@@ -44,7 +44,7 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 **Goal:** Make EnhancementHub credible for 1–2 design-partner pilots without implementation heroics.
 
 ### 1.1 Positioning & packaging
-- [ ] Rewrite landing/README around **outcome** (hours saved, approval-ready packages), not feature list
+- [x] Rewrite landing/README around **outcome** (hours saved, approval-ready packages), not feature list
 - [ ] Define ICP one-pager: ".NET on Azure, 50–500 devs, portfolio governance pain"
 - [ ] Create 10-minute demo script: intake → AI analysis → system map → approval → Jira export
 - [ ] Pricing/packaging draft: pilot vs enterprise license tiers
@@ -56,15 +56,16 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 - [ ] Dashboard: "requests awaiting analysis" and "high-risk pending approval" widgets
 
 ### 1.3 Operational fixes (quick wins)
-- [ ] Run `ApplicationDiscoveryJob` in **Worker only** (remove from Web to prevent duplicate work)
-- [ ] Consolidate background job registration behind a single `registerBackgroundJobs` flag
-- [ ] Add health check endpoints (`/health`, `/health/ready`) on API and Worker
-- [ ] Document Production deployment checklist (JWT, DataProtection keys, Postgres, S3)
+- [x] Run `ApplicationDiscoveryJob` in **Worker only** (remove from Web to prevent duplicate work)
+- [x] Consolidate background job registration behind a single `registerBackgroundJobs` flag
+- [x] Add health check endpoints (`/health`, `/health/ready`) on API and Worker
+- [x] Document Production deployment checklist (JWT, DataProtection keys, Postgres, S3)
 
 ### 1.4 Test & docs
-- [ ] Update README test count and Phase 15 security section
-- [ ] Add `docs/DEPLOYMENT.md` with Docker Compose + Kubernetes sketch
-- [ ] Add smoke test script for post-deploy validation
+- [x] Update README test count and Phase 15 security section
+- [x] Add `docs/DEPLOYMENT.md` with Docker Compose + Kubernetes sketch
+- [x] Add smoke test script for post-deploy validation
+- [x] Begin Phase 16: `IApplicationAccessService` for System Intelligence list/get scoping
 
 **Exit criteria:** A design partner can deploy via Docker Compose, complete onboarding, submit a request, receive AI analysis, view system map, and export to Jira—without developer assistance.
 
@@ -220,11 +221,11 @@ Track monthly from first pilot:
 
 ## Recommended immediate next steps (this sprint)
 
-1. **Remove duplicate `ApplicationDiscoveryJob` from Web** — lowest effort, highest ops impact.
-2. **Add health checks + deployment doc** — unblocks pilot install.
-3. **Rewrite README value proposition** — unblocks sales conversations.
-4. **Plan Phase 16** (authorization completeness + Entra ID hardening) — unblocks security review.
-5. **Plan Phase 18** (job queue) — unblocks scale testing.
+1. ~~**Remove duplicate `ApplicationDiscoveryJob` from Web**~~ — done (Horizon 1)
+2. ~~**Add health checks + deployment doc**~~ — done (Horizon 1)
+3. ~~**Rewrite README value proposition**~~ — done (Horizon 1)
+4. **Continue Phase 16** (authorization completeness + Entra ID hardening) — started with application scoping
+5. **Plan Phase 18** (job queue) — unblocks scale testing
 
 ---
 

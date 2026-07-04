@@ -1,8 +1,24 @@
 # EnhancementHub
 
-AI-powered enhancement ticketing and technical impact analysis platform for enterprise software ecosystems.
+**Turn business enhancement requests into approval-ready technical change packages—grounded in your actual code and database schema, with full audit trail.**
 
-EnhancementHub centralizes enhancement requests across applications and repositories, indexes codebase knowledge, runs AI impact analysis, and produces approval-ready technical change requests with full auditability.
+EnhancementHub is an AI-powered platform for enterprise IT teams that bridges the gap between business intake and technical delivery. It combines governed enhancement ticketing, repository-aware AI impact analysis, and System Intelligence (live schema mapping, drift detection, and architecture graphs) in a single .NET 8 platform.
+
+**Ideal for:** mid-market and enterprise organizations with .NET/Azure application estates, portfolio governance requirements, and slow business-to-technical handoffs.
+
+---
+
+## Why EnhancementHub
+
+| Problem | EnhancementHub outcome |
+|---------|------------------------|
+| Vague business requests | Structured intake with AI-generated technical scope |
+| Architects spend hours on impact analysis | Repository + schema-aware analysis in minutes |
+| Code and database drift undetected | Live schema scan vs indexed EF mappings |
+| No audit trail for AI recommendations | Human approval gate before export to Jira/Azure DevOps |
+| Air-gapped or enterprise Git | On-prem agent, ZIP upload, GitHub App clone |
+
+---
 
 ## Architecture
 
@@ -22,6 +38,12 @@ tests/
 └── EnhancementHub.Tests/           # Unit + integration tests
 ```
 
+**Deploy API + Web + Worker** for production. Background jobs run in Worker only.
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for production checklist and [docs/ROADMAP.md](docs/ROADMAP.md) for the product roadmap.
+
+---
+
 ## Core capabilities
 
 1. **Enhancement request intake** — submit, track, and manage requests across statuses
@@ -32,6 +54,8 @@ tests/
 6. **Ticket export** — GitHub Issues, Azure DevOps, Jira (provider abstraction)
 7. **Reporting** — dashboards for status, risk, approval time, AI confidence trends
 8. **System Intelligence** — database schema scanning, code↔DB knowledge graph, drift detection, documentation export, refactor blast-radius analysis
+
+---
 
 ## System Intelligence
 
@@ -47,23 +71,15 @@ Architecture intelligence module for connecting live databases and Git repositor
 | Refactor analysis | Blast-radius impact analysis and AI migration plans |
 | On-prem agent | `EnhancementHub.Agent` console app for air-gapped DB scanning |
 
-### System Intelligence API routes
-
-- `GET/POST /api/database-connections`
-- `POST /api/database-connections/{id}/scan`
-- `GET /api/system-map/{applicationId}`
-- `GET/POST /api/schema-drift/{connectionId}`
-- `GET /api/documentation/{applicationId}/export`
-- `POST /api/refactor/analyze`, `POST /api/refactor/plans`
-- `POST /api/on-prem-agent/register`, `POST /api/on-prem-agent/{agentId}/scan-results`
-
 ### On-prem agent
 
 ```bash
 dotnet run --project src/EnhancementHub.Agent
 ```
 
-Configure `Agent:ApiBaseUrl`, `Agent:AgentId`, `Agent:ConnectionId`, `Agent:ConnectionString`, and `Agent:Provider` in `src/EnhancementHub.Agent/appsettings.json` or via `ENHANCEMENTHUB_` environment variables.
+Configure `Agent:ApiBaseUrl`, `Agent:AgentId`, `Agent:ApiKey`, `Agent:ConnectionId`, `Agent:ConnectionString`, and `Agent:Provider`.
+
+---
 
 ## Quick start (local)
 
@@ -86,6 +102,7 @@ dotnet run --project src/EnhancementHub.Worker
 |---------|-----|
 | API + Swagger | http://localhost:5075/swagger |
 | Web UI | http://localhost:5001 |
+| Health (API) | http://localhost:5075/health/ready |
 
 **Dev login:** `admin@enhancementhub.dev` / `password123`
 
@@ -93,30 +110,28 @@ dotnet run --project src/EnhancementHub.Worker
 
 ```bash
 docker compose up --build
+./scripts/smoke-check.sh
 ```
 
 Set `OPENAI_API_KEY` for live AI analysis; without it, the system uses deterministic mock analysis for development.
+
+---
 
 ## Implementation phases
 
 | Phase | Scope | Status |
 |-------|-------|--------|
-| 1 | Domain model, DB schema, enhancement CRUD, basic UI, approval workflow | Complete |
-| 2 | Repository indexing, application profiles, searchable knowledge base | Complete |
-| 3 | AI analysis pipeline, structured output validation, risk scoring, review UI | Complete |
-| 4 | External ticket integrations, reporting, admin settings, tests | Complete |
-| 5 | DB schema scanner, EF mapping, system graph, System Map UI | Complete |
-| 6 | Multi-repo graph, schema drift detection, documentation export | Complete |
-| 7 | Refactor blast-radius analysis, AI migration plans | Complete |
-| 8 | On-prem agent, SSO stubs (OpenID Connect), System Intelligence tests | Complete |
-| 9 | Column-level drift, pgvector search, SSO role mapping, notifications, blob storage | Complete |
-| 10 | Qdrant/Azure Search vectors, S3 presigned URLs, email/Teams notifications | Complete |
-| 11 | Client onboarding wizard, discovery orchestration, dashboard checklist | Complete |
-| 12 | Git clone onboarding, connection builder, on-prem agent tab, async discovery | Complete |
-| 13 | Attachment scanning with ClamAV support and upload rejection | Complete |
-| 14 | ZIP upload onboarding and GitHub App enterprise repo cloning | Complete |
+| 1–9 | Core platform, System Intelligence, production scale | Complete |
+| 10 | Qdrant/Azure Search, S3, email/Teams notifications | Complete |
+| 11 | Onboarding wizard | Complete |
+| 12–13 | Git clone, on-prem agent, attachment scanning | Complete |
+| 14 | ZIP upload, GitHub App enterprise repo access | Complete |
+| 15 | Enterprise hardening (PBKDF2, agent auth, resource scoping, rate limits) | Complete |
+| 16+ | See [docs/ROADMAP.md](docs/ROADMAP.md) | Planned |
 
 See [docs/PHASES.md](docs/PHASES.md) for detailed phase breakdown.
+
+---
 
 ## Configuration
 
@@ -127,26 +142,26 @@ Key settings in `appsettings.json`:
   "Database": { "Provider": "Sqlite" },
   "ConnectionStrings": { "Default": "Data Source=enhancementhub.db" },
   "Jwt": { "Secret": "...", "Issuer": "EnhancementHub", "Audience": "EnhancementHub" },
-  "OpenAI": { "ApiKey": "", "Model": "gpt-4o-mini", "Endpoint": "https://api.openai.com/v1" },
-  "VectorSearch": { "Provider": "InMemory|PgVector|Qdrant|AzureSearch", "Dimensions": 64 },
-  "Storage": { "Provider": "Local|S3", "LocalRoot": "uploads" },
-  "Attachments": {
-    "Scanning": {
-      "Enabled": true,
-      "ClamAv": { "Enabled": false, "Host": "localhost", "Port": 3310 }
-    }
-  },
-  "Repositories": { "CloneRoot": "repo-clones", "ArchiveMaxSizeBytes": 500000000 },
-  "GitHubApp": { "AppId": "", "PrivateKey": "", "InstallationId": "" },
+  "DataProtection": { "ApplicationName": "EnhancementHub", "KeysPath": "" },
+  "OpenAI": { "ApiKey": "", "Model": "gpt-4o-mini" },
+  "VectorSearch": { "Provider": "InMemory|PgVector|Qdrant|AzureSearch" },
+  "Storage": { "Provider": "Local|S3" }
 }
 ```
+
+---
 
 ## Security
 
 - JWT authentication with role-based authorization (`Admin`, `Submitter`, `Reviewer`, `Approver`, `Developer`)
-- Audit logging for all approval and sensitive actions
-- Prompt sanitization for AI inputs
-- AI cannot modify code or export tickets without human approval
+- PBKDF2 password hashing; production JWT and Data Protection key validation
+- Team-scoped resource access for enhancement requests and applications
+- On-prem agent API key authentication (`X-Agent-Api-Key`)
+- Rate limiting on login and attachment upload
+- Audit logging for approval and sensitive actions
+- Prompt sanitization for AI inputs; human approval required before ticket export
+
+---
 
 ## Testing
 
@@ -154,17 +169,18 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-64 tests covering risk scoring, AI validation, repository scanning, EF entity mapping, schema drift detection, documentation export, enterprise integrations, onboarding wizard, attachment scanning, ZIP/GitHub App onboarding, API integration, approval workflow, role permissions, and ticket export.
+72+ tests covering security hardening, risk scoring, AI validation, repository scanning, schema drift, onboarding, integrations, API workflows, and role permissions.
+
+---
 
 ## API overview
 
+- `GET /health`, `GET /health/ready`
 - `POST /api/auth/login`
 - `GET/POST /api/enhancement-requests`
-- `POST /api/enhancementrequests/{id}/attachments`
-- `GET /api/enhancementrequests/{id}/attachments/{attachmentId}/download`
-- `POST /api/approvals/{id}/actions`
-- `POST /api/repositories`, `POST /api/repositories/{id}/index`
-- `GET /api/knowledge/search`
 - `POST /api/analysis/{requestId}/trigger`
-- `POST /api/external-tickets/export`
+- `GET /api/system-map/{applicationId}`
+- `POST /api/on-prem-agent/register`
 - `GET /api/reporting/dashboard`
+
+Full Swagger available at `/swagger` in Development.

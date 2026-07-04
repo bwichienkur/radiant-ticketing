@@ -2,9 +2,9 @@ using EnhancementHub.Api.Extensions;
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.DependencyInjection;
 using EnhancementHub.Infrastructure.DependencyInjection;
-using EnhancementHub.Infrastructure.Services.Notifications;
 using EnhancementHub.Infrastructure.Persistence;
 using EnhancementHub.Infrastructure.Security;
+using EnhancementHub.Infrastructure.Services.Notifications;
 using EnhancementHub.Web.Hubs;
 using EnhancementHub.Web.Services;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +15,7 @@ ProductionConfigurationValidator.Validate(builder.Configuration, builder.Environ
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddHostedService<EnhancementHub.Infrastructure.Background.ApplicationDiscoveryJob>();
+builder.Services.AddEnhancementHubHealthChecks();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<SignalRNotificationPublisher>();
 builder.Services.AddScoped<INotificationPublisher>(sp => new CompositeNotificationPublisher(
@@ -61,6 +61,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapEnhancementHubHealthChecks();
 app.MapRazorPages();
 app.MapHub<PlatformNotificationHub>("/hubs/notifications");
 

@@ -13,19 +13,22 @@ public sealed class ListApplicationsQueryHandler
     : IRequestHandler<ListApplicationsQuery, IReadOnlyList<ApplicationDto>>
 {
     private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IApplicationAccessService _accessService;
 
-    public ListApplicationsQueryHandler(IEnhancementHubDbContext dbContext)
+    public ListApplicationsQueryHandler(
+        IEnhancementHubDbContext dbContext,
+        IApplicationAccessService accessService)
     {
         _dbContext = dbContext;
+        _accessService = accessService;
     }
 
     public async Task<IReadOnlyList<ApplicationDto>> Handle(
         ListApplicationsQuery request,
         CancellationToken cancellationToken)
     {
-        var entities = await _dbContext.Applications
-            .AsNoTracking()
-            .Include(a => a.Repositories)
+        var entities = await _accessService.ApplyVisibilityFilter(
+                _dbContext.Applications.AsNoTracking().Include(a => a.Repositories))
             .OrderBy(a => a.Name)
             .ToListAsync(cancellationToken);
 
@@ -40,16 +43,22 @@ public sealed class GetApplicationProfileQueryHandler
     : IRequestHandler<GetApplicationProfileQuery, IReadOnlyList<ApplicationProfileDto>>
 {
     private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IApplicationAccessService _accessService;
 
-    public GetApplicationProfileQueryHandler(IEnhancementHubDbContext dbContext)
+    public GetApplicationProfileQueryHandler(
+        IEnhancementHubDbContext dbContext,
+        IApplicationAccessService accessService)
     {
         _dbContext = dbContext;
+        _accessService = accessService;
     }
 
     public async Task<IReadOnlyList<ApplicationProfileDto>> Handle(
         GetApplicationProfileQuery request,
         CancellationToken cancellationToken)
     {
+        await _accessService.EnsureAccessibleApplicationAsync(request.ApplicationId, cancellationToken);
+
         var profiles = await _dbContext.ApplicationProfiles
             .AsNoTracking()
             .Where(p => p.ApplicationId == request.ApplicationId)

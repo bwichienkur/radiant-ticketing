@@ -13,19 +13,35 @@ public sealed class ListRepositoriesQueryHandler
     : IRequestHandler<ListRepositoriesQuery, IReadOnlyList<RepositoryDto>>
 {
     private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IApplicationAccessService _accessService;
 
-    public ListRepositoriesQueryHandler(IEnhancementHubDbContext dbContext)
+    public ListRepositoriesQueryHandler(
+        IEnhancementHubDbContext dbContext,
+        IApplicationAccessService accessService)
     {
         _dbContext = dbContext;
+        _accessService = accessService;
     }
 
     public async Task<IReadOnlyList<RepositoryDto>> Handle(
         ListRepositoriesQuery request,
         CancellationToken cancellationToken)
     {
+        if (request.ApplicationId.HasValue)
+        {
+            await _accessService.EnsureAccessibleApplicationAsync(
+                request.ApplicationId.Value,
+                cancellationToken);
+        }
+
+        var accessibleApplicationIds = _accessService
+            .ApplyVisibilityFilter(_dbContext.Applications.AsNoTracking())
+            .Select(a => a.Id);
+
         var query = _dbContext.Repositories
             .AsNoTracking()
             .Include(r => r.Application)
+            .Where(r => accessibleApplicationIds.Contains(r.ApplicationId))
             .AsQueryable();
 
         if (request.ApplicationId.HasValue)
