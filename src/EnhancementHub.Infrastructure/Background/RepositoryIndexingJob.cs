@@ -1,5 +1,4 @@
-using EnhancementHub.Application.Abstractions;
-using Microsoft.EntityFrameworkCore;
+using EnhancementHub.Infrastructure.Background.Executors;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -8,37 +7,27 @@ namespace EnhancementHub.Infrastructure.Background;
 
 public sealed class RepositoryIndexingJob : BackgroundService
 {
-    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly RepositoryIndexingJobExecutor _executor;
     private readonly ILogger<RepositoryIndexingJob> _logger;
     private readonly TimeSpan _pollInterval = TimeSpan.FromMinutes(5);
 
-    public RepositoryIndexingJob(IServiceScopeFactory scopeFactory, ILogger<RepositoryIndexingJob> logger)
+    public RepositoryIndexingJob(
+        RepositoryIndexingJobExecutor executor,
+        ILogger<RepositoryIndexingJob> logger)
     {
-        _scopeFactory = scopeFactory;
+        _executor = executor;
         _logger = logger;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Repository indexing job started.");
+        _logger.LogInformation("Repository indexing job started (polling mode).");
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                using var scope = _scopeFactory.CreateScope();
-                var dbContext = scope.ServiceProvider.GetRequiredService<IEnhancementHubDbContext>();
-                var indexer = scope.ServiceProvider.GetRequiredService<IRepositoryIndexer>();
-
-                var pendingIds = await dbContext.Repositories
-                    .Where(r => r.IndexingStatus == Domain.Enums.IndexingStatus.Pending)
-                    .Select(r => r.Id)
-                    .ToListAsync(stoppingToken);
-
-                foreach (var id in pendingIds)
-                {
-                    await indexer.IndexRepositoryAsync(id, stoppingToken);
-                }
+                await _executor.ExecuteAsync(stoppingToken);
             }
             catch (Exception ex) when (ex is not OperationCanceledException)
             {

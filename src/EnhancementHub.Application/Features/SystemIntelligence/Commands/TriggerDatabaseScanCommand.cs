@@ -15,19 +15,24 @@ public sealed class TriggerDatabaseScanCommandHandler
 {
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly IDatabaseSchemaIngestionService _ingestionService;
+    private readonly IApplicationAccessService _accessService;
 
     public TriggerDatabaseScanCommandHandler(
         IEnhancementHubDbContext dbContext,
-        IDatabaseSchemaIngestionService ingestionService)
+        IDatabaseSchemaIngestionService ingestionService,
+        IApplicationAccessService accessService)
     {
         _dbContext = dbContext;
         _ingestionService = ingestionService;
+        _accessService = accessService;
     }
 
     public async Task<DatabaseConnectionDto> Handle(
         TriggerDatabaseScanCommand request,
         CancellationToken cancellationToken)
     {
+        await _accessService.EnsureAccessibleConnectionAsync(request.ConnectionId, cancellationToken);
+
         await _ingestionService.IngestAsync(request.ConnectionId, cancellationToken);
 
         var entity = await _dbContext.DatabaseConnections

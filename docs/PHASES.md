@@ -130,13 +130,24 @@
 - Resource-level authorization for enhancement requests and attachments
 - Rate limiting on login and attachment upload endpoints
 
-## Horizon 1 — Pilot Readiness (in progress)
+## Horizon 1 — Pilot Readiness (complete)
 
 - Background jobs run in Worker only (removed duplicate discovery job from Web)
 - Health checks on API, Web, and Worker (`/health`, `/health/ready`)
 - Production deployment guide (`docs/DEPLOYMENT.md`) and smoke check script
 - README repositioned around business outcomes
-- Application team-scoping for System Intelligence list/get queries (Phase 16 start)
+
+## Phase 16 — System Intelligence authorization (complete)
+
+- Team-scoped access on all System Intelligence commands and read queries
+- Application, connection, drift report, and refactor plan scoping via `IApplicationAccessService`
+
+## Phase 18 — Durable job orchestration (complete)
+
+- Hangfire + PostgreSQL storage when `BackgroundJobs:Provider=Hangfire`
+- Shared job executors used by Hangfire recurring jobs and polling fallback
+- Hangfire dashboard at `/hangfire` on Worker (Development)
+- Docker Compose Worker uses Hangfire by default
 
 ## Future enhancements
 

@@ -247,11 +247,20 @@ public sealed record GetDriftReportQuery(Guid ConnectionId, Guid? RepositoryId =
 public sealed class GetDriftReportQueryHandler : IRequestHandler<GetDriftReportQuery, DriftReportDto>
 {
     private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IApplicationAccessService _accessService;
 
-    public GetDriftReportQueryHandler(IEnhancementHubDbContext dbContext) => _dbContext = dbContext;
+    public GetDriftReportQueryHandler(
+        IEnhancementHubDbContext dbContext,
+        IApplicationAccessService accessService)
+    {
+        _dbContext = dbContext;
+        _accessService = accessService;
+    }
 
     public async Task<DriftReportDto> Handle(GetDriftReportQuery request, CancellationToken cancellationToken)
     {
+        await _accessService.EnsureAccessibleConnectionAsync(request.ConnectionId, cancellationToken);
+
         var findingsQuery = _dbContext.SchemaDriftFindings
             .AsNoTracking()
             .Where(f => f.DatabaseConnectionId == request.ConnectionId);
@@ -294,11 +303,20 @@ public sealed record GetRefactorPlanQuery(Guid PlanId) : IRequest<RefactorPlanDe
 public sealed class GetRefactorPlanQueryHandler : IRequestHandler<GetRefactorPlanQuery, RefactorPlanDetailDto>
 {
     private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IApplicationAccessService _accessService;
 
-    public GetRefactorPlanQueryHandler(IEnhancementHubDbContext dbContext) => _dbContext = dbContext;
+    public GetRefactorPlanQueryHandler(
+        IEnhancementHubDbContext dbContext,
+        IApplicationAccessService accessService)
+    {
+        _dbContext = dbContext;
+        _accessService = accessService;
+    }
 
     public async Task<RefactorPlanDetailDto> Handle(GetRefactorPlanQuery request, CancellationToken cancellationToken)
     {
+        await _accessService.EnsureAccessibleRefactorPlanAsync(request.PlanId, cancellationToken);
+
         var plan = await _dbContext.RefactorPlans
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Id == request.PlanId, cancellationToken)
@@ -332,14 +350,49 @@ public sealed class ListRefactorPlansQueryHandler
     : IRequestHandler<ListRefactorPlansQuery, IReadOnlyList<RefactorPlanDto>>
 {
     private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IApplicationAccessService _accessService;
 
-    public ListRefactorPlansQueryHandler(IEnhancementHubDbContext dbContext) => _dbContext = dbContext;
+    public ListRefactorPlansQueryHandler(
+        IEnhancementHubDbContext dbContext,
+        IApplicationAccessService accessService)
+    {
+        _dbContext = dbContext;
+        _accessService = accessService;
+    }
 
     public async Task<IReadOnlyList<RefactorPlanDto>> Handle(
         ListRefactorPlansQuery request,
         CancellationToken cancellationToken)
     {
-        var query = _dbContext.RefactorPlans.AsNoTracking().AsQueryable();
+        if (request.ApplicationId.HasValue)
+        {
+            await _accessService.EnsureAccessibleApplicationAsync(
+                request.ApplicationId.Value,
+                cancellationToken);
+        }
+
+        if (request.ConnectionId.HasValue)
+        {
+            await _accessService.EnsureAccessibleConnectionAsync(
+                request.ConnectionId.Value,
+                cancellationToken);
+        }
+
+        var accessibleApplicationIds = _accessService
+            .ApplyVisibilityFilter(_dbContext.Applications.AsNoTracking())
+            .Select(a => a.Id);
+
+        var query = _dbContext.RefactorPlans
+            .AsNoTracking()
+            .Where(p =>
+                (p.DatabaseConnectionId.HasValue
+                    && _dbContext.DatabaseConnections.Any(c =>
+                        c.Id == p.DatabaseConnectionId
+                        && accessibleApplicationIds.Contains(c.ApplicationId)))
+                || (p.RepositoryId.HasValue
+                    && _dbContext.Repositories.Any(r =>
+                        r.Id == p.RepositoryId
+                        && accessibleApplicationIds.Contains(r.ApplicationId))));
 
         if (request.ConnectionId.HasValue)
         {

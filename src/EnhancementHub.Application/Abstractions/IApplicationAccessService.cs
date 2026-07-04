@@ -17,4 +17,8 @@ public interface IApplicationAccessService
     Task EnsureAccessibleConnectionAsync(
         Guid connectionId,
         CancellationToken cancellationToken = default);
+
+    Task EnsureAccessibleRefactorPlanAsync(
+        Guid planId,
+        CancellationToken cancellationToken = default);
 }

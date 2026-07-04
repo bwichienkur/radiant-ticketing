@@ -13,14 +13,22 @@ public sealed class ExportDocumentationCommandHandler
     : IRequestHandler<ExportDocumentationCommand, DocumentationExportResultDto>
 {
     private readonly IDocumentationExportService _exportService;
+    private readonly IApplicationAccessService _accessService;
 
-    public ExportDocumentationCommandHandler(IDocumentationExportService exportService) =>
+    public ExportDocumentationCommandHandler(
+        IDocumentationExportService exportService,
+        IApplicationAccessService accessService)
+    {
         _exportService = exportService;
+        _accessService = accessService;
+    }
 
     public async Task<DocumentationExportResultDto> Handle(
         ExportDocumentationCommand request,
         CancellationToken cancellationToken)
     {
+        await _accessService.EnsureAccessibleApplicationAsync(request.ApplicationId, cancellationToken);
+
         var bundle = await _exportService.ExportAsync(request.ApplicationId, cancellationToken);
 
         var content = request.Format switch

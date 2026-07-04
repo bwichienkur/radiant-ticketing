@@ -1,5 +1,6 @@
 using EnhancementHub.Application.DependencyInjection;
 using EnhancementHub.Infrastructure.DependencyInjection;
+using Hangfire;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -22,6 +23,12 @@ try
 
     var app = builder.Build();
     app.MapEnhancementHubHealthChecks();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseHangfireDashboard("/hangfire");
+    }
+
     await app.RunAsync();
 }
 catch (Exception ex)

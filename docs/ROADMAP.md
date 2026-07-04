@@ -78,7 +78,7 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 ### 2.1 Identity & access (Phase 16)
 - [ ] Azure Entra ID as documented default SSO path (OIDC already stubbed)
 - [ ] Group → role mapping validation in admin UI
-- [ ] Extend resource authorization to System Intelligence APIs (applications, connections, exports, drift reports)
+- [x] Extend resource authorization to System Intelligence APIs (applications, connections, exports, drift reports)
 - [ ] Team membership management UI (invite, assign roles)
 - [ ] Optional: API keys for service-to-service integrations
 
@@ -90,8 +90,8 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 - [ ] Rate limits and daily budget caps per tenant/org
 
 ### 2.3 Job orchestration (Phase 18)
-- [ ] Replace polling `BackgroundService` jobs with durable queue (Hangfire + PostgreSQL or Azure Service Bus)
-- [ ] Idempotent job handlers with retry and dead-letter
+- [x] Replace polling `BackgroundService` jobs with durable queue (Hangfire + PostgreSQL)
+- [x] Idempotent job handlers with shared executors and `DisableConcurrentExecution` via Hangfire
 - [ ] Job status API: indexing, discovery, schema scan, AI analysis
 - [ ] Admin UI: queue depth, failed jobs, manual retry
 
