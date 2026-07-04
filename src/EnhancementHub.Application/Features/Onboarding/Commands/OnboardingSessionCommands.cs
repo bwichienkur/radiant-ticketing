@@ -99,6 +99,7 @@ public sealed class AdvanceOnboardingSessionCommandHandler
         }
 
         session.CurrentStep = request.Step;
+        session.WizardError = null;
         session.UpdatedAt = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync(cancellationToken);
         return OnboardingSessionMapper.ToDto(session);

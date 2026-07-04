@@ -90,6 +90,7 @@ public sealed class QueueApplicationDiscoveryCommandHandler
         session.DiscoveryJobState = DiscoveryJobState.Queued;
         session.DiscoveryStatus = "Queued for discovery...";
         session.LastError = null;
+        session.WizardError = null;
         session.DiscoveryCompletedAt = null;
         session.UpdatedAt = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync(cancellationToken);

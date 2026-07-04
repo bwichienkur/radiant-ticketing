@@ -23,6 +23,7 @@ public sealed record OnboardingSessionDto(
     DiscoveryJobState DiscoveryJobState,
     string? DiscoveryStatus,
     string? LastError,
+    string? WizardError,
     DateTime? DiscoveryCompletedAt,
     DateTime? CompletedAt,
     Guid? OnPremAgentId,

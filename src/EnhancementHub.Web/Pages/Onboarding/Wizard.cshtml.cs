@@ -86,7 +86,19 @@ public class WizardModel : PageModel
         }
 
         await LoadStepContextAsync(cancellationToken);
-        PrefillForms();
+        await PrefillFormsAsync(cancellationToken);
+
+        if (string.IsNullOrWhiteSpace(ErrorMessage) && !string.IsNullOrWhiteSpace(Session.WizardError))
+        {
+            ErrorMessage = Session.WizardError;
+        }
+
+        if (string.IsNullOrWhiteSpace(ErrorMessage)
+            && Session.DiscoveryJobState == DiscoveryJobState.Failed
+            && !string.IsNullOrWhiteSpace(Session.LastError))
+        {
+            ErrorMessage = Session.LastError;
+        }
 
         if (Session.CurrentStep == OnboardingStep.ConnectCode)
         {
@@ -108,7 +120,7 @@ public class WizardModel : PageModel
 
         if (string.IsNullOrWhiteSpace(Step1.Name))
         {
-            ErrorMessage = "Application name is required.";
+            await RecordWizardErrorAsync("Application name is required.", cancellationToken);
             return Page();
         }
 
@@ -147,7 +159,7 @@ public class WizardModel : PageModel
 
         if (string.IsNullOrWhiteSpace(Step2.RepositoryName) || string.IsNullOrWhiteSpace(Step2.RepositoryPath))
         {
-            ErrorMessage = "Repository name and path are required.";
+            await RecordWizardErrorAsync("Repository name and path are required.", cancellationToken);
             PrefillForms();
             return Page();
         }
@@ -155,7 +167,7 @@ public class WizardModel : PageModel
         var validation = await _mediator.Send(new ValidateRepositoryPathQuery(Step2.RepositoryPath), cancellationToken);
         if (!validation.IsValid)
         {
-            ErrorMessage = validation.ErrorMessage ?? "Repository path is not accessible.";
+            await RecordWizardErrorAsync(validation.ErrorMessage ?? "Repository path is not accessible.", cancellationToken);
             PathValidation = validation;
             PrefillForms();
             return Page();
@@ -187,7 +199,7 @@ public class WizardModel : PageModel
 
         if (string.IsNullOrWhiteSpace(Step3.ConnectionName) || string.IsNullOrWhiteSpace(Step3.ConnectionString))
         {
-            ErrorMessage = "Connection name and connection string are required.";
+            await RecordWizardErrorAsync("Connection name and connection string are required.", cancellationToken);
             PrefillForms();
             return Page();
         }
@@ -232,7 +244,7 @@ public class WizardModel : PageModel
 
         if (zipFile is null || zipFile.Length == 0)
         {
-            ErrorMessage = "ZIP file is required.";
+            await RecordWizardErrorAsync("ZIP file is required.", cancellationToken);
             GitHubAppStatus = await _mediator.Send(new GetGitHubAppStatusQuery(), cancellationToken);
             PrefillForms();
             return Page();
@@ -240,7 +252,7 @@ public class WizardModel : PageModel
 
         if (!string.Equals(Path.GetExtension(zipFile.FileName), ".zip", StringComparison.OrdinalIgnoreCase))
         {
-            ErrorMessage = "Only .zip archives are supported.";
+            await RecordWizardErrorAsync("Only .zip archives are supported.", cancellationToken);
             GitHubAppStatus = await _mediator.Send(new GetGitHubAppStatusQuery(), cancellationToken);
             PrefillForms();
             return Page();
@@ -258,7 +270,7 @@ public class WizardModel : PageModel
 
         if (!result.Succeeded)
         {
-            ErrorMessage = result.ErrorMessage ?? "Failed to extract repository archive.";
+            await RecordWizardErrorAsync(result.ErrorMessage ?? "Failed to extract repository archive.", cancellationToken);
             GitHubAppStatus = await _mediator.Send(new GetGitHubAppStatusQuery(), cancellationToken);
             PrefillForms();
             return Page();
@@ -291,7 +303,7 @@ public class WizardModel : PageModel
 
         if (!result.Succeeded)
         {
-            ErrorMessage = result.ErrorMessage ?? "GitHub App clone failed.";
+            await RecordWizardErrorAsync(result.ErrorMessage ?? "GitHub App clone failed.", cancellationToken);
             GitHubAppStatus = await _mediator.Send(new GetGitHubAppStatusQuery(), cancellationToken);
             PrefillForms();
             return Page();
@@ -323,7 +335,7 @@ public class WizardModel : PageModel
 
         if (!result.Succeeded)
         {
-            ErrorMessage = result.ErrorMessage ?? "Git clone failed.";
+            await RecordWizardErrorAsync(result.ErrorMessage ?? "Git clone failed.", cancellationToken);
             PrefillForms();
             return Page();
         }
@@ -431,24 +443,72 @@ public class WizardModel : PageModel
         }
     }
 
-    private void PrefillForms()
+    private async Task PrefillFormsAsync(CancellationToken cancellationToken)
     {
-        if (!string.IsNullOrWhiteSpace(Session.ApplicationName))
+        var prefill = await _mediator.Send(new GetOnboardingWizardPrefillQuery(SessionId), cancellationToken);
+
+        if (prefill.Step1 is not null)
+        {
+            Step1.Name = string.IsNullOrWhiteSpace(Step1.Name) ? prefill.Step1.Name : Step1.Name;
+            Step1.BusinessDomain ??= prefill.Step1.BusinessDomain;
+            Step1.Purpose ??= prefill.Step1.Purpose;
+            Step1.RiskSensitiveAreas ??= prefill.Step1.RiskSensitiveAreas;
+            Step1.OwnerTeamName ??= prefill.Step1.OwnerTeamName;
+        }
+        else if (!string.IsNullOrWhiteSpace(Session.ApplicationName))
         {
             Step1.Name ??= Session.ApplicationName;
+        }
+
+        if (prefill.Step2 is not null)
+        {
+            if (string.IsNullOrWhiteSpace(Step2.RepositoryName))
+            {
+                Step2.RepositoryName = prefill.Step2.RepositoryName;
+            }
+
+            if (string.IsNullOrWhiteSpace(Step2.RepositoryPath))
+            {
+                Step2.RepositoryPath = prefill.Step2.RepositoryPath;
+            }
+
+            if (string.IsNullOrWhiteSpace(Step2.DefaultBranch))
+            {
+                Step2.DefaultBranch = prefill.Step2.DefaultBranch;
+            }
+        }
+
+        if (prefill.Step3 is not null)
+        {
+            if (string.IsNullOrWhiteSpace(Step3.ConnectionName))
+            {
+                Step3.ConnectionName = prefill.Step3.ConnectionName;
+            }
+
+            Step3.Provider = prefill.Step3.Provider;
+            Step3.IsReadOnly = prefill.Step3.IsReadOnly;
+        }
+        else if (string.IsNullOrWhiteSpace(Step3.ConnectionName))
+        {
+            Step3.ConnectionName = $"{Session.ApplicationName ?? "App"} Database";
+            Step3.ConnectionString = "Data Source=enhancementhub.db";
+            Step3.IsReadOnly = true;
         }
 
         if (string.IsNullOrWhiteSpace(Step2.DefaultBranch))
         {
             Step2.DefaultBranch = "main";
         }
+    }
 
-        if (string.IsNullOrWhiteSpace(Step3.ConnectionName))
-        {
-            Step3.ConnectionName = $"{Session.ApplicationName ?? "App"} Database";
-            Step3.ConnectionString = "Data Source=enhancementhub.db";
-            Step3.IsReadOnly = true;
-        }
+    private void PrefillForms() =>
+        PrefillFormsAsync(CancellationToken.None).GetAwaiter().GetResult();
+
+    private async Task RecordWizardErrorAsync(string message, CancellationToken cancellationToken)
+    {
+        ErrorMessage = message;
+        await _mediator.Send(new SetOnboardingWizardErrorCommand(SessionId, message), cancellationToken);
+        Session = await _mediator.Send(new GetOnboardingSessionQuery(SessionId), cancellationToken);
     }
 
     public sealed record StepDefinition(int Number, string Label);

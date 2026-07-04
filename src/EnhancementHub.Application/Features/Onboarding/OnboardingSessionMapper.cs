@@ -16,6 +16,7 @@ public static class OnboardingSessionMapper
             session.DiscoveryJobState,
             session.DiscoveryStatus,
             session.LastError,
+            session.WizardError,
             session.DiscoveryCompletedAt,
             session.CompletedAt,
             session.OnPremAgentId,

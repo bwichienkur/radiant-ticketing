@@ -13,6 +13,7 @@ public class OnboardingSession : BaseEntity
     public DiscoveryJobState DiscoveryJobState { get; set; } = DiscoveryJobState.None;
     public string? DiscoveryStatus { get; set; }
     public string? LastError { get; set; }
+    public string? WizardError { get; set; }
     public DateTime? DiscoveryCompletedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
     public Guid? OnPremAgentId { get; set; }
