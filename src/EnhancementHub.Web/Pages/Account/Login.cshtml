@@ -2,28 +2,109 @@
 @model EnhancementHub.Web.Pages.Account.LoginModel
 @{
     ViewData["Title"] = "Sign In";
-    Layout = "_Layout";
+    Layout = "_LoginLayout";
 }
 
-<div class="login-card card-panel p-4">
-    <h1 class="h4 mb-1">Sign in to EnhancementHub</h1>
-    <p class="text-muted small mb-4">Use your enterprise credentials</p>
-
-    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-    {
-        <div class="alert alert-danger">@Model.ErrorMessage</div>
-    }
-
-    <form method="post">
-        <div class="mb-3">
-            <label class="form-label" asp-for="Email">Email</label>
-            <input class="form-control" asp-for="Email" autocomplete="username" />
+<div class="login-shell">
+    <section class="login-hero" aria-hidden="true">
+        <div class="login-hero-content">
+            <div class="login-brand-mark">EH</div>
+            <h1 class="login-hero-title">EnhancementHub</h1>
+            <p class="login-hero-tagline">
+                Architecture intelligence and AI-powered enhancement ticketing for enterprise software ecosystems.
+            </p>
+            <ul class="login-feature-list">
+                <li>Map code, databases, and APIs in a live system graph</li>
+                <li>Detect schema drift before it reaches production</li>
+                <li>Run AI impact analysis with human approval workflows</li>
+            </ul>
         </div>
-        <div class="mb-3">
-            <label class="form-label" asp-for="Password">Password</label>
-            <input class="form-control" asp-for="Password" type="password" autocomplete="current-password" />
+    </section>
+
+    <section class="login-panel">
+        <div class="login-panel-inner">
+            <div class="login-panel-header">
+                <h2 class="h4 mb-1">Welcome back</h2>
+                <p class="text-muted mb-0">Sign in to continue to your workspace</p>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger d-flex align-items-start gap-2 mt-4 mb-0" role="alert">
+                    <span class="login-alert-icon" aria-hidden="true">!</span>
+                    <div>@Model.ErrorMessage</div>
+                </div>
+            }
+
+            @if (Model.SsoEnabled)
+            {
+                <form method="get" asp-page-handler="Sso" class="mt-4">
+                    <button type="submit" class="btn btn-outline-primary w-100 login-sso-btn">
+                        <span class="login-sso-icon" aria-hidden="true">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.4 2H3.7C2.7 2 2 2.7 2 3.7v7.7c0 1 .7 1.7 1.7 1.7h7.7c1 0 1.7-.7 1.7-1.7V3.7c0-1-.7-1.7-1.7-1.7zm8.9 0h-7.7c-1 0-1.7.7-1.7 1.7v7.7c0 1 .7 1.7 1.7 1.7h7.7c1 0 1.7-.7 1.7-1.7V3.7c0-1-.7-1.7-1.7-1.7zm-8.9 10.6H3.7c-1 0-1.7.7-1.7 1.7v7.7c0 1 .7 1.7 1.7 1.7h7.7c1 0 1.7-.7 1.7-1.7v-7.7c0-1-.7-1.7-1.7-1.7zm8.9 0h-7.7c-1 0-1.7.7-1.7 1.7v7.7c0 1 .7 1.7 1.7 1.7h7.7c1 0 1.7-.7 1.7-1.7v-7.7c0-1-.7-1.7-1.7-1.7z"/></svg>
+                        </span>
+                        Sign in with Microsoft
+                    </button>
+                </form>
+
+                <div class="login-divider my-4">
+                    <span>or sign in with email</span>
+                </div>
+            }
+
+            <form method="post" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                <div class="mb-3">
+                    <label class="form-label" asp-for="Email">Work email</label>
+                    <input class="form-control form-control-lg login-input"
+                           asp-for="Email"
+                           type="email"
+                           placeholder="you@company.com"
+                           autocomplete="username"
+                           autofocus />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label class="form-label mb-0" asp-for="Password">Password</label>
+                    </div>
+                    <input class="form-control form-control-lg login-input"
+                           asp-for="Password"
+                           type="password"
+                           placeholder="Enter your password"
+                           autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" asp-for="RememberMe" type="checkbox" />
+                        <label class="form-check-label" asp-for="RememberMe">Remember me</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100 login-submit-btn">Sign in</button>
+            </form>
+
+            @if (Model.ShowDevCredentials)
+            {
+                <div class="login-dev-hint mt-4">
+                    <div class="login-dev-hint-label">Development credentials</div>
+                    <code>admin@enhancementhub.dev</code>
+                    <span class="text-muted">/</span>
+                    <code>password123</code>
+                </div>
+            }
+
+            <p class="login-footer-note text-muted small mt-4 mb-0">
+                Protected by enterprise authentication. Unauthorized access is prohibited.
+            </p>
         </div>
-        <button type="submit" class="btn btn-primary w-100">Sign in</button>
-    </form>
-    <p class="text-muted small mt-3 mb-0">Dev: admin@enhancementhub.dev / password123</p>
+    </section>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
