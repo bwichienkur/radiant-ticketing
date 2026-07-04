@@ -4,11 +4,24 @@
     ViewData["Title"] = "Repositories";
 }
 
-<div class="page-header">
-    <h1>Repositories</h1>
-    <p>Source repository indexing status</p>
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1>Repositories</h1>
+        <p>Source repository indexing status</p>
+    </div>
+    <a asp-page="/Onboarding/Wizard" class="btn btn-outline-primary">Add via setup wizard</a>
 </div>
 
+@if (!Model.Repositories.Any())
+{
+    <div class="card-panel p-5 text-center">
+        <h2 class="h5">No repositories connected</h2>
+        <p class="text-muted mb-4">Connect a local repository clone during application onboarding to index code and build architecture intelligence.</p>
+        <a asp-page="/Onboarding/Wizard" class="btn btn-primary">Start setup wizard</a>
+    </div>
+}
+else
+{
 <div class="card-panel">
     <table class="table table-hover table-enterprise mb-0">
         <thead>
@@ -34,3 +47,4 @@
         </tbody>
     </table>
 </div>
+}

@@ -323,3 +323,85 @@ body {
     right: 1rem;
     z-index: 1000;
 }
+
+.onboarding-progress .onboarding-step {
+    flex: 1;
+    min-width: 5.5rem;
+    text-align: center;
+    padding: 0.75rem 0.5rem;
+    border-radius: 0.75rem;
+    background: var(--eh-surface);
+    border: 1px solid var(--eh-border);
+    opacity: 0.7;
+}
+
+.onboarding-progress .onboarding-step.active {
+    border-color: var(--eh-accent);
+    box-shadow: 0 0 0 1px var(--eh-accent-soft);
+    opacity: 1;
+}
+
+.onboarding-progress .onboarding-step.complete {
+    opacity: 1;
+}
+
+.onboarding-progress .step-number {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 999px;
+    margin: 0 auto 0.35rem;
+    display: grid;
+    place-items: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    background: var(--eh-accent-soft);
+    color: var(--eh-accent);
+}
+
+.onboarding-progress .onboarding-step.complete .step-number {
+    background: var(--eh-success);
+    color: #fff;
+}
+
+.onboarding-progress .step-label {
+    font-size: 0.8rem;
+    color: var(--eh-muted);
+}
+
+.onboarding-checklist {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.onboarding-checklist .checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--eh-border);
+    border-radius: 0.75rem;
+    background: var(--eh-bg);
+}
+
+.onboarding-checklist .checklist-item.done {
+    border-color: rgba(5, 150, 105, 0.35);
+    background: rgba(5, 150, 105, 0.06);
+}
+
+.onboarding-checklist .check {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 999px;
+    display: grid;
+    place-items: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: var(--eh-border);
+    color: var(--eh-muted);
+    flex-shrink: 0;
+}
+
+.onboarding-checklist .checklist-item.done .check {
+    background: var(--eh-success);
+    color: #fff;
+}

@@ -4,13 +4,58 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<div class="page-header d-flex justify-content-between align-items-center">
+<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div>
         <h1>Dashboard</h1>
         <p>Enhancement request pipeline overview</p>
     </div>
-    <a asp-page="/EnhancementRequests/Create" class="btn btn-primary">New Request</a>
+    <div class="d-flex gap-2">
+        <a asp-page="/Onboarding/Wizard" class="btn btn-outline-primary">Document an application</a>
+        <a asp-page="/EnhancementRequests/Create" class="btn btn-primary">New Request</a>
+    </div>
 </div>
+
+@if (Model.OnboardingStatus is not null && Model.ShowOnboardingChecklist)
+{
+    <div class="card-panel p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+            <div>
+                <h2 class="h5 mb-1">Getting started</h2>
+                <p class="text-muted mb-0">Complete these steps to document your first application.</p>
+            </div>
+            @if (Model.OnboardingStatus.ActiveSessionId.HasValue)
+            {
+                <a asp-page="/Onboarding/Wizard" asp-route-id="@Model.OnboardingStatus.ActiveSessionId" class="btn btn-sm btn-primary">Resume wizard</a>
+            }
+            else
+            {
+                <a asp-page="/Onboarding/Wizard" class="btn btn-sm btn-primary">Start wizard</a>
+            }
+        </div>
+        <div class="onboarding-checklist">
+            <div class="checklist-item @(Model.OnboardingStatus.ApplicationCount > 0 ? "done" : "")">
+                <span class="check">@(Model.OnboardingStatus.ApplicationCount > 0 ? "✓" : "1")</span>
+                <span>Register an application</span>
+            </div>
+            <div class="checklist-item @(Model.OnboardingStatus.RepositoryCount > 0 ? "done" : "")">
+                <span class="check">@(Model.OnboardingStatus.RepositoryCount > 0 ? "✓" : "2")</span>
+                <span>Connect a repository</span>
+            </div>
+            <div class="checklist-item @(Model.OnboardingStatus.DatabaseConnectionCount > 0 ? "done" : "")">
+                <span class="check">@(Model.OnboardingStatus.DatabaseConnectionCount > 0 ? "✓" : "3")</span>
+                <span>Connect a database</span>
+            </div>
+            <div class="checklist-item @(Model.OnboardingStatus.HasIndexedRepository ? "done" : "")">
+                <span class="check">@(Model.OnboardingStatus.HasIndexedRepository ? "✓" : "4")</span>
+                <span>Run code discovery</span>
+            </div>
+            <div class="checklist-item @(Model.OnboardingStatus.HasSystemGraph ? "done" : "")">
+                <span class="check">@(Model.OnboardingStatus.HasSystemGraph ? "✓" : "5")</span>
+                <span>Build system map & export docs</span>
+            </div>
+        </div>
+    </div>
+}
 
 @if (Model.Report is not null)
 {

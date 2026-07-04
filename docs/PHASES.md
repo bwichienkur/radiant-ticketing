@@ -86,6 +86,17 @@
 - Microsoft Teams webhook notification channel (`Notifications:Teams`)
 - Composite notification publisher fan-out across enabled channels
 
+## Phase 11 — Client Onboarding Wizard
+
+- Guided 6-step application setup wizard (`/Onboarding/Wizard`)
+- Application creation UI with auto team provisioning
+- Repository path validation with Roslyn preview stats
+- Database registration or skip path inside wizard flow
+- One-click discovery orchestration (index, scan, graph, drift)
+- Review screen with documentation export and system map links
+- Dashboard getting-started checklist with resume support
+- Empty states on Applications, Repositories, and Database Connections pages
+
 ## Future enhancements
 
 - Attachment virus scanning

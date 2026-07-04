@@ -1,0 +1,232 @@
+@page "{id:guid?}"
+@model EnhancementHub.Web.Pages.Onboarding.WizardModel
+@{
+    ViewData["Title"] = "Application Setup Wizard";
+    var steps = WizardModel.StepDefinitions;
+}
+
+<div class="page-header">
+    <h1>Document your application</h1>
+    <p class="text-muted">Guided setup to connect code, scan databases, and generate architecture documentation.</p>
+</div>
+
+<partial name="_OnboardingProgress" model="Model" />
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
+{
+    <div class="alert alert-success">@Model.SuccessMessage</div>
+}
+
+<div class="card-panel p-4">
+    @switch (Model.Session.CurrentStep)
+    {
+        case EnhancementHub.Domain.Enums.OnboardingStep.ApplicationBasics:
+            <h2 class="h4 mb-3">Step 1 — Application basics</h2>
+            <p class="text-muted">Tell us about the application you want to document.</p>
+            <form method="post" asp-page-handler="Step1">
+                <input type="hidden" asp-for="SessionId" />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Application name</label>
+                        <input asp-for="Step1.Name" class="form-control" placeholder="e.g. Order Management System" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Business domain</label>
+                        <input asp-for="Step1.BusinessDomain" class="form-control" placeholder="e.g. E-Commerce" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Purpose</label>
+                        <textarea asp-for="Step1.Purpose" class="form-control" rows="2" placeholder="What does this application do?"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Risk-sensitive areas</label>
+                        <input asp-for="Step1.RiskSensitiveAreas" class="form-control" placeholder="e.g. PII, payments, authentication" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Owning team (optional)</label>
+                        <input asp-for="Step1.OwnerTeamName" class="form-control" placeholder="e.g. Platform Engineering" />
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">Continue to code connection</button>
+                </div>
+            </form>
+            break;
+
+        case EnhancementHub.Domain.Enums.OnboardingStep.ConnectCode:
+            <h2 class="h4 mb-3">Step 2 — Connect code</h2>
+            <p class="text-muted">Point to a local clone of the repository. EnhancementHub scans it read-only.</p>
+            <form method="post" asp-page-handler="ValidatePath" class="mb-4">
+                <input type="hidden" asp-for="SessionId" />
+                <div class="mb-3">
+                    <label class="form-label">Repository path</label>
+                    <div class="input-group">
+                        <input asp-for="Step2.RepositoryPath" class="form-control" placeholder="/path/to/repo" />
+                        <button type="submit" class="btn btn-outline-secondary">Test access</button>
+                    </div>
+                </div>
+            </form>
+            @if (Model.PathValidation is not null)
+            {
+                <div class="alert @(Model.PathValidation.IsValid ? "alert-success" : "alert-warning")">
+                    @if (Model.PathValidation.IsValid)
+                    {
+                        <div>Path is accessible.</div>
+                        <div class="small mt-1">
+                            @Model.PathValidation.CSharpFileCount C# files ·
+                            @Model.PathValidation.ControllerCount controllers ·
+                            @Model.PathValidation.DbContextCount DbContexts ·
+                            @Model.PathValidation.EntityMappingCount entity mappings
+                        </div>
+                    }
+                    else
+                    {
+                        <div>@Model.PathValidation.ErrorMessage</div>
+                    }
+                </div>
+            }
+            <form method="post" asp-page-handler="Step2">
+                <input type="hidden" asp-for="SessionId" />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Repository name</label>
+                        <input asp-for="Step2.RepositoryName" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Default branch</label>
+                        <input asp-for="Step2.DefaultBranch" class="form-control" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Repository path</label>
+                        <input asp-for="Step2.RepositoryPath" class="form-control" />
+                    </div>
+                </div>
+                <div class="mt-4 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Continue to database</button>
+                    <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="1" class="btn btn-outline-secondary">Back</a>
+                </div>
+            </form>
+            break;
+
+        case EnhancementHub.Domain.Enums.OnboardingStep.ConnectDatabase:
+            <h2 class="h4 mb-3">Step 3 — Connect database</h2>
+            <p class="text-muted">Register a read-only database connection, or skip if you'll use the on-prem agent later.</p>
+            <form method="post" asp-page-handler="Step3">
+                <input type="hidden" asp-for="SessionId" />
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Connection name</label>
+                        <input asp-for="Step3.ConnectionName" class="form-control" placeholder="e.g. Production read replica" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Provider</label>
+                        <select asp-for="Step3.Provider" class="form-select" asp-items="Html.GetEnumSelectList<EnhancementHub.Domain.Enums.DatabaseProviderType>()"></select>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Connection string</label>
+                        <textarea asp-for="Step3.ConnectionString" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input asp-for="Step3.IsReadOnly" class="form-check-input" />
+                            <label asp-for="Step3.IsReadOnly" class="form-check-label">Read-only connection</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 d-flex gap-2 flex-wrap">
+                    <button type="submit" class="btn btn-primary">Register & continue</button>
+                    <button type="submit" asp-page-handler="SkipDatabase" class="btn btn-outline-secondary">Skip database for now</button>
+                    <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="2" class="btn btn-link">Back</a>
+                </div>
+            </form>
+            break;
+
+        case EnhancementHub.Domain.Enums.OnboardingStep.RunDiscovery:
+            <h2 class="h4 mb-3">Step 4 — Run discovery</h2>
+            <p class="text-muted">Index code, scan databases, build the system graph, and check schema drift.</p>
+            @if (!string.IsNullOrWhiteSpace(Model.Session.DiscoveryStatus))
+            {
+                <div class="alert alert-info">@Model.Session.DiscoveryStatus</div>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Session.LastError))
+            {
+                <div class="alert alert-danger">@Model.Session.LastError</div>
+            }
+            @if (Model.DiscoveryResult is not null)
+            {
+                <div class="alert @(Model.DiscoveryResult.Succeeded ? "alert-success" : "alert-danger")">
+                    @if (Model.DiscoveryResult.Succeeded)
+                    {
+                        <div>Discovery completed successfully.</div>
+                        <div class="small mt-1">
+                            @Model.DiscoveryResult.RepositoriesIndexed repos indexed ·
+                            @Model.DiscoveryResult.DatabasesScanned DBs scanned ·
+                            @Model.DiscoveryResult.GraphNodeCount graph nodes ·
+                            @Model.DiscoveryResult.DriftFindingCount drift findings
+                        </div>
+                    }
+                    else
+                    {
+                        <div>Discovery failed: @Model.DiscoveryResult.ErrorMessage</div>
+                    }
+                </div>
+            }
+            <form method="post" asp-page-handler="Step4">
+                <input type="hidden" asp-for="SessionId" />
+                <button type="submit" class="btn btn-primary">
+                    @(Model.Session.DiscoveryCompletedAt is null ? "Run discovery" : "Re-run discovery")
+                </button>
+                @if (Model.Session.DiscoveryCompletedAt is not null)
+                {
+                    <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="5" class="btn btn-outline-primary ms-2">Continue to review</a>
+                }
+            </form>
+            break;
+
+        case EnhancementHub.Domain.Enums.OnboardingStep.ReviewExport:
+            <h2 class="h4 mb-3">Step 5 — Review & export</h2>
+            @if (Model.Review is not null)
+            {
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3"><div class="stat-card"><div class="label">Repositories</div><div class="value fs-3">@Model.Review.RepositoryCount</div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><div class="label">Databases</div><div class="value fs-3">@Model.Review.DatabaseConnectionCount</div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><div class="label">Graph nodes</div><div class="value fs-3">@Model.Review.GraphNodeCount</div></div></div>
+                    <div class="col-md-3"><div class="stat-card"><div class="label">Drift findings</div><div class="value fs-3">@Model.Review.DriftFindingCount</div></div></div>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(Model.Review.LatestProfileSummary))
+                {
+                    <p class="text-muted">@Model.Review.LatestProfileSummary</p>
+                }
+            }
+            <div class="d-flex gap-2 flex-wrap">
+                <form method="post" asp-page-handler="ExportDocs" class="d-inline">
+                    <input type="hidden" asp-for="SessionId" />
+                    <button type="submit" class="btn btn-primary">Download documentation</button>
+                </form>
+                <a asp-page="/SystemMap/Index" asp-route-applicationId="@Model.Session.ApplicationId" class="btn btn-outline-primary">View system map</a>
+                <a asp-page="/SchemaDrift/Index" class="btn btn-outline-secondary">Review drift</a>
+                <form method="post" asp-page-handler="Complete" class="d-inline">
+                    <input type="hidden" asp-for="SessionId" />
+                    <button type="submit" class="btn btn-success">Finish setup</button>
+                </form>
+            </div>
+            break;
+
+        case EnhancementHub.Domain.Enums.OnboardingStep.Complete:
+            <div class="text-center py-4">
+                <h2 class="h4 mb-3">Setup complete</h2>
+                <p class="text-muted mb-4">@Model.Session.ApplicationName is ready. You can submit enhancement requests, monitor drift, and re-export documentation anytime.</p>
+                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                    <a asp-page="/Applications/Details" asp-route-id="@Model.Session.ApplicationId" class="btn btn-primary">View application</a>
+                    <a asp-page="/Documentation/Export" class="btn btn-outline-primary">Export docs</a>
+                    <a asp-page="/Index" class="btn btn-outline-secondary">Go to dashboard</a>
+                </div>
+            </div>
+            break;
+    }
+</div>

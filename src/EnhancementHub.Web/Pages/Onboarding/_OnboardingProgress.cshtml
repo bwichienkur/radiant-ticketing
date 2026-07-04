@@ -1,0 +1,19 @@
+@model EnhancementHub.Web.Pages.Onboarding.WizardModel
+
+@{
+    var current = (int)Model.Session.CurrentStep;
+}
+
+<div class="onboarding-progress mb-4">
+    <div class="d-flex justify-content-between flex-wrap gap-2">
+        @foreach (var step in WizardModel.StepDefinitions)
+        {
+            var isActive = step.Number == current;
+            var isComplete = step.Number < current || Model.Session.Status == EnhancementHub.Domain.Enums.OnboardingSessionStatus.Completed;
+            <div class="onboarding-step @(isActive ? "active" : null) @(isComplete ? "complete" : null)">
+                <div class="step-number">@step.Number</div>
+                <div class="step-label">@step.Label</div>
+            </div>
+        }
+    </div>
+</div>

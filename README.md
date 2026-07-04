@@ -111,6 +111,7 @@ Set `OPENAI_API_KEY` for live AI analysis; without it, the system uses determini
 | 8 | On-prem agent, SSO stubs (OpenID Connect), System Intelligence tests | Complete |
 | 9 | Column-level drift, pgvector search, SSO role mapping, notifications, blob storage | Complete |
 | 10 | Qdrant/Azure Search vectors, S3 presigned URLs, email/Teams notifications | Complete |
+| 11 | Client onboarding wizard, discovery orchestration, dashboard checklist | Complete |
 
 See [docs/PHASES.md](docs/PHASES.md) for detailed phase breakdown.
 
@@ -146,7 +147,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-56 tests covering risk scoring, AI validation, repository scanning, EF entity mapping, schema drift detection, documentation export, enterprise integrations, API integration, approval workflow, role permissions, and ticket export.
+58 tests covering risk scoring, AI validation, repository scanning, EF entity mapping, schema drift detection, documentation export, enterprise integrations, onboarding wizard, API integration, approval workflow, role permissions, and ticket export.
 
 ## API overview
 

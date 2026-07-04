@@ -47,6 +47,7 @@ public interface IEnhancementHubDbContext
     DbSet<SystemGraphSnapshot> SystemGraphSnapshots { get; }
     DbSet<SchemaDriftReport> SchemaDriftReports { get; }
     DbSet<OnPremAgent> OnPremAgents { get; }
+    DbSet<OnboardingSession> OnboardingSessions { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -53,6 +53,7 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<SystemGraphSnapshot> SystemGraphSnapshots => Set<SystemGraphSnapshot>();
     public DbSet<SchemaDriftReport> SchemaDriftReports => Set<SchemaDriftReport>();
     public DbSet<OnPremAgent> OnPremAgents => Set<OnPremAgent>();
+    public DbSet<OnboardingSession> OnboardingSessions => Set<OnboardingSession>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
