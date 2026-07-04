@@ -33,13 +33,44 @@
 - Dashboard reporting (status counts, approval time, risk trends)
 - Admin settings and AI prompt configuration
 - Correlation IDs, Polly retries, structured logging
-- 40 unit and integration tests
+- Unit and integration tests
 - Docker Compose for local PostgreSQL deployment
+
+## Phase 5 — System Intelligence: Schema & Graph Foundation
+
+- `DatabaseConnection` registration with encrypted connection strings
+- Read-only schema scanners: SQL Server, PostgreSQL, SQLite
+- EF entity↔table mapping via Roslyn (`[Table]`, `DbSet<>`, fluent API)
+- `CodeEntityMapping` persistence during repository indexing
+- System knowledge graph (`SystemGraphNode`, `SystemGraphEdge`)
+- System Map UI and database connection management pages
+
+## Phase 6 — Drift Detection & Documentation
+
+- Multi-repository graph builder linking code and database artifacts
+- Schema drift detector comparing live DB vs indexed EF mappings
+- Drift report UI with severity classification
+- Markdown + Mermaid ERD documentation export
+- ERD visualization page per database connection
+
+## Phase 7 — Refactor Intelligence
+
+- Blast-radius analysis across controllers, entities, and tables
+- AI-assisted refactor plan generation with migration steps
+- Refactor plan storage and review UI
+
+## Phase 8 — Enterprise Deployment
+
+- On-prem agent (`EnhancementHub.Agent`) for air-gapped database scanning
+- Agent scan result ingestion via `POST /api/on-prem-agent/{agentId}/scan-results`
+- OpenID Connect SSO stub (enable via `Authentication:OpenIdConnect:Enabled`)
+- System Intelligence unit tests (EF mapping, drift detection, doc export)
 
 ## Future enhancements
 
 - pgvector production deployment for semantic search at scale
 - Azure AI Search / Qdrant vector provider implementations
-- SSO (Azure AD / OIDC)
+- Full Azure AD / Entra ID SSO integration with role mapping
 - Real-time notifications
 - Attachment blob storage (S3/Azure Blob)
+- Column-level drift detection with type/nullability comparison

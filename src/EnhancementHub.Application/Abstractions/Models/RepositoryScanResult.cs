@@ -1,4 +1,18 @@
+using EnhancementHub.Domain.Enums;
+
 namespace EnhancementHub.Application.Abstractions.Models;
+
+public sealed class EntityMappingInfo
+{
+    public string EntityClassName { get; set; } = string.Empty;
+    public string EntityNamespace { get; set; } = string.Empty;
+    public string EntityFilePath { get; set; } = string.Empty;
+    public string TableName { get; set; } = string.Empty;
+    public string SchemaName { get; set; } = "dbo";
+    public string? DbContextType { get; set; }
+    public EntityMappingSource MappingSource { get; set; }
+    public double ConfidenceScore { get; set; }
+}
 
 public sealed class RepositoryScanResult
 {
@@ -7,6 +21,7 @@ public sealed class RepositoryScanResult
     public IReadOnlyList<ScannedClass> Classes { get; set; } = Array.Empty<ScannedClass>();
     public IReadOnlyList<ScannedController> Controllers { get; set; } = Array.Empty<ScannedController>();
     public IReadOnlyList<string> DbContextTypes { get; set; } = Array.Empty<string>();
+    public IReadOnlyList<EntityMappingInfo> EntityMappings { get; set; } = Array.Empty<EntityMappingInfo>();
     public int TotalFilesScanned { get; set; }
 }
 

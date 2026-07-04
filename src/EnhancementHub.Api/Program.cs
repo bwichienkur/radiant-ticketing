@@ -4,11 +4,9 @@ using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.DependencyInjection;
 using EnhancementHub.Infrastructure.DependencyInjection;
 using EnhancementHub.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using EnhancementHub.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Serilog;
-using System.Text;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
@@ -28,24 +26,7 @@ try
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
 
-    var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "dev-secret-change-in-production-min-32-chars!!";
-    var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "EnhancementHub";
-    var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "EnhancementHub";
-
-    builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-        .AddJwtBearer(options =>
-        {
-            options.TokenValidationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtIssuer,
-                ValidAudience = jwtAudience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
-            };
-        });
+    builder.Services.AddEnhancementHubJwtAuthentication(builder.Configuration);
 
     builder.Services.AddAuthorization();
     builder.Services.AddControllers();

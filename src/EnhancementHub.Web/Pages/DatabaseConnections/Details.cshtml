@@ -1,0 +1,38 @@
+@page "{id:guid}"
+@model EnhancementHub.Web.Pages.DatabaseConnections.DetailsModel
+@{ ViewData["Title"] = Model.Schema?.ConnectionName ?? "Database"; }
+
+<div class="d-flex justify-content-between mb-4">
+    <h1 class="h3 mb-0">@Model.Schema?.ConnectionName</h1>
+    <div>
+        <a class="btn btn-outline-primary" asp-page="Erd" asp-route-id="@Model.ConnectionId">View ERD</a>
+        <a class="btn btn-outline-secondary" asp-page="/SchemaDrift/Index" asp-route-connectionId="@Model.ConnectionId">Drift report</a>
+    </div>
+</div>
+
+@if (Model.Schema is not null)
+{
+    @foreach (var table in Model.Schema.Tables)
+    {
+        <div class="card mb-3">
+            <div class="card-header fw-semibold">@table.SchemaName.@table.TableName</div>
+            <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                    <thead><tr><th>Column</th><th>Type</th><th>Nullable</th><th>PK</th><th>FK</th></tr></thead>
+                    <tbody>
+                    @foreach (var col in table.Columns)
+                    {
+                        <tr>
+                            <td>@col.Name</td>
+                            <td>@col.DataType</td>
+                            <td>@(col.IsNullable ? "Yes" : "No")</td>
+                            <td>@(col.IsPrimaryKey ? "✓" : "")</td>
+                            <td>@(col.IsForeignKey ? "✓" : "")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}

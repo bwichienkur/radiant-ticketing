@@ -1,3 +1,4 @@
+using EnhancementHub.Application.Abstractions;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.DataProtection;
@@ -5,10 +6,8 @@ using Microsoft.Extensions.Logging;
 
 namespace EnhancementHub.Infrastructure.Security;
 
-public interface ISecretProtector
+public interface ISecretProtector : IConnectionStringProtector
 {
-    string Protect(string plaintext);
-    string Unprotect(string protectedData);
 }
 
 public sealed class SecretProtector : ISecretProtector

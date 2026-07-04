@@ -16,4 +16,8 @@ public class Application : BaseEntity
     public ICollection<ApplicationProfile> Profiles { get; set; } = new List<ApplicationProfile>();
     public ICollection<EnhancementRequest> TargetedRequests { get; set; } = new List<EnhancementRequest>();
     public ICollection<AffectedApplication> AnalysisImpacts { get; set; } = new List<AffectedApplication>();
+    public ICollection<DatabaseConnection> DatabaseConnections { get; set; } = new List<DatabaseConnection>();
+    public ICollection<SystemGraphNode> GraphNodes { get; set; } = new List<SystemGraphNode>();
+    public ICollection<SystemGraphSnapshot> SystemGraphSnapshots { get; set; } = new List<SystemGraphSnapshot>();
+    public ICollection<OnPremAgent> OnPremAgents { get; set; } = new List<OnPremAgent>();
 }

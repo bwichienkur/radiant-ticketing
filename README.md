@@ -15,7 +15,8 @@ src/
 ├── EnhancementHub.Infrastructure/  # EF Core, AI, indexing, integrations
 ├── EnhancementHub.Api/             # REST API
 ├── EnhancementHub.Web/             # Razor Pages enterprise UI
-└── EnhancementHub.Worker/        # Background jobs (indexing, AI, refresh)
+├── EnhancementHub.Worker/          # Background jobs (indexing, AI, refresh)
+└── EnhancementHub.Agent/           # On-prem DB schema scan agent
 
 tests/
 └── EnhancementHub.Tests/           # Unit + integration tests
@@ -30,6 +31,39 @@ tests/
 5. **Human approval workflow** — review, edit, approve/reject with full audit trail
 6. **Ticket export** — GitHub Issues, Azure DevOps, Jira (provider abstraction)
 7. **Reporting** — dashboards for status, risk, approval time, AI confidence trends
+8. **System Intelligence** — database schema scanning, code↔DB knowledge graph, drift detection, documentation export, refactor blast-radius analysis
+
+## System Intelligence
+
+Architecture intelligence module for connecting live databases and Git repositories:
+
+| Capability | Description |
+|------------|-------------|
+| DB schema scanner | Read-only scan of SQL Server, PostgreSQL, and SQLite |
+| EF entity mapping | Roslyn analysis of `[Table]`, `DbSet<>`, and fluent API mappings |
+| System map | Interactive graph linking controllers, entities, tables, and APIs |
+| Schema drift | Compare live DB schema against indexed code mappings |
+| Documentation export | Markdown + Mermaid ERD generation |
+| Refactor analysis | Blast-radius impact analysis and AI migration plans |
+| On-prem agent | `EnhancementHub.Agent` console app for air-gapped DB scanning |
+
+### System Intelligence API routes
+
+- `GET/POST /api/database-connections`
+- `POST /api/database-connections/{id}/scan`
+- `GET /api/system-map/{applicationId}`
+- `GET/POST /api/schema-drift/{connectionId}`
+- `GET /api/documentation/{applicationId}/export`
+- `POST /api/refactor/analyze`, `POST /api/refactor/plans`
+- `POST /api/on-prem-agent/register`, `POST /api/on-prem-agent/{agentId}/scan-results`
+
+### On-prem agent
+
+```bash
+dotnet run --project src/EnhancementHub.Agent
+```
+
+Configure `Agent:ApiBaseUrl`, `Agent:AgentId`, `Agent:ConnectionId`, `Agent:ConnectionString`, and `Agent:Provider` in `src/EnhancementHub.Agent/appsettings.json` or via `ENHANCEMENTHUB_` environment variables.
 
 ## Quick start (local)
 
@@ -71,6 +105,10 @@ Set `OPENAI_API_KEY` for live AI analysis; without it, the system uses determini
 | 2 | Repository indexing, application profiles, searchable knowledge base | Complete |
 | 3 | AI analysis pipeline, structured output validation, risk scoring, review UI | Complete |
 | 4 | External ticket integrations, reporting, admin settings, tests | Complete |
+| 5 | DB schema scanner, EF mapping, system graph, System Map UI | Complete |
+| 6 | Multi-repo graph, schema drift detection, documentation export | Complete |
+| 7 | Refactor blast-radius analysis, AI migration plans | Complete |
+| 8 | On-prem agent, SSO stubs (OpenID Connect), System Intelligence tests | Complete |
 
 See [docs/PHASES.md](docs/PHASES.md) for detailed phase breakdown.
 
@@ -83,7 +121,15 @@ Key settings in `appsettings.json`:
   "Database": { "Provider": "Sqlite" },
   "ConnectionStrings": { "Default": "Data Source=enhancementhub.db" },
   "Jwt": { "Secret": "...", "Issuer": "EnhancementHub", "Audience": "EnhancementHub" },
-  "OpenAI": { "ApiKey": "", "Model": "gpt-4o-mini", "Endpoint": "https://api.openai.com/v1" }
+  "OpenAI": { "ApiKey": "", "Model": "gpt-4o-mini", "Endpoint": "https://api.openai.com/v1" },
+  "Authentication": {
+    "OpenIdConnect": {
+      "Enabled": false,
+      "Authority": "https://login.microsoftonline.com/{tenant-id}/v2.0",
+      "ClientId": "",
+      "ClientSecret": ""
+    }
+  }
 }
 ```
 
@@ -100,7 +146,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-40 tests covering risk scoring, AI validation, repository scanning, API integration, approval workflow, role permissions, and ticket export.
+44 tests covering risk scoring, AI validation, repository scanning, EF entity mapping, schema drift detection, documentation export, API integration, approval workflow, role permissions, and ticket export.
 
 ## API overview
 

@@ -1,0 +1,29 @@
+@page
+@model EnhancementHub.Web.Pages.DatabaseConnections.RegisterModel
+@{ ViewData["Title"] = "Register Database"; }
+
+<h1 class="h3 mb-4">Register database connection</h1>
+
+<form method="post" class="col-lg-8">
+    <div class="mb-3">
+        <label class="form-label">Application</label>
+        <select asp-for="Input.ApplicationId" asp-items="Model.ApplicationOptions" class="form-select"></select>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Input.Name" class="form-label"></label>
+        <input asp-for="Input.Name" class="form-control" />
+    </div>
+    <div class="mb-3">
+        <label asp-for="Input.Provider" class="form-label"></label>
+        <select asp-for="Input.Provider" class="form-select" asp-items="Html.GetEnumSelectList<EnhancementHub.Domain.Enums.DatabaseProviderType>()"></select>
+    </div>
+    <div class="mb-3">
+        <label asp-for="Input.ConnectionString" class="form-label"></label>
+        <textarea asp-for="Input.ConnectionString" class="form-control" rows="3"></textarea>
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="Input.IsReadOnly" class="form-check-input" />
+        <label asp-for="Input.IsReadOnly" class="form-check-label">Read-only connection</label>
+    </div>
+    <button class="btn btn-primary">Register & scan</button>
+</form>

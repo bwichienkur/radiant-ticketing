@@ -2,7 +2,7 @@ using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.DependencyInjection;
 using EnhancementHub.Infrastructure.DependencyInjection;
 using EnhancementHub.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using EnhancementHub.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,13 +16,7 @@ builder.Services.AddRazorPages(options =>
 });
 builder.Services.AddScoped<EnhancementHub.Web.Services.DevAuthService>();
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/Account/Login";
-        options.AccessDeniedPath = "/Account/Login";
-        options.ExpireTimeSpan = TimeSpan.FromHours(8);
-    });
+builder.Services.AddEnhancementHubCookieAuthentication(builder.Configuration);
 
 builder.Services.AddAuthorization();
 

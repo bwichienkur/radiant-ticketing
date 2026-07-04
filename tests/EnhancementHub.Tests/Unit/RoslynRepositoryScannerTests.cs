@@ -1,4 +1,5 @@
 using EnhancementHub.Infrastructure.Services;
+using EnhancementHub.Infrastructure.Services.SystemIntelligence;
 using FluentAssertions;
 
 namespace EnhancementHub.Tests.Unit;
@@ -6,7 +7,7 @@ namespace EnhancementHub.Tests.Unit;
 public sealed class RoslynRepositoryScannerTests : IDisposable
 {
     private readonly string _rootPath;
-    private readonly RoslynRepositoryScanner _sut = new();
+    private readonly RoslynRepositoryScanner _sut = new(new EfEntityTableMapper());
 
     public RoslynRepositoryScannerTests()
     {

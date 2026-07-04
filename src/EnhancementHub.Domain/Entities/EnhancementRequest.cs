@@ -26,4 +26,5 @@ public class EnhancementRequest : BaseEntity
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     public ICollection<ExternalTicket> ExternalTickets { get; set; } = new List<ExternalTicket>();
     public ICollection<AiPromptRun> AiPromptRuns { get; set; } = new List<AiPromptRun>();
+    public ICollection<RefactorPlan> RefactorPlans { get; set; } = new List<RefactorPlan>();
 }

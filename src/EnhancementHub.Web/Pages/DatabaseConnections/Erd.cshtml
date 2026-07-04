@@ -1,0 +1,17 @@
+@page "{id:guid}"
+@model EnhancementHub.Web.Pages.DatabaseConnections.ErdModel
+@{ ViewData["Title"] = "ERD"; }
+
+<h1 class="h3 mb-4">Entity Relationship Diagram</h1>
+
+<div class="card"><div class="card-body">
+<pre class="mb-0">@Model.Mermaid</pre>
+</div></div>
+
+@section Scripts {
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({ startOnLoad: true, theme: 'neutral' });
+</script>
+<div class="mermaid mt-4">@Model.Mermaid</div>
+}

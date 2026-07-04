@@ -56,6 +56,7 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
             var rootPath = ResolveRepositoryPath(repository);
             var branch = await GetOrCreateBranchAsync(repository, cancellationToken);
             var scan = await _scanner.ScanAsync(rootPath, cancellationToken);
+            await PersistEntityMappingsAsync(repositoryId, scan.EntityMappings, cancellationToken);
 
             var files = Directory
                 .EnumerateFiles(rootPath, "*.*", SearchOption.AllDirectories)
@@ -219,6 +220,40 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
         _dbContext.RepositoryBranches.Add(branch);
         await _dbContext.SaveChangesAsync(cancellationToken);
         return branch;
+    }
+
+    private async Task PersistEntityMappingsAsync(
+        Guid repositoryId,
+        IReadOnlyList<EntityMappingInfo> mappings,
+        CancellationToken cancellationToken)
+    {
+        var existing = await _dbContext.CodeEntityMappings
+            .Where(m => m.RepositoryId == repositoryId)
+            .ToListAsync(cancellationToken);
+
+        _dbContext.CodeEntityMappings.RemoveRange(existing);
+
+        var now = DateTime.UtcNow;
+        foreach (var mapping in mappings)
+        {
+            _dbContext.CodeEntityMappings.Add(new CodeEntityMapping
+            {
+                Id = Guid.NewGuid(),
+                RepositoryId = repositoryId,
+                EntityClassName = mapping.EntityClassName,
+                EntityNamespace = mapping.EntityNamespace,
+                EntityFilePath = mapping.EntityFilePath,
+                TableName = mapping.TableName,
+                SchemaName = mapping.SchemaName,
+                DbContextType = mapping.DbContextType,
+                MappingSource = mapping.MappingSource,
+                ConfidenceScore = mapping.ConfidenceScore,
+                CreatedAt = now,
+                UpdatedAt = now
+            });
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private async Task IndexSymbolsAsync(IndexedFile file, ScannedClass? scannedClass, CancellationToken cancellationToken)

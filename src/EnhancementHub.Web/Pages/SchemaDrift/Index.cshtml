@@ -1,0 +1,38 @@
+@page
+@model EnhancementHub.Web.Pages.SchemaDrift.IndexModel
+@{ ViewData["Title"] = "Schema Drift"; }
+
+<h1 class="h3 mb-4">Schema drift detection</h1>
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-5">
+        <select name="connectionId" class="form-select" required>
+            @foreach (var c in Model.Connections)
+            {
+                <option value="@c.Id" selected="@(Model.ConnectionId == c.Id)">@c.Name (@c.ApplicationName)</option>
+            }
+        </select>
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-primary">View report</button>
+        <button type="submit" asp-page-handler="Detect" class="btn btn-outline-secondary">Run detection</button>
+    </div>
+</form>
+
+@if (Model.Report is not null)
+{
+    <div class="alert alert-info">@Model.Report.Findings.Count finding(s) detected.</div>
+    @foreach (var finding in Model.Report.Findings)
+    {
+        <div class="card mb-2 border-@(finding.Severity.ToString().ToLower())">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <strong>@finding.Title</strong>
+                    <span class="badge bg-warning text-dark">@finding.Severity</span>
+                </div>
+                <p class="mb-1 mt-2">@finding.Description</p>
+                <small class="text-muted">Code: @finding.CodeReference | DB: @finding.DatabaseReference</small>
+            </div>
+        </div>
+    }
+}

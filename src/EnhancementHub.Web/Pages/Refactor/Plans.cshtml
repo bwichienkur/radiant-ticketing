@@ -1,0 +1,34 @@
+@page
+@model EnhancementHub.Web.Pages.Refactor.PlansModel
+@{ ViewData["Title"] = "Refactor Plans"; }
+
+<div class="d-flex justify-content-between mb-4">
+    <h1 class="h3 mb-0">Refactor plans</h1>
+    <a class="btn btn-primary" asp-page="Analyze">New analysis</a>
+</div>
+
+<table class="table table-hover">
+    <thead><tr><th>Title</th><th>Target</th><th>Risk</th><th>Status</th><th>Created</th></tr></thead>
+    <tbody>
+    @foreach (var plan in Model.Plans)
+    {
+        <tr>
+            <td><a asp-page="Plans" asp-route-planId="@plan.Id">@plan.Title</a></td>
+            <td>@plan.TargetDescription</td>
+            <td><span class="badge bg-warning text-dark">@plan.RiskLevel</span></td>
+            <td>@plan.Status</td>
+            <td>@plan.CreatedAt.ToString("g")</td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@if (Model.SelectedPlan is not null)
+{
+    <div class="card mt-4">
+        <div class="card-header">@Model.SelectedPlan.Title</div>
+        <div class="card-body">
+            <pre class="mb-0">@Model.SelectedPlan.PlanMarkdown</pre>
+        </div>
+    </div>
+}

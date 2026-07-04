@@ -1,0 +1,41 @@
+@page
+@model EnhancementHub.Web.Pages.Refactor.AnalyzeModel
+@{ ViewData["Title"] = "Refactor Analysis"; }
+
+<h1 class="h3 mb-4">Refactor blast-radius analysis</h1>
+
+<form method="post" class="row g-3 col-lg-8 mb-4">
+    <div class="col-md-5">
+        <select asp-for="ApplicationId" class="form-select">
+            @foreach (var app in Model.Applications)
+            {
+                <option value="@app.Id">@app.Name</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-5">
+        <input asp-for="Target" class="form-control" placeholder="Table or entity name" />
+    </div>
+    <div class="col-md-2"><button class="btn btn-primary w-100">Analyze</button></div>
+</form>
+
+@if (Model.Result is not null)
+{
+    <div class="card mb-4">
+        <div class="card-header">Blast radius for <strong>@Model.Result.TargetName</strong></div>
+        <ul class="list-group list-group-flush">
+            @foreach (var item in Model.Result.AffectedItems)
+            {
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>@item.Name <span class="badge bg-secondary">@item.Type</span></span>
+                    <span class="text-muted small">@item.Impact (depth @item.Depth)</span>
+                </li>
+            }
+        </ul>
+    </div>
+    <form method="post" asp-page-handler="GeneratePlan">
+        <input type="hidden" asp-for="ApplicationId" />
+        <input type="hidden" asp-for="Target" />
+        <button type="submit" class="btn btn-outline-primary">Generate refactor plan</button>
+    </form>
+}

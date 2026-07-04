@@ -5,6 +5,7 @@ using EnhancementHub.Infrastructure.Persistence;
 using EnhancementHub.Infrastructure.Persistence.Repositories;
 using EnhancementHub.Infrastructure.Security;
 using EnhancementHub.Infrastructure.Services;
+using EnhancementHub.Infrastructure.Services.SystemIntelligence;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -47,6 +48,7 @@ public static class InfrastructureServiceExtensions
 
         services.AddDataProtection();
         services.AddSingleton<ISecretProtector, SecretProtector>();
+        services.AddSingleton<IConnectionStringProtector>(sp => sp.GetRequiredService<ISecretProtector>());
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IAuditService, AuditService>();
@@ -55,6 +57,17 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IVectorSearchService, InMemoryVectorSearchService>();
         services.AddScoped<IKnowledgeSearchService, KeywordKnowledgeSearchService>();
         services.AddScoped<IGitRepositoryScanner, RoslynRepositoryScanner>();
+        services.AddScoped<EfEntityTableMapper>();
+        services.AddScoped<SqlServerSchemaScanner>();
+        services.AddScoped<PostgreSqlSchemaScanner>();
+        services.AddScoped<DatabaseSchemaScannerFactory>();
+        services.AddScoped<DatabaseSchemaIngestionService>();
+        services.AddScoped<ISystemGraphBuilder, SystemGraphBuilderService>();
+        services.AddScoped<ISchemaDriftDetector, SchemaDriftDetectorService>();
+        services.AddScoped<IDocumentationExportService, DocumentationExportService>();
+        services.AddScoped<IRefactorBlastRadiusService, RefactorBlastRadiusService>();
+        services.AddScoped<IRefactorPlanGenerator, RefactorPlanGeneratorService>();
+        services.AddSingleton<IOnPremAgentService, OnPremAgentService>();
         services.AddScoped<ApplicationProfileGenerator>();
         services.AddScoped<IRepositoryIndexer, RepositoryIndexerService>();
         services.AddScoped<IRiskScoringService, RiskScoringService>();
@@ -98,12 +111,16 @@ public static class InfrastructureServiceExtensions
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<JiraTicketExporter>>()));
 
         services.AddScoped<IExternalTicketExporterFactory, ExternalTicketExporterFactory>();
+        services.AddScoped<IDatabaseSchemaScanner, DatabaseSchemaScanner>();
+        services.AddScoped<IDatabaseSchemaIngestionService, DatabaseSchemaIngestionService>();
+        services.AddScoped<IEfEntityTableMapper, EfEntityTableMapper>();
 
         if (registerBackgroundJobs)
         {
             services.AddHostedService<RepositoryIndexingJob>();
             services.AddHostedService<AiAnalysisJob>();
             services.AddHostedService<ScheduledRepositoryRefreshJob>();
+            services.AddHostedService<DatabaseSchemaScanJob>();
         }
 
         return services;

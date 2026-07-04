@@ -33,6 +33,19 @@ public interface IEnhancementHubDbContext
     DbSet<AiPromptRun> AiPromptRuns { get; }
     DbSet<RetrievedContextItem> RetrievedContextItems { get; }
     DbSet<SystemSetting> SystemSettings { get; }
+    DbSet<DatabaseConnection> DatabaseConnections { get; }
+    DbSet<DatabaseTable> DatabaseTables { get; }
+    DbSet<DatabaseColumn> DatabaseColumns { get; }
+    DbSet<DatabaseRelationship> DatabaseRelationships { get; }
+    DbSet<CodeEntityMapping> CodeEntityMappings { get; }
+    DbSet<CodeTableReference> CodeTableReferences { get; }
+    DbSet<SchemaDriftFinding> SchemaDriftFindings { get; }
+    DbSet<SystemGraphNode> SystemGraphNodes { get; }
+    DbSet<SystemGraphEdge> SystemGraphEdges { get; }
+    DbSet<RefactorPlan> RefactorPlans { get; }
+    DbSet<SystemGraphSnapshot> SystemGraphSnapshots { get; }
+    DbSet<SchemaDriftReport> SchemaDriftReports { get; }
+    DbSet<OnPremAgent> OnPremAgents { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

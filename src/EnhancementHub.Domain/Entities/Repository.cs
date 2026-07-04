@@ -19,4 +19,9 @@ public class Repository : BaseEntity
     public ICollection<IndexedFile> IndexedFiles { get; set; } = new List<IndexedFile>();
     public ICollection<ApplicationProfile> Profiles { get; set; } = new List<ApplicationProfile>();
     public ICollection<AffectedRepository> AnalysisImpacts { get; set; } = new List<AffectedRepository>();
+    public ICollection<CodeEntityMapping> EntityMappings { get; set; } = new List<CodeEntityMapping>();
+    public ICollection<CodeTableReference> TableReferences { get; set; } = new List<CodeTableReference>();
+    public ICollection<SchemaDriftFinding> DriftFindings { get; set; } = new List<SchemaDriftFinding>();
+    public ICollection<SystemGraphNode> GraphNodes { get; set; } = new List<SystemGraphNode>();
+    public ICollection<RefactorPlan> RefactorPlans { get; set; } = new List<RefactorPlan>();
 }

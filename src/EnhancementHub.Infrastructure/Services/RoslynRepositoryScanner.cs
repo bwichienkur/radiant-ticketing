@@ -1,5 +1,6 @@
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Abstractions.Models;
+using EnhancementHub.Infrastructure.Services.SystemIntelligence;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -8,10 +9,17 @@ namespace EnhancementHub.Infrastructure.Services;
 
 public sealed class RoslynRepositoryScanner : IGitRepositoryScanner
 {
+    private readonly EfEntityTableMapper _entityMapper;
+
     private static readonly string[] ExcludedDirectories =
     [
         "bin", "obj", ".git", "node_modules", ".vs", "packages", "TestResults"
     ];
+
+    public RoslynRepositoryScanner(EfEntityTableMapper entityMapper)
+    {
+        _entityMapper = entityMapper;
+    }
 
     public async Task<RepositoryScanResult> ScanAsync(string rootPath, CancellationToken cancellationToken = default)
     {
@@ -105,6 +113,8 @@ public sealed class RoslynRepositoryScanner : IGitRepositoryScanner
             }
         }
 
+        var entityMappings = await _entityMapper.MapEntitiesAsync(rootPath, dbContexts.OrderBy(x => x).ToList(), cancellationToken);
+
         return new RepositoryScanResult
         {
             RootPath = rootPath,
@@ -116,6 +126,7 @@ public sealed class RoslynRepositoryScanner : IGitRepositoryScanner
             Classes = classes.OrderBy(c => c.Namespace).ThenBy(c => c.Name).ToList(),
             Controllers = controllers.OrderBy(c => c.Name).ToList(),
             DbContextTypes = dbContexts.OrderBy(x => x).ToList(),
+            EntityMappings = entityMappings,
             TotalFilesScanned = csharpFiles.Count
         };
     }

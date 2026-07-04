@@ -39,6 +39,19 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<AiPromptRun> AiPromptRuns => Set<AiPromptRun>();
     public DbSet<RetrievedContextItem> RetrievedContextItems => Set<RetrievedContextItem>();
     public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
+    public DbSet<DatabaseConnection> DatabaseConnections => Set<DatabaseConnection>();
+    public DbSet<DatabaseTable> DatabaseTables => Set<DatabaseTable>();
+    public DbSet<DatabaseColumn> DatabaseColumns => Set<DatabaseColumn>();
+    public DbSet<DatabaseRelationship> DatabaseRelationships => Set<DatabaseRelationship>();
+    public DbSet<CodeEntityMapping> CodeEntityMappings => Set<CodeEntityMapping>();
+    public DbSet<CodeTableReference> CodeTableReferences => Set<CodeTableReference>();
+    public DbSet<SchemaDriftFinding> SchemaDriftFindings => Set<SchemaDriftFinding>();
+    public DbSet<SystemGraphNode> SystemGraphNodes => Set<SystemGraphNode>();
+    public DbSet<SystemGraphEdge> SystemGraphEdges => Set<SystemGraphEdge>();
+    public DbSet<RefactorPlan> RefactorPlans => Set<RefactorPlan>();
+    public DbSet<SystemGraphSnapshot> SystemGraphSnapshots => Set<SystemGraphSnapshot>();
+    public DbSet<SchemaDriftReport> SchemaDriftReports => Set<SchemaDriftReport>();
+    public DbSet<OnPremAgent> OnPremAgents => Set<OnPremAgent>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

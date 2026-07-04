@@ -1,0 +1,31 @@
+@page
+@model EnhancementHub.Web.Pages.DatabaseConnections.IndexModel
+@{ ViewData["Title"] = "Database Connections"; }
+
+<div class="d-flex justify-content-between mb-4">
+    <h1 class="h3 mb-0">Database Connections</h1>
+    <a class="btn btn-primary" asp-page="Register">Register connection</a>
+</div>
+
+<table class="table table-hover">
+    <thead><tr><th>Name</th><th>Application</th><th>Provider</th><th>Status</th><th>Last scan</th><th></th></tr></thead>
+    <tbody>
+    @foreach (var c in Model.Connections)
+    {
+        <tr>
+            <td>@c.Name</td>
+            <td>@c.ApplicationName</td>
+            <td>@c.Provider</td>
+            <td><span class="badge bg-@(c.ScanStatus == "Completed" ? "success" : "secondary")">@c.ScanStatus</span></td>
+            <td>@(c.LastScannedAt?.ToString("g") ?? "—")</td>
+            <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary" asp-page="Details" asp-route-id="@c.Id">Details</a>
+                <form method="post" asp-page-handler="Scan" class="d-inline">
+                    <input type="hidden" name="id" value="@c.Id" />
+                    <button class="btn btn-sm btn-outline-secondary">Scan</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

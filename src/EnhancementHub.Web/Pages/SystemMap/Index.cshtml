@@ -1,0 +1,72 @@
+@page
+@model EnhancementHub.Web.Pages.SystemMap.IndexModel
+@{
+    ViewData["Title"] = "System Map";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">System Map</h1>
+        <p class="text-muted mb-0">Code ↔ database relationship graph across applications.</p>
+    </div>
+    @if (Model.SelectedApplicationId.HasValue)
+    {
+        <form method="post" asp-page-handler="Build">
+            <input type="hidden" name="applicationId" value="@Model.SelectedApplicationId" />
+            <button class="btn btn-primary">Rebuild graph</button>
+        </form>
+    }
+</div>
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-6">
+        <label class="form-label">Application</label>
+        <select name="applicationId" class="form-select" onchange="this.form.submit()">
+            <option value="">Select application...</option>
+            @foreach (var app in Model.Applications)
+            {
+                <option value="@app.Id" selected="@(Model.SelectedApplicationId == app.Id)">@app.Name</option>
+            }
+        </select>
+    </div>
+</form>
+
+@if (Model.Map is not null)
+{
+    <div class="row g-3 mb-3">
+        <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Nodes</div><div class="h4 mb-0">@Model.Map.Nodes.Count</div></div></div></div>
+        <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Edges</div><div class="h4 mb-0">@Model.Map.Edges.Count</div></div></div></div>
+        <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Tables</div><div class="h4 mb-0">@Model.Map.Nodes.Count(n => n.Type == "Table")</div></div></div></div>
+        <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">APIs</div><div class="h4 mb-0">@Model.Map.Nodes.Count(n => n.Type == "ApiEndpoint")</div></div></div></div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">Graph nodes</div>
+        <div class="table-responsive">
+            <table class="table table-sm mb-0">
+                <thead><tr><th>Label</th><th>Type</th><th>Detail</th></tr></thead>
+                <tbody>
+                @foreach (var node in Model.Map.Nodes.Take(100))
+                {
+                    <tr><td>@node.Label</td><td><span class="badge bg-secondary">@node.Type</span></td><td class="text-muted small">@node.Detail</td></tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Relationships</div>
+        <div class="table-responsive">
+            <table class="table table-sm mb-0">
+                <thead><tr><th>From</th><th>To</th><th>Link</th></tr></thead>
+                <tbody>
+                @foreach (var edge in Model.Map.Edges.Take(100))
+                {
+                    <tr><td>@edge.FromId</td><td>@edge.ToId</td><td>@edge.Label</td></tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
