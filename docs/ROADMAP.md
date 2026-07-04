@@ -52,7 +52,7 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 ### 1.2 Demo-critical UX polish
 - [x] Enhancement request detail: analysis summary above the fold, risk badge, confidence score
 - [x] System Map: default layout, loading states, empty-state guidance
-- [ ] Onboarding wizard: progress persistence, clearer error recovery
+- [x] Onboarding wizard: progress persistence, clearer error recovery
 - [x] Dashboard: "requests awaiting analysis" and "high-risk pending approval" widgets
 
 ### 1.3 Operational fixes (quick wins)

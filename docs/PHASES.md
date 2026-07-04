@@ -181,6 +181,13 @@
 - Admin-only export via `GET /api/auditlogs/export` and Audit page buttons
 - Export includes previous/new values and correlation IDs for compliance review
 
+## Horizon 1 continuation — Onboarding wizard polish
+
+- Resume banner and clickable progress steps for completed wizard stages
+- Form prefill from registered application, repository, and database connection
+- Persisted wizard errors (`WizardError`) with recovery on step advance
+- Discovery failure panel with retry guidance and links back to code/database steps
+
 ## Future enhancements
 
 - GitHub App webhook-driven automatic re-index on push

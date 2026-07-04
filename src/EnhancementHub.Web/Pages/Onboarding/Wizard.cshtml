@@ -10,11 +10,28 @@
     <p class="text-muted">Guided setup to connect code, scan databases, and generate architecture documentation.</p>
 </div>
 
+@if (Model.Session.Status == EnhancementHub.Domain.Enums.OnboardingSessionStatus.InProgress && Model.Session.CurrentStep != EnhancementHub.Domain.Enums.OnboardingStep.Complete)
+{
+    <div class="alert alert-light border mb-3">
+        <strong>Resume setup</strong> — you're on step @((int)Model.Session.CurrentStep) (@WizardModel.StepDefinitions.First(s => s.Number == (int)Model.Session.CurrentStep).Label).
+        @if (!string.IsNullOrWhiteSpace(Model.Session.ApplicationName))
+        {
+            <span>Application: <strong>@Model.Session.ApplicationName</strong>.</span>
+        }
+        Progress is saved automatically as you complete each step.
+    </div>
+}
+
 <partial name="_OnboardingProgress" model="Model" />
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {
-    <div class="alert alert-danger">@Model.ErrorMessage</div>
+    <div class="alert alert-danger d-flex justify-content-between align-items-start gap-3">
+        <div>
+            <strong>Something went wrong</strong>
+            <div class="mt-1">@Model.ErrorMessage</div>
+        </div>
+    </div>
 }
 
 @if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
@@ -320,19 +337,30 @@
             <p class="text-muted">Index code, scan databases, build the system graph, and check schema drift.</p>
             @if (!string.IsNullOrWhiteSpace(Model.Session.DiscoveryStatus))
             {
-                <div class="alert alert-info">
+                <div class="alert @(Model.Session.DiscoveryJobState == EnhancementHub.Domain.Enums.DiscoveryJobState.Failed ? "alert-warning" : "alert-info")">
                     <div>@Model.Session.DiscoveryStatus</div>
                     <div class="small text-muted mt-1">State: @Model.Session.DiscoveryJobState</div>
                 </div>
             }
-            @if (!string.IsNullOrWhiteSpace(Model.Session.LastError))
+            @if (Model.Session.DiscoveryJobState == EnhancementHub.Domain.Enums.DiscoveryJobState.Failed)
             {
-                <div class="alert alert-danger">@Model.Session.LastError</div>
+                <div class="card-panel p-3 mb-3">
+                    <h3 class="h6">Recovery steps</h3>
+                    <ol class="small mb-3">
+                        <li>Verify the repository path is still accessible and the database connection is valid.</li>
+                        <li>Check Worker logs if discovery runs in a background job host.</li>
+                        <li>Fix the issue, then click <strong>Retry discovery</strong> below.</li>
+                    </ol>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="2" class="btn btn-sm btn-outline-secondary">Review code connection</a>
+                        <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="3" class="btn btn-sm btn-outline-secondary">Review database connection</a>
+                    </div>
+                </div>
             }
             <form method="post" asp-page-handler="Step4">
                 <input type="hidden" asp-for="SessionId" />
                 <button type="submit" class="btn btn-primary" disabled="@(Model.Session.DiscoveryJobState is EnhancementHub.Domain.Enums.DiscoveryJobState.Queued or EnhancementHub.Domain.Enums.DiscoveryJobState.Running)">
-                    @(Model.Session.DiscoveryCompletedAt is null ? "Queue discovery" : "Re-queue discovery")
+                    @(Model.Session.DiscoveryJobState == EnhancementHub.Domain.Enums.DiscoveryJobState.Failed ? "Retry discovery" : Model.Session.DiscoveryCompletedAt is null ? "Queue discovery" : "Re-queue discovery")
                 </button>
                 @if (Model.Session.DiscoveryJobState == EnhancementHub.Domain.Enums.DiscoveryJobState.Completed)
                 {
@@ -341,6 +369,10 @@
             </form>
             @if (Model.Session.DiscoveryJobState is EnhancementHub.Domain.Enums.DiscoveryJobState.Queued or EnhancementHub.Domain.Enums.DiscoveryJobState.Running)
             {
+                <div class="mt-3 d-flex align-items-center gap-2 text-muted">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span>Discovery in progress — this page refreshes every 4 seconds.</span>
+                </div>
                 <script>
                     setTimeout(() => window.location.reload(), 4000);
                 </script>
