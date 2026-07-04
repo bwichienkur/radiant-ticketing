@@ -67,4 +67,36 @@ public sealed class ApplicationAccessService : IApplicationAccessService
 
         await EnsureAccessibleApplicationAsync(connection.ApplicationId, cancellationToken);
     }
+
+    public async Task EnsureAccessibleRefactorPlanAsync(
+        Guid planId,
+        CancellationToken cancellationToken = default)
+    {
+        var plan = await _dbContext.RefactorPlans
+            .AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == planId, cancellationToken)
+            ?? throw new NotFoundException(nameof(RefactorPlan), planId);
+
+        if (plan.DatabaseConnectionId.HasValue)
+        {
+            await EnsureAccessibleConnectionAsync(plan.DatabaseConnectionId.Value, cancellationToken);
+            return;
+        }
+
+        if (plan.RepositoryId.HasValue)
+        {
+            var repository = await _dbContext.Repositories
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.Id == plan.RepositoryId.Value, cancellationToken)
+                ?? throw new NotFoundException(nameof(Repository), plan.RepositoryId.Value);
+
+            await EnsureAccessibleApplicationAsync(repository.ApplicationId, cancellationToken);
+            return;
+        }
+
+        if (_currentUser.Role != UserRole.Admin)
+        {
+            throw new NotFoundException(nameof(RefactorPlan), planId);
+        }
+    }
 }

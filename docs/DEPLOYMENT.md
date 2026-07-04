@@ -140,9 +140,22 @@ readinessProbe:
 |-----------|-------|-------|
 | API | Yes | Stateless; shared DB + S3 + key ring |
 | Web | Yes | Shared DB; SignalR requires backplane for multi-instance |
-| Worker | Yes* | *Requires durable job queue (Phase 18) for safe multi-worker |
+| Worker | Yes | Use `BackgroundJobs:Provider=Hangfire` with PostgreSQL for safe multi-worker |
 | PostgreSQL | Vertical + replicas | Use read replica for reporting at scale |
 | Vector search | Offload | Prefer Qdrant/Azure Search over PgVector at 100+ repos |
+
+### Background jobs
+
+Set `BackgroundJobs:Provider` to `Hangfire` when using PostgreSQL (recommended for Docker Compose and production). SQLite local dev uses `Polling` (default) with in-process hosted services.
+
+```json
+"BackgroundJobs": {
+  "Provider": "Hangfire",
+  "HangfireSchema": "hangfire"
+}
+```
+
+Hangfire dashboard (Development): http://localhost:5076/hangfire
 
 ---
 

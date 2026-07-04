@@ -12,17 +12,24 @@ public sealed class DetectSchemaDriftCommandHandler
 {
     private readonly ISchemaDriftDetector _detector;
     private readonly IMediator _mediator;
+    private readonly IApplicationAccessService _accessService;
 
-    public DetectSchemaDriftCommandHandler(ISchemaDriftDetector detector, IMediator mediator)
+    public DetectSchemaDriftCommandHandler(
+        ISchemaDriftDetector detector,
+        IMediator mediator,
+        IApplicationAccessService accessService)
     {
         _detector = detector;
         _mediator = mediator;
+        _accessService = accessService;
     }
 
     public async Task<DriftReportDto> Handle(
         DetectSchemaDriftCommand request,
         CancellationToken cancellationToken)
     {
+        await _accessService.EnsureAccessibleConnectionAsync(request.ConnectionId, cancellationToken);
+
         await _detector.DetectDriftAsync(request.ConnectionId, cancellationToken);
         return await _mediator.Send(
             new Queries.GetDriftReportQuery(request.ConnectionId, request.RepositoryId),

@@ -32,15 +32,18 @@ public sealed class RegisterDatabaseConnectionCommandHandler
 {
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly IConnectionStringProtector _connectionStringProtector;
+    private readonly IApplicationAccessService _accessService;
     private readonly IAuditService _auditService;
 
     public RegisterDatabaseConnectionCommandHandler(
         IEnhancementHubDbContext dbContext,
         IConnectionStringProtector connectionStringProtector,
+        IApplicationAccessService accessService,
         IAuditService auditService)
     {
         _dbContext = dbContext;
         _connectionStringProtector = connectionStringProtector;
+        _accessService = accessService;
         _auditService = auditService;
     }
 
@@ -48,10 +51,9 @@ public sealed class RegisterDatabaseConnectionCommandHandler
         RegisterDatabaseConnectionCommand request,
         CancellationToken cancellationToken)
     {
-        var application = await _dbContext.Applications
-            .AsNoTracking()
-            .FirstOrDefaultAsync(a => a.Id == request.ApplicationId, cancellationToken)
-            ?? throw new NotFoundException(nameof(ApplicationEntity), request.ApplicationId);
+        var application = await _accessService.GetAccessibleApplicationAsync(
+            request.ApplicationId,
+            cancellationToken);
 
         var now = DateTime.UtcNow;
         var entity = new DatabaseConnection

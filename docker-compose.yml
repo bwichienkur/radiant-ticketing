@@ -75,6 +75,8 @@ services:
       Database__Provider: PostgreSQL
       ConnectionStrings__Default: Host=postgres;Port=5432;Database=enhancementhub;Username=enhancementhub;Password=enhancementhub
       OpenAI__ApiKey: ${OPENAI_API_KEY:-}
+      BackgroundJobs__Provider: Hangfire
+      BackgroundJobs__HangfireSchema: hangfire
     ports:
       - "5076:8080"
     depends_on:

@@ -1,12 +1,10 @@
 using System.Text.Json;
 using EnhancementHub.Application.Abstractions;
-using EnhancementHub.Application.Common.Exceptions;
 using EnhancementHub.Application.Features.SystemIntelligence.Dtos;
 using EnhancementHub.Domain.Entities;
 using EnhancementHub.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using ApplicationEntity = EnhancementHub.Domain.Entities.Application;
 
 namespace EnhancementHub.Application.Features.SystemIntelligence.Commands;
 
@@ -20,28 +18,25 @@ public sealed class GenerateRefactorPlanCommandHandler
     private readonly IRefactorPlanGenerator _planGenerator;
     private readonly IRefactorBlastRadiusService _blastRadiusService;
     private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IApplicationAccessService _accessService;
 
     public GenerateRefactorPlanCommandHandler(
         IRefactorPlanGenerator planGenerator,
         IRefactorBlastRadiusService blastRadiusService,
-        IEnhancementHubDbContext dbContext)
+        IEnhancementHubDbContext dbContext,
+        IApplicationAccessService accessService)
     {
         _planGenerator = planGenerator;
         _blastRadiusService = blastRadiusService;
         _dbContext = dbContext;
+        _accessService = accessService;
     }
 
     public async Task<RefactorPlanDetailDto> Handle(
         GenerateRefactorPlanCommand request,
         CancellationToken cancellationToken)
     {
-        var applicationExists = await _dbContext.Applications
-            .AnyAsync(a => a.Id == request.ApplicationId, cancellationToken);
-
-        if (!applicationExists)
-        {
-            throw new NotFoundException(nameof(ApplicationEntity), request.ApplicationId);
-        }
+        await _accessService.EnsureAccessibleApplicationAsync(request.ApplicationId, cancellationToken);
 
         var connection = await _dbContext.DatabaseConnections
             .AsNoTracking()

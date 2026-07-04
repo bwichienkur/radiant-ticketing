@@ -1,12 +1,15 @@
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Abstractions.Persistence;
 using EnhancementHub.Infrastructure.Background;
+using EnhancementHub.Infrastructure.Background.Executors;
 using EnhancementHub.Infrastructure.Persistence;
 using EnhancementHub.Infrastructure.Persistence.Repositories;
 using EnhancementHub.Infrastructure.Security;
 using EnhancementHub.Infrastructure.Services;
 using EnhancementHub.Infrastructure.Services.Notifications;
 using EnhancementHub.Infrastructure.Services.SystemIntelligence;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -205,14 +208,51 @@ public static class InfrastructureServiceExtensions
 
         if (registerBackgroundJobs)
         {
-            services.AddHostedService<RepositoryIndexingJob>();
-            services.AddHostedService<AiAnalysisJob>();
-            services.AddHostedService<ScheduledRepositoryRefreshJob>();
-            services.AddHostedService<DatabaseSchemaScanJob>();
-            services.AddHostedService<ApplicationDiscoveryJob>();
+            RegisterBackgroundJobs(services, configuration, connectionString, provider);
         }
 
         return services;
+    }
+
+    private static void RegisterBackgroundJobs(
+        IServiceCollection services,
+        IConfiguration configuration,
+        string connectionString,
+        DatabaseProvider provider)
+    {
+        services.AddScoped<RepositoryIndexingJobExecutor>();
+        services.AddScoped<AiAnalysisJobExecutor>();
+        services.AddScoped<ApplicationDiscoveryJobExecutor>();
+        services.AddScoped<DatabaseSchemaScanJobExecutor>();
+        services.AddScoped<ScheduledRepositoryRefreshJobExecutor>();
+
+        var jobProvider = configuration["BackgroundJobs:Provider"] ?? "Polling";
+        var useHangfire = jobProvider.Equals("Hangfire", StringComparison.OrdinalIgnoreCase)
+            && provider == DatabaseProvider.PostgreSql;
+
+        if (useHangfire)
+        {
+            services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UsePostgreSqlStorage(
+                    options => options.UseNpgsqlConnection(connectionString),
+                    new PostgreSqlStorageOptions
+                    {
+                        SchemaName = configuration["BackgroundJobs:HangfireSchema"] ?? "hangfire"
+                    }));
+
+            services.AddHangfireServer();
+            services.AddHostedService<HangfireRecurringJobInitializer>();
+            return;
+        }
+
+        services.AddHostedService<RepositoryIndexingJob>();
+        services.AddHostedService<AiAnalysisJob>();
+        services.AddHostedService<ScheduledRepositoryRefreshJob>();
+        services.AddHostedService<DatabaseSchemaScanJob>();
+        services.AddHostedService<ApplicationDiscoveryJob>();
     }
 
     private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy() =>
