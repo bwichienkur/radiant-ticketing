@@ -24,4 +24,23 @@ public sealed class AuditLogsController : ControllerBase
         [FromQuery] int limit = 100,
         CancellationToken cancellationToken = default) =>
         Ok(await _mediator.Send(new ListAuditLogsQuery(entityType, action, userId, from, to, limit), cancellationToken));
+
+    [HttpGet("export")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Export(
+        [FromQuery] string format = "csv",
+        [FromQuery] string? entityType = null,
+        [FromQuery] string? action = null,
+        [FromQuery] Guid? userId = null,
+        [FromQuery] DateTime? from = null,
+        [FromQuery] DateTime? to = null,
+        [FromQuery] int limit = 10000,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _mediator.Send(
+            new ExportAuditLogsQuery(format, entityType, action, userId, from, to, limit),
+            cancellationToken);
+
+        return File(result.Content, result.ContentType, result.FileName);
+    }
 }

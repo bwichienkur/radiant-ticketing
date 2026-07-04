@@ -4,39 +4,73 @@
     ViewData["Title"] = "Audit Log";
 }
 
-<div class="page-header">
-    <h1>Audit Log</h1>
-    <p>System activity and change history</p>
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+        <h1>Audit Log</h1>
+        <p>System activity and change history</p>
+    </div>
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="d-flex gap-2">
+            <a asp-page="./Index" asp-page-handler="Export" asp-route-format="csv"
+               asp-route-entityType="@Model.EntityType" asp-route-action="@Model.Action"
+               asp-route-from="@Model.From?.ToString("yyyy-MM-dd")" asp-route-to="@Model.To?.ToString("yyyy-MM-dd")"
+               class="btn btn-outline-primary btn-sm">Export CSV</a>
+            <a asp-page="./Index" asp-page-handler="Export" asp-route-format="json"
+               asp-route-entityType="@Model.EntityType" asp-route-action="@Model.Action"
+               asp-route-from="@Model.From?.ToString("yyyy-MM-dd")" asp-route-to="@Model.To?.ToString("yyyy-MM-dd")"
+               class="btn btn-outline-secondary btn-sm">Export JSON</a>
+        </div>
+    }
 </div>
 
 <div class="card-panel p-3 mb-3">
-    <form method="get" class="row g-2">
-        <div class="col-md-4">
-            <input class="form-control" name="EntityType" value="@Model.EntityType" placeholder="Entity type" />
+    <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Entity type</label>
+            <input class="form-control" name="EntityType" value="@Model.EntityType" placeholder="EnhancementRequest" />
         </div>
-        <div class="col-md-4">
-            <input class="form-control" name="Action" value="@Model.Action" placeholder="Action" />
+        <div class="col-md-3">
+            <label class="form-label small mb-1">Action</label>
+            <input class="form-control" name="Action" value="@Model.Action" placeholder="Approved" />
         </div>
-        <div class="col-md-4">
-            <button type="submit" class="btn btn-primary">Filter</button>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">From</label>
+            <input class="form-control" type="date" name="From" value="@Model.From?.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small mb-1">To</label>
+            <input class="form-control" type="date" name="To" value="@Model.To?.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
         </div>
     </form>
 </div>
 
-<div class="card-panel">
-    <table class="table table-hover table-enterprise mb-0">
-        <thead><tr><th>Time</th><th>Action</th><th>Entity</th><th>User</th><th>Details</th></tr></thead>
-        <tbody>
-        @foreach (var log in Model.Logs)
-        {
-            <tr>
-                <td class="small">@log.CreatedAt.ToString("g")</td>
-                <td>@log.Action</td>
-                <td>@log.EntityType</td>
-                <td>@(log.UserName ?? "—")</td>
-                <td class="small">@(log.Comments ?? "—")</td>
-            </tr>
-        }
-        </tbody>
-    </table>
-</div>
+@if (Model.Logs.Count == 0)
+{
+    <div class="card-panel p-4">
+        <p class="text-muted mb-0">No audit entries match the current filters.</p>
+    </div>
+}
+else
+{
+    <div class="card-panel">
+        <table class="table table-hover table-enterprise mb-0">
+            <thead><tr><th>Time (UTC)</th><th>Action</th><th>Entity</th><th>User</th><th>Details</th></tr></thead>
+            <tbody>
+            @foreach (var log in Model.Logs)
+            {
+                <tr>
+                    <td class="small">@log.CreatedAt.ToString("u")</td>
+                    <td>@log.Action</td>
+                    <td>@log.EntityType</td>
+                    <td>@(log.UserName ?? "—")</td>
+                    <td class="small">@(log.Comments ?? "—")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}

@@ -175,6 +175,12 @@
 - `GET /api/admin/authentication/status` and `POST /api/admin/jobs/{jobId}/retry`
 - System Map UX: empty states, loading indicator, type-grouped tabs
 
+## Horizon 2 continuation — Audit log export
+
+- CSV and JSON export with date range, entity type, and action filters
+- Admin-only export via `GET /api/auditlogs/export` and Audit page buttons
+- Export includes previous/new values and correlation IDs for compliance review
+
 ## Future enhancements
 
 - GitHub App webhook-driven automatic re-index on push
