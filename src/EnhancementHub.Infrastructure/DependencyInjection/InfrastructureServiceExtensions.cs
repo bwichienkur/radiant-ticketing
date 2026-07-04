@@ -153,6 +153,7 @@ public static class InfrastructureServiceExtensions
         services.AddSingleton<AiResponseValidator>();
 
         services.Configure<Options.AiOptions>(configuration.GetSection(Options.AiOptions.SectionName));
+        services.Configure<Options.RetentionOptions>(configuration.GetSection(Options.RetentionOptions.SectionName));
         services.PostConfigure<Options.AiOptions>(options =>
         {
             if (string.IsNullOrWhiteSpace(options.OpenAI.ApiKey))
@@ -194,6 +195,7 @@ public static class InfrastructureServiceExtensions
 
         services.AddScoped<IBackgroundJobStatusService, BackgroundJobStatusService>();
         services.AddSingleton<IAuthenticationConfigurationService, AuthenticationConfigurationService>();
+        services.AddScoped<IDataRetentionService, DataRetentionService>();
 
         services.AddHttpClient(OpenAiHttpClientName)
             .AddPolicyHandler(GetRetryPolicy());
@@ -289,6 +291,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<ApplicationDiscoveryJobExecutor>();
         services.AddScoped<DatabaseSchemaScanJobExecutor>();
         services.AddScoped<ScheduledRepositoryRefreshJobExecutor>();
+        services.AddScoped<DataRetentionJobExecutor>();
 
         var jobProvider = configuration["BackgroundJobs:Provider"] ?? "Polling";
         var useHangfire = ShouldUseHangfire(configuration, provider);
@@ -316,6 +319,7 @@ public static class InfrastructureServiceExtensions
         services.AddHostedService<ScheduledRepositoryRefreshJob>();
         services.AddHostedService<DatabaseSchemaScanJob>();
         services.AddHostedService<ApplicationDiscoveryJob>();
+        services.AddHostedService<DataRetentionJob>();
     }
 
     private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy() =>

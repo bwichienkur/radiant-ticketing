@@ -97,7 +97,7 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 
 ### 2.4 Compliance & audit
 - [x] Immutable audit log export (CSV/JSON) with date range filter
-- [ ] Data retention policies for AI prompt runs and attachments
+- [x] Data retention policies for AI prompt runs and attachments
 - [ ] SOC 2 readiness checklist mapping (control → feature)
 - [ ] Security whitepaper: auth, encryption at rest, agent model, AI data flow
 

@@ -51,6 +51,16 @@ public sealed class AdminController : ControllerBase
     public async Task<IActionResult> GetAuthenticationStatus(CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new GetAuthenticationConfigurationStatusQuery(), cancellationToken));
 
+    [HttpGet("retention/status")]
+    public async Task<IActionResult> GetDataRetentionStatus(CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetDataRetentionStatusQuery(), cancellationToken));
+
+    [HttpPost("retention/apply")]
+    public async Task<IActionResult> ApplyDataRetention(
+        [FromQuery] bool dryRun = false,
+        CancellationToken cancellationToken = default) =>
+        Ok(await _mediator.Send(new ApplyDataRetentionCommand(dryRun), cancellationToken));
+
     [HttpPut("ai-prompts/{id:guid}")]
     public async Task<IActionResult> UpdateAiPrompt(Guid id, [FromBody] UpdatePromptRequest request, CancellationToken cancellationToken)
     {

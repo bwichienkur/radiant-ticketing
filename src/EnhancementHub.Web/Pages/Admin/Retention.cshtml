@@ -1,0 +1,91 @@
+@page
+@model EnhancementHub.Web.Pages.Admin.RetentionModel
+@{
+    ViewData["Title"] = "Data Retention";
+    var status = Model.Status;
+}
+
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+        <h1>Data Retention</h1>
+        <p>Purge expired AI prompt runs and enhancement request attachments</p>
+    </div>
+    @if (status is not null)
+    {
+        <span class="badge @(status.Enabled ? "text-bg-success" : "text-bg-secondary") badge-status">
+            Scheduled job @(status.Enabled ? "enabled" : "disabled")
+        </span>
+    }
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-info">@Model.StatusMessage</div>
+}
+
+@if (status is null)
+{
+    <div class="card-panel p-4"><p class="text-muted mb-0">Unable to load retention status.</p></div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-md-4"><div class="stat-card"><div class="label">AI prompt runs retention</div><div class="value fs-4">@status.AiPromptRunsRetentionDays<span class="fs-6"> days</span></div></div></div>
+        <div class="col-md-4"><div class="stat-card"><div class="label">Attachments retention</div><div class="value fs-4">@status.AttachmentsRetentionDays<span class="fs-6"> days</span></div></div></div>
+        <div class="col-md-4"><div class="stat-card"><div class="label">Batch size</div><div class="value fs-4">@status.BatchSize</div></div></div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card-panel p-4 h-100">
+                <h2 class="h6">Eligible for purge</h2>
+                <dl class="row mb-0 small">
+                    <dt class="col-sm-6">AI prompt runs</dt>
+                    <dd class="col-sm-6">@status.EligibleAiPromptRunCount @(status.AiPromptRunsCutoffUtc is not null ? $"(before {status.AiPromptRunsCutoffUtc:u})" : "")</dd>
+                    <dt class="col-sm-6">Attachments</dt>
+                    <dd class="col-sm-6">@status.EligibleAttachmentCount @(status.AttachmentsCutoffUtc is not null ? $"(before {status.AttachmentsCutoffUtc:u})" : "")</dd>
+                </dl>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-panel p-4 h-100">
+                <h2 class="h6">Configuration</h2>
+                <p class="small text-muted mb-2">Set policies in <code>appsettings</code> under the <code>Retention</code> section:</p>
+                <pre class="small bg-dark text-light p-3 rounded mb-0">"Retention": {
+  "Enabled": false,
+  "AiPromptRunsDays": 365,
+  "AttachmentsDays": 180,
+  "BatchSize": 500
+}</pre>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2 flex-wrap">
+        <form method="post" asp-page-handler="Preview">
+            <button type="submit" class="btn btn-outline-primary">Preview purge</button>
+        </form>
+        <form method="post" asp-page-handler="Apply" onsubmit="return confirm('Permanently delete eligible records and attachment files?');">
+            <button type="submit" class="btn btn-danger">Apply retention now</button>
+        </form>
+    </div>
+
+    @if (Model.LastResult is not null)
+    {
+        <div class="card-panel p-4 mt-4">
+            <h2 class="h6">@(Model.LastResult.DryRun ? "Preview result" : "Last apply result")</h2>
+            <ul class="small mb-0">
+                <li>AI prompt runs: @Model.LastResult.AiPromptRunsDeleted</li>
+                <li>Retrieved context items: @Model.LastResult.RetrievedContextItemsDeleted</li>
+                <li>Attachments: @Model.LastResult.AttachmentsDeleted</li>
+                <li>Attachment files removed: @Model.LastResult.AttachmentFilesDeleted</li>
+                <li>Applied at: @Model.LastResult.AppliedAtUtc.ToString("u") UTC</li>
+            </ul>
+        </div>
+    }
+
+    <p class="text-muted small mt-3 mb-0">
+        When <code>Retention:Enabled</code> is true, the Worker runs a daily job to apply retention automatically.
+        Manual apply processes up to @status.BatchSize records per category per run.
+    </p>
+}
