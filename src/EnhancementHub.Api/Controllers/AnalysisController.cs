@@ -1,8 +1,10 @@
 using EnhancementHub.Application.Features.Analysis.Commands;
 using EnhancementHub.Application.Features.Analysis.Queries;
+using EnhancementHub.Api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace EnhancementHub.Api.Controllers;
 
@@ -20,10 +22,12 @@ public sealed class AnalysisController : ControllerBase
         Ok(await _mediator.Send(new GetEnhancementAnalysisQuery(requestId, version), cancellationToken));
 
     [HttpPost("{requestId:guid}/trigger")]
+    [EnableRateLimiting(RateLimitingExtensions.AiAnalysisPolicy)]
     public async Task<IActionResult> Trigger(Guid requestId, CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new TriggerAiAnalysisCommand(requestId), cancellationToken));
 
     [HttpPost("{requestId:guid}/reanalyze")]
+    [EnableRateLimiting(RateLimitingExtensions.AiAnalysisPolicy)]
     public async Task<IActionResult> Reanalyze(Guid requestId, CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new RequestReanalysisCommand(requestId), cancellationToken));
 }

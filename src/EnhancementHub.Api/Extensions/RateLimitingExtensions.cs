@@ -7,6 +7,7 @@ public static class RateLimitingExtensions
 {
     public const string LoginPolicy = "login";
     public const string UploadPolicy = "upload";
+    public const string AiAnalysisPolicy = "ai-analysis";
 
     public static IServiceCollection AddEnhancementHubRateLimiting(this IServiceCollection services)
     {
@@ -31,6 +32,15 @@ public static class RateLimitingExtensions
                     {
                         Window = TimeSpan.FromMinutes(1),
                         PermitLimit = 20,
+                        QueueLimit = 0
+                    }));
+            options.AddPolicy(AiAnalysisPolicy, httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    GetPartitionKey(httpContext, "ai-analysis"),
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        Window = TimeSpan.FromMinutes(1),
+                        PermitLimit = 5,
                         QueueLimit = 0
                     }));
         });

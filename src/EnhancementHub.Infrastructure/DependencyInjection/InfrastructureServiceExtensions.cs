@@ -151,6 +151,46 @@ public static class InfrastructureServiceExtensions
         services.AddSingleton<PromptSanitizer>();
         services.AddSingleton<AiResponseValidator>();
 
+        services.Configure<Options.AiOptions>(configuration.GetSection(Options.AiOptions.SectionName));
+        services.PostConfigure<Options.AiOptions>(options =>
+        {
+            if (string.IsNullOrWhiteSpace(options.OpenAI.ApiKey))
+            {
+                options.OpenAI.ApiKey = configuration["OpenAI:ApiKey"] ?? string.Empty;
+            }
+
+            if (string.IsNullOrWhiteSpace(options.OpenAI.BaseUrl))
+            {
+                options.OpenAI.BaseUrl = configuration["OpenAI:BaseUrl"] ?? "https://api.openai.com/v1/";
+            }
+
+            var legacyModel = configuration["OpenAI:Model"];
+            if (!string.IsNullOrWhiteSpace(legacyModel))
+            {
+                if (string.IsNullOrWhiteSpace(options.OpenAI.Models.EnhancementAnalysis))
+                {
+                    options.OpenAI.Models.EnhancementAnalysis = legacyModel;
+                }
+
+                if (string.IsNullOrWhiteSpace(options.OpenAI.Models.RefactorPlan))
+                {
+                    options.OpenAI.Models.RefactorPlan = legacyModel;
+                }
+            }
+        });
+
+        services.AddScoped<IPiiRedactionService, Services.Ai.PiiRedactionService>();
+        services.AddScoped<IAiUsageBudgetService, Services.Ai.AiUsageBudgetService>();
+        services.AddScoped<IChatCompletionService, Services.Ai.ChatCompletionService>();
+
+        services.AddScoped<IAiAnalysisService>(sp =>
+            new OpenAiAnalysisService(
+                sp.GetRequiredService<IChatCompletionService>(),
+                sp.GetRequiredService<PromptSanitizer>(),
+                sp.GetRequiredService<AiResponseValidator>(),
+                sp.GetRequiredService<IRiskScoringService>(),
+                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<OpenAiAnalysisService>>()));
+
         services.AddHttpClient(OpenAiHttpClientName)
             .AddPolicyHandler(GetRetryPolicy());
 
@@ -169,18 +209,6 @@ public static class InfrastructureServiceExtensions
         services.AddHttpClient(GitHubAppHttpClientName, client =>
         {
             client.BaseAddress = new Uri("https://api.github.com/");
-        });
-
-        services.AddScoped<IAiAnalysisService>(sp =>
-        {
-            var factory = sp.GetRequiredService<IHttpClientFactory>();
-            return new OpenAiAnalysisService(
-                factory.CreateClient(OpenAiHttpClientName),
-                configuration,
-                sp.GetRequiredService<PromptSanitizer>(),
-                sp.GetRequiredService<AiResponseValidator>(),
-                sp.GetRequiredService<IRiskScoringService>(),
-                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<OpenAiAnalysisService>>());
         });
 
         services.AddScoped<IExternalTicketExporter, GitHubTicketExporter>(sp =>

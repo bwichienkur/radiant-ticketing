@@ -83,11 +83,11 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 - [ ] Optional: API keys for service-to-service integrations
 
 ### 2.2 Enterprise AI (Phase 17)
-- [ ] Azure OpenAI provider alongside OpenAI
-- [ ] Configurable model per workflow step (classify, analyze, refactor)
-- [ ] Token/cost tracking per request (`AiPromptRun` aggregation dashboard)
-- [ ] PII redaction hook before prompt submission
-- [ ] Rate limits and daily budget caps per tenant/org
+- [x] Azure OpenAI provider alongside OpenAI
+- [x] Configurable model per workflow step (classify, analyze, refactor)
+- [x] Token/cost tracking per request (`AiPromptRun` aggregation dashboard)
+- [x] PII redaction hook before prompt submission
+- [x] Rate limits and daily budget caps per tenant/org
 
 ### 2.3 Job orchestration (Phase 18)
 - [x] Replace polling `BackgroundService` jobs with durable queue (Hangfire + PostgreSQL)

@@ -1,39 +1,29 @@
-using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Abstractions.Models;
-using Microsoft.Extensions.Configuration;
+using EnhancementHub.Domain.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace EnhancementHub.Infrastructure.Services;
 
 public sealed class OpenAiAnalysisService : IAiAnalysisService
 {
-    private readonly HttpClient _httpClient;
-    private readonly IConfiguration _configuration;
+    private readonly IChatCompletionService _chatCompletion;
     private readonly PromptSanitizer _promptSanitizer;
     private readonly AiResponseValidator _validator;
     private readonly IRiskScoringService _riskScoring;
     private readonly ILogger<OpenAiAnalysisService> _logger;
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = false
-    };
-
     public OpenAiAnalysisService(
-        HttpClient httpClient,
-        IConfiguration configuration,
+        IChatCompletionService chatCompletion,
         PromptSanitizer promptSanitizer,
         AiResponseValidator validator,
         IRiskScoringService riskScoring,
         ILogger<OpenAiAnalysisService> logger)
     {
-        _httpClient = httpClient;
-        _configuration = configuration;
+        _chatCompletion = chatCompletion;
         _promptSanitizer = promptSanitizer;
         _validator = validator;
         _riskScoring = riskScoring;
@@ -47,63 +37,41 @@ public sealed class OpenAiAnalysisService : IAiAnalysisService
         string? repositoryContext,
         CancellationToken cancellationToken = default)
     {
-        var apiKey = _configuration["OpenAI:ApiKey"];
-        if (string.IsNullOrWhiteSpace(apiKey))
+        if (!_chatCompletion.IsConfigured)
         {
-            _logger.LogInformation("OpenAI API key not configured; using deterministic mock analysis for {RequestId}", enhancementRequestId);
+            _logger.LogInformation(
+                "AI provider not configured; using deterministic mock analysis for {RequestId}",
+                enhancementRequestId);
             return CreateMockAnalysis(title, description);
         }
 
         var prompt = _promptSanitizer.BuildStructuredPrompt(title, description, repositoryContext);
-        var model = _configuration["OpenAI:Model"] ?? "gpt-4o-mini";
 
-        var requestBody = new
-        {
-            model,
-            response_format = new { type = "json_object" },
-            messages = new[]
+        var completion = await _chatCompletion.CompleteAsync(
+            new ChatCompletionRequest
             {
-                new
-                {
-                    role = "system",
-                    content = """
-                        You are a software architecture analyst. Return JSON with:
-                        summary (string), impactedAreas (string[]), recommendations (string[]),
-                        risks (string[]), estimatedEffortHours (number), modelUsed (string).
-                        """
-                },
-                new { role = "user", content = prompt }
-            }
-        };
+                WorkflowStep = AiWorkflowStep.EnhancementAnalysis,
+                SystemPrompt = """
+                    You are a software architecture analyst. Return JSON with:
+                    summary (string), impactedAreas (string[]), recommendations (string[]),
+                    risks (string[]), estimatedEffortHours (number), modelUsed (string).
+                    """,
+                UserPrompt = prompt
+            },
+            cancellationToken);
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions");
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-        request.Content = new StringContent(JsonSerializer.Serialize(requestBody, JsonOptions), Encoding.UTF8, "application/json");
-
-        using var response = await _httpClient.SendAsync(request, cancellationToken);
-        var responseJson = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            _logger.LogWarning("OpenAI request failed ({Status}): {Body}", response.StatusCode, responseJson);
-            return CreateMockAnalysis(title, description);
-        }
-
-        using var doc = JsonDocument.Parse(responseJson);
-        var content = doc.RootElement
-            .GetProperty("choices")[0]
-            .GetProperty("message")
-            .GetProperty("content")
-            .GetString();
-
-        if (!_validator.TryValidate(content ?? string.Empty, out var result, out var error))
+        if (!_validator.TryValidate(completion.Content, out var result, out var error))
         {
             _logger.LogWarning("AI response validation failed: {Error}", error);
             return CreateMockAnalysis(title, description);
         }
 
-        result!.ModelUsed = model;
+        result!.ModelUsed = completion.ModelUsed;
         result.IsMock = false;
+        result.PromptTokens = completion.PromptTokens;
+        result.CompletionTokens = completion.CompletionTokens;
+        result.TotalTokens = completion.TotalTokens;
+        result.EstimatedCostUsd = completion.EstimatedCostUsd;
         return result;
     }
 

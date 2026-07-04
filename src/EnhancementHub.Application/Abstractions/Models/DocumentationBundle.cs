@@ -19,6 +19,11 @@ public sealed class RefactorPlanResult
     public RiskLevel RiskLevel { get; set; }
     public double ConfidenceScore { get; set; }
     public bool GeneratedByAi { get; set; }
+    public string ModelUsed { get; set; } = string.Empty;
+    public int PromptTokens { get; set; }
+    public int CompletionTokens { get; set; }
+    public int TotalTokens { get; set; }
+    public decimal EstimatedCostUsd { get; set; }
 }
 
 public sealed class MigrationStepDto

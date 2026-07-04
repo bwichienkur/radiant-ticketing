@@ -149,6 +149,15 @@
 - Hangfire dashboard at `/hangfire` on Worker (Development)
 - Docker Compose Worker uses Hangfire by default
 
+## Phase 17 — Enterprise AI (complete)
+
+- Unified `IChatCompletionService` supporting OpenAI and Azure OpenAI
+- Per-workflow model/deployment config (`EnhancementAnalysis`, `RefactorPlan`)
+- Token and cost tracking on `AiPromptRun` with daily budget enforcement
+- PII redaction (email, phone, SSN, card patterns) before prompts
+- Admin AI usage report (`GET /api/admin/ai-usage`)
+- Rate limiting on manual AI analysis triggers (5/min)
+
 ## Future enhancements
 
 - GitHub App webhook-driven automatic re-index on push
