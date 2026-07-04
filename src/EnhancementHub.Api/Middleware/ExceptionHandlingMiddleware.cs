@@ -34,6 +34,10 @@ public sealed class ExceptionHandlingMiddleware
         {
             await WriteErrorAsync(context, HttpStatusCode.Forbidden, ex.Message);
         }
+        catch (AiBudgetExceededException ex)
+        {
+            await WriteErrorAsync(context, HttpStatusCode.TooManyRequests, ex.Message);
+        }
         catch (ValidationException ex)
         {
             await WriteErrorAsync(context, HttpStatusCode.BadRequest, string.Join("; ", ex.Errors.Select(e => e.ErrorMessage)));

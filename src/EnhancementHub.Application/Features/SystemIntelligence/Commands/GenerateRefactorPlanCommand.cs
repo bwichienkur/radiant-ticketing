@@ -85,6 +85,31 @@ public sealed class GenerateRefactorPlanCommandHandler
         _dbContext.RefactorPlans.Add(entity);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
+        if (plan.GeneratedByAi)
+        {
+            _dbContext.AiPromptRuns.Add(new AiPromptRun
+            {
+                Id = Guid.NewGuid(),
+                ApplicationId = request.ApplicationId,
+                WorkflowStep = AiWorkflowStep.RefactorPlan.ToString(),
+                PromptVersion = "v1",
+                ModelName = plan.ModelUsed,
+                SystemPrompt = "Refactor plan generation",
+                UserPrompt = request.Target,
+                StructuredResponse = JsonSerializer.Serialize(plan),
+                PromptTokens = plan.PromptTokens,
+                CompletionTokens = plan.CompletionTokens,
+                TotalTokens = plan.TotalTokens,
+                EstimatedCostUsd = plan.EstimatedCostUsd,
+                Status = AiRunStatus.Completed,
+                StartedAt = DateTime.UtcNow,
+                CompletedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            });
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+
         return new RefactorPlanDetailDto(
             entity.Id,
             entity.Title,

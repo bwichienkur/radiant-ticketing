@@ -1,34 +1,30 @@
-using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Abstractions.Models;
 using EnhancementHub.Domain.Enums;
-using EnhancementHub.Infrastructure.DependencyInjection;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace EnhancementHub.Infrastructure.Services.SystemIntelligence;
 
 public sealed class RefactorPlanGeneratorService : IRefactorPlanGenerator
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly IConfiguration _configuration;
-    private readonly ILogger<RefactorPlanGeneratorService> _logger;
-
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         PropertyNameCaseInsensitive = true
     };
 
+    private readonly IChatCompletionService _chatCompletion;
+    private readonly IPiiRedactionService _piiRedaction;
+    private readonly ILogger<RefactorPlanGeneratorService> _logger;
+
     public RefactorPlanGeneratorService(
-        IHttpClientFactory httpClientFactory,
-        IConfiguration configuration,
+        IChatCompletionService chatCompletion,
+        IPiiRedactionService piiRedaction,
         ILogger<RefactorPlanGeneratorService> logger)
     {
-        _httpClientFactory = httpClientFactory;
-        _configuration = configuration;
+        _chatCompletion = chatCompletion;
+        _piiRedaction = piiRedaction;
         _logger = logger;
     }
 
@@ -40,69 +36,43 @@ public sealed class RefactorPlanGeneratorService : IRefactorPlanGenerator
         RefactorBlastRadiusResult? blastRadius,
         CancellationToken cancellationToken = default)
     {
-        var apiKey = _configuration["OpenAI:ApiKey"];
-        if (string.IsNullOrWhiteSpace(apiKey))
+        if (!_chatCompletion.IsConfigured)
         {
-            _logger.LogInformation("OpenAI API key not configured; using deterministic refactor plan.");
+            _logger.LogInformation("AI provider not configured; using deterministic refactor plan.");
             return CreateMockPlan(targetDescription, blastRadius);
         }
 
-        var model = _configuration["OpenAI:Model"] ?? "gpt-4o-mini";
         var blastRadiusSummary = blastRadius is null
             ? "No blast radius analysis provided."
             : JsonSerializer.Serialize(blastRadius, JsonOptions);
 
-        var requestBody = new
-        {
-            model,
-            response_format = new { type = "json_object" },
-            messages = new[]
+        var userPrompt = _piiRedaction.Redact($"""
+            Target change: {targetDescription}
+            EnhancementRequestId: {enhancementRequestId}
+            DatabaseConnectionId: {databaseConnectionId}
+            RepositoryId: {repositoryId}
+            Blast radius: {blastRadiusSummary}
+            """);
+
+        var completion = await _chatCompletion.CompleteAsync(
+            new ChatCompletionRequest
             {
-                new
-                {
-                    role = "system",
-                    content = """
-                        You are a database migration architect. Return JSON with:
-                        title (string), targetDescription (string), riskLevel (Low|Medium|High|Critical),
-                        confidenceScore (number 0-1), migrationSteps (array of { order, description, sqlScript, rollbackScript }).
-                        """
-                },
-                new
-                {
-                    role = "user",
-                    content = $"""
-                        Target change: {targetDescription}
-                        EnhancementRequestId: {enhancementRequestId}
-                        DatabaseConnectionId: {databaseConnectionId}
-                        RepositoryId: {repositoryId}
-                        Blast radius: {blastRadiusSummary}
-                        """
-                }
-            }
-        };
+                WorkflowStep = AiWorkflowStep.RefactorPlan,
+                SystemPrompt = """
+                    You are a database migration architect. Return JSON with:
+                    title (string), targetDescription (string), riskLevel (Low|Medium|High|Critical),
+                    confidenceScore (number 0-1), migrationSteps (array of { order, description, sqlScript, rollbackScript }).
+                    """,
+                UserPrompt = userPrompt
+            },
+            cancellationToken);
 
-        var client = _httpClientFactory.CreateClient(InfrastructureServiceExtensions.OpenAiHttpClientName);
-        using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.openai.com/v1/chat/completions");
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
-        request.Content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
-
-        using var response = await client.SendAsync(request, cancellationToken);
-        response.EnsureSuccessStatusCode();
-
-        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
-        var content = doc.RootElement
-            .GetProperty("choices")[0]
-            .GetProperty("message")
-            .GetProperty("content")
-            .GetString();
-
-        if (string.IsNullOrWhiteSpace(content))
+        if (string.IsNullOrWhiteSpace(completion.Content))
         {
             return CreateMockPlan(targetDescription, blastRadius);
         }
 
-        var parsed = JsonSerializer.Deserialize<RefactorPlanAiResponse>(content, JsonOptions);
+        var parsed = JsonSerializer.Deserialize<RefactorPlanAiResponse>(completion.Content, JsonOptions);
         if (parsed is null)
         {
             return CreateMockPlan(targetDescription, blastRadius);
@@ -115,7 +85,12 @@ public sealed class RefactorPlanGeneratorService : IRefactorPlanGenerator
             MigrationSteps = parsed.MigrationSteps ?? [],
             RiskLevel = Enum.TryParse<RiskLevel>(parsed.RiskLevel, true, out var risk) ? risk : RiskLevel.Medium,
             ConfidenceScore = parsed.ConfidenceScore,
-            GeneratedByAi = true
+            GeneratedByAi = true,
+            ModelUsed = completion.ModelUsed,
+            PromptTokens = completion.PromptTokens,
+            CompletionTokens = completion.CompletionTokens,
+            TotalTokens = completion.TotalTokens,
+            EstimatedCostUsd = completion.EstimatedCostUsd
         };
     }
 
@@ -127,6 +102,7 @@ public sealed class RefactorPlanGeneratorService : IRefactorPlanGenerator
             RiskLevel = blastRadius?.TotalAffectedComponents > 5 ? RiskLevel.High : RiskLevel.Medium,
             ConfidenceScore = 0.6,
             GeneratedByAi = false,
+            ModelUsed = "deterministic-mock",
             MigrationSteps =
             [
                 new MigrationStepDto
