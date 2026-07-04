@@ -51,7 +51,7 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 
 ### 1.2 Demo-critical UX polish
 - [x] Enhancement request detail: analysis summary above the fold, risk badge, confidence score
-- [ ] System Map: default layout, loading states, empty-state guidance
+- [x] System Map: default layout, loading states, empty-state guidance
 - [ ] Onboarding wizard: progress persistence, clearer error recovery
 - [x] Dashboard: "requests awaiting analysis" and "high-risk pending approval" widgets
 
@@ -77,7 +77,7 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 
 ### 2.1 Identity & access (Phase 16)
 - [x] Azure Entra ID as documented default SSO path (`docs/ENTRA_ID_SSO.md`)
-- [ ] Group → role mapping validation in admin UI
+- [x] Group → role mapping validation in admin UI (`/Admin/Authentication`)
 - [x] Extend resource authorization to System Intelligence APIs (applications, connections, exports, drift reports)
 - [ ] Team membership management UI (invite, assign roles)
 - [ ] Optional: API keys for service-to-service integrations
@@ -93,7 +93,7 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 - [x] Replace polling `BackgroundService` jobs with durable queue (Hangfire + PostgreSQL)
 - [x] Idempotent job handlers with shared executors and `DisableConcurrentExecution` via Hangfire
 - [x] Job status API: indexing, discovery, schema scan, AI analysis (`GET /api/admin/jobs/status`)
-- [ ] Admin UI: queue depth, failed jobs, manual retry
+- [x] Admin UI: queue depth, failed jobs, manual retry (`/Admin/Jobs`)
 
 ### 2.4 Compliance & audit
 - [ ] Immutable audit log export (CSV/JSON) with date range filter

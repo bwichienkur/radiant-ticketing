@@ -1,0 +1,111 @@
+@page
+@model EnhancementHub.Web.Pages.Admin.AuthenticationModel
+@{
+    ViewData["Title"] = "Authentication";
+    var status = Model.Status;
+}
+
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+        <h1>Authentication</h1>
+        <p>OpenID Connect / Entra ID configuration and role mapping validation</p>
+    </div>
+    @if (status is not null)
+    {
+        if (status.OpenIdConnectEnabled)
+        {
+            <span class="badge @(status.IsProductionReady ? "text-bg-success" : "text-bg-warning") badge-status">
+                @(status.IsProductionReady ? "Production ready" : "Needs attention")
+            </span>
+        }
+        else
+        {
+            <span class="badge text-bg-secondary badge-status">Local auth</span>
+        }
+    }
+</div>
+
+@if (status is null)
+{
+    <div class="card-panel p-4"><p class="text-muted mb-0">Unable to load authentication configuration.</p></div>
+}
+else
+{
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card-panel p-4 h-100">
+                <h2 class="h5 mb-3">OpenID Connect</h2>
+                <dl class="row mb-0 small">
+                    <dt class="col-sm-4">Enabled</dt>
+                    <dd class="col-sm-8">@(status.OpenIdConnectEnabled ? "Yes" : "No")</dd>
+                    <dt class="col-sm-4">Authority</dt>
+                    <dd class="col-sm-8">@(status.Authority ?? "—")</dd>
+                    <dt class="col-sm-4">Client ID</dt>
+                    <dd class="col-sm-8">@(status.ClientId ?? "—")</dd>
+                    <dt class="col-sm-4">Client secret</dt>
+                    <dd class="col-sm-8">@(status.ClientSecretConfigured ? "Configured" : "Missing")</dd>
+                    <dt class="col-sm-4">Default role</dt>
+                    <dd class="col-sm-8">@(status.DefaultRole ?? "—")</dd>
+                    <dt class="col-sm-4">Scopes</dt>
+                    <dd class="col-sm-8">@string.Join(", ", status.Scopes)</dd>
+                </dl>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card-panel p-4 h-100">
+                <h2 class="h5 mb-3">Validation</h2>
+                @if (status.Issues.Count == 0)
+                {
+                    <p class="text-success mb-0">No configuration issues detected.</p>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var issue in status.Issues)
+                        {
+                            var css = issue.Severity switch
+                            {
+                                "Error" => "list-group-item-danger",
+                                "Warning" => "list-group-item-warning",
+                                _ => "list-group-item-light"
+                            };
+                            <li class="list-group-item @css px-0">
+                                <strong>@issue.Severity:</strong> @issue.Message
+                            </li>
+                        }
+                    </ul>
+                }
+                <p class="small text-muted mt-3 mb-0">
+                    See <code>docs/ENTRA_ID_SSO.md</code> for Entra app registration steps.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-panel">
+        <div class="card-header px-0">Role mappings</div>
+        @if (status.RoleMappings.Count == 0)
+        {
+            <p class="text-muted mb-0 p-3">No role mappings configured. Users receive the default role when SSO is enabled.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-enterprise mb-0">
+                    <thead><tr><th>Entra group / role ID</th><th>Application role</th><th>Valid role</th><th>GUID format</th></tr></thead>
+                    <tbody>
+                    @foreach (var mapping in status.RoleMappings)
+                    {
+                        <tr>
+                            <td><code>@mapping.Source</code></td>
+                            <td>@mapping.TargetRole</td>
+                            <td>@(mapping.IsValidTargetRole ? "✓" : "✗")</td>
+                            <td>@(mapping.IsGuidFormat ? "✓" : "—")</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+}

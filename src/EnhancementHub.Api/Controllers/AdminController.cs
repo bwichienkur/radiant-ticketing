@@ -1,4 +1,5 @@
 using EnhancementHub.Application.Admin;
+using EnhancementHub.Application.Features.Admin.Commands;
 using EnhancementHub.Application.Features.Admin.Queries;
 using EnhancementHub.Application.Features.Reporting.Queries;
 using MediatR;
@@ -38,6 +39,17 @@ public sealed class AdminController : ControllerBase
     [HttpGet("jobs/status")]
     public async Task<IActionResult> GetBackgroundJobsStatus(CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new GetBackgroundJobsStatusQuery(), cancellationToken));
+
+    [HttpPost("jobs/{jobId}/retry")]
+    public async Task<IActionResult> RetryBackgroundJob(string jobId, CancellationToken cancellationToken)
+    {
+        var success = await _mediator.Send(new RetryBackgroundJobCommand(jobId), cancellationToken);
+        return success ? NoContent() : NotFound();
+    }
+
+    [HttpGet("authentication/status")]
+    public async Task<IActionResult> GetAuthenticationStatus(CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetAuthenticationConfigurationStatusQuery(), cancellationToken));
 
     [HttpPut("ai-prompts/{id:guid}")]
     public async Task<IActionResult> UpdateAiPrompt(Guid id, [FromBody] UpdatePromptRequest request, CancellationToken cancellationToken)

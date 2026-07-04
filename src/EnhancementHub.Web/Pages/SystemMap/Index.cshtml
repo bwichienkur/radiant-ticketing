@@ -2,71 +2,178 @@
 @model EnhancementHub.Web.Pages.SystemMap.IndexModel
 @{
     ViewData["Title"] = "System Map";
+    var nodesByType = Model.Map?.Nodes
+        .GroupBy(n => n.Type)
+        .OrderBy(g => g.Key)
+        .ToList();
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
     <div>
-        <h1 class="h3 mb-1">System Map</h1>
-        <p class="text-muted mb-0">Code ↔ database relationship graph across applications.</p>
+        <h1>System Map</h1>
+        <p>Code ↔ database relationship graph across applications</p>
     </div>
     @if (Model.SelectedApplicationId.HasValue)
     {
         <form method="post" asp-page-handler="Build">
             <input type="hidden" name="applicationId" value="@Model.SelectedApplicationId" />
-            <button class="btn btn-primary">Rebuild graph</button>
+            <button class="btn btn-primary" @(Model.IsBuilding ? "disabled" : null)>
+                @(Model.IsBuilding ? "Rebuilding…" : "Rebuild graph")
+            </button>
         </form>
     }
 </div>
 
-<form method="get" class="row g-3 mb-4">
-    <div class="col-md-6">
-        <label class="form-label">Application</label>
-        <select name="applicationId" class="form-select" onchange="this.form.submit()">
-            <option value="">Select application...</option>
-            @foreach (var app in Model.Applications)
-            {
-                <option value="@app.Id" selected="@(Model.SelectedApplicationId == app.Id)">@app.Name</option>
-            }
-        </select>
-    </div>
-</form>
-
-@if (Model.Map is not null)
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
 {
-    <div class="row g-3 mb-3">
-        <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Nodes</div><div class="h4 mb-0">@Model.Map.Nodes.Count</div></div></div></div>
-        <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Edges</div><div class="h4 mb-0">@Model.Map.Edges.Count</div></div></div></div>
-        <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">Tables</div><div class="h4 mb-0">@Model.Map.Nodes.Count(n => n.Type == "Table")</div></div></div></div>
-        <div class="col-md-3"><div class="card"><div class="card-body"><div class="text-muted small">APIs</div><div class="h4 mb-0">@Model.Map.Nodes.Count(n => n.Type == "ApiEndpoint")</div></div></div></div>
-    </div>
+    <div class="alert alert-success">@Model.StatusMessage</div>
+}
 
-    <div class="card mb-4">
-        <div class="card-header">Graph nodes</div>
-        <div class="table-responsive">
-            <table class="table table-sm mb-0">
-                <thead><tr><th>Label</th><th>Type</th><th>Detail</th></tr></thead>
-                <tbody>
-                @foreach (var node in Model.Map.Nodes.Take(100))
-                {
-                    <tr><td>@node.Label</td><td><span class="badge bg-secondary">@node.Type</span></td><td class="text-muted small">@node.Detail</td></tr>
-                }
-                </tbody>
-            </table>
-        </div>
+@if (Model.Applications.Count == 0)
+{
+    <div class="card-panel p-4 text-center">
+        <h2 class="h5">No applications yet</h2>
+        <p class="text-muted mb-3">Register an application and run discovery before building a system map.</p>
+        <a asp-page="/Onboarding/Wizard" class="btn btn-primary">Start onboarding wizard</a>
     </div>
+}
+else
+{
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-6">
+            <label class="form-label">Application</label>
+            <select name="applicationId" class="form-select" onchange="this.form.submit()">
+                @foreach (var app in Model.Applications)
+                {
+                    <option value="@app.Id" selected="@(Model.SelectedApplicationId == app.Id)">@app.Name</option>
+                }
+            </select>
+        </div>
+    </form>
 
-    <div class="card">
-        <div class="card-header">Relationships</div>
-        <div class="table-responsive">
-            <table class="table table-sm mb-0">
-                <thead><tr><th>From</th><th>To</th><th>Link</th></tr></thead>
-                <tbody>
-                @foreach (var edge in Model.Map.Edges.Take(100))
-                {
-                    <tr><td>@edge.FromId</td><td>@edge.ToId</td><td>@edge.Label</td></tr>
-                }
-                </tbody>
-            </table>
+    @if (Model.IsLoading)
+    {
+        <div class="card-panel p-4 mb-4">
+            <div class="d-flex align-items-center gap-2">
+                <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
+                <span>Loading system map…</span>
+            </div>
         </div>
-    </div>
+    }
+    else if (Model.Map is null || Model.Map.Nodes.Count == 0)
+    {
+        <div class="card-panel p-4 text-center">
+            <h2 class="h5">No graph data yet</h2>
+            <p class="text-muted mb-3">
+                Index repositories and scan database connections for
+                <strong>@(Model.Map?.ApplicationName ?? "this application")</strong>, then rebuild the graph.
+            </p>
+            @if (Model.SelectedApplicationId.HasValue)
+            {
+                <form method="post" asp-page-handler="Build" class="d-inline">
+                    <input type="hidden" name="applicationId" value="@Model.SelectedApplicationId" />
+                    <button type="submit" class="btn btn-primary">Build system graph</button>
+                </form>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-md-3"><div class="stat-card"><div class="label">Nodes</div><div class="value">@Model.Map.Nodes.Count</div></div></div>
+            <div class="col-md-3"><div class="stat-card"><div class="label">Edges</div><div class="value">@Model.Map.Edges.Count</div></div></div>
+            <div class="col-md-3"><div class="stat-card"><div class="label">Tables</div><div class="value">@Model.Map.Nodes.Count(n => n.Type == "Table")</div></div></div>
+            <div class="col-md-3"><div class="stat-card"><div class="label">APIs</div><div class="value">@Model.Map.Nodes.Count(n => n.Type == "ApiEndpoint")</div></div></div>
+        </div>
+
+        @if (Model.Map.BuiltAt.HasValue)
+        {
+            <p class="text-muted small">Graph built @Model.Map.BuiltAt.Value.ToString("g") UTC</p>
+        }
+
+        <ul class="nav nav-tabs mb-3" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-overview" type="button">Overview</button></li>
+            @if (nodesByType is not null)
+            {
+                @foreach (var group in nodesByType)
+                {
+                    <li class="nav-item">
+                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-@group.Key.Replace(" ", "-")" type="button">
+                            @group.Key (@group.Count())
+                        </button>
+                    </li>
+                }
+            }
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-edges" type="button">Relationships (@Model.Map.Edges.Count)</button></li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="tab-overview">
+                <div class="card-panel">
+                    <p class="mb-3">The system map links indexed code artifacts to database tables and API endpoints. Use the type tabs to explore each category.</p>
+                    @if (nodesByType is not null)
+                    {
+                        <div class="row g-2">
+                            @foreach (var group in nodesByType)
+                            {
+                                <div class="col-md-4">
+                                    <div class="stat-card">
+                                        <div class="label">@group.Key</div>
+                                        <div class="value fs-4">@group.Count()</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+
+            @if (nodesByType is not null)
+            {
+                @foreach (var group in nodesByType)
+                {
+                    var tabId = $"tab-{group.Key.Replace(" ", "-")}";
+                    <div class="tab-pane fade" id="@tabId">
+                        <div class="card-panel">
+                            <div class="table-responsive">
+                                <table class="table table-sm table-enterprise mb-0">
+                                    <thead><tr><th>Label</th><th>Detail</th></tr></thead>
+                                    <tbody>
+                                    @foreach (var node in group.OrderBy(n => n.Label).Take(200))
+                                    {
+                                        <tr><td>@node.Label</td><td class="text-muted small">@(node.Detail ?? "—")</td></tr>
+                                    }
+                                    </tbody>
+                                </table>
+                            </div>
+                            @if (group.Count() > 200)
+                            {
+                                <p class="small text-muted mb-0 mt-2">Showing first 200 of @group.Count() nodes.</p>
+                            }
+                        </div>
+                    </div>
+                }
+            }
+
+            <div class="tab-pane fade" id="tab-edges">
+                <div class="card-panel">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-enterprise mb-0">
+                            <thead><tr><th>From</th><th>To</th><th>Link</th></tr></thead>
+                            <tbody>
+                            @foreach (var edge in Model.Map.Edges.OrderBy(e => e.Label).Take(200))
+                            {
+                                <tr><td class="small">@edge.FromId</td><td class="small">@edge.ToId</td><td>@edge.Label</td></tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                    @if (Model.Map.Edges.Count > 200)
+                    {
+                        <p class="small text-muted mb-0 mt-2">Showing first 200 of @Model.Map.Edges.Count relationships.</p>
+                    }
+                </div>
+            </div>
+        </div>
+    }
 }
