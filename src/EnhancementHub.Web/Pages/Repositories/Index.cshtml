@@ -1,0 +1,36 @@
+@page
+@model EnhancementHub.Web.Pages.Repositories.IndexModel
+@{
+    ViewData["Title"] = "Repositories";
+}
+
+<div class="page-header">
+    <h1>Repositories</h1>
+    <p>Source repository indexing status</p>
+</div>
+
+<div class="card-panel">
+    <table class="table table-hover table-enterprise mb-0">
+        <thead>
+            <tr><th>Name</th><th>Application</th><th>URL</th><th>Status</th><th>Last Indexed</th><th></th></tr>
+        </thead>
+        <tbody>
+        @foreach (var repo in Model.Repositories)
+        {
+            <tr>
+                <td>@repo.Name</td>
+                <td>@(repo.ApplicationName ?? "—")</td>
+                <td class="small text-truncate" style="max-width:200px">@repo.Url</td>
+                <td><span class="badge text-bg-secondary">@repo.IndexingStatus</span></td>
+                <td>@(repo.LastIndexedAt?.ToString("g") ?? "—")</td>
+                <td>
+                    <form method="post" asp-page-handler="Trigger" class="d-inline">
+                        <input type="hidden" name="id" value="@repo.Id" />
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Re-index</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

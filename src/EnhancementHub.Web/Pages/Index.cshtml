@@ -1,0 +1,40 @@
+@page
+@model EnhancementHub.Web.Pages.IndexModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <div>
+        <h1>Dashboard</h1>
+        <p>Enhancement request pipeline overview</p>
+    </div>
+    <a asp-page="/EnhancementRequests/Create" class="btn btn-primary">New Request</a>
+</div>
+
+@if (Model.Report is not null)
+{
+    <div class="row g-3 mb-4">
+        <div class="col-md-3"><div class="stat-card"><div class="label">Total Requests</div><div class="value">@Model.Report.TotalRequests</div></div></div>
+        <div class="col-md-3"><div class="stat-card"><div class="label">Pending Approval</div><div class="value text-warning">@Model.Report.PendingApprovalCount</div></div></div>
+        <div class="col-md-3"><div class="stat-card"><div class="label">High Risk</div><div class="value text-danger">@Model.Report.HighRiskCount</div></div></div>
+        <div class="col-md-3"><div class="stat-card"><div class="label">Ready for Dev</div><div class="value text-success">@Model.Report.ReadyForDevelopmentCount</div></div></div>
+    </div>
+    <div class="row g-3">
+        <div class="col-md-4"><div class="stat-card"><div class="label">Critical Risk</div><div class="value">@Model.Report.CriticalRiskCount</div></div></div>
+        <div class="col-md-4"><div class="stat-card"><div class="label">Avg Approval Time</div><div class="value fs-4">@(Model.Report.AverageApprovalTimeHours?.ToString("F1") ?? "—")<span class="fs-6"> hrs</span></div></div></div>
+        <div class="col-md-4"><div class="stat-card"><div class="label">Statuses Tracked</div><div class="value fs-4">@Model.Report.RequestsByStatus.Count</div></div></div>
+    </div>
+}
+
+<button class="btn btn-outline-secondary btn-sm theme-toggle" type="button" onclick="toggleTheme()">Toggle theme</button>
+
+@section Scripts {
+<script>
+function toggleTheme() {
+    const html = document.documentElement;
+    const next = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-bs-theme', next);
+}
+</script>
+}

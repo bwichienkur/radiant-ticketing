@@ -1,0 +1,29 @@
+@page
+@model EnhancementHub.Web.Pages.Account.LoginModel
+@{
+    ViewData["Title"] = "Sign In";
+    Layout = "_Layout";
+}
+
+<div class="login-card card-panel p-4">
+    <h1 class="h4 mb-1">Sign in to EnhancementHub</h1>
+    <p class="text-muted small mb-4">Use your enterprise credentials</p>
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    <form method="post">
+        <div class="mb-3">
+            <label class="form-label" asp-for="Email">Email</label>
+            <input class="form-control" asp-for="Email" autocomplete="username" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label" asp-for="Password">Password</label>
+            <input class="form-control" asp-for="Password" type="password" autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Sign in</button>
+    </form>
+    <p class="text-muted small mt-3 mb-0">Dev: admin@enhancementhub.dev / password123</p>
+</div>

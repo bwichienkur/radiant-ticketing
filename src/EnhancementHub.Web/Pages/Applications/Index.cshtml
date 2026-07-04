@@ -1,0 +1,27 @@
+@page
+@model EnhancementHub.Web.Pages.Applications.IndexModel
+@{
+    ViewData["Title"] = "Applications";
+}
+
+<div class="page-header">
+    <h1>Applications</h1>
+    <p>Registered enterprise applications</p>
+</div>
+
+<div class="card-panel">
+    <table class="table table-hover table-enterprise mb-0">
+        <thead><tr><th>Name</th><th>Domain</th><th>Repositories</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var app in Model.Applications)
+        {
+            <tr>
+                <td>@app.Name</td>
+                <td>@(app.BusinessDomain ?? "—")</td>
+                <td>@app.RepositoryCount</td>
+                <td><a asp-page="Details" asp-route-id="@app.Id" class="btn btn-sm btn-outline-primary">Profile</a></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

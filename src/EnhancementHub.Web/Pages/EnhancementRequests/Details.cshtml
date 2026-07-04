@@ -1,0 +1,173 @@
+@page "{id:guid}"
+@model EnhancementHub.Web.Pages.EnhancementRequests.DetailsModel
+@{
+    ViewData["Title"] = Model.Detail?.Title ?? "Request Details";
+    var r = Model.Detail!;
+    var analysis = Model.Analysis;
+}
+
+<div class="page-header d-flex justify-content-between align-items-start">
+    <div>
+        <h1>@r.Title</h1>
+        <p>
+            <span class="badge text-bg-secondary badge-status">@r.Status</span>
+            <span class="text-muted ms-2">Submitted by @r.SubmittedByUserName on @r.CreatedAt.ToString("g")</span>
+        </p>
+    </div>
+    <a asp-page="Approve" class="btn btn-outline-primary">Approval Queue</a>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card-panel p-4 mb-4">
+            <div class="detail-section">
+                <h3>Original Ask</h3>
+                <p class="mb-2"><strong>Business description</strong></p>
+                <p>@r.BusinessDescription</p>
+                <p class="mb-2"><strong>Desired outcome</strong></p>
+                <p class="mb-0">@r.DesiredOutcome</p>
+            </div>
+            @if (!string.IsNullOrWhiteSpace(r.SupportingNotes))
+            {
+                <div class="detail-section">
+                    <h3>Supporting Notes</h3>
+                    <p class="mb-0">@r.SupportingNotes</p>
+                </div>
+            }
+        </div>
+
+        @if (analysis is not null)
+        {
+            <div class="card-panel p-4 mb-4">
+                <div class="detail-section">
+                    <h3>AI Summary</h3>
+                    <p>@(analysis.FeatureSummary ?? "—")</p>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="label">Risk</div>
+                            <div class="value fs-4">@analysis.RiskLevel</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="label">Confidence</div>
+                            <div class="value fs-4">@($"{analysis.ConfidenceScore:P0}")</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stat-card">
+                            <div class="label">Clarification</div>
+                            <div class="value fs-4">@(analysis.NeedsClarification ? "Needed" : "No")</div>
+                        </div>
+                    </div>
+                </div>
+                @if (!string.IsNullOrWhiteSpace(analysis.RiskExplanation))
+                {
+                    <div class="detail-section mt-3">
+                        <h3>Risk Explanation</h3>
+                        <p class="mb-0">@analysis.RiskExplanation</p>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(analysis.TechnicalRequirements))
+                {
+                    <div class="detail-section">
+                        <h3>Technical Requirements</h3>
+                        <pre class="mb-0 small">@analysis.TechnicalRequirements</pre>
+                    </div>
+                }
+                @if (!string.IsNullOrWhiteSpace(analysis.TestingPlan))
+                {
+                    <div class="detail-section">
+                        <h3>Testing Plan</h3>
+                        <p class="mb-0">@analysis.TestingPlan</p>
+                    </div>
+                }
+                @if (analysis.AffectedApplications.Count > 0)
+                {
+                    <div class="detail-section">
+                        <h3>Affected Applications</h3>
+                        <ul class="mb-0">@foreach (var a in analysis.AffectedApplications) { <li>@(a.ApplicationName ?? a.ApplicationId.ToString())</li> }</ul>
+                    </div>
+                }
+                @if (analysis.DatabaseChangeRecommendations.Count > 0)
+                {
+                    <div class="detail-section">
+                        <h3>Database Changes</h3>
+                        <table class="table table-sm">
+                            <thead><tr><th>Table</th><th>Type</th><th>Description</th></tr></thead>
+                            <tbody>
+                            @foreach (var d in analysis.DatabaseChangeRecommendations)
+                            {
+                                <tr><td>@d.TableName</td><td>@d.ChangeType</td><td>@d.Description</td></tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                @if (analysis.ApiChangeRecommendations.Count > 0)
+                {
+                    <div class="detail-section">
+                        <h3>API Changes</h3>
+                        <table class="table table-sm">
+                            <thead><tr><th>Endpoint</th><th>Type</th><th>Description</th></tr></thead>
+                            <tbody>
+                            @foreach (var a in analysis.ApiChangeRecommendations)
+                            {
+                                <tr><td>@a.Endpoint</td><td>@a.ChangeType</td><td>@a.Description</td></tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card-panel p-3 mb-4">
+            <div class="card-header px-0">Approval History</div>
+            <div class="card-body px-0">
+                @if (Model.ApprovalHistory.Count == 0)
+                {
+                    <p class="text-muted small mb-0">No approval actions yet.</p>
+                }
+                else
+                {
+                    <ul class="list-group list-group-flush">
+                    @foreach (var action in Model.ApprovalHistory)
+                    {
+                        <li class="list-group-item px-0">
+                            <strong>@action.ActionType</strong> by @action.UserDisplayName<br />
+                            <span class="text-muted small">@action.CreatedAt.ToString("g")</span>
+                            @if (!string.IsNullOrWhiteSpace(action.Comments)) { <p class="small mb-0 mt-1">@action.Comments</p> }
+                        </li>
+                    }
+                    </ul>
+                }
+            </div>
+        </div>
+
+        <div class="card-panel p-3">
+            <div class="card-header px-0">Comments</div>
+            <div class="card-body px-0">
+                @if (r.Comments.Count == 0)
+                {
+                    <p class="text-muted small mb-0">No comments.</p>
+                }
+                else
+                {
+                    @foreach (var c in r.Comments)
+                    {
+                        <div class="border-bottom py-2">
+                            <strong>@c.UserDisplayName</strong>
+                            @if (c.IsInternal) { <span class="badge text-bg-warning">Internal</span> }
+                            <p class="small mb-0">@c.Content</p>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

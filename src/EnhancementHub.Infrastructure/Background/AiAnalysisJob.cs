@@ -1,0 +1,167 @@
+using System.Text.Json;
+using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Domain.Entities;
+using EnhancementHub.Domain.Enums;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+
+namespace EnhancementHub.Infrastructure.Background;
+
+public sealed class AiAnalysisJob : BackgroundService
+{
+    private readonly IServiceScopeFactory _scopeFactory;
+    private readonly ILogger<AiAnalysisJob> _logger;
+    private readonly TimeSpan _pollInterval = TimeSpan.FromMinutes(2);
+
+    public AiAnalysisJob(IServiceScopeFactory scopeFactory, ILogger<AiAnalysisJob> logger)
+    {
+        _scopeFactory = scopeFactory;
+        _logger = logger;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        _logger.LogInformation("AI analysis job started.");
+
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                using var scope = _scopeFactory.CreateScope();
+                var dbContext = scope.ServiceProvider.GetRequiredService<IEnhancementHubDbContext>();
+                var aiService = scope.ServiceProvider.GetRequiredService<IAiAnalysisService>();
+                var riskScoring = scope.ServiceProvider.GetRequiredService<IRiskScoringService>();
+                var audit = scope.ServiceProvider.GetRequiredService<IAuditService>();
+
+                var pending = await dbContext.EnhancementRequests
+                    .Include(r => r.TargetApplication)
+                    .ThenInclude(a => a!.Profiles)
+                    .Where(r => r.Status == EnhancementRequestStatus.Submitted
+                        || r.Status == EnhancementRequestStatus.AiAnalyzing)
+                    .Take(5)
+                    .ToListAsync(stoppingToken);
+
+                foreach (var request in pending)
+                {
+                    await ProcessRequestAsync(dbContext, aiService, riskScoring, audit, request, stoppingToken);
+                }
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                _logger.LogError(ex, "AI analysis job iteration failed.");
+            }
+
+            await Task.Delay(_pollInterval, stoppingToken);
+        }
+    }
+
+    private async Task ProcessRequestAsync(
+        IEnhancementHubDbContext dbContext,
+        IAiAnalysisService aiService,
+        IRiskScoringService riskScoring,
+        IAuditService audit,
+        EnhancementRequest request,
+        CancellationToken cancellationToken)
+    {
+        request.Status = EnhancementRequestStatus.AiAnalyzing;
+        request.UpdatedAt = DateTime.UtcNow;
+
+        var latestVersion = await dbContext.EnhancementAnalyses
+            .Where(a => a.EnhancementRequestId == request.Id)
+            .Select(a => (int?)a.Version)
+            .MaxAsync(cancellationToken) ?? 0;
+
+        var analysis = new EnhancementAnalysis
+        {
+            Id = Guid.NewGuid(),
+            EnhancementRequestId = request.Id,
+            Version = latestVersion + 1,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        dbContext.EnhancementAnalyses.Add(analysis);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            var repositoryContext = request.TargetApplication?.Profiles.FirstOrDefault()?.KeyComponents;
+            var description = $"{request.BusinessDescription}\n\nDesired outcome: {request.DesiredOutcome}";
+            var result = await aiService.AnalyzeEnhancementAsync(
+                request.Id,
+                request.Title,
+                description,
+                repositoryContext,
+                cancellationToken);
+
+            var riskScore = riskScoring.CalculateRiskScore(result, null);
+            analysis.FeatureSummary = result.Summary;
+            analysis.BusinessRequirement = request.BusinessDescription;
+            analysis.TechnicalRequirements = string.Join(Environment.NewLine, result.Recommendations);
+            analysis.RiskLevel = riskScoring.MapToRiskLevel(riskScore);
+            analysis.RiskExplanation = string.Join(Environment.NewLine, result.Risks);
+            analysis.TestingPlan = "Validate impacted areas with automated regression and integration tests.";
+            analysis.ConfidenceScore = result.IsMock ? 0.6 : 0.85;
+            analysis.NeedsClarification = result.Risks.Any(r => r.Contains("clarification", StringComparison.OrdinalIgnoreCase));
+            analysis.UpdatedAt = DateTime.UtcNow;
+
+            foreach (var area in result.ImpactedAreas)
+            {
+                dbContext.AnalysisFindings.Add(new AnalysisFinding
+                {
+                    Id = Guid.NewGuid(),
+                    EnhancementAnalysisId = analysis.Id,
+                    Category = "Impact",
+                    Title = area,
+                    Description = area,
+                    ConfidenceScore = analysis.ConfidenceScore,
+                    IsAiSuggested = true,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                });
+            }
+
+            dbContext.RiskAssessments.Add(new RiskAssessment
+            {
+                Id = Guid.NewGuid(),
+                EnhancementAnalysisId = analysis.Id,
+                RiskLevel = analysis.RiskLevel,
+                Explanation = analysis.RiskExplanation,
+                ConfidenceScore = analysis.ConfidenceScore,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            });
+
+            dbContext.AiPromptRuns.Add(new AiPromptRun
+            {
+                Id = Guid.NewGuid(),
+                EnhancementRequestId = request.Id,
+                EnhancementAnalysisId = analysis.Id,
+                PromptVersion = "v1",
+                ModelName = result.ModelUsed,
+                SystemPrompt = "Enhancement analysis",
+                UserPrompt = request.Title,
+                StructuredResponse = JsonSerializer.Serialize(result),
+                Status = AiRunStatus.Completed,
+                StartedAt = DateTime.UtcNow,
+                CompletedAt = DateTime.UtcNow,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            });
+
+            request.Status = EnhancementRequestStatus.PendingApproval;
+            request.UpdatedAt = DateTime.UtcNow;
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await audit.LogAsync("EnhancementAnalyzed", nameof(EnhancementRequest), request.Id, result.Summary, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            analysis.AmbiguityNotes = ex.Message;
+            request.Status = EnhancementRequestStatus.Submitted;
+            request.UpdatedAt = DateTime.UtcNow;
+            await dbContext.SaveChangesAsync(cancellationToken);
+            _logger.LogError(ex, "Failed to analyze enhancement request {RequestId}", request.Id);
+        }
+    }
+}

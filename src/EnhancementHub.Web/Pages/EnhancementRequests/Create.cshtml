@@ -1,0 +1,60 @@
+@page
+@model EnhancementHub.Web.Pages.EnhancementRequests.CreateModel
+@{
+    ViewData["Title"] = "New Enhancement Request";
+}
+
+<div class="page-header">
+    <h1>New Enhancement Request</h1>
+    <p>Describe the business need and desired outcome</p>
+</div>
+
+<div class="card-panel p-4">
+    <form method="post">
+        <div class="row g-3">
+            <div class="col-md-8">
+                <label class="form-label">Title</label>
+                <input class="form-control" asp-for="Input.Title" required />
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Priority</label>
+                <select class="form-select" asp-for="Input.Priority">
+                    <option>Low</option>
+                    <option selected>Medium</option>
+                    <option>High</option>
+                    <option>Critical</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Target Application</label>
+                <select class="form-select" asp-for="Input.TargetApplicationId" asp-items="Model.Applications">
+                    <option value="">— Select —</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Department</label>
+                <input class="form-control" asp-for="Input.Department" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Requested Due Date</label>
+                <input class="form-control" asp-for="Input.RequestedDueDate" type="date" />
+            </div>
+            <div class="col-12">
+                <label class="form-label">Business Description</label>
+                <textarea class="form-control" asp-for="Input.BusinessDescription" rows="4" required></textarea>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Desired Outcome</label>
+                <textarea class="form-control" asp-for="Input.DesiredOutcome" rows="3" required></textarea>
+            </div>
+            <div class="col-12">
+                <label class="form-label">Supporting Notes</label>
+                <textarea class="form-control" asp-for="Input.SupportingNotes" rows="2"></textarea>
+            </div>
+        </div>
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Submit Request</button>
+            <a asp-page="Index" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

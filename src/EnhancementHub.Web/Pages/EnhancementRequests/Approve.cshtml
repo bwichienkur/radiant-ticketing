@@ -1,0 +1,69 @@
+@page
+@model EnhancementHub.Web.Pages.EnhancementRequests.ApproveModel
+@{
+    ViewData["Title"] = "Approval Queue";
+}
+
+<div class="page-header">
+    <h1>Approval Queue</h1>
+    <p>Review and action pending enhancement requests</p>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card-panel">
+            <div class="card-header">Pending (@Model.Pending.Count)</div>
+            <div class="list-group list-group-flush">
+                @foreach (var item in Model.Pending)
+                {
+                    <a asp-page="Approve" asp-route-id="@item.Id"
+                       class="list-group-item list-group-item-action @(Model.SelectedRequestId == item.Id ? "active" : "")">
+                        <strong>@item.Title</strong>
+                        <span class="d-block small">@(item.SubmittedByUserName ?? "—") · @item.Priority</span>
+                    </a>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        @if (Model.Selected is not null)
+        {
+            var s = Model.Selected;
+            <div class="card-panel p-4">
+                <h2 class="h5">@s.Title</h2>
+                <p class="text-muted">@s.BusinessDescription</p>
+                @if (s.Analyses.FirstOrDefault()?.FeatureSummary is not null)
+                {
+                    <div class="alert alert-info">
+                        <strong>AI Summary:</strong> @s.Analyses.First().FeatureSummary
+                    </div>
+                }
+                <form method="post" asp-page-handler="Action" class="mb-4">
+                    <input type="hidden" asp-for="SelectedRequestId" />
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Action</label>
+                            <select class="form-select" asp-for="ActionType" asp-items="Html.GetEnumSelectList<ApprovalActionType>()"></select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Comments</label>
+                            <textarea class="form-control" asp-for="Comments" rows="2"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Submit Action</button>
+                    <a asp-page="Details" asp-route-id="@s.Id" class="btn btn-outline-secondary mt-3">Full Details</a>
+                </form>
+                <form method="post" asp-page-handler="Comment">
+                    <input type="hidden" asp-for="SelectedRequestId" />
+                    <label class="form-label">Add internal comment</label>
+                    <textarea class="form-control" asp-for="NewComment" rows="2"></textarea>
+                    <button type="submit" class="btn btn-outline-secondary btn-sm mt-2">Add Comment</button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <div class="card-panel p-4 text-muted">No requests pending approval.</div>
+        }
+    </div>
+</div>

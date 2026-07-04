@@ -1,0 +1,42 @@
+@page
+@model EnhancementHub.Web.Pages.Audit.IndexModel
+@{
+    ViewData["Title"] = "Audit Log";
+}
+
+<div class="page-header">
+    <h1>Audit Log</h1>
+    <p>System activity and change history</p>
+</div>
+
+<div class="card-panel p-3 mb-3">
+    <form method="get" class="row g-2">
+        <div class="col-md-4">
+            <input class="form-control" name="EntityType" value="@Model.EntityType" placeholder="Entity type" />
+        </div>
+        <div class="col-md-4">
+            <input class="form-control" name="Action" value="@Model.Action" placeholder="Action" />
+        </div>
+        <div class="col-md-4">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </div>
+    </form>
+</div>
+
+<div class="card-panel">
+    <table class="table table-hover table-enterprise mb-0">
+        <thead><tr><th>Time</th><th>Action</th><th>Entity</th><th>User</th><th>Details</th></tr></thead>
+        <tbody>
+        @foreach (var log in Model.Logs)
+        {
+            <tr>
+                <td class="small">@log.CreatedAt.ToString("g")</td>
+                <td>@log.Action</td>
+                <td>@log.EntityType</td>
+                <td>@(log.UserName ?? "—")</td>
+                <td class="small">@(log.Comments ?? "—")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: enhancementhub-postgres
+    environment:
+      POSTGRES_USER: enhancementhub
+      POSTGRES_PASSWORD: enhancementhub
+      POSTGRES_DB: enhancementhub
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U enhancementhub"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: enhancementhub-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      Database__Provider: PostgreSQL
+      ConnectionStrings__Default: Host=postgres;Port=5432;Database=enhancementhub;Username=enhancementhub;Password=enhancementhub
+      Jwt__Secret: local-dev-secret-change-in-production-min-32-chars
+      Jwt__Issuer: EnhancementHub
+      Jwt__Audience: EnhancementHub
+      OpenAI__ApiKey: ${OPENAI_API_KEY:-}
+      Cors__WebOrigin: http://localhost:5001
+    ports:
+      - "5075:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: enhancementhub-web
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      Database__Provider: PostgreSQL
+      ConnectionStrings__Default: Host=postgres;Port=5432;Database=enhancementhub;Username=enhancementhub;Password=enhancementhub
+      Jwt__Secret: local-dev-secret-change-in-production-min-32-chars
+    ports:
+      - "5001:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: enhancementhub-worker
+    environment:
+      DOTNET_ENVIRONMENT: Development
+      Database__Provider: PostgreSQL
+      ConnectionStrings__Default: Host=postgres;Port=5432;Database=enhancementhub;Username=enhancementhub;Password=enhancementhub
+      OpenAI__ApiKey: ${OPENAI_API_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

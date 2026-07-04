@@ -1,0 +1,36 @@
+namespace EnhancementHub.Application.Abstractions.Models;
+
+public sealed class RepositoryScanResult
+{
+    public string RootPath { get; set; } = string.Empty;
+    public IReadOnlyList<ScannedNamespace> Namespaces { get; set; } = Array.Empty<ScannedNamespace>();
+    public IReadOnlyList<ScannedClass> Classes { get; set; } = Array.Empty<ScannedClass>();
+    public IReadOnlyList<ScannedController> Controllers { get; set; } = Array.Empty<ScannedController>();
+    public IReadOnlyList<string> DbContextTypes { get; set; } = Array.Empty<string>();
+    public int TotalFilesScanned { get; set; }
+}
+
+public sealed class ScannedNamespace
+{
+    public string Name { get; set; } = string.Empty;
+    public string FilePath { get; set; } = string.Empty;
+}
+
+public sealed class ScannedClass
+{
+    public string Name { get; set; } = string.Empty;
+    public string Namespace { get; set; } = string.Empty;
+    public string FilePath { get; set; } = string.Empty;
+    public bool IsStatic { get; set; }
+    public bool IsPartial { get; set; }
+    public IReadOnlyList<string> Methods { get; set; } = Array.Empty<string>();
+    public IReadOnlyList<string> BaseTypes { get; set; } = Array.Empty<string>();
+}
+
+public sealed class ScannedController
+{
+    public string Name { get; set; } = string.Empty;
+    public string Namespace { get; set; } = string.Empty;
+    public string FilePath { get; set; } = string.Empty;
+    public IReadOnlyList<string> Actions { get; set; } = Array.Empty<string>();
+}

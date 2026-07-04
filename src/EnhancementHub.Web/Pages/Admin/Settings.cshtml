@@ -1,0 +1,34 @@
+@page
+@model EnhancementHub.Web.Pages.Admin.SettingsModel
+@{
+    ViewData["Title"] = "System Settings";
+}
+
+<div class="page-header">
+    <h1>System Settings</h1>
+    <p>Configure platform behavior</p>
+</div>
+
+<div class="card-panel">
+    <table class="table table-enterprise mb-0">
+        <thead><tr><th>Category</th><th>Key</th><th>Value</th><th>Description</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var setting in Model.Settings)
+        {
+            <tr>
+                <td>@setting.Category</td>
+                <td>@setting.Key</td>
+                <td>
+                    <form method="post" class="d-flex gap-2">
+                        <input type="hidden" asp-for="SettingId" value="@setting.Id" />
+                        <input class="form-control form-control-sm" name="Value" value="@setting.Value" />
+                        <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                    </form>
+                </td>
+                <td class="small text-muted">@(setting.Description ?? "—")</td>
+                <td></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

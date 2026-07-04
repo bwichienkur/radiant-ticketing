@@ -1,74 +1,45 @@
-# EnhancementHub Platform Phases
+# EnhancementHub Implementation Phases
 
-This document tracks the phased delivery of the Radiant Ticketing / EnhancementHub platform.
+## Phase 1 — Domain, Database, CRUD, UI, Approval
 
-## Phase 1 — Foundation
+- Full domain model with 27+ entities
+- EF Core schema with migrations (SQLite/PostgreSQL)
+- Enhancement request intake with all required statuses
+- CQRS commands/queries via MediatR
+- Razor Pages UI: dashboard, submit, detail, approval queue
+- Approval workflow with audit logging
 
-- Next.js application scaffold with TypeScript and Tailwind
-- Prisma schema for users, venues, events, ticket types, orders, and tickets
-- SQLite database for local development
-- Shared utilities and API response helpers
+## Phase 2 — Repository Indexing & Knowledge Base
 
-**Status:** Complete
+- Git repository registration and branch tracking
+- Roslyn-based C# scanner (controllers, services, DbContext, entities)
+- Application profile generation
+- Indexed files and symbols storage
+- Hybrid keyword + vector search abstraction (`IVectorSearchService`)
+- On-demand and scheduled re-indexing via Worker
 
-## Phase 2 — Authentication
+## Phase 3 — AI Analysis Pipeline
 
-- User registration and login
-- Password hashing with bcrypt
-- JWT session cookies
-- Role-based access: `CUSTOMER`, `ORGANIZER`, `ADMIN`
+- Multi-step AI workflow: classify → retrieve → analyze → generate change request
+- Structured JSON output with schema validation
+- Risk scoring service (Low/Medium/High/Critical)
+- Confidence scores and open questions
+- Analysis review UI on request detail page
+- Full prompt/response audit trail (`AiPromptRun`, `RetrievedContextItem`)
 
-**Status:** Complete
+## Phase 4 — Integrations, Reporting, Hardening
 
-## Phase 3 — Events & Venues
-
-- Venue management API
-- Event CRUD with draft/published lifecycle
-- Ticket type configuration per event
-- Organizer-scoped event management
-
-**Status:** Complete
-
-## Phase 4 — Commerce
-
-- Order creation with inventory validation
-- Atomic ticket issuance in database transactions
-- Sold-count tracking per ticket type
-- Order history API
-
-**Status:** Complete
-
-## Phase 5 — Customer Portal
-
-- Home page with featured events
-- Event listing and detail pages
-- Ticket quantity selection and checkout
-- My Tickets page with order history
-
-**Status:** Complete
-
-## Phase 6 — Admin Dashboard
-
-- Organizer/admin analytics (events, orders, revenue)
-- Event creation workflow
-- Ticket type management per event
-- Recent orders feed
-
-**Status:** Complete
-
-## Phase 7 — Check-in & QR
-
-- Unique ticket codes (`RAD-` prefix)
-- QR code generation for each ticket
-- Venue check-in API with duplicate detection
-- Organizer check-in UI
-
-**Status:** Complete
+- External ticket export: GitHub, Azure DevOps, Jira (swappable via factory)
+- Dashboard reporting (status counts, approval time, risk trends)
+- Admin settings and AI prompt configuration
+- Correlation IDs, Polly retries, structured logging
+- 40 unit and integration tests
+- Docker Compose for local PostgreSQL deployment
 
 ## Future enhancements
 
-- Payment gateway integration (Stripe)
-- Email notifications and ticket delivery
-- PostgreSQL production deployment
-- Seat maps and reserved seating
-- Multi-tenant organizer accounts
+- pgvector production deployment for semantic search at scale
+- Azure AI Search / Qdrant vector provider implementations
+- SSO (Azure AD / OIDC)
+- Real-time notifications
+- Attachment blob storage (S3/Azure Blob)
