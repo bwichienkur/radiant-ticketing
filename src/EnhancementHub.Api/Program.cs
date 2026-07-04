@@ -27,7 +27,7 @@ try
         .WriteTo.Console());
 
     builder.Services.AddApplication();
-    builder.Services.AddInfrastructure(builder.Configuration);
+    builder.Services.AddInfrastructure(builder.Configuration, registerHangfireMonitoring: true);
     builder.Services.AddEnhancementHubHealthChecks();
 
     builder.Services.AddEnhancementHubJwtAuthentication(builder.Configuration);

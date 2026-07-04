@@ -30,7 +30,8 @@ public static class InfrastructureServiceExtensions
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
         IConfiguration configuration,
-        bool registerBackgroundJobs = false)
+        bool registerBackgroundJobs = false,
+        bool registerHangfireMonitoring = false)
     {
         services.AddHttpContextAccessor();
 
@@ -191,6 +192,8 @@ public static class InfrastructureServiceExtensions
                 sp.GetRequiredService<IRiskScoringService>(),
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<OpenAiAnalysisService>>()));
 
+        services.AddScoped<IBackgroundJobStatusService, BackgroundJobStatusService>();
+
         services.AddHttpClient(OpenAiHttpClientName)
             .AddPolicyHandler(GetRetryPolicy());
 
@@ -238,9 +241,41 @@ public static class InfrastructureServiceExtensions
         {
             RegisterBackgroundJobs(services, configuration, connectionString, provider);
         }
+        else if (registerHangfireMonitoring)
+        {
+            RegisterHangfireMonitoringStorage(services, configuration, connectionString, provider);
+        }
 
         return services;
     }
+
+    private static void RegisterHangfireMonitoringStorage(
+        IServiceCollection services,
+        IConfiguration configuration,
+        string connectionString,
+        DatabaseProvider provider)
+    {
+        if (!ShouldUseHangfire(configuration, provider))
+        {
+            return;
+        }
+
+        services.AddHangfire(config => config
+            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseRecommendedSerializerSettings()
+            .UsePostgreSqlStorage(
+                options => options.UseNpgsqlConnection(connectionString),
+                new PostgreSqlStorageOptions
+                {
+                    SchemaName = configuration["BackgroundJobs:HangfireSchema"] ?? "hangfire"
+                }));
+    }
+
+    private static bool ShouldUseHangfire(IConfiguration configuration, DatabaseProvider provider) =>
+        (configuration["BackgroundJobs:Provider"] ?? "Polling")
+            .Equals("Hangfire", StringComparison.OrdinalIgnoreCase)
+        && provider == DatabaseProvider.PostgreSql;
 
     private static void RegisterBackgroundJobs(
         IServiceCollection services,
@@ -255,8 +290,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<ScheduledRepositoryRefreshJobExecutor>();
 
         var jobProvider = configuration["BackgroundJobs:Provider"] ?? "Polling";
-        var useHangfire = jobProvider.Equals("Hangfire", StringComparison.OrdinalIgnoreCase)
-            && provider == DatabaseProvider.PostgreSql;
+        var useHangfire = ShouldUseHangfire(configuration, provider);
 
         if (useHangfire)
         {

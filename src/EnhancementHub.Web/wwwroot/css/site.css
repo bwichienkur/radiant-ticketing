@@ -96,6 +96,19 @@ body {
     padding: 0.35em 0.65em;
 }
 
+.stat-card-link {
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card-link:hover {
+    border-color: var(--eh-accent);
+    box-shadow: 0 0 0 1px var(--eh-accent-soft);
+}
+
+.analysis-summary-banner {
+    border-left: 4px solid var(--eh-accent);
+}
+
 .detail-section {
     margin-bottom: 1.5rem;
 }

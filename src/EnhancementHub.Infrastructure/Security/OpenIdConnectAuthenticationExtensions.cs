@@ -104,10 +104,14 @@ public static class OpenIdConnectAuthenticationExtensions
         }
 
         options.MapInboundClaims = false;
+        options.UsePkce = true;
         options.TokenValidationParameters.NameClaimType = "preferred_username";
         options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
+        options.TokenValidationParameters.ValidateIssuer = true;
 
-        var roleMappings = section.GetSection("RoleMappings").Get<Dictionary<string, string>>() ?? new Dictionary<string, string>();
+        var roleMappings = section.GetSection("RoleMappings").Get<Dictionary<string, string>>()
+            ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
         options.Events.OnTokenValidated = context =>
         {
             if (context.Principal?.Identity is not ClaimsIdentity identity)
@@ -115,15 +119,18 @@ public static class OpenIdConnectAuthenticationExtensions
                 return Task.CompletedTask;
             }
 
-            var groupClaims = identity.FindAll("groups")
+            MapEntraIdentityClaims(identity);
+
+            var mappedSources = identity.FindAll("groups")
+                .Concat(identity.FindAll("roles"))
                 .Concat(identity.FindAll(ClaimTypes.Role))
                 .Select(c => c.Value)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToList();
 
-            foreach (var group in groupClaims)
+            foreach (var source in mappedSources)
             {
-                if (roleMappings.TryGetValue(group, out var mappedRole))
+                if (roleMappings.TryGetValue(source, out var mappedRole))
                 {
                     identity.AddClaim(new Claim(ClaimTypes.Role, mappedRole));
                 }
@@ -137,5 +144,36 @@ public static class OpenIdConnectAuthenticationExtensions
 
             return Task.CompletedTask;
         };
+    }
+
+    private static void MapEntraIdentityClaims(ClaimsIdentity identity)
+    {
+        var objectId = identity.FindFirst("oid")?.Value ?? identity.FindFirst("sub")?.Value;
+        if (!string.IsNullOrWhiteSpace(objectId)
+            && !identity.HasClaim(c => c.Type == ClaimTypes.NameIdentifier))
+        {
+            identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, objectId));
+        }
+
+        var email = identity.FindFirst("email")?.Value
+            ?? identity.FindFirst("preferred_username")?.Value;
+        if (!string.IsNullOrWhiteSpace(email) && !identity.HasClaim(c => c.Type == ClaimTypes.Email))
+        {
+            identity.AddClaim(new Claim(ClaimTypes.Email, email));
+        }
+
+        var displayName = identity.FindFirst("name")?.Value;
+        if (!string.IsNullOrWhiteSpace(displayName) && !identity.HasClaim(c => c.Type == ClaimTypes.Name))
+        {
+            identity.AddClaim(new Claim(ClaimTypes.Name, displayName));
+        }
+
+        foreach (var appRole in identity.FindAll("roles"))
+        {
+            if (!identity.HasClaim(ClaimTypes.Role, appRole.Value))
+            {
+                identity.AddClaim(new Claim(ClaimTypes.Role, appRole.Value));
+            }
+        }
     }
 }

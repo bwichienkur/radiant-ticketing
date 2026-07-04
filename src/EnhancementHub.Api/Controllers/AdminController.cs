@@ -1,4 +1,5 @@
 using EnhancementHub.Application.Admin;
+using EnhancementHub.Application.Features.Admin.Queries;
 using EnhancementHub.Application.Features.Reporting.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -33,6 +34,10 @@ public sealed class AdminController : ControllerBase
     [HttpGet("ai-usage")]
     public async Task<IActionResult> GetAiUsage(CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new GetAiUsageReportQuery(), cancellationToken));
+
+    [HttpGet("jobs/status")]
+    public async Task<IActionResult> GetBackgroundJobsStatus(CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetBackgroundJobsStatusQuery(), cancellationToken));
 
     [HttpPut("ai-prompts/{id:guid}")]
     public async Task<IActionResult> UpdateAiPrompt(Guid id, [FromBody] UpdatePromptRequest request, CancellationToken cancellationToken)

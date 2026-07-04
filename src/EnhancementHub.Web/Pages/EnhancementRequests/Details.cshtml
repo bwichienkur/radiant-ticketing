@@ -1,9 +1,18 @@
 @page "{id:guid}"
 @model EnhancementHub.Web.Pages.EnhancementRequests.DetailsModel
+@using EnhancementHub.Domain.Enums
 @{
     ViewData["Title"] = Model.Detail?.Title ?? "Request Details";
     var r = Model.Detail!;
     var analysis = Model.Analysis;
+
+    string RiskBadgeClass(RiskLevel risk) => risk switch
+    {
+        RiskLevel.Critical => "text-bg-danger",
+        RiskLevel.High => "text-bg-warning",
+        RiskLevel.Medium => "text-bg-info",
+        _ => "text-bg-success"
+    };
 }
 
 <div class="page-header d-flex justify-content-between align-items-start">
@@ -16,6 +25,48 @@
     </div>
     <a asp-page="Approve" class="btn btn-outline-primary">Approval Queue</a>
 </div>
+
+@if (analysis is not null)
+{
+    <div class="card-panel p-4 mb-4 analysis-summary-banner">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center flex-wrap gap-2 mb-2">
+                    <h2 class="h5 mb-0">AI Analysis</h2>
+                    <span class="badge @RiskBadgeClass(analysis.RiskLevel) badge-status">@analysis.RiskLevel risk</span>
+                    @if (analysis.NeedsClarification)
+                    {
+                        <span class="badge text-bg-secondary badge-status">Clarification needed</span>
+                    }
+                </div>
+                <p class="mb-0">@(analysis.FeatureSummary ?? "Analysis complete — see details below.")</p>
+            </div>
+            <div class="d-flex gap-3">
+                <div class="text-center">
+                    <div class="small text-muted">Confidence</div>
+                    <div class="fw-semibold fs-5">@($"{analysis.ConfidenceScore:P0}")</div>
+                </div>
+                <div class="text-center">
+                    <div class="small text-muted">Version</div>
+                    <div class="fw-semibold fs-5">@analysis.Version</div>
+                </div>
+            </div>
+        </div>
+        @if (!string.IsNullOrWhiteSpace(analysis.RiskExplanation))
+        {
+            <p class="text-muted small mb-0 mt-3"><strong>Risk:</strong> @analysis.RiskExplanation</p>
+        }
+    </div>
+}
+else if (r.Status is EnhancementRequestStatus.Submitted or EnhancementRequestStatus.AiAnalyzing)
+{
+    <div class="card-panel p-4 mb-4">
+        <div class="d-flex align-items-center gap-2">
+            <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
+            <span>AI analysis is in progress. Refresh this page in a moment.</span>
+        </div>
+    </div>
+}
 
 <div class="row g-4">
     <div class="col-lg-8">
@@ -47,7 +98,7 @@
                     <div class="col-md-4">
                         <div class="stat-card">
                             <div class="label">Risk</div>
-                            <div class="value fs-4">@analysis.RiskLevel</div>
+                            <div class="value fs-4"><span class="badge @RiskBadgeClass(analysis.RiskLevel)">@analysis.RiskLevel</span></div>
                         </div>
                     </div>
                     <div class="col-md-4">

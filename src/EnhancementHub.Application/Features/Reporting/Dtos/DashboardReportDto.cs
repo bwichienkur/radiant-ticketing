@@ -6,6 +6,8 @@ public sealed record DashboardReportDto(
     IReadOnlyDictionary<EnhancementRequestStatus, int> RequestsByStatus,
     int TotalRequests,
     int PendingApprovalCount,
+    int AwaitingAnalysisCount,
+    int HighRiskPendingApprovalCount,
     int HighRiskCount,
     int CriticalRiskCount,
     int ReadyForDevelopmentCount,

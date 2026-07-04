@@ -158,6 +158,16 @@
 - Admin AI usage report (`GET /api/admin/ai-usage`)
 - Rate limiting on manual AI analysis triggers (5/min)
 
+## Phase 16 continuation — Entra ID SSO & admin operations
+
+- Production validation for OpenID Connect settings when SSO is enabled
+- Entra ID claim hardening (`oid`, `roles`, `groups`, email, display name)
+- Entra ID setup guide (`docs/ENTRA_ID_SSO.md`)
+- Admin background job status API (`GET /api/admin/jobs/status`)
+- Hangfire monitoring storage on API (no job server) for queue statistics
+- Dashboard widgets: awaiting analysis, high-risk pending approval
+- Request detail: AI analysis summary banner above the fold with risk badge
+
 ## Future enhancements
 
 - GitHub App webhook-driven automatic re-index on push

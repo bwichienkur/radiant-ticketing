@@ -63,16 +63,35 @@ public sealed class GetDashboardReportQueryHandler
         var latestAnalyses = await _dbContext.EnhancementAnalyses
             .AsNoTracking()
             .GroupBy(a => a.EnhancementRequestId)
-            .Select(g => new { RiskLevel = g.OrderByDescending(a => a.Version).First().RiskLevel })
+            .Select(g => new
+            {
+                EnhancementRequestId = g.Key,
+                RiskLevel = g.OrderByDescending(a => a.Version).First().RiskLevel
+            })
             .ToListAsync(cancellationToken);
 
         var highRiskCount = latestAnalyses.Count(a => a.RiskLevel == RiskLevel.High);
         var criticalRiskCount = latestAnalyses.Count(a => a.RiskLevel == RiskLevel.Critical);
 
+        var pendingApprovalIds = requests
+            .Where(r => r.Status == EnhancementRequestStatus.PendingApproval)
+            .Select(r => r.Id)
+            .ToHashSet();
+
+        var highRiskPendingApprovalCount = latestAnalyses.Count(a =>
+            pendingApprovalIds.Contains(a.EnhancementRequestId)
+            && (a.RiskLevel == RiskLevel.High || a.RiskLevel == RiskLevel.Critical));
+
+        var awaitingAnalysisCount = requests.Count(r =>
+            r.Status == EnhancementRequestStatus.Submitted
+            || r.Status == EnhancementRequestStatus.AiAnalyzing);
+
         return new DashboardReportDto(
             requestsByStatus,
             requests.Count,
             requests.Count(r => r.Status == EnhancementRequestStatus.PendingApproval),
+            awaitingAnalysisCount,
+            highRiskPendingApprovalCount,
             highRiskCount,
             criticalRiskCount,
             requests.Count(r => r.Status == EnhancementRequestStatus.ReadyForDevelopment),
