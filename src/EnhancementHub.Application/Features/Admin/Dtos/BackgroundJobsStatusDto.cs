@@ -5,7 +5,8 @@ public sealed record BackgroundJobsStatusDto(
     DateTime GeneratedAtUtc,
     BackgroundJobQueueCountsDto QueueCounts,
     IReadOnlyList<BackgroundJobDefinitionStatusDto> Jobs,
-    BackgroundJobHangfireStatsDto? Hangfire);
+    BackgroundJobHangfireStatsDto? Hangfire,
+    IReadOnlyList<BackgroundJobFailedJobDto> FailedJobs);
 
 public sealed record BackgroundJobQueueCountsDto(
     int PendingRepositoryIndexing,
@@ -27,3 +28,9 @@ public sealed record BackgroundJobHangfireStatsDto(
     long Succeeded,
     long Failed,
     long Deleted);
+
+public sealed record BackgroundJobFailedJobDto(
+    string JobId,
+    string? JobName,
+    string? FailedAt,
+    string? ExceptionMessage);

@@ -168,6 +168,13 @@
 - Dashboard widgets: awaiting analysis, high-risk pending approval
 - Request detail: AI analysis summary banner above the fold with risk badge
 
+## Phase 18 continuation — Admin operations UI
+
+- Admin background jobs page (`/Admin/Jobs`) with queue depth, schedules, failed jobs, and Hangfire retry
+- Admin authentication page (`/Admin/Authentication`) with OIDC config and role mapping validation
+- `GET /api/admin/authentication/status` and `POST /api/admin/jobs/{jobId}/retry`
+- System Map UX: empty states, loading indicator, type-grouped tabs
+
 ## Future enhancements
 
 - GitHub App webhook-driven automatic re-index on push

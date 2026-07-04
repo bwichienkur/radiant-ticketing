@@ -40,13 +40,51 @@ public sealed class BackgroundJobStatusService : IBackgroundJobStatusService
 
         var jobs = BuildJobDefinitions(provider);
         var hangfire = TryGetHangfireStats();
+        var failedJobs = TryGetFailedJobs();
 
         return new BackgroundJobsStatusDto(
             provider,
             DateTime.UtcNow,
             queueCounts,
             jobs,
-            hangfire);
+            hangfire,
+            failedJobs);
+    }
+
+    public Task<bool> RetryFailedJobAsync(string jobId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(jobId))
+        {
+            return Task.FromResult(false);
+        }
+
+        var provider = _configuration["BackgroundJobs:Provider"] ?? "Polling";
+        if (!provider.Equals("Hangfire", StringComparison.OrdinalIgnoreCase))
+        {
+            return Task.FromResult(false);
+        }
+
+        try
+        {
+            var monitoring = JobStorage.Current?.GetMonitoringApi();
+            if (monitoring is null)
+            {
+                return Task.FromResult(false);
+            }
+
+            var failedJob = monitoring.FailedJobs(0, 100).FirstOrDefault(j => j.Key == jobId);
+            if (failedJob.Key is null)
+            {
+                return Task.FromResult(false);
+            }
+
+            BackgroundJob.Requeue(jobId);
+            return Task.FromResult(true);
+        }
+        catch
+        {
+            return Task.FromResult(false);
+        }
     }
 
     private static IReadOnlyList<BackgroundJobDefinitionStatusDto> BuildJobDefinitions(string provider)
@@ -135,4 +173,33 @@ public sealed class BackgroundJobStatusService : IBackgroundJobStatusService
             return null;
         }
     }
+
+    private static IReadOnlyList<BackgroundJobFailedJobDto> TryGetFailedJobs()
+    {
+        try
+        {
+            var monitoring = JobStorage.Current?.GetMonitoringApi();
+            if (monitoring is null)
+            {
+                return [];
+            }
+
+            return monitoring.FailedJobs(0, 20)
+                .Select(job => new BackgroundJobFailedJobDto(
+                    job.Key,
+                    job.Value.Job?.ToString(),
+                    job.Value.FailedAt?.ToString("u"),
+                    Truncate(job.Value.ExceptionMessage, 500)))
+                .ToList();
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private static string? Truncate(string? value, int maxLength) =>
+        string.IsNullOrEmpty(value) || value.Length <= maxLength
+            ? value
+            : value[..maxLength] + "…";
 }

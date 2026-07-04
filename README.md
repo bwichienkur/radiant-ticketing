@@ -169,7 +169,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-85+ tests covering enterprise AI, SSO hardening, security, risk scoring, repository scanning, schema drift, onboarding, integrations, API workflows, and role permissions.
+90+ tests covering enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, onboarding, integrations, API workflows, and role permissions.
 
 ---
 

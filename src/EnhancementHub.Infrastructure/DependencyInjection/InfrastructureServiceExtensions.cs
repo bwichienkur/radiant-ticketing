@@ -193,6 +193,7 @@ public static class InfrastructureServiceExtensions
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<OpenAiAnalysisService>>()));
 
         services.AddScoped<IBackgroundJobStatusService, BackgroundJobStatusService>();
+        services.AddSingleton<IAuthenticationConfigurationService, AuthenticationConfigurationService>();
 
         services.AddHttpClient(OpenAiHttpClientName)
             .AddPolicyHandler(GetRetryPolicy());
