@@ -40,7 +40,7 @@ tests/
 
 **Deploy API + Web + Worker** for production. Background jobs run in Worker only.
 
-See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for production checklist and [docs/ROADMAP.md](docs/ROADMAP.md) for the product roadmap.
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for production checklist, [docs/SECURITY.md](docs/SECURITY.md) for the security whitepaper, and [docs/ROADMAP.md](docs/ROADMAP.md) for the product roadmap.
 
 ---
 
@@ -169,7 +169,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-99+ tests covering data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
+101+ tests covering SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
 
 ---
 

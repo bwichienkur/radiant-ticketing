@@ -73,6 +73,7 @@ chmod +x scripts/smoke-check.sh
 - [ ] Enable attachment ClamAV scanning if required by policy
 - [ ] Configure data retention (`Retention:Enabled`, `AiPromptRunsDays`, `AttachmentsDays`) for compliance
 - [ ] Restrict network access to Worker (health port only if exposed)
+- [ ] Review [Security whitepaper](SECURITY.md) and [SOC 2 readiness mapping](SOC2_READINESS.md) with security team
 
 ### Services to run
 

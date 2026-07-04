@@ -61,6 +61,10 @@ public sealed class AdminController : ControllerBase
         CancellationToken cancellationToken = default) =>
         Ok(await _mediator.Send(new ApplyDataRetentionCommand(dryRun), cancellationToken));
 
+    [HttpGet("compliance/soc2")]
+    public async Task<IActionResult> GetSoc2ReadinessReport(CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetSoc2ReadinessReportQuery(), cancellationToken));
+
     [HttpPut("ai-prompts/{id:guid}")]
     public async Task<IActionResult> UpdateAiPrompt(Guid id, [FromBody] UpdatePromptRequest request, CancellationToken cancellationToken)
     {
