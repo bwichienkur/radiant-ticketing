@@ -3,6 +3,8 @@ using EnhancementHub.Domain.Entities;
 using EnhancementHub.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Text;
+using ApplicationEntity = EnhancementHub.Domain.Entities.Application;
 
 namespace EnhancementHub.Infrastructure.Persistence;
 
@@ -70,5 +72,77 @@ public static class DevDataSeeder
 
         await db.SaveChangesAsync(cancellationToken);
         logger.LogInformation("Development seed data created.");
+
+        await SeedDemoSystemIntelligenceDataAsync(db, logger, cancellationToken);
+    }
+
+    private static async Task SeedDemoSystemIntelligenceDataAsync(
+        IEnhancementHubDbContext db,
+        ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        if (await db.Applications.AnyAsync(cancellationToken))
+        {
+            return;
+        }
+
+        logger.LogInformation("Seeding demo System Intelligence data.");
+
+        var teamId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+        var applicationId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+        var repositoryId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+        var now = DateTime.UtcNow;
+
+        db.Teams.Add(new Team
+        {
+            Id = teamId,
+            Name = "Platform Engineering",
+            Description = "Core platform and architecture team",
+            CreatedAt = now,
+            UpdatedAt = now
+        });
+
+        db.Applications.Add(new ApplicationEntity
+        {
+            Id = applicationId,
+            Name = "Radiant Commerce Platform",
+            BusinessDomain = "E-Commerce",
+            Purpose = "Order management and fulfillment",
+            Description = "Demo application for architecture intelligence",
+            OwnerTeamId = teamId,
+            CreatedAt = now,
+            UpdatedAt = now
+        });
+
+        db.Repositories.Add(new Repository
+        {
+            Id = repositoryId,
+            ApplicationId = applicationId,
+            Name = "enhancementhub",
+            Url = "/workspace",
+            Provider = ExternalTicketProvider.GitHub,
+            DefaultBranch = "main",
+            IndexingStatus = IndexingStatus.Pending,
+            CreatedAt = now,
+            UpdatedAt = now
+        });
+
+        db.DatabaseConnections.Add(new DatabaseConnection
+        {
+            Id = Guid.Parse("55555555-5555-5555-5555-555555555555"),
+            ApplicationId = applicationId,
+            Name = "EnhancementHub SQLite",
+            Provider = DatabaseProviderType.Sqlite,
+            ConnectionStringProtected = Convert.ToBase64String(
+                Encoding.UTF8.GetBytes("Data Source=enhancementhub.db")),
+            DatabaseName = "enhancementhub",
+            IsReadOnly = true,
+            ScanStatus = nameof(SchemaScanStatus.Pending),
+            CreatedAt = now,
+            UpdatedAt = now
+        });
+
+        await db.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("Demo System Intelligence data created.");
     }
 }

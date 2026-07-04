@@ -67,7 +67,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IDocumentationExportService, DocumentationExportService>();
         services.AddScoped<IRefactorBlastRadiusService, RefactorBlastRadiusService>();
         services.AddScoped<IRefactorPlanGenerator, RefactorPlanGeneratorService>();
-        services.AddSingleton<IOnPremAgentService, OnPremAgentService>();
+        services.AddScoped<IOnPremAgentService, OnPremAgentService>();
         services.AddScoped<ApplicationProfileGenerator>();
         services.AddScoped<IRepositoryIndexer, RepositoryIndexerService>();
         services.AddScoped<IRiskScoringService, RiskScoringService>();
