@@ -54,7 +54,31 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IAuditService, AuditService>();
         services.AddSingleton<IPasswordHasher, DevPasswordHasher>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
-        services.AddScoped<IVectorSearchService, InMemoryVectorSearchService>();
+        services.AddScoped<InMemoryVectorSearchService>();
+        services.AddScoped<PgVectorSearchService>();
+        services.AddScoped<IVectorSearchService>(sp =>
+        {
+            var config = sp.GetRequiredService<IConfiguration>();
+            var vectorProvider = config["VectorSearch:Provider"];
+            var databaseProvider = config["Database:Provider"];
+            if (string.Equals(vectorProvider, "PgVector", StringComparison.OrdinalIgnoreCase)
+                && string.Equals(databaseProvider, "PostgreSQL", StringComparison.OrdinalIgnoreCase))
+            {
+                return sp.GetRequiredService<PgVectorSearchService>();
+            }
+
+            return sp.GetRequiredService<InMemoryVectorSearchService>();
+        });
+        services.AddScoped<LocalFileStorageService>();
+        services.AddScoped<S3FileStorageService>();
+        services.AddScoped<IFileStorageService>(sp =>
+        {
+            var provider = configuration["Storage:Provider"] ?? "Local";
+            return string.Equals(provider, "S3", StringComparison.OrdinalIgnoreCase)
+                ? sp.GetRequiredService<S3FileStorageService>()
+                : sp.GetRequiredService<LocalFileStorageService>();
+        });
+        services.AddScoped<INotificationPublisher, NoOpNotificationPublisher>();
         services.AddScoped<IKnowledgeSearchService, KeywordKnowledgeSearchService>();
         services.AddScoped<IGitRepositoryScanner, RoslynRepositoryScanner>();
         services.AddScoped<EfEntityTableMapper>();

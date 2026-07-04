@@ -16,4 +16,5 @@ public class CodeEntityMapping : BaseEntity
     public double ConfidenceScore { get; set; }
 
     public Repository Repository { get; set; } = null!;
+    public ICollection<CodeEntityProperty> Properties { get; set; } = new List<CodeEntityProperty>();
 }

@@ -12,17 +12,20 @@ public sealed class DatabaseSchemaIngestionService : IDatabaseSchemaIngestionSer
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly IDatabaseSchemaScanner _scanner;
     private readonly IConnectionStringProtector _connectionStringProtector;
+    private readonly INotificationPublisher _notifications;
     private readonly ILogger<DatabaseSchemaIngestionService> _logger;
 
     public DatabaseSchemaIngestionService(
         IEnhancementHubDbContext dbContext,
         IDatabaseSchemaScanner scanner,
         IConnectionStringProtector connectionStringProtector,
+        INotificationPublisher notifications,
         ILogger<DatabaseSchemaIngestionService> logger)
     {
         _dbContext = dbContext;
         _scanner = scanner;
         _connectionStringProtector = connectionStringProtector;
+        _notifications = notifications;
         _logger = logger;
     }
 
@@ -165,5 +168,12 @@ public sealed class DatabaseSchemaIngestionService : IDatabaseSchemaIngestionSer
         await _dbContext.SaveChangesAsync(cancellationToken);
         _logger.LogInformation("Ingested schema scan for connection {ConnectionId}: {TableCount} tables",
             databaseConnectionId, scanResult.Tables.Count);
+
+        await _notifications.PublishAsync(
+            "database.scan.completed",
+            "Database scan completed",
+            $"Captured {scanResult.Tables.Count} tables for {connection.Name}.",
+            new { connectionId = databaseConnectionId, tableCount = scanResult.Tables.Count },
+            cancellationToken);
     }
 }

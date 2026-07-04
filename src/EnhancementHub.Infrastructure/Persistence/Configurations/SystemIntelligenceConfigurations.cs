@@ -184,6 +184,23 @@ public class CodeEntityMappingConfiguration : IEntityTypeConfiguration<CodeEntit
             .WithMany(r => r.EntityMappings)
             .HasForeignKey(x => x.RepositoryId)
             .OnDelete(DeleteBehavior.Cascade);
+        builder.HasMany(x => x.Properties)
+            .WithOne(p => p.Mapping)
+            .HasForeignKey(p => p.CodeEntityMappingId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
+public class CodeEntityPropertyConfiguration : IEntityTypeConfiguration<CodeEntityProperty>
+{
+    public void Configure(EntityTypeBuilder<CodeEntityProperty> builder)
+    {
+        builder.ToTable("CodeEntityProperties");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.PropertyName).HasMaxLength(256).IsRequired();
+        builder.Property(x => x.ColumnName).HasMaxLength(256);
+        builder.Property(x => x.ClrType).HasMaxLength(256).IsRequired();
+        builder.HasIndex(x => new { x.CodeEntityMappingId, x.PropertyName }).IsUnique();
     }
 }
 

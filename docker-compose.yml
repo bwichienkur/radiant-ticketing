@@ -33,6 +33,10 @@ services:
       Jwt__Audience: EnhancementHub
       OpenAI__ApiKey: ${OPENAI_API_KEY:-}
       Cors__WebOrigin: http://localhost:5001
+      VectorSearch__Provider: PgVector
+      VectorSearch__Dimensions: 64
+      Storage__Provider: Local
+      Storage__LocalRoot: /data/uploads
     ports:
       - "5075:8080"
     depends_on:
@@ -50,6 +54,10 @@ services:
       Database__Provider: PostgreSQL
       ConnectionStrings__Default: Host=postgres;Port=5432;Database=enhancementhub;Username=enhancementhub;Password=enhancementhub
       Jwt__Secret: local-dev-secret-change-in-production-min-32-chars
+      VectorSearch__Provider: PgVector
+      VectorSearch__Dimensions: 64
+      Storage__Provider: Local
+      Storage__LocalRoot: /data/uploads
     ports:
       - "5001:8080"
     depends_on:

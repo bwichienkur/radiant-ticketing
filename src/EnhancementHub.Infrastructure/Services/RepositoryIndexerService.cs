@@ -20,6 +20,7 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
     private readonly ApplicationProfileGenerator _profileGenerator;
     private readonly IVectorSearchService _vectorSearch;
     private readonly IAuditService _auditService;
+    private readonly INotificationPublisher _notifications;
     private readonly IConfiguration _configuration;
     private readonly ILogger<RepositoryIndexerService> _logger;
 
@@ -29,6 +30,7 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
         ApplicationProfileGenerator profileGenerator,
         IVectorSearchService vectorSearch,
         IAuditService auditService,
+        INotificationPublisher notifications,
         IConfiguration configuration,
         ILogger<RepositoryIndexerService> logger)
     {
@@ -37,6 +39,7 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
         _profileGenerator = profileGenerator;
         _vectorSearch = vectorSearch;
         _auditService = auditService;
+        _notifications = notifications;
         _configuration = configuration;
         _logger = logger;
     }
@@ -154,6 +157,13 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
                 cancellationToken);
 
             _logger.LogInformation("Repository {RepositoryId} indexed successfully ({FileCount} files)", repositoryId, seenPaths.Count);
+
+            await _notifications.PublishAsync(
+                "repository.index.completed",
+                "Repository indexed",
+                $"Indexed {seenPaths.Count} files from {repository.Name}.",
+                new { repositoryId, fileCount = seenPaths.Count },
+                cancellationToken);
         }
         catch (Exception ex)
         {
@@ -161,6 +171,13 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
             repository.UpdatedAt = DateTime.UtcNow;
             await _dbContext.SaveChangesAsync(cancellationToken);
             _logger.LogError(ex, "Failed to index repository {RepositoryId}", repositoryId);
+
+            await _notifications.PublishAsync(
+                "repository.index.failed",
+                "Repository indexing failed",
+                $"Indexing failed for {repository.Name}: {ex.Message}",
+                new { repositoryId },
+                cancellationToken);
             throw;
         }
     }
@@ -236,9 +253,10 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
         var now = DateTime.UtcNow;
         foreach (var mapping in mappings)
         {
-            _dbContext.CodeEntityMappings.Add(new CodeEntityMapping
+            var mappingId = Guid.NewGuid();
+            var entityMapping = new CodeEntityMapping
             {
-                Id = Guid.NewGuid(),
+                Id = mappingId,
                 RepositoryId = repositoryId,
                 EntityClassName = mapping.EntityClassName,
                 EntityNamespace = mapping.EntityNamespace,
@@ -250,7 +268,25 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
                 ConfidenceScore = mapping.ConfidenceScore,
                 CreatedAt = now,
                 UpdatedAt = now
-            });
+            };
+
+            foreach (var property in mapping.Properties)
+            {
+                entityMapping.Properties.Add(new CodeEntityProperty
+                {
+                    Id = Guid.NewGuid(),
+                    CodeEntityMappingId = mappingId,
+                    PropertyName = property.PropertyName,
+                    ColumnName = property.ColumnName,
+                    ClrType = property.ClrType,
+                    IsNullable = property.IsNullable,
+                    IsPrimaryKey = property.IsPrimaryKey,
+                    CreatedAt = now,
+                    UpdatedAt = now
+                });
+            }
+
+            _dbContext.CodeEntityMappings.Add(entityMapping);
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);

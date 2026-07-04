@@ -10,13 +10,16 @@ namespace EnhancementHub.Infrastructure.Services.SystemIntelligence;
 public sealed class SchemaDriftDetectorService : ISchemaDriftDetector
 {
     private readonly IEnhancementHubDbContext _dbContext;
+    private readonly INotificationPublisher _notifications;
     private readonly ILogger<SchemaDriftDetectorService> _logger;
 
     public SchemaDriftDetectorService(
         IEnhancementHubDbContext dbContext,
+        INotificationPublisher notifications,
         ILogger<SchemaDriftDetectorService> logger)
     {
         _dbContext = dbContext;
+        _notifications = notifications;
         _logger = logger;
     }
 
@@ -34,6 +37,7 @@ public sealed class SchemaDriftDetectorService : ISchemaDriftDetector
             .ToListAsync(cancellationToken);
 
         var codeMappings = await _dbContext.CodeEntityMappings
+            .Include(m => m.Properties)
             .Where(m => applicationRepoIds.Contains(m.RepositoryId))
             .ToListAsync(cancellationToken);
 
@@ -116,6 +120,13 @@ public sealed class SchemaDriftDetectorService : ISchemaDriftDetector
         _logger.LogInformation("Drift detection for connection {ConnectionId} found {Count} issues",
             databaseConnectionId, findings.Count);
 
+        await _notifications.PublishAsync(
+            "schema.drift.detected",
+            "Schema drift scan complete",
+            $"Detected {findings.Count} drift finding(s).",
+            new { databaseConnectionId, findingCount = findings.Count },
+            cancellationToken);
+
         return new DriftReport
         {
             DatabaseConnectionId = databaseConnectionId,
@@ -126,7 +137,6 @@ public sealed class SchemaDriftDetectorService : ISchemaDriftDetector
 
     private static void CompareColumns(CodeEntityMapping mapping, DatabaseTable dbTable, List<DriftFindingDto> findings)
     {
-        // Phase 1: flag tables with no columns as potential drift
         if (dbTable.Columns.Count == 0)
         {
             findings.Add(new DriftFindingDto
@@ -139,8 +149,134 @@ public sealed class SchemaDriftDetectorService : ISchemaDriftDetector
                 DatabaseReference = $"{mapping.SchemaName}.{mapping.TableName}",
                 RepositoryId = mapping.RepositoryId
             });
+            return;
+        }
+
+        if (mapping.Properties.Count == 0)
+        {
+            return;
+        }
+
+        var dbColumns = dbTable.Columns.ToDictionary(
+            c => c.Name,
+            c => c,
+            StringComparer.OrdinalIgnoreCase);
+
+        var matchedDbColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var property in mapping.Properties)
+        {
+            var columnName = property.ColumnName ?? property.PropertyName;
+            if (!dbColumns.TryGetValue(columnName, out var dbColumn))
+            {
+                findings.Add(new DriftFindingDto
+                {
+                    DriftType = DriftType.MissingInDatabase,
+                    Severity = DriftSeverity.High,
+                    Title = $"Column missing in database: {mapping.TableName}.{columnName}",
+                    Description = $"Property {mapping.EntityClassName}.{property.PropertyName} maps to column '{columnName}' but it was not found in the live database.",
+                    CodeReference = $"{mapping.EntityFilePath} ({property.PropertyName}: {property.ClrType})",
+                    DatabaseReference = $"{mapping.SchemaName}.{mapping.TableName}",
+                    RepositoryId = mapping.RepositoryId
+                });
+                continue;
+            }
+
+            matchedDbColumns.Add(dbColumn.Name);
+
+            if (property.IsNullable != dbColumn.IsNullable)
+            {
+                findings.Add(new DriftFindingDto
+                {
+                    DriftType = DriftType.NullableMismatch,
+                    Severity = DriftSeverity.Medium,
+                    Title = $"Nullable mismatch: {mapping.TableName}.{columnName}",
+                    Description = $"Code expects nullable={property.IsNullable} but database column is nullable={dbColumn.IsNullable}.",
+                    CodeReference = $"{mapping.EntityFilePath} ({property.PropertyName})",
+                    DatabaseReference = $"{dbColumn.DataType} nullable={dbColumn.IsNullable}",
+                    RepositoryId = mapping.RepositoryId
+                });
+            }
+
+            if (!TypesCompatible(property.ClrType, dbColumn.DataType))
+            {
+                findings.Add(new DriftFindingDto
+                {
+                    DriftType = DriftType.ColumnTypeMismatch,
+                    Severity = DriftSeverity.High,
+                    Title = $"Type mismatch: {mapping.TableName}.{columnName}",
+                    Description = $"Code type '{property.ClrType}' does not match database type '{dbColumn.DataType}'.",
+                    CodeReference = $"{mapping.EntityFilePath} ({property.PropertyName}: {property.ClrType})",
+                    DatabaseReference = dbColumn.DataType,
+                    RepositoryId = mapping.RepositoryId
+                });
+            }
+        }
+
+        foreach (var dbColumn in dbTable.Columns)
+        {
+            if (!matchedDbColumns.Contains(dbColumn.Name))
+            {
+                findings.Add(new DriftFindingDto
+                {
+                    DriftType = DriftType.MissingInCode,
+                    Severity = DriftSeverity.Medium,
+                    Title = $"Column missing in code: {mapping.TableName}.{dbColumn.Name}",
+                    Description = $"Database column '{dbColumn.Name}' exists but has no mapped EF property on {mapping.EntityClassName}.",
+                    CodeReference = mapping.EntityFilePath,
+                    DatabaseReference = $"{dbColumn.DataType} nullable={dbColumn.IsNullable}",
+                    RepositoryId = mapping.RepositoryId
+                });
+            }
         }
     }
+
+    public static bool TypesCompatible(string clrType, string dbType)
+    {
+        var normalizedClr = NormalizeTypeName(clrType);
+        var normalizedDb = NormalizeTypeName(dbType);
+
+        if (normalizedClr == normalizedDb)
+        {
+            return true;
+        }
+
+        return (normalizedClr, normalizedDb) switch
+        {
+            ("int", "integer") => true,
+            ("int", "int") => true,
+            ("int32", "integer") => true,
+            ("long", "bigint") => true,
+            ("int64", "bigint") => true,
+            ("string", "text") => true,
+            ("string", "varchar") => true,
+            ("string", "nvarchar") => true,
+            ("string", "character varying") => true,
+            ("bool", "boolean") => true,
+            ("bool", "bit") => true,
+            ("boolean", "bit") => true,
+            ("datetime", "timestamp") => true,
+            ("datetime", "datetime") => true,
+            ("datetimeoffset", "timestamp with time zone") => true,
+            ("guid", "uuid") => true,
+            ("guid", "uniqueidentifier") => true,
+            ("decimal", "numeric") => true,
+            ("decimal", "decimal") => true,
+            ("double", "double precision") => true,
+            ("float", "real") => true,
+            ("float", "float") => true,
+            ("byte[]", "blob") => true,
+            ("byte[]", "bytea") => true,
+            _ when normalizedDb.Contains(normalizedClr) || normalizedClr.Contains(normalizedDb) => true,
+            _ => false
+        };
+    }
+
+    private static string NormalizeTypeName(string type) =>
+        type.Replace("System.", string.Empty, StringComparison.Ordinal)
+            .Trim()
+            .ToLowerInvariant()
+            .Split('(')[0];
 
     private async Task PersistFindingsAsync(
         DatabaseConnection connection,

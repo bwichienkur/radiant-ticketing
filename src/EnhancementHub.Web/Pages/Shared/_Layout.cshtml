@@ -61,7 +61,38 @@
         @RenderBody()
     </main>
 
+    <div id="notification-toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+        <script>
+            (() => {
+                const container = document.getElementById('notification-toast-container');
+                const connection = new signalR.HubConnectionBuilder()
+                    .withUrl('/hubs/notifications')
+                    .withAutomaticReconnect()
+                    .build();
+
+                connection.on('PlatformNotification', payload => {
+                    const toast = document.createElement('div');
+                    toast.className = 'toast show mb-2 border-0 shadow';
+                    toast.innerHTML = `
+                        <div class="toast-header">
+                            <strong class="me-auto">${payload.title ?? 'EnhancementHub'}</strong>
+                            <small class="text-muted">now</small>
+                            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                        </div>
+                        <div class="toast-body">${payload.message ?? ''}</div>`;
+                    container.appendChild(toast);
+                    setTimeout(() => toast.remove(), 8000);
+                });
+
+                connection.start().catch(console.error);
+            })();
+        </script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

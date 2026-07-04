@@ -54,6 +54,22 @@ public sealed class EnhancementRequestsController : ControllerBase
             request.TeamId,
             request.SupportingNotes), cancellationToken));
 
+    [HttpPost("{id:guid}/attachments")]
+    [RequestSizeLimit(20_000_000)]
+    public async Task<IActionResult> UploadAttachment(
+        Guid id,
+        IFormFile file,
+        CancellationToken cancellationToken)
+    {
+        await using var stream = file.OpenReadStream();
+        var result = await _mediator.Send(new UploadEnhancementAttachmentCommand(
+            id,
+            file.FileName,
+            file.ContentType,
+            stream), cancellationToken);
+        return Ok(result);
+    }
+
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {

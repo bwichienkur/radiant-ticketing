@@ -12,6 +12,16 @@ public sealed class EntityMappingInfo
     public string? DbContextType { get; set; }
     public EntityMappingSource MappingSource { get; set; }
     public double ConfidenceScore { get; set; }
+    public IReadOnlyList<EntityPropertyInfo> Properties { get; set; } = Array.Empty<EntityPropertyInfo>();
+}
+
+public sealed class EntityPropertyInfo
+{
+    public string PropertyName { get; set; } = string.Empty;
+    public string? ColumnName { get; set; }
+    public string ClrType { get; set; } = string.Empty;
+    public bool IsNullable { get; set; }
+    public bool IsPrimaryKey { get; set; }
 }
 
 public sealed class RepositoryScanResult

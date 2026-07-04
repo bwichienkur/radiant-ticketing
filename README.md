@@ -109,6 +109,7 @@ Set `OPENAI_API_KEY` for live AI analysis; without it, the system uses determini
 | 6 | Multi-repo graph, schema drift detection, documentation export | Complete |
 | 7 | Refactor blast-radius analysis, AI migration plans | Complete |
 | 8 | On-prem agent, SSO stubs (OpenID Connect), System Intelligence tests | Complete |
+| 9 | Column-level drift, pgvector search, SSO role mapping, notifications, blob storage | Complete |
 
 See [docs/PHASES.md](docs/PHASES.md) for detailed phase breakdown.
 

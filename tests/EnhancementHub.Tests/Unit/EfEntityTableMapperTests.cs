@@ -30,6 +30,9 @@ public sealed class EfEntityTableMapperTests : IDisposable
         mappings.Should().Contain(m =>
             m.EntityClassName == "Order"
             && m.TableName == "Orders");
+
+        mappings.First(m => m.EntityClassName == "Customer").Properties.Should().Contain(p => p.PropertyName == "Id" && p.IsPrimaryKey);
+        mappings.First(m => m.EntityClassName == "Customer").Properties.Should().Contain(p => p.PropertyName == "Email");
     }
 
     public void Dispose()
@@ -66,6 +69,7 @@ public sealed class EfEntityTableMapperTests : IDisposable
             public class Customer
             {
                 public int Id { get; set; }
+                public string Email { get; set; } = string.Empty;
             }
             """);
 

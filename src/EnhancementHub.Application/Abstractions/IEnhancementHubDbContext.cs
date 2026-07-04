@@ -38,6 +38,7 @@ public interface IEnhancementHubDbContext
     DbSet<DatabaseColumn> DatabaseColumns { get; }
     DbSet<DatabaseRelationship> DatabaseRelationships { get; }
     DbSet<CodeEntityMapping> CodeEntityMappings { get; }
+    DbSet<CodeEntityProperty> CodeEntityProperties { get; }
     DbSet<CodeTableReference> CodeTableReferences { get; }
     DbSet<SchemaDriftFinding> SchemaDriftFindings { get; }
     DbSet<SystemGraphNode> SystemGraphNodes { get; }

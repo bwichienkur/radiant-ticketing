@@ -3,12 +3,16 @@ using EnhancementHub.Application.DependencyInjection;
 using EnhancementHub.Infrastructure.DependencyInjection;
 using EnhancementHub.Infrastructure.Persistence;
 using EnhancementHub.Infrastructure.Security;
+using EnhancementHub.Web.Hubs;
+using EnhancementHub.Web.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddSignalR();
+builder.Services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/");
@@ -46,5 +50,6 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapRazorPages();
+app.MapHub<PlatformNotificationHub>("/hubs/notifications");
 
 app.Run();

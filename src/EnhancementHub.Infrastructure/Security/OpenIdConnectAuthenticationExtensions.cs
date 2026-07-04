@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -41,7 +42,7 @@ public static class OpenIdConnectAuthenticationExtensions
 
         if (IsOpenIdConnectEnabled(configuration))
         {
-            builder.AddOpenIdConnect("oidc", options => ConfigureOpenIdConnect(options, configuration));
+            builder.AddOpenIdConnect(options => ConfigureOpenIdConnect(options, configuration));
         }
 
         return builder;
@@ -101,5 +102,40 @@ public static class OpenIdConnectAuthenticationExtensions
             options.Scope.Add("profile");
             options.Scope.Add("email");
         }
+
+        options.MapInboundClaims = false;
+        options.TokenValidationParameters.NameClaimType = "preferred_username";
+        options.TokenValidationParameters.RoleClaimType = ClaimTypes.Role;
+
+        var roleMappings = section.GetSection("RoleMappings").Get<Dictionary<string, string>>() ?? new Dictionary<string, string>();
+        options.Events.OnTokenValidated = context =>
+        {
+            if (context.Principal?.Identity is not ClaimsIdentity identity)
+            {
+                return Task.CompletedTask;
+            }
+
+            var groupClaims = identity.FindAll("groups")
+                .Concat(identity.FindAll(ClaimTypes.Role))
+                .Select(c => c.Value)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            foreach (var group in groupClaims)
+            {
+                if (roleMappings.TryGetValue(group, out var mappedRole))
+                {
+                    identity.AddClaim(new Claim(ClaimTypes.Role, mappedRole));
+                }
+            }
+
+            var defaultRole = section["DefaultRole"];
+            if (!string.IsNullOrWhiteSpace(defaultRole) && !identity.HasClaim(c => c.Type == ClaimTypes.Role))
+            {
+                identity.AddClaim(new Claim(ClaimTypes.Role, defaultRole));
+            }
+
+            return Task.CompletedTask;
+        };
     }
 }

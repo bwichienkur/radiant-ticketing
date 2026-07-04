@@ -101,11 +101,126 @@ public sealed class EfEntityTableMapper : IEfEntityTableMapper
             }
         }
 
+        var entityFiles = csharpFiles.ToDictionary(
+            f => GetRelativePath(rootPath, f),
+            f => f,
+            StringComparer.OrdinalIgnoreCase);
+
         return mappings
             .GroupBy(m => $"{m.EntityClassName}|{m.TableName}|{m.SchemaName}", StringComparer.OrdinalIgnoreCase)
-            .Select(g => g.OrderByDescending(m => m.ConfidenceScore).First())
+            .Select(g =>
+            {
+                var mapping = g.OrderByDescending(m => m.ConfidenceScore).First();
+                mapping.Properties = ExtractPropertiesForEntity(rootPath, mapping, entityFiles);
+                return mapping;
+            })
             .OrderBy(m => m.EntityClassName)
             .ToList();
+    }
+
+    private static IReadOnlyList<EntityPropertyInfo> ExtractPropertiesForEntity(
+        string rootPath,
+        EntityMappingInfo mapping,
+        IReadOnlyDictionary<string, string> entityFiles)
+    {
+        if (entityFiles.TryGetValue(mapping.EntityFilePath, out var mappedFile))
+        {
+            var properties = ExtractPropertiesFromFile(mappedFile, mapping.EntityClassName);
+            if (properties.Count > 0)
+            {
+                return properties;
+            }
+        }
+
+        foreach (var file in entityFiles.Values)
+        {
+            var properties = ExtractPropertiesFromFile(file, mapping.EntityClassName);
+            if (properties.Count > 0)
+            {
+                return properties;
+            }
+        }
+
+        return Array.Empty<EntityPropertyInfo>();
+    }
+
+    private static List<EntityPropertyInfo> ExtractPropertiesFromFile(string filePath, string entityClassName)
+    {
+        var source = File.ReadAllText(filePath);
+        var tree = CSharpSyntaxTree.ParseText(source);
+        var root = tree.GetRoot();
+
+        var classDecl = root.DescendantNodes()
+            .OfType<ClassDeclarationSyntax>()
+            .FirstOrDefault(c => c.Identifier.Text.Equals(entityClassName, StringComparison.Ordinal));
+
+        if (classDecl is null)
+        {
+            return [];
+        }
+
+        var properties = new List<EntityPropertyInfo>();
+        foreach (var property in classDecl.Members.OfType<PropertyDeclarationSyntax>())
+        {
+            if (!property.Modifiers.Any(SyntaxKind.PublicKeyword))
+            {
+                continue;
+            }
+
+            var typeText = property.Type.ToString();
+            var isNullable = property.Type is NullableTypeSyntax
+                || typeText.EndsWith('?')
+                || typeText.StartsWith("Nullable<", StringComparison.Ordinal);
+
+            properties.Add(new EntityPropertyInfo
+            {
+                PropertyName = property.Identifier.Text,
+                ColumnName = ExtractColumnName(property) ?? property.Identifier.Text,
+                ClrType = typeText.TrimEnd('?'),
+                IsNullable = isNullable,
+                IsPrimaryKey = IsPrimaryKey(property)
+            });
+        }
+
+        return properties;
+    }
+
+    private static string? ExtractColumnName(PropertyDeclarationSyntax property)
+    {
+        foreach (var attrList in property.AttributeLists)
+        {
+            foreach (var attr in attrList.Attributes)
+            {
+                var name = attr.Name.ToString();
+                if (name is "Column" or "ColumnAttribute"
+                    || name.EndsWith(".Column", StringComparison.Ordinal)
+                    || name.EndsWith(".ColumnAttribute", StringComparison.Ordinal))
+                {
+                    return attr.ArgumentList?.Arguments.FirstOrDefault()?.Expression.ToString().Trim('"');
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static bool IsPrimaryKey(PropertyDeclarationSyntax property)
+    {
+        foreach (var attrList in property.AttributeLists)
+        {
+            foreach (var attr in attrList.Attributes)
+            {
+                var name = attr.Name.ToString();
+                if (name is "Key" or "KeyAttribute"
+                    || name.EndsWith(".Key", StringComparison.Ordinal)
+                    || name.EndsWith(".KeyAttribute", StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return property.Identifier.Text.Equals("Id", StringComparison.Ordinal);
     }
 
     private static IEnumerable<EntityMappingInfo> ExtractFluentMappings(

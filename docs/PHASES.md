@@ -66,11 +66,19 @@
 - OpenID Connect SSO stub (enable via `Authentication:OpenIdConnect:Enabled`)
 - System Intelligence unit tests (EF mapping, drift detection, doc export)
 
+## Phase 9 — Production Scale & Enterprise Readiness
+
+- Column-level schema drift detection (type, nullability, missing columns)
+- `CodeEntityProperty` extraction via Roslyn during repository indexing
+- pgvector semantic search provider for PostgreSQL (`VectorSearch:Provider=PgVector`)
+- Azure AD / Entra ID SSO role mapping from security groups
+- Real-time SignalR notifications for scans, indexing, and drift detection
+- Blob storage abstraction with local disk and S3-compatible stub
+- Enhancement request attachment upload API
+
 ## Future enhancements
 
-- pgvector production deployment for semantic search at scale
 - Azure AI Search / Qdrant vector provider implementations
-- Full Azure AD / Entra ID SSO integration with role mapping
-- Real-time notifications
-- Attachment blob storage (S3/Azure Blob)
-- Column-level drift detection with type/nullability comparison
+- Full S3 attachment storage with presigned URLs
+- Real-time email/Teams notification channels
+- Attachment virus scanning

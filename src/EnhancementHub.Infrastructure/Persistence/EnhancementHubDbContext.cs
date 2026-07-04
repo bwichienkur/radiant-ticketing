@@ -44,6 +44,7 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<DatabaseColumn> DatabaseColumns => Set<DatabaseColumn>();
     public DbSet<DatabaseRelationship> DatabaseRelationships => Set<DatabaseRelationship>();
     public DbSet<CodeEntityMapping> CodeEntityMappings => Set<CodeEntityMapping>();
+    public DbSet<CodeEntityProperty> CodeEntityProperties => Set<CodeEntityProperty>();
     public DbSet<CodeTableReference> CodeTableReferences => Set<CodeTableReference>();
     public DbSet<SchemaDriftFinding> SchemaDriftFindings => Set<SchemaDriftFinding>();
     public DbSet<SystemGraphNode> SystemGraphNodes => Set<SystemGraphNode>();

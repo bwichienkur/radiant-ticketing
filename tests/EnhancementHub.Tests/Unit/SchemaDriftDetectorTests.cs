@@ -3,6 +3,7 @@ using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Domain.Entities;
 using EnhancementHub.Domain.Enums;
 using EnhancementHub.Infrastructure.Persistence;
+using EnhancementHub.Infrastructure.Services;
 using EnhancementHub.Infrastructure.Services.SystemIntelligence;
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
@@ -27,7 +28,7 @@ public sealed class SchemaDriftDetectorTests : IDisposable
                 .UseSqlite(_connection)
                 .Options);
         _dbContext.Database.EnsureCreated();
-        _sut = new SchemaDriftDetectorService(_dbContext, NullLogger<SchemaDriftDetectorService>.Instance);
+        _sut = new SchemaDriftDetectorService(_dbContext, new NoOpNotificationPublisher(), NullLogger<SchemaDriftDetectorService>.Instance);
     }
 
     [Fact]
