@@ -68,7 +68,7 @@ public sealed class Phase16SsoJobsDashboardTests
         var status = await service.GetStatusAsync();
 
         status.Provider.Should().Be("Polling");
-        status.Jobs.Should().HaveCount(5);
+        status.Jobs.Should().HaveCount(6);
         status.QueueCounts.Should().NotBeNull();
     }
 

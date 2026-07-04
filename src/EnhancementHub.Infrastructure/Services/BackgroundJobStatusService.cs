@@ -97,7 +97,8 @@ public sealed class BackgroundJobStatusService : IBackgroundJobStatusService
                 new("ai-analysis", "Analyze submitted enhancement requests", "Polling every 2 minutes", null, null),
                 new("application-discovery", "Run onboarding discovery jobs", "Polling every 3 seconds", null, null),
                 new("database-schema-scan", "Scan pending database connections", "Polling every 10 minutes", null, null),
-                new("repository-refresh", "Re-index stale repositories", "Polling every 12 hours", null, null)
+                new("repository-refresh", "Re-index stale repositories", "Polling every 12 hours", null, null),
+                new("data-retention", "Purge expired AI prompt runs and attachments", "Polling every 24 hours", null, null)
             ];
         }
 
@@ -115,7 +116,8 @@ public sealed class BackgroundJobStatusService : IBackgroundJobStatusService
                 BuildRecurringJobStatus(connection, "ai-analysis", "Analyze submitted enhancement requests", "*/2 * * * *"),
                 BuildRecurringJobStatus(connection, "application-discovery", "Run onboarding discovery jobs", "* * * * *"),
                 BuildRecurringJobStatus(connection, "database-schema-scan", "Scan pending database connections", "*/10 * * * *"),
-                BuildRecurringJobStatus(connection, "repository-refresh", "Re-index stale repositories", "Daily")
+                BuildRecurringJobStatus(connection, "repository-refresh", "Re-index stale repositories", "Daily"),
+                BuildRecurringJobStatus(connection, "data-retention", "Purge expired AI prompt runs and attachments", "Daily")
             ];
         }
         catch
@@ -130,7 +132,8 @@ public sealed class BackgroundJobStatusService : IBackgroundJobStatusService
         new("ai-analysis", "Analyze submitted enhancement requests", "*/2 * * * *", null, null),
         new("application-discovery", "Run onboarding discovery jobs", "* * * * *", null, null),
         new("database-schema-scan", "Scan pending database connections", "*/10 * * * *", null, null),
-        new("repository-refresh", "Re-index stale repositories", "Daily", null, null)
+        new("repository-refresh", "Re-index stale repositories", "Daily", null, null),
+        new("data-retention", "Purge expired AI prompt runs and attachments", "Daily", null, null)
     ];
 
     private static BackgroundJobDefinitionStatusDto BuildRecurringJobStatus(

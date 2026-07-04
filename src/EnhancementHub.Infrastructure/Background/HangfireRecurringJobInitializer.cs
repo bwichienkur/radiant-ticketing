@@ -39,6 +39,11 @@ public sealed class HangfireRecurringJobInitializer : IHostedService
             executor => executor.ExecuteAsync(CancellationToken.None),
             Cron.Daily);
 
+        RecurringJob.AddOrUpdate<DataRetentionJobExecutor>(
+            "data-retention",
+            executor => executor.ExecuteAsync(CancellationToken.None),
+            Cron.Daily);
+
         _logger.LogInformation("Hangfire recurring jobs registered.");
         return Task.CompletedTask;
     }

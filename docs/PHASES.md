@@ -188,6 +188,13 @@
 - Persisted wizard errors (`WizardError`) with recovery on step advance
 - Discovery failure panel with retry guidance and links back to code/database steps
 
+## Horizon 2 continuation — Data retention
+
+- Configurable retention for `AiPromptRun` records and enhancement attachments (`Retention` config section)
+- Daily background job when `Retention:Enabled=true` (Hangfire or polling Worker)
+- Admin page `/Admin/Retention` with preview and manual apply
+- API: `GET /api/admin/retention/status`, `POST /api/admin/retention/apply?dryRun=true|false`
+
 ## Future enhancements
 
 - GitHub App webhook-driven automatic re-index on push

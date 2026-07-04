@@ -71,6 +71,7 @@ chmod +x scripts/smoke-check.sh
 - [ ] Set `DataProtection:KeysPath` on shared storage for API + Web instances
 - [ ] Store on-prem agent API keys in a secrets manager
 - [ ] Enable attachment ClamAV scanning if required by policy
+- [ ] Configure data retention (`Retention:Enabled`, `AiPromptRunsDays`, `AttachmentsDays`) for compliance
 - [ ] Restrict network access to Worker (health port only if exposed)
 
 ### Services to run
