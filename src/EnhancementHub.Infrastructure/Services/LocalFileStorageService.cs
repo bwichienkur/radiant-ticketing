@@ -57,6 +57,9 @@ public sealed class LocalFileStorageService : IFileStorageService
         return Task.CompletedTask;
     }
 
+    public Task<string?> GetPresignedDownloadUrlAsync(string storagePath, TimeSpan validity, CancellationToken cancellationToken = default) =>
+        Task.FromResult<string?>(null);
+
     private static string Sanitize(string value) =>
         string.Concat(value.Split(Path.GetInvalidFileNameChars(), StringSplitOptions.RemoveEmptyEntries));
 }

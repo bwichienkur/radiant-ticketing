@@ -70,6 +70,24 @@ public sealed class EnhancementRequestsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("{id:guid}/attachments/{attachmentId:guid}/download")]
+    public async Task<IActionResult> DownloadAttachment(
+        Guid id,
+        Guid attachmentId,
+        CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new GetEnhancementAttachmentDownloadQuery(id, attachmentId),
+            cancellationToken);
+
+        if (!string.IsNullOrWhiteSpace(result.PresignedDownloadUrl))
+        {
+            return Redirect(result.PresignedDownloadUrl);
+        }
+
+        return File(result.ContentStream!, result.ContentType, result.FileName);
+    }
+
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {

@@ -37,7 +37,7 @@ public sealed class PgVectorSearchService : IVectorSearchService
             DO UPDATE SET "Embedding" = EXCLUDED."Embedding", "UpdatedAt" = EXCLUDED."UpdatedAt"
             """;
         command.Parameters.AddWithValue("id", sourceId);
-        command.Parameters.AddWithValue("embedding", new Vector(Normalize(embedding)));
+        command.Parameters.AddWithValue("embedding", new Vector(VectorEmbeddingNormalizer.Normalize(embedding, _dimensions)));
         command.Parameters.AddWithValue("updatedAt", DateTime.UtcNow);
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
@@ -60,7 +60,7 @@ public sealed class PgVectorSearchService : IVectorSearchService
             ORDER BY "Embedding" <=> @query
             LIMIT {topK}
             """;
-        command.Parameters.AddWithValue("query", new Vector(Normalize(queryEmbedding)));
+        command.Parameters.AddWithValue("query", new Vector(VectorEmbeddingNormalizer.Normalize(queryEmbedding, _dimensions)));
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         while (await reader.ReadAsync(cancellationToken))
@@ -107,21 +107,5 @@ public sealed class PgVectorSearchService : IVectorSearchService
             )
             """;
         await create.ExecuteNonQueryAsync(cancellationToken);
-    }
-
-    private float[] Normalize(float[] embedding)
-    {
-        if (embedding.Length == _dimensions)
-        {
-            return embedding;
-        }
-
-        var normalized = new float[_dimensions];
-        for (var i = 0; i < _dimensions; i++)
-        {
-            normalized[i] = embedding[i % embedding.Length];
-        }
-
-        return normalized;
     }
 }

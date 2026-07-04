@@ -76,9 +76,16 @@
 - Blob storage abstraction with local disk and S3-compatible stub
 - Enhancement request attachment upload API
 
+## Phase 10 — Enterprise Integrations
+
+- Qdrant vector search provider (`VectorSearch:Provider=Qdrant`)
+- Azure AI Search vector provider (`VectorSearch:Provider=AzureSearch`)
+- Full S3 attachment storage with presigned download URLs
+- Attachment download API (`GET /api/enhancementrequests/{id}/attachments/{attachmentId}/download`)
+- Email notification channel via SMTP (`Notifications:Email`)
+- Microsoft Teams webhook notification channel (`Notifications:Teams`)
+- Composite notification publisher fan-out across enabled channels
+
 ## Future enhancements
 
-- Azure AI Search / Qdrant vector provider implementations
-- Full S3 attachment storage with presigned URLs
-- Real-time email/Teams notification channels
 - Attachment virus scanning

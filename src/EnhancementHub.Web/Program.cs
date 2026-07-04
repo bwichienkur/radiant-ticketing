@@ -1,6 +1,7 @@
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.DependencyInjection;
 using EnhancementHub.Infrastructure.DependencyInjection;
+using EnhancementHub.Infrastructure.Services.Notifications;
 using EnhancementHub.Infrastructure.Persistence;
 using EnhancementHub.Infrastructure.Security;
 using EnhancementHub.Web.Hubs;
@@ -12,7 +13,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddSignalR();
-builder.Services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
+builder.Services.AddScoped<SignalRNotificationPublisher>();
+builder.Services.AddScoped<INotificationPublisher>(sp => new CompositeNotificationPublisher(
+    [
+        sp.GetRequiredService<SignalRNotificationPublisher>(),
+        sp.GetRequiredService<EmailNotificationPublisher>(),
+        sp.GetRequiredService<TeamsWebhookNotificationPublisher>()
+    ],
+    sp.GetRequiredService<ILogger<CompositeNotificationPublisher>>()));
 builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/");

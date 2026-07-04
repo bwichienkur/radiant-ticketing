@@ -110,6 +110,7 @@ Set `OPENAI_API_KEY` for live AI analysis; without it, the system uses determini
 | 7 | Refactor blast-radius analysis, AI migration plans | Complete |
 | 8 | On-prem agent, SSO stubs (OpenID Connect), System Intelligence tests | Complete |
 | 9 | Column-level drift, pgvector search, SSO role mapping, notifications, blob storage | Complete |
+| 10 | Qdrant/Azure Search vectors, S3 presigned URLs, email/Teams notifications | Complete |
 
 See [docs/PHASES.md](docs/PHASES.md) for detailed phase breakdown.
 
@@ -123,14 +124,12 @@ Key settings in `appsettings.json`:
   "ConnectionStrings": { "Default": "Data Source=enhancementhub.db" },
   "Jwt": { "Secret": "...", "Issuer": "EnhancementHub", "Audience": "EnhancementHub" },
   "OpenAI": { "ApiKey": "", "Model": "gpt-4o-mini", "Endpoint": "https://api.openai.com/v1" },
-  "Authentication": {
-    "OpenIdConnect": {
-      "Enabled": false,
-      "Authority": "https://login.microsoftonline.com/{tenant-id}/v2.0",
-      "ClientId": "",
-      "ClientSecret": ""
-    }
-  }
+  "VectorSearch": { "Provider": "InMemory|PgVector|Qdrant|AzureSearch", "Dimensions": 64 },
+  "Storage": { "Provider": "Local|S3", "LocalRoot": "uploads" },
+  "Notifications": {
+    "Email": { "Enabled": false, "SmtpHost": "", "ToAddresses": [] },
+    "Teams": { "Enabled": false, "WebhookUrl": "" }
+  },
 }
 ```
 
@@ -147,12 +146,14 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-44 tests covering risk scoring, AI validation, repository scanning, EF entity mapping, schema drift detection, documentation export, API integration, approval workflow, role permissions, and ticket export.
+56 tests covering risk scoring, AI validation, repository scanning, EF entity mapping, schema drift detection, documentation export, enterprise integrations, API integration, approval workflow, role permissions, and ticket export.
 
 ## API overview
 
 - `POST /api/auth/login`
 - `GET/POST /api/enhancement-requests`
+- `POST /api/enhancementrequests/{id}/attachments`
+- `GET /api/enhancementrequests/{id}/attachments/{attachmentId}/download`
 - `POST /api/approvals/{id}/actions`
 - `POST /api/repositories`, `POST /api/repositories/{id}/index`
 - `GET /api/knowledge/search`

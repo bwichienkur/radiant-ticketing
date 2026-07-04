@@ -5,6 +5,7 @@ using EnhancementHub.Infrastructure.Persistence;
 using EnhancementHub.Infrastructure.Persistence.Repositories;
 using EnhancementHub.Infrastructure.Security;
 using EnhancementHub.Infrastructure.Services;
+using EnhancementHub.Infrastructure.Services.Notifications;
 using EnhancementHub.Infrastructure.Services.SystemIntelligence;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,8 @@ public static class InfrastructureServiceExtensions
 {
     public const string OpenAiHttpClientName = "OpenAI";
     public const string ExternalTicketsHttpClientName = "ExternalTickets";
+    public const string QdrantHttpClientName = "Qdrant";
+    public const string TeamsWebhookHttpClientName = "TeamsWebhook";
 
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
@@ -56,15 +59,28 @@ public static class InfrastructureServiceExtensions
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<InMemoryVectorSearchService>();
         services.AddScoped<PgVectorSearchService>();
+        services.AddScoped<QdrantVectorSearchService>();
+        services.AddScoped<AzureSearchVectorService>();
         services.AddScoped<IVectorSearchService>(sp =>
         {
             var config = sp.GetRequiredService<IConfiguration>();
-            var vectorProvider = config["VectorSearch:Provider"];
+            var vectorProvider = config["VectorSearch:Provider"] ?? "InMemory";
             var databaseProvider = config["Database:Provider"];
+
             if (string.Equals(vectorProvider, "PgVector", StringComparison.OrdinalIgnoreCase)
                 && string.Equals(databaseProvider, "PostgreSQL", StringComparison.OrdinalIgnoreCase))
             {
                 return sp.GetRequiredService<PgVectorSearchService>();
+            }
+
+            if (string.Equals(vectorProvider, "Qdrant", StringComparison.OrdinalIgnoreCase))
+            {
+                return sp.GetRequiredService<QdrantVectorSearchService>();
+            }
+
+            if (string.Equals(vectorProvider, "AzureSearch", StringComparison.OrdinalIgnoreCase))
+            {
+                return sp.GetRequiredService<AzureSearchVectorService>();
             }
 
             return sp.GetRequiredService<InMemoryVectorSearchService>();
@@ -78,7 +94,14 @@ public static class InfrastructureServiceExtensions
                 ? sp.GetRequiredService<S3FileStorageService>()
                 : sp.GetRequiredService<LocalFileStorageService>();
         });
-        services.AddScoped<INotificationPublisher, NoOpNotificationPublisher>();
+        services.AddScoped<EmailNotificationPublisher>();
+        services.AddScoped<TeamsWebhookNotificationPublisher>();
+        services.AddScoped<INotificationPublisher>(sp => new CompositeNotificationPublisher(
+            [
+                sp.GetRequiredService<EmailNotificationPublisher>(),
+                sp.GetRequiredService<TeamsWebhookNotificationPublisher>()
+            ],
+            sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<CompositeNotificationPublisher>>()));
         services.AddScoped<IKnowledgeSearchService, KeywordKnowledgeSearchService>();
         services.AddScoped<IGitRepositoryScanner, RoslynRepositoryScanner>();
         services.AddScoped<EfEntityTableMapper>();
@@ -102,6 +125,15 @@ public static class InfrastructureServiceExtensions
             .AddPolicyHandler(GetRetryPolicy());
 
         services.AddHttpClient(ExternalTicketsHttpClientName)
+            .AddPolicyHandler(GetRetryPolicy());
+
+        services.AddHttpClient(QdrantHttpClientName, (sp, client) =>
+        {
+            var config = sp.GetRequiredService<IConfiguration>();
+            var baseUrl = config["VectorSearch:Qdrant:Url"] ?? "http://localhost:6333";
+            client.BaseAddress = new Uri(baseUrl.TrimEnd('/') + "/");
+        });
+        services.AddHttpClient(TeamsWebhookHttpClientName)
             .AddPolicyHandler(GetRetryPolicy());
 
         services.AddScoped<IAiAnalysisService>(sp =>
