@@ -50,13 +50,23 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IEnhancementHubDbContext>(sp => sp.GetRequiredService<EnhancementHubDbContext>());
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 
-        services.AddDataProtection();
+        var dataProtectionBuilder = services.AddDataProtection()
+            .SetApplicationName(configuration["DataProtection:ApplicationName"] ?? "EnhancementHub");
+
+        var keysPath = configuration["DataProtection:KeysPath"];
+        if (!string.IsNullOrWhiteSpace(keysPath))
+        {
+            Directory.CreateDirectory(keysPath);
+            dataProtectionBuilder.PersistKeysToFileSystem(new DirectoryInfo(keysPath));
+        }
+
         services.AddSingleton<ISecretProtector, SecretProtector>();
         services.AddSingleton<IConnectionStringProtector>(sp => sp.GetRequiredService<ISecretProtector>());
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IEnhancementRequestAccessService, EnhancementRequestAccessService>();
         services.AddScoped<IAuditService, AuditService>();
-        services.AddSingleton<IPasswordHasher, DevPasswordHasher>();
+        services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddScoped<InMemoryVectorSearchService>();
         services.AddScoped<PgVectorSearchService>();

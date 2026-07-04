@@ -15,20 +15,25 @@ public sealed class ListEnhancementRequestsQueryHandler
     : IRequestHandler<ListEnhancementRequestsQuery, IReadOnlyList<EnhancementRequestDto>>
 {
     private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IEnhancementRequestAccessService _accessService;
 
-    public ListEnhancementRequestsQueryHandler(IEnhancementHubDbContext dbContext)
+    public ListEnhancementRequestsQueryHandler(
+        IEnhancementHubDbContext dbContext,
+        IEnhancementRequestAccessService accessService)
     {
         _dbContext = dbContext;
+        _accessService = accessService;
     }
 
     public async Task<IReadOnlyList<EnhancementRequestDto>> Handle(
         ListEnhancementRequestsQuery request,
         CancellationToken cancellationToken)
     {
-        var query = _dbContext.EnhancementRequests
-            .AsNoTracking()
-            .Include(r => r.TargetApplication)
-            .Include(r => r.SubmittedByUser)
+        var query = _accessService.ApplyVisibilityFilter(
+                _dbContext.EnhancementRequests
+                    .AsNoTracking()
+                    .Include(r => r.TargetApplication)
+                    .Include(r => r.SubmittedByUser))
             .AsQueryable();
 
         if (request.Status.HasValue)

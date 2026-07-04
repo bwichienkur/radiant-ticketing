@@ -14,16 +14,22 @@ public sealed class GetEnhancementRequestByIdQueryHandler
     : IRequestHandler<GetEnhancementRequestByIdQuery, EnhancementRequestDetailDto>
 {
     private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IEnhancementRequestAccessService _accessService;
 
-    public GetEnhancementRequestByIdQueryHandler(IEnhancementHubDbContext dbContext)
+    public GetEnhancementRequestByIdQueryHandler(
+        IEnhancementHubDbContext dbContext,
+        IEnhancementRequestAccessService accessService)
     {
         _dbContext = dbContext;
+        _accessService = accessService;
     }
 
     public async Task<EnhancementRequestDetailDto> Handle(
         GetEnhancementRequestByIdQuery request,
         CancellationToken cancellationToken)
     {
+        await _accessService.GetAccessibleRequestAsync(request.Id, cancellationToken);
+
         var entity = await _dbContext.EnhancementRequests
             .AsNoTracking()
             .Include(r => r.TargetApplication)

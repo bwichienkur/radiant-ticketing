@@ -33,6 +33,7 @@ public sealed class UploadEnhancementAttachmentCommandHandler
     private readonly IFileStorageService _fileStorage;
     private readonly IAttachmentScanService _attachmentScan;
     private readonly ICurrentUserService _currentUser;
+    private readonly IEnhancementRequestAccessService _accessService;
     private readonly IAuditService _auditService;
 
     public UploadEnhancementAttachmentCommandHandler(
@@ -40,12 +41,14 @@ public sealed class UploadEnhancementAttachmentCommandHandler
         IFileStorageService fileStorage,
         IAttachmentScanService attachmentScan,
         ICurrentUserService currentUser,
+        IEnhancementRequestAccessService accessService,
         IAuditService auditService)
     {
         _dbContext = dbContext;
         _fileStorage = fileStorage;
         _attachmentScan = attachmentScan;
         _currentUser = currentUser;
+        _accessService = accessService;
         _auditService = auditService;
     }
 
@@ -53,9 +56,9 @@ public sealed class UploadEnhancementAttachmentCommandHandler
         UploadEnhancementAttachmentCommand request,
         CancellationToken cancellationToken)
     {
-        var enhancementRequest = await _dbContext.EnhancementRequests
-            .FirstOrDefaultAsync(r => r.Id == request.EnhancementRequestId, cancellationToken)
-            ?? throw new NotFoundException(nameof(EnhancementRequest), request.EnhancementRequestId);
+        var enhancementRequest = await _accessService.GetAccessibleRequestAsync(
+            request.EnhancementRequestId,
+            cancellationToken);
 
         if (!_currentUser.UserId.HasValue)
         {

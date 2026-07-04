@@ -1,9 +1,11 @@
 using EnhancementHub.Application.Features.EnhancementRequests.Commands;
 using EnhancementHub.Application.Features.EnhancementRequests.Queries;
+using EnhancementHub.Api.Extensions;
 using EnhancementHub.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace EnhancementHub.Api.Controllers;
 
@@ -56,6 +58,7 @@ public sealed class EnhancementRequestsController : ControllerBase
 
     [HttpPost("{id:guid}/attachments")]
     [RequestSizeLimit(20_000_000)]
+    [EnableRateLimiting(RateLimitingExtensions.UploadPolicy)]
     public async Task<IActionResult> UploadAttachment(
         Guid id,
         IFormFile file,

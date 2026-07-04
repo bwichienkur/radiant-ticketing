@@ -34,6 +34,8 @@ public sealed class OnPremAgentRegistration
     public Guid AgentId { get; set; }
     public string AgentName { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public Guid? ApplicationId { get; set; }
     public DateTime RegisteredAt { get; set; }
     public DateTime? LastSeenAt { get; set; }
+    public string? ApiKey { get; set; }
 }

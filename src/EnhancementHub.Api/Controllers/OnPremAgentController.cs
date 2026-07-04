@@ -11,6 +11,8 @@ namespace EnhancementHub.Api.Controllers;
 [Route("api/on-prem-agent")]
 public sealed class OnPremAgentController : ControllerBase
 {
+    private const string AgentApiKeyHeader = "X-Agent-Api-Key";
+
     private readonly IMediator _mediator;
     private readonly IOnPremAgentService _agentService;
 
@@ -31,13 +33,26 @@ public sealed class OnPremAgentController : ControllerBase
         [FromBody] SubmitScanResultsRequest request,
         CancellationToken cancellationToken)
     {
-        await _agentService.AcceptScanPayloadAsync(agentId, request.ConnectionId, request.ScanResult, cancellationToken);
+        if (!Request.Headers.TryGetValue(AgentApiKeyHeader, out var apiKeyValues)
+            || string.IsNullOrWhiteSpace(apiKeyValues))
+        {
+            return Unauthorized(new { error = "Agent API key is required." });
+        }
+
+        await _agentService.AcceptScanPayloadAsync(
+            agentId,
+            apiKeyValues.ToString(),
+            request.ConnectionId,
+            request.ScanResult,
+            cancellationToken);
+
         return Ok(new { success = true });
     }
 
     [Authorize]
     [HttpGet]
-    public IActionResult ListAgents() => Ok(_agentService.GetRegisteredAgents());
+    public async Task<IActionResult> ListAgents(CancellationToken cancellationToken) =>
+        Ok(await _agentService.GetRegisteredAgentsAsync(cancellationToken));
 }
 
 public sealed class SubmitScanResultsRequest

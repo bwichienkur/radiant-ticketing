@@ -120,6 +120,16 @@
 - Installation token flow with JWT app authentication
 - GitHub App status detection in onboarding wizard
 
+## Phase 15 — Enterprise Hardening (Tier 1)
+
+- PBKDF2 password hashing replaces development SHA256 hasher
+- Data Protection keys persisted to filesystem (`DataProtection:KeysPath`)
+- Production startup validation for JWT secret and key persistence
+- On-prem agent API key authentication on `scan-results` (`X-Agent-Api-Key`)
+- DB-backed on-prem agent registry with hashed API keys
+- Resource-level authorization for enhancement requests and attachments
+- Rate limiting on login and attachment upload endpoints
+
 ## Future enhancements
 
 - GitHub App webhook-driven automatic re-index on push

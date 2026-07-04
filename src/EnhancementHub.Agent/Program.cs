@@ -15,6 +15,8 @@ var apiBaseUrl = configuration["Agent:ApiBaseUrl"]
     ?? throw new InvalidOperationException("Agent:ApiBaseUrl is required.");
 var agentId = Guid.Parse(configuration["Agent:AgentId"]
     ?? throw new InvalidOperationException("Agent:AgentId is required."));
+var apiKey = configuration["Agent:ApiKey"]
+    ?? throw new InvalidOperationException("Agent:ApiKey is required.");
 var connectionId = Guid.Parse(configuration["Agent:ConnectionId"]
     ?? throw new InvalidOperationException("Agent:ConnectionId is required."));
 var connectionString = configuration["Agent:ConnectionString"]
@@ -34,6 +36,8 @@ var scanResult = await scanner.ScanAsync(connectionString, provider);
 Console.WriteLine($"Scanned {scanResult.Tables.Count} tables. Uploading to {apiBaseUrl}...");
 
 using var http = new HttpClient { BaseAddress = new Uri(apiBaseUrl.TrimEnd('/') + "/") };
+http.DefaultRequestHeaders.Add("X-Agent-Api-Key", apiKey);
+
 var payload = new ScanPayload(connectionId, scanResult);
 var response = await http.PostAsJsonAsync($"api/on-prem-agent/{agentId}/scan-results", payload);
 

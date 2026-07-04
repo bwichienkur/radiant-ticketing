@@ -144,7 +144,8 @@ public sealed class SetupOnPremAgentForOnboardingCommandHandler
 
         var agent = await _mediator.Send(new RegisterOnPremAgentCommand(
             $"{application.Name} On-Prem Agent",
-            $"Registered during onboarding for {application.Name}"), cancellationToken);
+            $"Registered during onboarding for {application.Name}",
+            request.ApplicationId), cancellationToken);
 
         session.OnPremAgentId = agent.Id;
         session.OnPremConnectionId = connection.Id;
@@ -157,6 +158,7 @@ public sealed class SetupOnPremAgentForOnboardingCommandHandler
         var snippet = $"""
             Agent__ApiBaseUrl={apiBaseUrl}
             Agent__AgentId={agent.Id}
+            Agent__ApiKey={agent.ApiKey}
             Agent__ConnectionId={connection.Id}
             Agent__ConnectionString=<your-on-prem-connection-string>
             Agent__Provider={request.Provider}

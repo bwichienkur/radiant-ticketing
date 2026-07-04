@@ -1,8 +1,9 @@
-using System.Text;
+using EnhancementHub.Api.Extensions;
 using EnhancementHub.Application.Auth;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace EnhancementHub.Api.Controllers;
 
@@ -16,6 +17,7 @@ public sealed class AuthController : ControllerBase
 
     [HttpPost("login")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitingExtensions.LoginPolicy)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
         var result = await _mediator.Send(new LoginCommand(request.Email, request.Password), cancellationToken);

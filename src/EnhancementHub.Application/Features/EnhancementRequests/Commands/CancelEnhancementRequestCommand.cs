@@ -14,17 +14,22 @@ public sealed class CancelEnhancementRequestCommandHandler
 {
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly IAuditService _auditService;
+    private readonly IEnhancementRequestAccessService _accessService;
 
     public CancelEnhancementRequestCommandHandler(
         IEnhancementHubDbContext dbContext,
-        IAuditService auditService)
+        IAuditService auditService,
+        IEnhancementRequestAccessService accessService)
     {
         _dbContext = dbContext;
         _auditService = auditService;
+        _accessService = accessService;
     }
 
     public async Task<Unit> Handle(CancelEnhancementRequestCommand request, CancellationToken cancellationToken)
     {
+        await _accessService.EnsureCanModifyAsync(request.Id, cancellationToken);
+
         var entity = await _dbContext.EnhancementRequests
             .FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(EnhancementRequest), request.Id);

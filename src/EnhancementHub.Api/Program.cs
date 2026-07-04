@@ -1,4 +1,5 @@
 using EnhancementHub.Application.Common.Exceptions;
+using EnhancementHub.Api.Extensions;
 using EnhancementHub.Api.Middleware;
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.DependencyInjection;
@@ -17,6 +18,8 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
 
+    ProductionConfigurationValidator.Validate(builder.Configuration, builder.Environment);
+
     builder.Host.UseSerilog((context, services, configuration) => configuration
         .ReadFrom.Configuration(context.Configuration)
         .ReadFrom.Services(services)
@@ -29,6 +32,7 @@ try
     builder.Services.AddEnhancementHubJwtAuthentication(builder.Configuration);
 
     builder.Services.AddAuthorization();
+    builder.Services.AddEnhancementHubRateLimiting();
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
@@ -60,6 +64,7 @@ try
 
     app.UseHttpsRedirection();
     app.UseCors("Web");
+    app.UseRateLimiter();
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapControllers();

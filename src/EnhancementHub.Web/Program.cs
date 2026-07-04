@@ -1,3 +1,4 @@
+using EnhancementHub.Api.Extensions;
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.DependencyInjection;
 using EnhancementHub.Infrastructure.DependencyInjection;
@@ -9,6 +10,8 @@ using EnhancementHub.Web.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+ProductionConfigurationValidator.Validate(builder.Configuration, builder.Environment);
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);

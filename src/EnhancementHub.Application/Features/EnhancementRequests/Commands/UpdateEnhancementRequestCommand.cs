@@ -32,16 +32,22 @@ public sealed class UpdateEnhancementRequestCommandHandler
     ];
 
     private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IEnhancementRequestAccessService _accessService;
 
-    public UpdateEnhancementRequestCommandHandler(IEnhancementHubDbContext dbContext)
+    public UpdateEnhancementRequestCommandHandler(
+        IEnhancementHubDbContext dbContext,
+        IEnhancementRequestAccessService accessService)
     {
         _dbContext = dbContext;
+        _accessService = accessService;
     }
 
     public async Task<EnhancementRequestDto> Handle(
         UpdateEnhancementRequestCommand request,
         CancellationToken cancellationToken)
     {
+        await _accessService.EnsureCanModifyAsync(request.Id, cancellationToken);
+
         var entity = await _dbContext.EnhancementRequests
             .Include(r => r.TargetApplication)
             .Include(r => r.SubmittedByUser)

@@ -21,20 +21,25 @@ public sealed class GetEnhancementAttachmentDownloadQueryHandler
 {
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly IFileStorageService _fileStorage;
+    private readonly IEnhancementRequestAccessService _accessService;
     private readonly TimeSpan _presignedUrlValidity = TimeSpan.FromMinutes(60);
 
     public GetEnhancementAttachmentDownloadQueryHandler(
         IEnhancementHubDbContext dbContext,
-        IFileStorageService fileStorage)
+        IFileStorageService fileStorage,
+        IEnhancementRequestAccessService accessService)
     {
         _dbContext = dbContext;
         _fileStorage = fileStorage;
+        _accessService = accessService;
     }
 
     public async Task<EnhancementAttachmentDownloadResult> Handle(
         GetEnhancementAttachmentDownloadQuery request,
         CancellationToken cancellationToken)
     {
+        await _accessService.GetAccessibleRequestAsync(request.EnhancementRequestId, cancellationToken);
+
         var attachment = await _dbContext.EnhancementAttachments
             .AsNoTracking()
             .FirstOrDefaultAsync(

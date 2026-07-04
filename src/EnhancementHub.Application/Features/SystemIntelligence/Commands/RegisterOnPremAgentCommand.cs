@@ -6,7 +6,8 @@ namespace EnhancementHub.Application.Features.SystemIntelligence.Commands;
 
 public sealed record RegisterOnPremAgentCommand(
     string Name,
-    string? Description = null) : IRequest<OnPremAgentDto>;
+    string? Description = null,
+    Guid? ApplicationId = null) : IRequest<OnPremAgentDto>;
 
 public sealed class RegisterOnPremAgentCommandHandler
     : IRequestHandler<RegisterOnPremAgentCommand, OnPremAgentDto>
@@ -23,14 +24,15 @@ public sealed class RegisterOnPremAgentCommandHandler
         var registration = await _agentService.RegisterAgentAsync(
             request.Name,
             request.Description,
+            request.ApplicationId,
             cancellationToken);
 
         return new OnPremAgentDto(
             registration.AgentId,
             registration.AgentName,
-            null,
+            registration.ApplicationId,
             registration.LastSeenAt,
             true,
-            registration.AgentId.ToString("N"));
+            registration.ApiKey);
     }
 }

@@ -4,7 +4,19 @@ namespace EnhancementHub.Application.Abstractions;
 
 public interface IOnPremAgentService
 {
-    Task<OnPremAgentRegistration> RegisterAgentAsync(string agentName, string? description, CancellationToken cancellationToken = default);
-    Task AcceptScanPayloadAsync(Guid agentId, Guid databaseConnectionId, DatabaseSchemaScanResult scanResult, CancellationToken cancellationToken = default);
-    IReadOnlyList<OnPremAgentRegistration> GetRegisteredAgents();
+    Task<OnPremAgentRegistration> RegisterAgentAsync(
+        string agentName,
+        string? description,
+        Guid? applicationId = null,
+        CancellationToken cancellationToken = default);
+
+    Task AcceptScanPayloadAsync(
+        Guid agentId,
+        string apiKey,
+        Guid databaseConnectionId,
+        DatabaseSchemaScanResult scanResult,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<OnPremAgentRegistration>> GetRegisteredAgentsAsync(
+        CancellationToken cancellationToken = default);
 }
