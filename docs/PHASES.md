@@ -195,6 +195,13 @@
 - Admin page `/Admin/Retention` with preview and manual apply
 - API: `GET /api/admin/retention/status`, `POST /api/admin/retention/apply?dryRun=true|false`
 
+## Horizon 2 continuation — Compliance documentation
+
+- SOC 2 control → feature mapping (`docs/SOC2_READINESS.md`)
+- Security whitepaper for procurement reviews (`docs/SECURITY.md`)
+- Admin compliance dashboard (`/Admin/Compliance`) with configuration-aware status
+- API: `GET /api/admin/compliance/soc2`
+
 ## Future enhancements
 
 - GitHub App webhook-driven automatic re-index on push

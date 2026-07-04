@@ -1,0 +1,72 @@
+@page
+@model EnhancementHub.Web.Pages.Admin.ComplianceModel
+@{
+    ViewData["Title"] = "SOC 2 Readiness";
+    var report = Model.Report;
+}
+
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+        <h1>SOC 2 Readiness</h1>
+        <p>Control-to-feature mapping for security questionnaire and audit preparation</p>
+    </div>
+    @if (report is not null)
+    {
+        <div class="d-flex gap-2">
+            <span class="badge text-bg-success badge-status">@report.ImplementedCount implemented</span>
+            <span class="badge text-bg-warning badge-status">@report.PartialCount partial</span>
+            @if (report.GapCount > 0)
+            {
+                <span class="badge text-bg-danger badge-status">@report.GapCount gaps</span>
+            }
+        </div>
+    }
+</div>
+
+<p class="text-muted small">
+    This report reflects platform capabilities and current configuration — not a SOC 2 attestation.
+    See <code>docs/SOC2_READINESS.md</code> and <code>docs/SECURITY.md</code> for full detail.
+</p>
+
+@if (report is null)
+{
+    <div class="card-panel p-4"><p class="text-muted mb-0">Unable to load compliance report.</p></div>
+}
+else
+{
+    <div class="card-panel">
+        <div class="table-responsive">
+            <table class="table table-enterprise mb-0">
+                <thead>
+                    <tr>
+                        <th>Control</th>
+                        <th>Category</th>
+                        <th>Control area</th>
+                        <th>EnhancementHub feature</th>
+                        <th>Status</th>
+                        <th>Configuration</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var control in report.Controls)
+                {
+                    var badgeClass = control.Status switch
+                    {
+                        "Implemented" => "text-bg-success",
+                        "Partial" => "text-bg-warning",
+                        _ => "text-bg-danger"
+                    };
+                    <tr>
+                        <td><code>@control.ControlId</code></td>
+                        <td class="small">@control.TrustServiceCategory</td>
+                        <td>@control.Title</td>
+                        <td class="small">@control.EnhancementHubFeature</td>
+                        <td><span class="badge @badgeClass badge-status">@control.Status</span></td>
+                        <td class="small text-muted">@(control.ConfigurationHint ?? "—")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
