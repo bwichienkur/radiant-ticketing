@@ -33,5 +33,44 @@ public static class ProductionConfigurationValidator
             throw new InvalidOperationException(
                 "DataProtection:KeysPath is required in Production so encrypted secrets survive restarts.");
         }
+
+        if (configuration.GetValue<bool>("Authentication:OpenIdConnect:Enabled"))
+        {
+            ValidateOpenIdConnectConfiguration(configuration);
+        }
+    }
+
+    private static void ValidateOpenIdConnectConfiguration(IConfiguration configuration)
+    {
+        var section = configuration.GetSection("Authentication:OpenIdConnect");
+
+        RequireSetting(section, "Authority");
+        RequireSetting(section, "ClientId");
+        RequireSetting(section, "ClientSecret");
+
+        var authority = section["Authority"]!;
+        if (!Uri.TryCreate(authority, UriKind.Absolute, out var authorityUri)
+            || authorityUri.Scheme is not ("http" or "https"))
+        {
+            throw new InvalidOperationException(
+                "Authentication:OpenIdConnect:Authority must be a valid absolute URL in Production.");
+        }
+
+        var defaultRole = section["DefaultRole"];
+        var hasRoleMappings = section.GetSection("RoleMappings").GetChildren().Any();
+        if (string.IsNullOrWhiteSpace(defaultRole) && !hasRoleMappings)
+        {
+            throw new InvalidOperationException(
+                "Authentication:OpenIdConnect requires DefaultRole or at least one RoleMappings entry in Production.");
+        }
+    }
+
+    private static void RequireSetting(IConfiguration section, string key)
+    {
+        if (string.IsNullOrWhiteSpace(section[key]))
+        {
+            throw new InvalidOperationException(
+                $"Authentication:OpenIdConnect:{key} is required when OpenID Connect is enabled in Production.");
+        }
     }
 }

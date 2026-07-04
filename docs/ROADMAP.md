@@ -50,10 +50,10 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 - [ ] Pricing/packaging draft: pilot vs enterprise license tiers
 
 ### 1.2 Demo-critical UX polish
-- [ ] Enhancement request detail: analysis summary above the fold, risk badge, confidence score
+- [x] Enhancement request detail: analysis summary above the fold, risk badge, confidence score
 - [ ] System Map: default layout, loading states, empty-state guidance
 - [ ] Onboarding wizard: progress persistence, clearer error recovery
-- [ ] Dashboard: "requests awaiting analysis" and "high-risk pending approval" widgets
+- [x] Dashboard: "requests awaiting analysis" and "high-risk pending approval" widgets
 
 ### 1.3 Operational fixes (quick wins)
 - [x] Run `ApplicationDiscoveryJob` in **Worker only** (remove from Web to prevent duplicate work)
@@ -76,7 +76,7 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 **Goal:** Close gaps that block enterprise procurement and security review.
 
 ### 2.1 Identity & access (Phase 16)
-- [ ] Azure Entra ID as documented default SSO path (OIDC already stubbed)
+- [x] Azure Entra ID as documented default SSO path (`docs/ENTRA_ID_SSO.md`)
 - [ ] Group → role mapping validation in admin UI
 - [x] Extend resource authorization to System Intelligence APIs (applications, connections, exports, drift reports)
 - [ ] Team membership management UI (invite, assign roles)
@@ -92,7 +92,7 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 ### 2.3 Job orchestration (Phase 18)
 - [x] Replace polling `BackgroundService` jobs with durable queue (Hangfire + PostgreSQL)
 - [x] Idempotent job handlers with shared executors and `DisableConcurrentExecution` via Hangfire
-- [ ] Job status API: indexing, discovery, schema scan, AI analysis
+- [x] Job status API: indexing, discovery, schema scan, AI analysis (`GET /api/admin/jobs/status`)
 - [ ] Admin UI: queue depth, failed jobs, manual retry
 
 ### 2.4 Compliance & audit

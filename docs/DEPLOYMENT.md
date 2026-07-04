@@ -66,7 +66,7 @@ chmod +x scripts/smoke-check.sh
 ### Security
 
 - [ ] Change default admin password after first login
-- [ ] Enable OpenID Connect (`Authentication:OpenIdConnect:Enabled=true`)
+- [ ] Enable OpenID Connect (`Authentication:OpenIdConnect:Enabled=true`) — see [Entra ID SSO guide](ENTRA_ID_SSO.md)
 - [ ] Configure Entra ID group → role mappings
 - [ ] Set `DataProtection:KeysPath` on shared storage for API + Web instances
 - [ ] Store on-prem agent API keys in a secrets manager
