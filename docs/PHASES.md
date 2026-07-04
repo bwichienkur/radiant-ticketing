@@ -112,7 +112,15 @@
 - Attachment scan status persisted on `EnhancementAttachment`
 - Upload rejected when scan fails
 
+## Phase 14 — Air-Gapped & Enterprise Repo Access
+
+- ZIP archive upload for air-gapped repository onboarding (wizard tab)
+- Zip-slip protection and source file validation on extract
+- GitHub App integration for enterprise private repo cloning
+- Installation token flow with JWT app authentication
+- GitHub App status detection in onboarding wizard
+
 ## Future enhancements
 
-- ZIP upload for air-gapped repository onboarding
-- GitHub App integration for enterprise repo access
+- GitHub App webhook-driven automatic re-index on push
+- Support for monorepo subdirectory selection during onboarding

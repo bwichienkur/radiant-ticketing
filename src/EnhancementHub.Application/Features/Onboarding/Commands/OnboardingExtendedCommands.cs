@@ -204,3 +204,138 @@ public sealed class BuildDatabaseConnectionStringQueryHandler
         return Task.FromResult(new DatabaseConnectionStringDto(connectionString));
     }
 }
+
+public sealed record UploadRepositoryArchiveCommand(
+    Guid ApplicationId,
+    string RepositoryName,
+    Stream ArchiveStream) : IRequest<GitCloneRequestDto>;
+
+public sealed class UploadRepositoryArchiveCommandValidator : AbstractValidator<UploadRepositoryArchiveCommand>
+{
+    public UploadRepositoryArchiveCommandValidator()
+    {
+        RuleFor(x => x.ApplicationId).NotEmpty();
+        RuleFor(x => x.RepositoryName).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.ArchiveStream).NotNull();
+    }
+}
+
+public sealed class UploadRepositoryArchiveCommandHandler
+    : IRequestHandler<UploadRepositoryArchiveCommand, GitCloneRequestDto>
+{
+    private readonly IRepositoryArchiveExtractService _archiveExtractService;
+    private readonly IMediator _mediator;
+
+    public UploadRepositoryArchiveCommandHandler(
+        IRepositoryArchiveExtractService archiveExtractService,
+        IMediator mediator)
+    {
+        _archiveExtractService = archiveExtractService;
+        _mediator = mediator;
+    }
+
+    public async Task<GitCloneRequestDto> Handle(
+        UploadRepositoryArchiveCommand request,
+        CancellationToken cancellationToken)
+    {
+        var extracted = await _archiveExtractService.ExtractZipAsync(request.ArchiveStream, cancellationToken);
+        if (!extracted.Succeeded || string.IsNullOrWhiteSpace(extracted.LocalPath))
+        {
+            return new GitCloneRequestDto(false, null, extracted.ErrorMessage);
+        }
+
+        await _mediator.Send(new RegisterRepositoryCommand(
+            request.ApplicationId,
+            request.RepositoryName.Trim(),
+            extracted.LocalPath,
+            ExternalTicketProvider.GitHub,
+            "main"), cancellationToken);
+
+        return new GitCloneRequestDto(true, extracted.LocalPath, null);
+    }
+}
+
+public sealed record CloneGitHubAppRepositoryCommand(
+    Guid ApplicationId,
+    string RepositoryName,
+    string Owner,
+    string Repository,
+    string DefaultBranch = "main",
+    long? InstallationId = null) : IRequest<GitCloneRequestDto>;
+
+public sealed class CloneGitHubAppRepositoryCommandValidator : AbstractValidator<CloneGitHubAppRepositoryCommand>
+{
+    public CloneGitHubAppRepositoryCommandValidator()
+    {
+        RuleFor(x => x.ApplicationId).NotEmpty();
+        RuleFor(x => x.RepositoryName).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.Owner).NotEmpty().MaximumLength(200);
+        RuleFor(x => x.Repository).NotEmpty().MaximumLength(200);
+    }
+}
+
+public sealed class CloneGitHubAppRepositoryCommandHandler
+    : IRequestHandler<CloneGitHubAppRepositoryCommand, GitCloneRequestDto>
+{
+    private readonly IGitHubAppCloneService _gitHubAppCloneService;
+    private readonly IMediator _mediator;
+
+    public CloneGitHubAppRepositoryCommandHandler(
+        IGitHubAppCloneService gitHubAppCloneService,
+        IMediator mediator)
+    {
+        _gitHubAppCloneService = gitHubAppCloneService;
+        _mediator = mediator;
+    }
+
+    public async Task<GitCloneRequestDto> Handle(
+        CloneGitHubAppRepositoryCommand request,
+        CancellationToken cancellationToken)
+    {
+        var clone = await _gitHubAppCloneService.CloneRepositoryAsync(
+            request.Owner,
+            request.Repository,
+            request.DefaultBranch,
+            request.InstallationId,
+            cancellationToken);
+
+        if (!clone.Succeeded || string.IsNullOrWhiteSpace(clone.LocalPath))
+        {
+            return new GitCloneRequestDto(false, null, clone.ErrorMessage);
+        }
+
+        await _mediator.Send(new RegisterRepositoryCommand(
+            request.ApplicationId,
+            request.RepositoryName.Trim(),
+            clone.LocalPath,
+            ExternalTicketProvider.GitHub,
+            request.DefaultBranch), cancellationToken);
+
+        return new GitCloneRequestDto(true, clone.LocalPath, null);
+    }
+}
+
+public sealed record GetGitHubAppStatusQuery : IRequest<GitHubAppStatusDto>;
+
+public sealed record GitHubAppStatusDto(bool IsConfigured, long? DefaultInstallationId);
+
+public sealed class GetGitHubAppStatusQueryHandler : IRequestHandler<GetGitHubAppStatusQuery, GitHubAppStatusDto>
+{
+    private readonly IGitHubAppCloneService _gitHubAppCloneService;
+    private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
+
+    public GetGitHubAppStatusQueryHandler(
+        IGitHubAppCloneService gitHubAppCloneService,
+        Microsoft.Extensions.Configuration.IConfiguration configuration)
+    {
+        _gitHubAppCloneService = gitHubAppCloneService;
+        _configuration = configuration;
+    }
+
+    public Task<GitHubAppStatusDto> Handle(GetGitHubAppStatusQuery request, CancellationToken cancellationToken)
+    {
+        var installation = _configuration["GitHubApp:InstallationId"];
+        long? defaultInstallation = long.TryParse(installation, out var parsed) ? parsed : null;
+        return Task.FromResult(new GitHubAppStatusDto(_gitHubAppCloneService.IsConfigured, defaultInstallation));
+    }
+}

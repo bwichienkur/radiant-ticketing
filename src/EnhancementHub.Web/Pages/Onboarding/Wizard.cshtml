@@ -63,6 +63,8 @@
             <ul class="nav nav-tabs mb-3" role="tablist">
                 <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#local-path-tab" type="button">Local path</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#git-clone-tab" type="button">Clone from Git</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#github-app-tab" type="button">GitHub App</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#zip-upload-tab" type="button">Upload ZIP</button></li>
             </ul>
             <div class="tab-content">
                 <div class="tab-pane fade show active" id="local-path-tab">
@@ -142,6 +144,64 @@
                         </div>
                         <div class="mt-4 d-flex gap-2">
                             <button type="submit" class="btn btn-primary">Clone & continue</button>
+                            <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="1" class="btn btn-outline-secondary">Back</a>
+                        </div>
+                    </form>
+                </div>
+                <div class="tab-pane fade" id="github-app-tab">
+                    <p class="text-muted">Clone private repositories using a configured GitHub App installation (enterprise-friendly).</p>
+                    @if (Model.GitHubAppStatus is { IsConfigured: false })
+                    {
+                        <div class="alert alert-warning">
+                            GitHub App is not configured. Set <code>GitHubApp:AppId</code>, <code>GitHubApp:PrivateKey</code>, and <code>GitHubApp:InstallationId</code> in appsettings.
+                        </div>
+                    }
+                    <form method="post" asp-page-handler="CloneGitHubApp">
+                        <input type="hidden" asp-for="SessionId" />
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Repository name</label>
+                                <input asp-for="Step2GitHubApp.RepositoryName" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Branch</label>
+                                <input asp-for="Step2GitHubApp.DefaultBranch" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Owner</label>
+                                <input asp-for="Step2GitHubApp.Owner" class="form-control" placeholder="organization-or-user" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Repository</label>
+                                <input asp-for="Step2GitHubApp.Repository" class="form-control" placeholder="repo-name" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Installation ID (optional override)</label>
+                                <input asp-for="Step2GitHubApp.InstallationId" class="form-control" placeholder="@(Model.GitHubAppStatus?.DefaultInstallationId?.ToString() ?? "uses appsettings default")" />
+                            </div>
+                        </div>
+                        <div class="mt-4 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary" disabled="@(Model.GitHubAppStatus is { IsConfigured: false })">Clone via GitHub App</button>
+                            <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="1" class="btn btn-outline-secondary">Back</a>
+                        </div>
+                    </form>
+                </div>
+                <div class="tab-pane fade" id="zip-upload-tab">
+                    <p class="text-muted">Upload a ZIP archive for air-gapped environments where Git access is unavailable.</p>
+                    <form method="post" asp-page-handler="UploadZip" enctype="multipart/form-data">
+                        <input type="hidden" asp-for="SessionId" />
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Repository name</label>
+                                <input asp-for="Step2.RepositoryName" class="form-control" placeholder="Defaults to archive filename" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">ZIP archive</label>
+                                <input type="file" name="zipFile" class="form-control" accept=".zip,application/zip" />
+                            </div>
+                        </div>
+                        <div class="mt-4 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Upload & continue</button>
                             <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="1" class="btn btn-outline-secondary">Back</a>
                         </div>
                     </form>

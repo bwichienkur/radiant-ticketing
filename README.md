@@ -114,6 +114,7 @@ Set `OPENAI_API_KEY` for live AI analysis; without it, the system uses determini
 | 11 | Client onboarding wizard, discovery orchestration, dashboard checklist | Complete |
 | 12 | Git clone onboarding, connection builder, on-prem agent tab, async discovery | Complete |
 | 13 | Attachment scanning with ClamAV support and upload rejection | Complete |
+| 14 | ZIP upload onboarding and GitHub App enterprise repo cloning | Complete |
 
 See [docs/PHASES.md](docs/PHASES.md) for detailed phase breakdown.
 
@@ -135,6 +136,8 @@ Key settings in `appsettings.json`:
       "ClamAv": { "Enabled": false, "Host": "localhost", "Port": 3310 }
     }
   },
+  "Repositories": { "CloneRoot": "repo-clones", "ArchiveMaxSizeBytes": 500000000 },
+  "GitHubApp": { "AppId": "", "PrivateKey": "", "InstallationId": "" },
 }
 ```
 
@@ -151,7 +154,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-62 tests covering risk scoring, AI validation, repository scanning, EF entity mapping, schema drift detection, documentation export, enterprise integrations, onboarding wizard, attachment scanning, API integration, approval workflow, role permissions, and ticket export.
+64 tests covering risk scoring, AI validation, repository scanning, EF entity mapping, schema drift detection, documentation export, enterprise integrations, onboarding wizard, attachment scanning, ZIP/GitHub App onboarding, API integration, approval workflow, role permissions, and ticket export.
 
 ## API overview
 

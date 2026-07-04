@@ -22,6 +22,7 @@ public static class InfrastructureServiceExtensions
     public const string ExternalTicketsHttpClientName = "ExternalTickets";
     public const string QdrantHttpClientName = "Qdrant";
     public const string TeamsWebhookHttpClientName = "TeamsWebhook";
+    public const string GitHubAppHttpClientName = "GitHubApp";
 
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
@@ -105,6 +106,10 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IKnowledgeSearchService, KeywordKnowledgeSearchService>();
         services.AddScoped<GitRepositoryCloneService>();
         services.AddScoped<IGitRepositoryCloneService>(sp => sp.GetRequiredService<GitRepositoryCloneService>());
+        services.AddScoped<RepositoryArchiveExtractService>();
+        services.AddScoped<IRepositoryArchiveExtractService>(sp => sp.GetRequiredService<RepositoryArchiveExtractService>());
+        services.AddScoped<GitHubAppCloneService>();
+        services.AddScoped<IGitHubAppCloneService>(sp => sp.GetRequiredService<GitHubAppCloneService>());
         services.AddScoped<AttachmentScanService>();
         services.AddScoped<NoOpAttachmentScanService>();
         services.AddScoped<IAttachmentScanService>(sp =>
@@ -146,6 +151,11 @@ public static class InfrastructureServiceExtensions
         });
         services.AddHttpClient(TeamsWebhookHttpClientName)
             .AddPolicyHandler(GetRetryPolicy());
+
+        services.AddHttpClient(GitHubAppHttpClientName, client =>
+        {
+            client.BaseAddress = new Uri("https://api.github.com/");
+        });
 
         services.AddScoped<IAiAnalysisService>(sp =>
         {

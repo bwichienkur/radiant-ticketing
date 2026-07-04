@@ -35,6 +35,9 @@ public class WizardModel : PageModel
     public Step2GitInput Step2Git { get; set; } = new();
 
     [BindProperty]
+    public Step2GitHubAppInput Step2GitHubApp { get; set; } = new();
+
+    [BindProperty]
     public Step3BuilderInput Step3Builder { get; set; } = new();
 
     [BindProperty]
@@ -45,6 +48,7 @@ public class WizardModel : PageModel
     public ApplicationDiscoveryResultDto? DiscoveryResult { get; private set; }
     public OnboardingReviewDto? Review { get; private set; }
     public OnPremAgentSetupDto? OnPremSetup { get; private set; }
+    public GitHubAppStatusDto? GitHubAppStatus { get; private set; }
     public string? BuiltConnectionString { get; private set; }
     public string? ErrorMessage { get; private set; }
     public string? SuccessMessage { get; private set; }
@@ -83,6 +87,11 @@ public class WizardModel : PageModel
 
         await LoadStepContextAsync(cancellationToken);
         PrefillForms();
+
+        if (Session.CurrentStep == OnboardingStep.ConnectCode)
+        {
+            GitHubAppStatus = await _mediator.Send(new GetGitHubAppStatusQuery(), cancellationToken);
+        }
 
         if (Session.CurrentStep == OnboardingStep.RunDiscovery
             && Session.DiscoveryJobState == DiscoveryJobState.Completed)
@@ -208,6 +217,90 @@ public class WizardModel : PageModel
             OnboardingStep.RunDiscovery,
             Session.ApplicationId,
             true), cancellationToken);
+
+        return RedirectToPage(new { id = SessionId });
+    }
+
+    public async Task<IActionResult> OnPostUploadZipAsync(IFormFile zipFile, CancellationToken cancellationToken)
+    {
+        await LoadSessionAsync(cancellationToken);
+
+        if (!Session.ApplicationId.HasValue)
+        {
+            return RedirectToPage(new { id = SessionId, step = 1 });
+        }
+
+        if (zipFile is null || zipFile.Length == 0)
+        {
+            ErrorMessage = "ZIP file is required.";
+            GitHubAppStatus = await _mediator.Send(new GetGitHubAppStatusQuery(), cancellationToken);
+            PrefillForms();
+            return Page();
+        }
+
+        if (!string.Equals(Path.GetExtension(zipFile.FileName), ".zip", StringComparison.OrdinalIgnoreCase))
+        {
+            ErrorMessage = "Only .zip archives are supported.";
+            GitHubAppStatus = await _mediator.Send(new GetGitHubAppStatusQuery(), cancellationToken);
+            PrefillForms();
+            return Page();
+        }
+
+        var repositoryName = string.IsNullOrWhiteSpace(Step2.RepositoryName)
+            ? Path.GetFileNameWithoutExtension(zipFile.FileName)
+            : Step2.RepositoryName.Trim();
+
+        await using var stream = zipFile.OpenReadStream();
+        var result = await _mediator.Send(new UploadRepositoryArchiveCommand(
+            Session.ApplicationId.Value,
+            repositoryName,
+            stream), cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            ErrorMessage = result.ErrorMessage ?? "Failed to extract repository archive.";
+            GitHubAppStatus = await _mediator.Send(new GetGitHubAppStatusQuery(), cancellationToken);
+            PrefillForms();
+            return Page();
+        }
+
+        await _mediator.Send(new AdvanceOnboardingSessionCommand(
+            SessionId,
+            OnboardingStep.ConnectDatabase,
+            Session.ApplicationId), cancellationToken);
+
+        return RedirectToPage(new { id = SessionId });
+    }
+
+    public async Task<IActionResult> OnPostCloneGitHubAppAsync(CancellationToken cancellationToken)
+    {
+        await LoadSessionAsync(cancellationToken);
+
+        if (!Session.ApplicationId.HasValue)
+        {
+            return RedirectToPage(new { id = SessionId, step = 1 });
+        }
+
+        var result = await _mediator.Send(new CloneGitHubAppRepositoryCommand(
+            Session.ApplicationId.Value,
+            Step2GitHubApp.RepositoryName,
+            Step2GitHubApp.Owner,
+            Step2GitHubApp.Repository,
+            Step2GitHubApp.DefaultBranch,
+            Step2GitHubApp.InstallationId), cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            ErrorMessage = result.ErrorMessage ?? "GitHub App clone failed.";
+            GitHubAppStatus = await _mediator.Send(new GetGitHubAppStatusQuery(), cancellationToken);
+            PrefillForms();
+            return Page();
+        }
+
+        await _mediator.Send(new AdvanceOnboardingSessionCommand(
+            SessionId,
+            OnboardingStep.ConnectDatabase,
+            Session.ApplicationId), cancellationToken);
 
         return RedirectToPage(new { id = SessionId });
     }
@@ -382,6 +475,15 @@ public class WizardModel : PageModel
         public string RepositoryUrl { get; set; } = string.Empty;
         public string DefaultBranch { get; set; } = "main";
         public string? AccessToken { get; set; }
+    }
+
+    public sealed class Step2GitHubAppInput
+    {
+        public string RepositoryName { get; set; } = string.Empty;
+        public string Owner { get; set; } = string.Empty;
+        public string Repository { get; set; } = string.Empty;
+        public string DefaultBranch { get; set; } = "main";
+        public long? InstallationId { get; set; }
     }
 
     public sealed class Step3Input
