@@ -28,6 +28,7 @@ try
 
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
+    builder.Services.AddEnhancementHubHealthChecks();
 
     builder.Services.AddEnhancementHubJwtAuthentication(builder.Configuration);
 
@@ -67,6 +68,7 @@ try
     app.UseRateLimiter();
     app.UseAuthentication();
     app.UseAuthorization();
+    app.MapEnhancementHubHealthChecks();
     app.MapControllers();
 
     if (app.Environment.IsDevelopment())

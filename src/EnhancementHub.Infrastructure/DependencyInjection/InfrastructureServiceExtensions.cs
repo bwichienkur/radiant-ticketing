@@ -65,6 +65,7 @@ public static class InfrastructureServiceExtensions
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IEnhancementRequestAccessService, EnhancementRequestAccessService>();
+        services.AddScoped<IApplicationAccessService, ApplicationAccessService>();
         services.AddScoped<IAuditService, AuditService>();
         services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();

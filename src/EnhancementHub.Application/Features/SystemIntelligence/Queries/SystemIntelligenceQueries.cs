@@ -15,15 +15,21 @@ public sealed record GetSystemMapQuery(Guid ApplicationId) : IRequest<SystemMapD
 public sealed class GetSystemMapQueryHandler : IRequestHandler<GetSystemMapQuery, SystemMapDto>
 {
     private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IApplicationAccessService _accessService;
 
-    public GetSystemMapQueryHandler(IEnhancementHubDbContext dbContext) => _dbContext = dbContext;
+    public GetSystemMapQueryHandler(
+        IEnhancementHubDbContext dbContext,
+        IApplicationAccessService accessService)
+    {
+        _dbContext = dbContext;
+        _accessService = accessService;
+    }
 
     public async Task<SystemMapDto> Handle(GetSystemMapQuery request, CancellationToken cancellationToken)
     {
-        var application = await _dbContext.Applications
-            .AsNoTracking()
-            .FirstOrDefaultAsync(a => a.Id == request.ApplicationId, cancellationToken)
-            ?? throw new NotFoundException(nameof(ApplicationEntity), request.ApplicationId);
+        var application = await _accessService.GetAccessibleApplicationAsync(
+            request.ApplicationId,
+            cancellationToken);
 
         var snapshot = await _dbContext.SystemGraphSnapshots
             .AsNoTracking()
@@ -86,11 +92,20 @@ public sealed record GetDatabaseSchemaQuery(Guid ConnectionId) : IRequest<Databa
 public sealed class GetDatabaseSchemaQueryHandler : IRequestHandler<GetDatabaseSchemaQuery, DatabaseSchemaDto>
 {
     private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IApplicationAccessService _accessService;
 
-    public GetDatabaseSchemaQueryHandler(IEnhancementHubDbContext dbContext) => _dbContext = dbContext;
+    public GetDatabaseSchemaQueryHandler(
+        IEnhancementHubDbContext dbContext,
+        IApplicationAccessService accessService)
+    {
+        _dbContext = dbContext;
+        _accessService = accessService;
+    }
 
     public async Task<DatabaseSchemaDto> Handle(GetDatabaseSchemaQuery request, CancellationToken cancellationToken)
     {
+        await _accessService.EnsureAccessibleConnectionAsync(request.ConnectionId, cancellationToken);
+
         var connection = await _dbContext.DatabaseConnections
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == request.ConnectionId, cancellationToken)
@@ -140,16 +155,35 @@ public sealed class ListDatabaseConnectionsQueryHandler
     : IRequestHandler<ListDatabaseConnectionsQuery, IReadOnlyList<DatabaseConnectionDto>>
 {
     private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IApplicationAccessService _accessService;
 
-    public ListDatabaseConnectionsQueryHandler(IEnhancementHubDbContext dbContext) => _dbContext = dbContext;
+    public ListDatabaseConnectionsQueryHandler(
+        IEnhancementHubDbContext dbContext,
+        IApplicationAccessService accessService)
+    {
+        _dbContext = dbContext;
+        _accessService = accessService;
+    }
 
     public async Task<IReadOnlyList<DatabaseConnectionDto>> Handle(
         ListDatabaseConnectionsQuery request,
         CancellationToken cancellationToken)
     {
+        if (request.ApplicationId.HasValue)
+        {
+            await _accessService.EnsureAccessibleApplicationAsync(
+                request.ApplicationId.Value,
+                cancellationToken);
+        }
+
+        var accessibleApplicationIds = _accessService
+            .ApplyVisibilityFilter(_dbContext.Applications.AsNoTracking())
+            .Select(a => a.Id);
+
         var query = _dbContext.DatabaseConnections
             .AsNoTracking()
             .Include(c => c.Application)
+            .Where(c => accessibleApplicationIds.Contains(c.ApplicationId))
             .AsQueryable();
 
         if (request.ApplicationId.HasValue)

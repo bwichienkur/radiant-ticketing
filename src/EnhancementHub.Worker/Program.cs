@@ -8,7 +8,7 @@ Log.Logger = new LoggerConfiguration()
 
 try
 {
-    var builder = Host.CreateApplicationBuilder(args);
+    var builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddSerilog((services, configuration) => configuration
         .ReadFrom.Configuration(builder.Configuration)
@@ -18,9 +18,11 @@ try
 
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration, registerBackgroundJobs: true);
+    builder.Services.AddEnhancementHubHealthChecks();
 
-    var host = builder.Build();
-    host.Run();
+    var app = builder.Build();
+    app.MapEnhancementHubHealthChecks();
+    await app.RunAsync();
 }
 catch (Exception ex)
 {
