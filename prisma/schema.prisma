@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum Role {
+  CUSTOMER
+  ORGANIZER
+  ADMIN
+}
+
+enum EventStatus {
+  DRAFT
+  PUBLISHED
+  CANCELLED
+  COMPLETED
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  REFUNDED
+}
+
+enum TicketStatus {
+  VALID
+  USED
+  CANCELLED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      Role     @default(CUSTOMER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  orders    Order[]
+  events    Event[]  @relation("EventOrganizer")
+}
+
+model Venue {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  city      String
+  capacity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  events    Event[]
+}
+
+model Event {
+  id          String       @id @default(cuid())
+  title       String
+  description String
+  imageUrl    String?
+  startAt     DateTime
+  endAt       DateTime
+  status      EventStatus  @default(DRAFT)
+  organizerId String
+  venueId     String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  organizer   User         @relation("EventOrganizer", fields: [organizerId], references: [id])
+  venue       Venue        @relation(fields: [venueId], references: [id])
+  ticketTypes TicketType[]
+}
+
+model TicketType {
+  id          String      @id @default(cuid())
+  name        String
+  description String?
+  price       Int
+  quantity    Int
+  sold        Int         @default(0)
+  eventId     String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  event       Event       @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  orderItems  OrderItem[]
+  tickets     Ticket[]
+}
+
+model Order {
+  id         String      @id @default(cuid())
+  userId     String
+  status     OrderStatus @default(PENDING)
+  totalCents Int
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  user       User        @relation(fields: [userId], references: [id])
+  items      OrderItem[]
+  tickets    Ticket[]
+}
+
+model OrderItem {
+  id           String     @id @default(cuid())
+  orderId      String
+  ticketTypeId String
+  quantity     Int
+  unitPrice    Int
+  order        Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  ticketType   TicketType @relation(fields: [ticketTypeId], references: [id])
+}
+
+model Ticket {
+  id           String       @id @default(cuid())
+  code         String       @unique
+  status       TicketStatus @default(VALID)
+  orderId      String
+  ticketTypeId String
+  checkedInAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  order        Order        @relation(fields: [orderId], references: [id])
+  ticketType   TicketType   @relation(fields: [ticketTypeId], references: [id])
+}
