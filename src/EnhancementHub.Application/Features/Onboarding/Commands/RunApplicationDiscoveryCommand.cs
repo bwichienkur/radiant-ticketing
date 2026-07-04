@@ -92,6 +92,7 @@ public sealed class RunApplicationDiscoveryCommandHandler
             {
                 session.DiscoveryStatus = "Discovery completed successfully.";
                 session.DiscoveryCompletedAt = DateTime.UtcNow;
+                session.DiscoveryJobState = DiscoveryJobState.Completed;
                 session.CurrentStep = OnboardingStep.ReviewExport;
                 session.LastError = null;
                 session.UpdatedAt = DateTime.UtcNow;
@@ -122,6 +123,7 @@ public sealed class RunApplicationDiscoveryCommandHandler
             if (session is not null)
             {
                 session.DiscoveryStatus = "Discovery failed.";
+                session.DiscoveryJobState = DiscoveryJobState.Failed;
                 session.LastError = ex.Message;
                 session.UpdatedAt = DateTime.UtcNow;
                 await _dbContext.SaveChangesAsync(cancellationToken);

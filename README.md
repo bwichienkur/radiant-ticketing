@@ -112,6 +112,8 @@ Set `OPENAI_API_KEY` for live AI analysis; without it, the system uses determini
 | 9 | Column-level drift, pgvector search, SSO role mapping, notifications, blob storage | Complete |
 | 10 | Qdrant/Azure Search vectors, S3 presigned URLs, email/Teams notifications | Complete |
 | 11 | Client onboarding wizard, discovery orchestration, dashboard checklist | Complete |
+| 12 | Git clone onboarding, connection builder, on-prem agent tab, async discovery | Complete |
+| 13 | Attachment scanning with ClamAV support and upload rejection | Complete |
 
 See [docs/PHASES.md](docs/PHASES.md) for detailed phase breakdown.
 
@@ -127,9 +129,11 @@ Key settings in `appsettings.json`:
   "OpenAI": { "ApiKey": "", "Model": "gpt-4o-mini", "Endpoint": "https://api.openai.com/v1" },
   "VectorSearch": { "Provider": "InMemory|PgVector|Qdrant|AzureSearch", "Dimensions": 64 },
   "Storage": { "Provider": "Local|S3", "LocalRoot": "uploads" },
-  "Notifications": {
-    "Email": { "Enabled": false, "SmtpHost": "", "ToAddresses": [] },
-    "Teams": { "Enabled": false, "WebhookUrl": "" }
+  "Attachments": {
+    "Scanning": {
+      "Enabled": true,
+      "ClamAv": { "Enabled": false, "Host": "localhost", "Port": 3310 }
+    }
   },
 }
 ```
@@ -147,7 +151,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-58 tests covering risk scoring, AI validation, repository scanning, EF entity mapping, schema drift detection, documentation export, enterprise integrations, onboarding wizard, API integration, approval workflow, role permissions, and ticket export.
+62 tests covering risk scoring, AI validation, repository scanning, EF entity mapping, schema drift detection, documentation export, enterprise integrations, onboarding wizard, attachment scanning, API integration, approval workflow, role permissions, and ticket export.
 
 ## API overview
 

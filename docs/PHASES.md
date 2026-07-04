@@ -97,6 +97,22 @@
 - Dashboard getting-started checklist with resume support
 - Empty states on Applications, Repositories, and Database Connections pages
 
+## Phase 12 — Onboarding Polish & Async Discovery
+
+- Server-side Git clone during onboarding (`Clone from Git` tab)
+- Connection string builder for database registration
+- On-prem agent setup tab with copy-paste agent configuration
+- Background discovery job with queued/running/completed states
+- Wizard auto-refresh while discovery runs
+
+## Phase 13 — Attachment Security
+
+- `IAttachmentScanService` with extension whitelist and magic-byte validation
+- Optional ClamAV INSTREAM virus scanning (`Attachments:Scanning:ClamAv`)
+- Attachment scan status persisted on `EnhancementAttachment`
+- Upload rejected when scan fails
+
 ## Future enhancements
 
-- Attachment virus scanning
+- ZIP upload for air-gapped repository onboarding
+- GitHub App integration for enterprise repo access

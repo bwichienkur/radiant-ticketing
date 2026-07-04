@@ -103,6 +103,17 @@ public static class InfrastructureServiceExtensions
             ],
             sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<CompositeNotificationPublisher>>()));
         services.AddScoped<IKnowledgeSearchService, KeywordKnowledgeSearchService>();
+        services.AddScoped<GitRepositoryCloneService>();
+        services.AddScoped<IGitRepositoryCloneService>(sp => sp.GetRequiredService<GitRepositoryCloneService>());
+        services.AddScoped<AttachmentScanService>();
+        services.AddScoped<NoOpAttachmentScanService>();
+        services.AddScoped<IAttachmentScanService>(sp =>
+        {
+            var enabled = configuration.GetValue("Attachments:Scanning:Enabled", true);
+            return enabled
+                ? sp.GetRequiredService<AttachmentScanService>()
+                : sp.GetRequiredService<NoOpAttachmentScanService>();
+        });
         services.AddScoped<IGitRepositoryScanner, RoslynRepositoryScanner>();
         services.AddScoped<EfEntityTableMapper>();
         services.AddScoped<SqlServerSchemaScanner>();
@@ -177,6 +188,7 @@ public static class InfrastructureServiceExtensions
             services.AddHostedService<AiAnalysisJob>();
             services.AddHostedService<ScheduledRepositoryRefreshJob>();
             services.AddHostedService<DatabaseSchemaScanJob>();
+            services.AddHostedService<ApplicationDiscoveryJob>();
         }
 
         return services;

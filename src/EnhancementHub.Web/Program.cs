@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddHostedService<EnhancementHub.Infrastructure.Background.ApplicationDiscoveryJob>();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<SignalRNotificationPublisher>();
 builder.Services.AddScoped<INotificationPublisher>(sp => new CompositeNotificationPublisher(

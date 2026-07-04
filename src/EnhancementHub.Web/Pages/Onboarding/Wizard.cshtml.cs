@@ -32,12 +32,20 @@ public class WizardModel : PageModel
     public Step2Input Step2 { get; set; } = new();
 
     [BindProperty]
+    public Step2GitInput Step2Git { get; set; } = new();
+
+    [BindProperty]
+    public Step3BuilderInput Step3Builder { get; set; } = new();
+
+    [BindProperty]
     public Step3Input Step3 { get; set; } = new();
 
     public OnboardingSessionDto Session { get; private set; } = null!;
     public RepositoryPathValidationDto? PathValidation { get; private set; }
     public ApplicationDiscoveryResultDto? DiscoveryResult { get; private set; }
     public OnboardingReviewDto? Review { get; private set; }
+    public OnPremAgentSetupDto? OnPremSetup { get; private set; }
+    public string? BuiltConnectionString { get; private set; }
     public string? ErrorMessage { get; private set; }
     public string? SuccessMessage { get; private set; }
 
@@ -75,6 +83,13 @@ public class WizardModel : PageModel
 
         await LoadStepContextAsync(cancellationToken);
         PrefillForms();
+
+        if (Session.CurrentStep == OnboardingStep.RunDiscovery
+            && Session.DiscoveryJobState == DiscoveryJobState.Completed)
+        {
+            return RedirectToPage(new { id = SessionId, step = 5 });
+        }
+
         return Page();
     }
 
@@ -197,6 +212,77 @@ public class WizardModel : PageModel
         return RedirectToPage(new { id = SessionId });
     }
 
+    public async Task<IActionResult> OnPostCloneGitAsync(CancellationToken cancellationToken)
+    {
+        await LoadSessionAsync(cancellationToken);
+
+        if (!Session.ApplicationId.HasValue)
+        {
+            return RedirectToPage(new { id = SessionId, step = 1 });
+        }
+
+        var result = await _mediator.Send(new CloneGitRepositoryCommand(
+            Session.ApplicationId.Value,
+            Step2Git.RepositoryName,
+            Step2Git.RepositoryUrl,
+            Step2Git.DefaultBranch,
+            Step2Git.AccessToken), cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            ErrorMessage = result.ErrorMessage ?? "Git clone failed.";
+            PrefillForms();
+            return Page();
+        }
+
+        await _mediator.Send(new AdvanceOnboardingSessionCommand(
+            SessionId,
+            OnboardingStep.ConnectDatabase,
+            Session.ApplicationId), cancellationToken);
+
+        return RedirectToPage(new { id = SessionId });
+    }
+
+    public async Task<IActionResult> OnPostBuildConnectionStringAsync(CancellationToken cancellationToken)
+    {
+        await LoadSessionAsync(cancellationToken);
+        var built = await _mediator.Send(new BuildDatabaseConnectionStringQuery(
+            Step3Builder.Provider,
+            Step3Builder.Host,
+            Step3Builder.Port,
+            Step3Builder.Database,
+            Step3Builder.Username,
+            Step3Builder.Password,
+            Step3Builder.IntegratedSecurity), cancellationToken);
+
+        BuiltConnectionString = built.ConnectionString;
+        Step3.ConnectionString = built.ConnectionString;
+        Step3.Provider = Step3Builder.Provider;
+        PrefillForms();
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPostSetupOnPremAgentAsync(CancellationToken cancellationToken)
+    {
+        await LoadSessionAsync(cancellationToken);
+
+        if (!Session.ApplicationId.HasValue)
+        {
+            return RedirectToPage(new { id = SessionId, step = 1 });
+        }
+
+        OnPremSetup = await _mediator.Send(new SetupOnPremAgentForOnboardingCommand(
+            SessionId,
+            Session.ApplicationId.Value,
+            Step3.ConnectionName,
+            Step3.Provider), cancellationToken);
+
+        SuccessMessage = "On-prem agent registered. Run the agent in your environment, then continue to discovery.";
+        Session = await _mediator.Send(new GetOnboardingSessionQuery(SessionId), cancellationToken);
+        PrefillForms();
+        return Page();
+    }
+
     public async Task<IActionResult> OnPostStep4Async(CancellationToken cancellationToken)
     {
         await LoadSessionAsync(cancellationToken);
@@ -206,18 +292,11 @@ public class WizardModel : PageModel
             return RedirectToPage(new { id = SessionId, step = 1 });
         }
 
-        DiscoveryResult = await _mediator.Send(
-            new RunApplicationDiscoveryCommand(Session.ApplicationId.Value, SessionId),
-            cancellationToken);
+        Session = await _mediator.Send(new QueueApplicationDiscoveryCommand(
+            Session.ApplicationId.Value,
+            SessionId), cancellationToken);
 
-        Session = await _mediator.Send(new GetOnboardingSessionQuery(SessionId), cancellationToken);
-
-        if (DiscoveryResult.Succeeded)
-        {
-            return RedirectToPage(new { id = SessionId, step = 5 });
-        }
-
-        ErrorMessage = DiscoveryResult.ErrorMessage;
+        SuccessMessage = "Discovery queued. This page will refresh while discovery runs.";
         PrefillForms();
         return Page();
     }
@@ -297,11 +376,30 @@ public class WizardModel : PageModel
         public string DefaultBranch { get; set; } = "main";
     }
 
+    public sealed class Step2GitInput
+    {
+        public string RepositoryName { get; set; } = string.Empty;
+        public string RepositoryUrl { get; set; } = string.Empty;
+        public string DefaultBranch { get; set; } = "main";
+        public string? AccessToken { get; set; }
+    }
+
     public sealed class Step3Input
     {
         public string ConnectionName { get; set; } = string.Empty;
         public DatabaseProviderType Provider { get; set; } = DatabaseProviderType.Sqlite;
         public string ConnectionString { get; set; } = string.Empty;
         public bool IsReadOnly { get; set; } = true;
+    }
+
+    public sealed class Step3BuilderInput
+    {
+        public DatabaseProviderType Provider { get; set; } = DatabaseProviderType.Sqlite;
+        public string Host { get; set; } = "localhost";
+        public int Port { get; set; } = 5432;
+        public string Database { get; set; } = "enhancementhub";
+        public string? Username { get; set; }
+        public string? Password { get; set; }
+        public bool IntegratedSecurity { get; set; }
     }
 }

@@ -13,9 +13,12 @@ public static class OnboardingSessionMapper
             session.CurrentStep,
             session.Status,
             session.SkipDatabase,
+            session.DiscoveryJobState,
             session.DiscoveryStatus,
             session.LastError,
             session.DiscoveryCompletedAt,
             session.CompletedAt,
+            session.OnPremAgentId,
+            session.OnPremConnectionId,
             session.CreatedAt);
 }

@@ -31,17 +31,20 @@ public sealed class UploadEnhancementAttachmentCommandHandler
 {
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly IFileStorageService _fileStorage;
+    private readonly IAttachmentScanService _attachmentScan;
     private readonly ICurrentUserService _currentUser;
     private readonly IAuditService _auditService;
 
     public UploadEnhancementAttachmentCommandHandler(
         IEnhancementHubDbContext dbContext,
         IFileStorageService fileStorage,
+        IAttachmentScanService attachmentScan,
         ICurrentUserService currentUser,
         IAuditService auditService)
     {
         _dbContext = dbContext;
         _fileStorage = fileStorage;
+        _attachmentScan = attachmentScan;
         _currentUser = currentUser;
         _auditService = auditService;
     }
@@ -57,6 +60,22 @@ public sealed class UploadEnhancementAttachmentCommandHandler
         if (!_currentUser.UserId.HasValue)
         {
             throw new UnauthorizedAccessException("User must be authenticated to upload attachments.");
+        }
+
+        var scanResult = await _attachmentScan.ScanAsync(
+            request.FileName,
+            request.ContentType,
+            request.Content,
+            cancellationToken);
+
+        if (!scanResult.IsAllowed)
+        {
+            throw new InvalidOperationException(scanResult.Details ?? "Attachment rejected by security scan.");
+        }
+
+        if (request.Content.CanSeek)
+        {
+            request.Content.Position = 0;
         }
 
         var storagePath = await _fileStorage.SaveAsync(
@@ -75,6 +94,10 @@ public sealed class UploadEnhancementAttachmentCommandHandler
             ContentType = request.ContentType,
             StoragePath = storagePath,
             UploadedByUserId = _currentUser.UserId.Value,
+            ScanStatus = scanResult.Status.Equals("Skipped", StringComparison.OrdinalIgnoreCase)
+                ? Domain.Enums.AttachmentScanStatus.Skipped
+                : Domain.Enums.AttachmentScanStatus.Clean,
+            ScanDetails = scanResult.Details,
             CreatedAt = now,
             UpdatedAt = now
         };

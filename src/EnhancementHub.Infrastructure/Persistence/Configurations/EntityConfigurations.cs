@@ -59,6 +59,7 @@ public class EntityConfigurations : IEntityTypeConfiguration<Team>,
     {
         builder.ToTable("EnhancementAttachments");
         builder.Property(x => x.FileName).HasMaxLength(512).IsRequired();
+        builder.Property(x => x.ScanDetails).HasMaxLength(2000);
         builder.HasOne(x => x.EnhancementRequest).WithMany(r => r.Attachments).HasForeignKey(x => x.EnhancementRequestId);
     }
 

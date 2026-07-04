@@ -60,90 +60,199 @@
 
         case EnhancementHub.Domain.Enums.OnboardingStep.ConnectCode:
             <h2 class="h4 mb-3">Step 2 — Connect code</h2>
-            <p class="text-muted">Point to a local clone of the repository. EnhancementHub scans it read-only.</p>
-            <form method="post" asp-page-handler="ValidatePath" class="mb-4">
-                <input type="hidden" asp-for="SessionId" />
-                <div class="mb-3">
-                    <label class="form-label">Repository path</label>
-                    <div class="input-group">
-                        <input asp-for="Step2.RepositoryPath" class="form-control" placeholder="/path/to/repo" />
-                        <button type="submit" class="btn btn-outline-secondary">Test access</button>
-                    </div>
-                </div>
-            </form>
-            @if (Model.PathValidation is not null)
-            {
-                <div class="alert @(Model.PathValidation.IsValid ? "alert-success" : "alert-warning")">
-                    @if (Model.PathValidation.IsValid)
+            <ul class="nav nav-tabs mb-3" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#local-path-tab" type="button">Local path</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#git-clone-tab" type="button">Clone from Git</button></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="local-path-tab">
+                    <p class="text-muted">Point to a local clone of the repository. EnhancementHub scans it read-only.</p>
+                    <form method="post" asp-page-handler="ValidatePath" class="mb-4">
+                        <input type="hidden" asp-for="SessionId" />
+                        <div class="mb-3">
+                            <label class="form-label">Repository path</label>
+                            <div class="input-group">
+                                <input asp-for="Step2.RepositoryPath" class="form-control" placeholder="/path/to/repo" />
+                                <button type="submit" class="btn btn-outline-secondary">Test access</button>
+                            </div>
+                        </div>
+                    </form>
+                    @if (Model.PathValidation is not null)
                     {
-                        <div>Path is accessible.</div>
-                        <div class="small mt-1">
-                            @Model.PathValidation.CSharpFileCount C# files ·
-                            @Model.PathValidation.ControllerCount controllers ·
-                            @Model.PathValidation.DbContextCount DbContexts ·
-                            @Model.PathValidation.EntityMappingCount entity mappings
+                        <div class="alert @(Model.PathValidation.IsValid ? "alert-success" : "alert-warning")">
+                            @if (Model.PathValidation.IsValid)
+                            {
+                                <div>Path is accessible.</div>
+                                <div class="small mt-1">
+                                    @Model.PathValidation.CSharpFileCount C# files ·
+                                    @Model.PathValidation.ControllerCount controllers ·
+                                    @Model.PathValidation.DbContextCount DbContexts ·
+                                    @Model.PathValidation.EntityMappingCount entity mappings
+                                </div>
+                            }
+                            else
+                            {
+                                <div>@Model.PathValidation.ErrorMessage</div>
+                            }
                         </div>
                     }
-                    else
-                    {
-                        <div>@Model.PathValidation.ErrorMessage</div>
-                    }
+                    <form method="post" asp-page-handler="Step2">
+                        <input type="hidden" asp-for="SessionId" />
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Repository name</label>
+                                <input asp-for="Step2.RepositoryName" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Default branch</label>
+                                <input asp-for="Step2.DefaultBranch" class="form-control" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Repository path</label>
+                                <input asp-for="Step2.RepositoryPath" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="mt-4 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Continue to database</button>
+                            <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="1" class="btn btn-outline-secondary">Back</a>
+                        </div>
+                    </form>
                 </div>
-            }
-            <form method="post" asp-page-handler="Step2">
-                <input type="hidden" asp-for="SessionId" />
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Repository name</label>
-                        <input asp-for="Step2.RepositoryName" class="form-control" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Default branch</label>
-                        <input asp-for="Step2.DefaultBranch" class="form-control" />
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Repository path</label>
-                        <input asp-for="Step2.RepositoryPath" class="form-control" />
-                    </div>
+                <div class="tab-pane fade" id="git-clone-tab">
+                    <p class="text-muted">Clone a remote repository to the EnhancementHub workspace (requires git on the server).</p>
+                    <form method="post" asp-page-handler="CloneGit">
+                        <input type="hidden" asp-for="SessionId" />
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Repository name</label>
+                                <input asp-for="Step2Git.RepositoryName" class="form-control" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Branch</label>
+                                <input asp-for="Step2Git.DefaultBranch" class="form-control" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Git URL</label>
+                                <input asp-for="Step2Git.RepositoryUrl" class="form-control" placeholder="https://github.com/org/repo.git" />
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Access token (optional, for private repos)</label>
+                                <input asp-for="Step2Git.AccessToken" class="form-control" type="password" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="mt-4 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">Clone & continue</button>
+                            <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="1" class="btn btn-outline-secondary">Back</a>
+                        </div>
+                    </form>
                 </div>
-                <div class="mt-4 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">Continue to database</button>
-                    <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="1" class="btn btn-outline-secondary">Back</a>
-                </div>
-            </form>
+            </div>
             break;
 
         case EnhancementHub.Domain.Enums.OnboardingStep.ConnectDatabase:
             <h2 class="h4 mb-3">Step 3 — Connect database</h2>
-            <p class="text-muted">Register a read-only database connection, or skip if you'll use the on-prem agent later.</p>
-            <form method="post" asp-page-handler="Step3">
-                <input type="hidden" asp-for="SessionId" />
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Connection name</label>
-                        <input asp-for="Step3.ConnectionName" class="form-control" placeholder="e.g. Production read replica" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Provider</label>
-                        <select asp-for="Step3.Provider" class="form-select" asp-items="Html.GetEnumSelectList<EnhancementHub.Domain.Enums.DatabaseProviderType>()"></select>
-                    </div>
-                    <div class="col-12">
-                        <label class="form-label">Connection string</label>
-                        <textarea asp-for="Step3.ConnectionString" class="form-control" rows="3"></textarea>
-                    </div>
-                    <div class="col-12">
-                        <div class="form-check">
-                            <input asp-for="Step3.IsReadOnly" class="form-check-input" />
-                            <label asp-for="Step3.IsReadOnly" class="form-check-label">Read-only connection</label>
+            <ul class="nav nav-tabs mb-3" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#direct-db-tab" type="button">Direct connection</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#onprem-agent-tab" type="button">On-prem agent</button></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="direct-db-tab">
+                    <p class="text-muted">Register a read-only database connection.</p>
+                    <form method="post" asp-page-handler="BuildConnectionString" class="card-panel p-3 mb-4">
+                        <input type="hidden" asp-for="SessionId" />
+                        <h3 class="h6">Connection string builder</h3>
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-4">
+                                <label class="form-label">Provider</label>
+                                <select asp-for="Step3Builder.Provider" class="form-select" asp-items="Html.GetEnumSelectList<EnhancementHub.Domain.Enums.DatabaseProviderType>()"></select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Host</label>
+                                <input asp-for="Step3Builder.Host" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Port</label>
+                                <input asp-for="Step3Builder.Port" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Database</label>
+                                <input asp-for="Step3Builder.Database" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Username</label>
+                                <input asp-for="Step3Builder.Username" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Password</label>
+                                <input asp-for="Step3Builder.Password" class="form-control" type="password" />
+                            </div>
                         </div>
-                    </div>
+                        <button type="submit" class="btn btn-outline-secondary btn-sm mt-3">Build connection string</button>
+                    </form>
+                    <form method="post" asp-page-handler="Step3">
+                        <input type="hidden" asp-for="SessionId" />
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Connection name</label>
+                                <input asp-for="Step3.ConnectionName" class="form-control" placeholder="e.g. Production read replica" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Provider</label>
+                                <select asp-for="Step3.Provider" class="form-select" asp-items="Html.GetEnumSelectList<EnhancementHub.Domain.Enums.DatabaseProviderType>()"></select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">Connection string</label>
+                                <textarea asp-for="Step3.ConnectionString" class="form-control" rows="3"></textarea>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input asp-for="Step3.IsReadOnly" class="form-check-input" />
+                                    <label asp-for="Step3.IsReadOnly" class="form-check-label">Read-only connection</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 d-flex gap-2 flex-wrap">
+                            <button type="submit" class="btn btn-primary">Register & continue</button>
+                            <button type="submit" asp-page-handler="SkipDatabase" class="btn btn-outline-secondary">Skip database for now</button>
+                            <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="2" class="btn btn-link">Back</a>
+                        </div>
+                    </form>
                 </div>
-                <div class="mt-4 d-flex gap-2 flex-wrap">
-                    <button type="submit" class="btn btn-primary">Register & continue</button>
-                    <button type="submit" asp-page-handler="SkipDatabase" class="btn btn-outline-secondary">Skip database for now</button>
-                    <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="2" class="btn btn-link">Back</a>
+                <div class="tab-pane fade" id="onprem-agent-tab">
+                    <p class="text-muted">For air-gapped databases, register an on-prem agent and run it inside the client network.</p>
+                    @if (Model.OnPremSetup is not null)
+                    {
+                        <div class="alert alert-success">
+                            <div class="fw-semibold">Agent registered</div>
+                            <div class="small mt-2">Agent ID: @Model.OnPremSetup.AgentId</div>
+                            <div class="small">Connection ID: @Model.OnPremSetup.ConnectionId</div>
+                        </div>
+                        <pre class="bg-dark text-light p-3 rounded small">@Model.OnPremSetup.AgentConfigSnippet</pre>
+                        <p class="text-muted small">Run: <code>@Model.OnPremSetup.RunCommand</code></p>
+                        <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="4" class="btn btn-primary">Continue to discovery</a>
+                    }
+                    else
+                    {
+                        <form method="post" asp-page-handler="SetupOnPremAgent">
+                            <input type="hidden" asp-for="SessionId" />
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Connection name</label>
+                                    <input asp-for="Step3.ConnectionName" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Provider</label>
+                                    <select asp-for="Step3.Provider" class="form-select" asp-items="Html.GetEnumSelectList<EnhancementHub.Domain.Enums.DatabaseProviderType>()"></select>
+                                </div>
+                            </div>
+                            <div class="mt-4 d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">Register on-prem agent</button>
+                                <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="2" class="btn btn-link">Back</a>
+                            </div>
+                        </form>
+                    }
                 </div>
-            </form>
+            </div>
             break;
 
         case EnhancementHub.Domain.Enums.OnboardingStep.RunDiscovery:
@@ -151,41 +260,31 @@
             <p class="text-muted">Index code, scan databases, build the system graph, and check schema drift.</p>
             @if (!string.IsNullOrWhiteSpace(Model.Session.DiscoveryStatus))
             {
-                <div class="alert alert-info">@Model.Session.DiscoveryStatus</div>
+                <div class="alert alert-info">
+                    <div>@Model.Session.DiscoveryStatus</div>
+                    <div class="small text-muted mt-1">State: @Model.Session.DiscoveryJobState</div>
+                </div>
             }
             @if (!string.IsNullOrWhiteSpace(Model.Session.LastError))
             {
                 <div class="alert alert-danger">@Model.Session.LastError</div>
             }
-            @if (Model.DiscoveryResult is not null)
-            {
-                <div class="alert @(Model.DiscoveryResult.Succeeded ? "alert-success" : "alert-danger")">
-                    @if (Model.DiscoveryResult.Succeeded)
-                    {
-                        <div>Discovery completed successfully.</div>
-                        <div class="small mt-1">
-                            @Model.DiscoveryResult.RepositoriesIndexed repos indexed ·
-                            @Model.DiscoveryResult.DatabasesScanned DBs scanned ·
-                            @Model.DiscoveryResult.GraphNodeCount graph nodes ·
-                            @Model.DiscoveryResult.DriftFindingCount drift findings
-                        </div>
-                    }
-                    else
-                    {
-                        <div>Discovery failed: @Model.DiscoveryResult.ErrorMessage</div>
-                    }
-                </div>
-            }
             <form method="post" asp-page-handler="Step4">
                 <input type="hidden" asp-for="SessionId" />
-                <button type="submit" class="btn btn-primary">
-                    @(Model.Session.DiscoveryCompletedAt is null ? "Run discovery" : "Re-run discovery")
+                <button type="submit" class="btn btn-primary" disabled="@(Model.Session.DiscoveryJobState is EnhancementHub.Domain.Enums.DiscoveryJobState.Queued or EnhancementHub.Domain.Enums.DiscoveryJobState.Running)">
+                    @(Model.Session.DiscoveryCompletedAt is null ? "Queue discovery" : "Re-queue discovery")
                 </button>
-                @if (Model.Session.DiscoveryCompletedAt is not null)
+                @if (Model.Session.DiscoveryJobState == EnhancementHub.Domain.Enums.DiscoveryJobState.Completed)
                 {
                     <a asp-page="./Wizard" asp-route-id="@Model.SessionId" asp-route-step="5" class="btn btn-outline-primary ms-2">Continue to review</a>
                 }
             </form>
+            @if (Model.Session.DiscoveryJobState is EnhancementHub.Domain.Enums.DiscoveryJobState.Queued or EnhancementHub.Domain.Enums.DiscoveryJobState.Running)
+            {
+                <script>
+                    setTimeout(() => window.location.reload(), 4000);
+                </script>
+            }
             break;
 
         case EnhancementHub.Domain.Enums.OnboardingStep.ReviewExport:

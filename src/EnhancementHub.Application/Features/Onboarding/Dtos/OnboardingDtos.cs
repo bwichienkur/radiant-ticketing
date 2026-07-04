@@ -20,10 +20,13 @@ public sealed record OnboardingSessionDto(
     OnboardingStep CurrentStep,
     OnboardingSessionStatus Status,
     bool SkipDatabase,
+    DiscoveryJobState DiscoveryJobState,
     string? DiscoveryStatus,
     string? LastError,
     DateTime? DiscoveryCompletedAt,
     DateTime? CompletedAt,
+    Guid? OnPremAgentId,
+    Guid? OnPremConnectionId,
     DateTime CreatedAt);
 
 public sealed record RepositoryPathValidationDto(
@@ -54,3 +57,18 @@ public sealed record OnboardingReviewDto(
     int DriftFindingCount,
     int ProfileCount,
     string? LatestProfileSummary);
+
+public sealed record GitCloneRequestDto(
+    bool Succeeded,
+    string? LocalPath,
+    string? ErrorMessage);
+
+public sealed record OnPremAgentSetupDto(
+    Guid AgentId,
+    Guid ConnectionId,
+    string ConnectionName,
+    string ApiBaseUrl,
+    string AgentConfigSnippet,
+    string RunCommand);
+
+public sealed record DatabaseConnectionStringDto(string ConnectionString);
