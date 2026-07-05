@@ -210,6 +210,15 @@
 - Audit logging for membership changes
 - API: `GET/POST /api/admin/teams`, `GET /api/admin/teams/{id}`, member CRUD endpoints
 
+## Horizon 2 continuation — Service API keys
+
+- Machine-to-machine authentication via `X-Api-Key` header (`eh_` prefix)
+- Policy scheme accepts JWT bearer tokens or API keys on the API
+- Admin page `/Admin/ApiKeys` to create, list, and revoke keys
+- Each key maps to a dedicated service user with configurable role and optional team scope
+- Hashed key storage; plain key shown once at creation
+- API: `GET/POST /api/admin/api-keys`, `DELETE /api/admin/api-keys/{id}`
+
 ## Future enhancements
 
 - GitHub App webhook-driven automatic re-index on push

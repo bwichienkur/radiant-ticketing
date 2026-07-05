@@ -70,6 +70,14 @@ Security design principles:
 - Keys stored hashed (PBKDF2); plain key shown once at registration
 - Agent authenticates on each scan result upload
 
+### 3.4 Service-to-service API keys
+
+- Machine integrations authenticate with `X-Api-Key` (prefix `eh_`)
+- Each key maps to a dedicated service user with a configurable global role
+- Optional team assignment scopes application access like human users
+- Keys stored hashed; plain value shown once at creation in `/Admin/ApiKeys`
+- Revocation disables the key and associated service account immediately
+
 ---
 
 ## 4. Authorization
@@ -93,6 +101,7 @@ Security design principles:
 | User passwords | PBKDF2 hash (salt + hash) |
 | Database connection strings | ASP.NET Data Protection encryption |
 | On-prem agent API keys | Hashed; not reversible |
+| Service API keys | Hashed; not reversible; prefix-only display in admin UI |
 | Data Protection key ring | Filesystem path (`DataProtection:KeysPath`) — use shared storage for multi-instance |
 | Attachments | Local filesystem or S3-compatible object storage |
 | JWT signing key | Configuration secret (environment variable / vault) |

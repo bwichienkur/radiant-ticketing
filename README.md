@@ -157,6 +157,7 @@ Key settings in `appsettings.json`:
 - PBKDF2 password hashing; production JWT and Data Protection key validation
 - Team-scoped resource access for enhancement requests and applications
 - On-prem agent API key authentication (`X-Agent-Api-Key`)
+- Service-to-service API keys for integrations (`X-Api-Key`, managed at `/Admin/ApiKeys`)
 - Rate limiting on login and attachment upload
 - Audit logging for approval and sensitive actions
 - Prompt sanitization for AI inputs; human approval required before ticket export
@@ -169,7 +170,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-107+ tests covering team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
+112+ tests covering service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
 
 ---
 

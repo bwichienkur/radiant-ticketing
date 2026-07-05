@@ -80,7 +80,7 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 - [x] Group → role mapping validation in admin UI (`/Admin/Authentication`)
 - [x] Extend resource authorization to System Intelligence APIs (applications, connections, exports, drift reports)
 - [x] Team membership management UI (invite, assign roles)
-- [ ] Optional: API keys for service-to-service integrations
+- [x] Optional: API keys for service-to-service integrations
 
 ### 2.2 Enterprise AI (Phase 17)
 - [x] Azure OpenAI provider alongside OpenAI

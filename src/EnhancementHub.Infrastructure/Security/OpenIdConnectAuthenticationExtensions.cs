@@ -23,7 +23,23 @@ public static class OpenIdConnectAuthenticationExtensions
         var jwtIssuer = configuration["Jwt:Issuer"] ?? "EnhancementHub";
         var jwtAudience = configuration["Jwt:Audience"] ?? "EnhancementHub";
 
-        var builder = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+        var builder = services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = EnhancementHubAuthDefaults.PolicyScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddPolicyScheme(EnhancementHubAuthDefaults.PolicyScheme, "JWT or API Key", options =>
+            {
+                options.ForwardDefaultSelector = context =>
+                {
+                    if (context.Request.Headers.ContainsKey(ApiKeyAuthenticationDefaults.HeaderName))
+                    {
+                        return ApiKeyAuthenticationDefaults.Scheme;
+                    }
+
+                    return JwtBearerDefaults.AuthenticationScheme;
+                };
+            })
             .AddJwtBearer(options =>
             {
                 options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
@@ -38,7 +54,10 @@ public static class OpenIdConnectAuthenticationExtensions
                         System.Text.Encoding.UTF8.GetBytes(jwtSecret))
                 };
                 configureJwt?.Invoke(options);
-            });
+            })
+            .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
+                ApiKeyAuthenticationDefaults.Scheme,
+                _ => { });
 
         if (IsOpenIdConnectEnabled(configuration))
         {

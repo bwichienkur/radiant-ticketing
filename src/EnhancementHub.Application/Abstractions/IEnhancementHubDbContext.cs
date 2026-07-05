@@ -48,6 +48,7 @@ public interface IEnhancementHubDbContext
     DbSet<SchemaDriftReport> SchemaDriftReports { get; }
     DbSet<OnPremAgent> OnPremAgents { get; }
     DbSet<OnboardingSession> OnboardingSessions { get; }
+    DbSet<ServiceApiKey> ServiceApiKeys { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

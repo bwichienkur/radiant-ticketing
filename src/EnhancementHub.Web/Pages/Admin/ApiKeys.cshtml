@@ -1,0 +1,139 @@
+@page
+@model EnhancementHub.Web.Pages.Admin.ApiKeysModel
+@using EnhancementHub.Domain.Enums
+@{
+    ViewData["Title"] = "API Keys";
+}
+
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+        <h1>Service API Keys</h1>
+        <p>Machine-to-machine authentication for integrations and automation</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-info">@Model.StatusMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.CreatedApiKey))
+{
+    <div class="alert alert-warning">
+        <strong>Copy this API key now — it will not be shown again.</strong>
+        <pre class="mb-0 mt-2 user-select-all">@Model.CreatedApiKey</pre>
+        <p class="small mb-0 mt-2">Send requests with header <code>X-Api-Key: &lt;key&gt;</code></p>
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card-panel p-4">
+            <h2 class="h6 mb-3">Create API key</h2>
+            <form method="post" asp-page-handler="Create">
+                <div class="mb-3">
+                    <label asp-for="NewKeyName" class="form-label">Name</label>
+                    <input asp-for="NewKeyName" class="form-control" required maxlength="200" placeholder="CI pipeline" />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="NewKeyDescription" class="form-label">Description</label>
+                    <textarea asp-for="NewKeyDescription" class="form-control" rows="2" maxlength="1000"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="NewKeyRole" class="form-label">Role</label>
+                    <select asp-for="NewKeyRole" class="form-select" asp-items="Html.GetEnumSelectList<UserRole>()"></select>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="NewKeyTeamId" class="form-label">Team (optional)</label>
+                    <select asp-for="NewKeyTeamId" class="form-select">
+                        <option value="">— No team scope —</option>
+                        @foreach (var team in Model.Teams)
+                        {
+                            <option value="@team.Id">@team.Name</option>
+                        }
+                    </select>
+                    <div class="form-text">Assign to a team to scope application access.</div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="NewKeyExpiresInDays" class="form-label">Expires in days (optional)</label>
+                    <input asp-for="NewKeyExpiresInDays" type="number" min="1" class="form-control" />
+                </div>
+                <button type="submit" class="btn btn-primary">Generate key</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card-panel">
+            <div class="card-header px-3 pt-3">Active keys</div>
+            @if (Model.ApiKeys.Count == 0)
+            {
+                <div class="p-4 text-muted">No API keys yet.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-enterprise mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Prefix</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Last used</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var key in Model.ApiKeys)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@key.Name</strong>
+                                        @if (!string.IsNullOrWhiteSpace(key.Description))
+                                        {
+                                            <div class="small text-muted">@key.Description</div>
+                                        }
+                                    </td>
+                                    <td><code>@key.KeyPrefix…</code></td>
+                                    <td>@key.Role</td>
+                                    <td>
+                                        @if (key.IsActive && (key.ExpiresAt is null || key.ExpiresAt > DateTime.UtcNow))
+                                        {
+                                            <span class="badge text-bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-secondary">Inactive</span>
+                                        }
+                                    </td>
+                                    <td class="small">@(key.LastUsedAt?.ToString("u") ?? "Never")</td>
+                                    <td class="text-end">
+                                        @if (key.IsActive)
+                                        {
+                                            <form method="post" asp-page-handler="Revoke" onsubmit="return confirm('Revoke this API key? Integrations using it will stop working.');">
+                                                <input type="hidden" name="RevokeKeyId" value="@key.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Revoke</button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<p class="text-muted small mt-3 mb-0">
+    API keys authenticate as a dedicated service user with the selected role.
+    Use the <code>X-Api-Key</code> header on API requests instead of a JWT bearer token.
+    Revoking a key immediately disables the associated service account.
+</p>
