@@ -23,6 +23,8 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
     private SqliteConnection? _connection;
     private bool _databaseInitialized;
 
+    protected virtual IReadOnlyDictionary<string, string?>? AdditionalSettings => null;
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
@@ -32,14 +34,24 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
 
         builder.ConfigureAppConfiguration((_, config) =>
         {
-            config.AddInMemoryCollection(new Dictionary<string, string?>
+            var settings = new Dictionary<string, string?>
             {
                 ["ConnectionStrings:Default"] = "Data Source=:memory:",
                 ["Jwt:Secret"] = JwtSecret,
                 ["Jwt:Issuer"] = "EnhancementHub",
                 ["Jwt:Audience"] = "EnhancementHub",
                 ["Jwt:ExpiryMinutes"] = "60"
-            });
+            };
+
+            if (AdditionalSettings is not null)
+            {
+                foreach (var (key, value) in AdditionalSettings)
+                {
+                    settings[key] = value;
+                }
+            }
+
+            config.AddInMemoryCollection(settings);
         });
 
         builder.ConfigureServices(services =>

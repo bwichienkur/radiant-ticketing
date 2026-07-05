@@ -58,6 +58,8 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<SystemGraphSnapshot> SystemGraphSnapshots => Set<SystemGraphSnapshot>();
     public DbSet<SchemaDriftReport> SchemaDriftReports => Set<SchemaDriftReport>();
     public DbSet<DocumentationExportCache> DocumentationExportCaches => Set<DocumentationExportCache>();
+    public DbSet<OpenApiRegistration> OpenApiRegistrations => Set<OpenApiRegistration>();
+    public DbSet<OpenApiEndpoint> OpenApiEndpoints => Set<OpenApiEndpoint>();
     public DbSet<OnPremAgent> OnPremAgents => Set<OnPremAgent>();
     public DbSet<OnboardingSession> OnboardingSessions => Set<OnboardingSession>();
     public DbSet<ServiceApiKey> ServiceApiKeys => Set<ServiceApiKey>();

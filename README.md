@@ -178,7 +178,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-139+ tests covering HA observability, System Intelligence performance, data layer scaling, indexing scale, incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
+146 tests covering polyglot integrations, HA observability, System Intelligence performance, data layer scaling, indexing scale, incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
 
 ---
 
@@ -191,5 +191,11 @@ dotnet test
 - `GET /api/system-map/{applicationId}`
 - `POST /api/on-prem-agent/register`
 - `GET /api/reporting/dashboard`
+- `POST /api/integrations/openapi` — register OpenAPI specs
+- `POST /api/integrations/polyglot/symbols` — ingest external language symbols
+- `POST /api/integrations/slack/intake`, `POST /api/integrations/teams/intake` — chat intake
+- `POST /api/webhooks/github` — GitHub push → auto re-index
+
+See [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) for configuration.
 
 Full Swagger available at `/swagger` in Development.
