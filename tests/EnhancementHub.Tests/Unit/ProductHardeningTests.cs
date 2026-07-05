@@ -160,12 +160,14 @@ public sealed class ProductHardeningTests
         var approve = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/EnhancementRequests/Approve.cshtml.cs"));
         var systemMap = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/SystemMap/Index.cshtml.cs"));
         var onboarding = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Onboarding/Wizard.cshtml.cs"));
+        var requestList = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/EnhancementRequests/Index.cshtml.cs"));
 
         details.Should().Contain("RedirectToPage(\"/Spa/RequestDetail\"");
         details.Should().Contain("\"classic\"");
         approve.Should().Contain("RedirectToPage(\"/Spa/ApprovalQueue\"");
         systemMap.Should().Contain("RedirectToPage(\"/Spa/SystemMap\"");
         onboarding.Should().Contain("RedirectToPage(\"/Spa/OnboardingWizard\"");
+        requestList.Should().Contain("RedirectToPage(\"/Spa/RequestList\"");
     }
 
     [Fact]
@@ -222,12 +224,34 @@ public sealed class ProductHardeningTests
     }
 
     [Fact]
+    public void LoadTestSmokeHarness_Exists()
+    {
+        File.Exists(Path.Combine(GetRepoRoot(), "scripts/run-load-test-smoke.mjs")).Should().BeTrue();
+        File.Exists(Path.Combine(GetRepoRoot(), "docs/LOAD_TEST_RESULTS.md")).Should().BeTrue();
+    }
+
+    [Fact]
+    public void RequestList_UsesReactSpa()
+    {
+        var sources = SpaBffTestHelper.ReadAllSpaBffSources();
+        sources.Should().Contain("[HttpGet(\"requests\")]");
+        sources.Should().Contain("ListEnhancementRequestsQuery");
+
+        File.Exists(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Spa/RequestList.cshtml")).Should().BeTrue();
+        File.Exists(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/ClientApp/src/apps/RequestListApp.tsx")).Should().BeTrue();
+
+        var index = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/EnhancementRequests/Index.cshtml.cs"));
+        index.Should().Contain("RedirectToPage(\"/Spa/RequestList\"");
+    }
+
+    [Fact]
     public void SidebarNav_PointsToReactRoutes()
     {
         var nav = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Shared/_SidebarNav.cshtml"));
         nav.Should().Contain("/Spa/ApprovalQueue");
         nav.Should().Contain("/Spa/OnboardingWizard");
         nav.Should().Contain("/Spa/SystemMap");
+        nav.Should().Contain("/Spa/RequestList");
     }
 
     [Fact]

@@ -182,7 +182,7 @@ export function DashboardApp() {
           ) : null}
           {insights.myAwaitingAnalysis > 0 ? (
             <div className="col-md-6 col-xl-4">
-              <a href="/EnhancementRequests/Index?status=Submitted" className="text-decoration-none">
+              <a href="/Spa/RequestList?status=Submitted" className="text-decoration-none">
                 <div className="stat-card queue-action-card stat-card-link">
                   <div className="label">Awaiting AI analysis</div>
                   <div className="value text-info">{insights.myAwaitingAnalysis}</div>
@@ -246,7 +246,7 @@ export function DashboardApp() {
               <LinkedStatCard
                 label="Awaiting Analysis"
                 value={report.awaitingAnalysisCount}
-                href="/EnhancementRequests/Index?status=Submitted"
+                href="/Spa/RequestList?status=Submitted"
                 valueClass="text-info"
               />
               <LinkedStatCard

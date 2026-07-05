@@ -19,7 +19,7 @@
             <a class="sidebar-link @(NavExact("/Index") ? "active" : "")" asp-page="/Index">
                 <span class="sidebar-icon" aria-hidden="true">◉</span> Dashboard
             </a>
-            <a class="sidebar-link @(NavActive("/EnhancementRequests") && !NavActive("/EnhancementRequests/Approve") ? "active" : "")" asp-page="/EnhancementRequests/Index">
+            <a class="sidebar-link @(NavActive("/Spa/RequestList", "/EnhancementRequests") && !NavActive("/EnhancementRequests/Approve", "/Spa/ApprovalQueue") && !NavActive("/EnhancementRequests/Create", "/Spa/CreateRequest") ? "active" : "")" href="/Spa/RequestList">
                 <span class="sidebar-icon" aria-hidden="true">☰</span> Requests
             </a>
             <a class="sidebar-link @(NavActive("/Spa/ApprovalQueue", "/EnhancementRequests/Approve") ? "active" : "")" href="/Spa/ApprovalQueue" data-tour="nav-approvals">

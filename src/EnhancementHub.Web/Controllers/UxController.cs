@@ -108,7 +108,7 @@ public sealed class UxController : ControllerBase
     private static IEnumerable<(string title, string url, string[] keywords)> GetStaticPages() =>
     [
         ("Dashboard", "/Index", ["home", "overview", "metrics"]),
-        ("Enhancement Requests", "/EnhancementRequests/Index", ["requests", "intake"]),
+        ("Enhancement Requests", "/Spa/RequestList", ["requests", "intake"]),
         ("Approval Queue", "/Spa/ApprovalQueue", ["approve", "pending"]),
         ("New Request", "/Spa/CreateRequest", ["create", "submit"]),
         ("System Map", "/Spa/SystemMap", ["graph", "architecture", "map"]),

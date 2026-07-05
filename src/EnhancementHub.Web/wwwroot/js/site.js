@@ -160,7 +160,7 @@
     const commandPages = [
         { title: 'Dashboard', url: '/Index', keys: ['home', 'dashboard'] },
         { title: 'New Request', url: '/Spa/CreateRequest', keys: ['new', 'create'] },
-        { title: 'Requests', url: '/EnhancementRequests/Index', keys: ['requests'] },
+        { title: 'Requests', url: '/Spa/RequestList', keys: ['requests'] },
         { title: 'Approval Queue', url: '/Spa/ApprovalQueue', keys: ['approve', 'approval'] },
         { title: 'System Map', url: '/Spa/SystemMap', keys: ['map', 'graph'] },
         { title: 'Onboarding', url: '/Spa/OnboardingWizard', keys: ['setup', 'wizard'] },

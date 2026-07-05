@@ -28,31 +28,35 @@ const SCENES = [
     caption: 'Backlog health, action queue, and activity feed for operators.',
     path: '/',
     duration: 5000,
-    wait: '.stat-card, .dashboard-stat, h1',
+    wait: '#spa-dashboard-root, .stat-card, h1',
+    spa: true,
   },
   {
     id: 'submit',
     title: '3. Submit request',
     caption: 'Capture business intent, priority, and target application.',
-    path: '/EnhancementRequests/Create',
+    path: '/Spa/CreateRequest',
     duration: 5000,
-    wait: 'form, input[name], .form-label',
+    wait: '#spa-create-request-root h1, #spa-create-request-root .form-label',
+    spa: true,
   },
   {
     id: 'requests',
     title: '4. Request triage',
     caption: 'Search, filter, and sort the enhancement backlog.',
-    path: '/EnhancementRequests',
+    path: '/Spa/RequestList',
     duration: 4500,
-    wait: 'table, .card-panel, h1',
+    wait: '#spa-request-list-root table, #spa-request-list-root .request-card-mobile, #spa-request-list-root h1',
+    spa: true,
   },
   {
     id: 'detail',
     title: '5. Request detail',
     caption: 'AI analysis, mission control metrics, and impact recommendations.',
-    path: `/EnhancementRequests/Details/${REQUEST_ID}`,
+    path: `/Spa/RequestDetail/${REQUEST_ID}`,
     duration: 6000,
-    wait: 'h1, .card-panel, #collaboration-panel',
+    wait: '#spa-request-detail-root h1, #spa-request-detail-root .card-panel',
+    spa: true,
   },
   {
     id: 'spa-detail',
@@ -67,9 +71,10 @@ const SCENES = [
     id: 'system-map',
     title: '7. System Map',
     caption: 'Code and database artifacts linked in a knowledge graph.',
-    path: `/SystemMap/Index?applicationId=${APP_ID}`,
+    path: `/Spa/SystemMap`,
     duration: 5000,
-    wait: '.card-panel, h1, .system-map',
+    wait: '#spa-system-map-root, h1',
+    spa: true,
   },
   {
     id: 'spa-map',
@@ -93,9 +98,10 @@ const SCENES = [
     id: 'approval',
     title: '10. Approval queue',
     caption: 'Human approve, reject, or clarify before export.',
-    path: '/EnhancementRequests/Approve',
+    path: '/Spa/ApprovalQueue',
     duration: 5000,
-    wait: '.approval-queue, .card-panel, h1',
+    wait: '#spa-approval-queue-root',
+    spa: true,
   },
   {
     id: 'spa-approval',
@@ -161,7 +167,8 @@ const SCENES = [
     caption: 'Intake → grounded AI → human approval → ticket export.',
     path: '/',
     duration: 5000,
-    wait: '.stat-card, h1',
+    wait: '#spa-dashboard-root, .stat-card, h1',
+    spa: true,
   },
 ];
 
@@ -282,6 +289,9 @@ async function waitForScene(page, scene) {
     await page.waitForFunction(
       () => {
         const roots = [
+          document.querySelector('#spa-dashboard-root'),
+          document.querySelector('#spa-create-request-root'),
+          document.querySelector('#spa-request-list-root'),
           document.querySelector('#spa-request-detail-root'),
           document.querySelector('#spa-system-map-root'),
           document.querySelector('#spa-approval-queue-root'),
@@ -294,9 +304,12 @@ async function waitForScene(page, scene) {
   }
 
   if (scene.action === 'click-graph') {
-    const graphBtn = page.getByRole('button', { name: 'Graph' });
+    await page.evaluate(() => {
+      document.querySelector('.product-tour-overlay')?.remove();
+    });
+    const graphBtn = page.getByRole('button', { name: 'Graph', exact: true });
     if (await graphBtn.count()) {
-      await graphBtn.first().click();
+      await graphBtn.first().click({ timeout: 5000 }).catch(() => undefined);
       await page.waitForTimeout(3000);
     }
   }
@@ -325,6 +338,7 @@ async function main() {
   // Prefer dark theme for a polished demo look
   await page.addInitScript(() => {
     localStorage.setItem('eh-theme', 'dark');
+    localStorage.setItem('eh-product-tour-seen', 'true');
     document.documentElement.setAttribute('data-bs-theme', 'dark');
   });
 

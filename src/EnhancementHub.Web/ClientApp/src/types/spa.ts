@@ -96,6 +96,17 @@ export interface PendingApprovalItem {
   daysInStatus?: number;
 }
 
+export interface EnhancementRequestListItem {
+  id: string;
+  title: string;
+  priority: string;
+  status: string | number;
+  targetApplicationName?: string;
+  submittedByUserName?: string;
+  latestRiskLevel?: string | number;
+  daysInStatus?: number;
+}
+
 export interface AnalysisSummary {
   id: string;
   version: number;

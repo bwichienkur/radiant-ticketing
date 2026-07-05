@@ -15,6 +15,7 @@ export default defineConfig({
         'onboarding-wizard': resolve(__dirname, 'src/entries/onboarding-wizard.tsx'),
         dashboard: resolve(__dirname, 'src/entries/dashboard.tsx'),
         'create-request': resolve(__dirname, 'src/entries/create-request.tsx'),
+        'request-list': resolve(__dirname, 'src/entries/request-list.tsx'),
       },
       output: {
         entryFileNames: '[name].js',

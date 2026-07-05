@@ -9,6 +9,7 @@ import type {
   DatabaseConnectionStringResult,
   EnhancementAnalysis,
   EnhancementRequestDetail,
+  EnhancementRequestListItem,
   EnhancementTemplate,
   GitHubAppStatus,
   OnboardingReview,
@@ -269,4 +270,34 @@ export async function getEnhancementTemplate(templateId: string): Promise<Enhanc
 
 export async function createEnhancementRequest(input: CreateRequestInput): Promise<CreatedRequestSummary> {
   return postJson('/web-api/spa/requests', input);
+}
+
+export async function listEnhancementRequests(params: {
+  q?: string;
+  status?: string;
+  priority?: string;
+  view?: string;
+  sort?: string;
+}): Promise<EnhancementRequestListItem[]> {
+  const search = new URLSearchParams();
+  if (params.q) {
+    search.set('q', params.q);
+  }
+  if (params.status) {
+    search.set('status', params.status);
+  }
+  if (params.priority) {
+    search.set('priority', params.priority);
+  }
+  if (params.view) {
+    search.set('view', params.view);
+  }
+  if (params.sort) {
+    search.set('sort', params.sort);
+  }
+
+  const query = search.toString();
+  return fetchJson<EnhancementRequestListItem[]>(
+    `/web-api/spa/requests${query ? `?${query}` : ''}`,
+  );
 }

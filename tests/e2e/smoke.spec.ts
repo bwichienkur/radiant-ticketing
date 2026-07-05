@@ -58,4 +58,15 @@ test.describe('EnhancementHub smoke', () => {
     });
     await expect(page.getByLabel('Title')).toBeVisible();
   });
+
+  test('request list SPA loads backlog', async ({ page }) => {
+    await page.goto('/Spa/RequestList');
+    await expect(page.getByRole('heading', { name: 'Enhancement Requests' })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page.getByRole('link', { name: 'New Request' }).first()).toBeVisible();
+    await expect(page.getByText(/order cancellation|compliance/i).first()).toBeVisible({
+      timeout: 15_000,
+    });
+  });
 });
