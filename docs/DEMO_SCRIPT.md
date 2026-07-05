@@ -193,6 +193,7 @@ Say:
 
 ## Related documents
 
+- [DEMO_VIDEO.md](DEMO_VIDEO.md) — automated product demo video (~90s) with per-feature narration
 - [ICP_ONE_PAGER.md](ICP_ONE_PAGER.md) — who this demo is for
 - [DEPLOYMENT.md](DEPLOYMENT.md) — pilot deployment steps
 - [PRICING.md](PRICING.md) — packaging conversation follow-up
