@@ -49,6 +49,8 @@ public interface IEnhancementHubDbContext
     DbSet<DocumentationExportCache> DocumentationExportCaches { get; }
     DbSet<OpenApiRegistration> OpenApiRegistrations { get; }
     DbSet<OpenApiEndpoint> OpenApiEndpoints { get; }
+    DbSet<ApprovalPolicyRule> ApprovalPolicyRules { get; }
+    DbSet<EnhancementTemplate> EnhancementTemplates { get; }
     DbSet<OnPremAgent> OnPremAgents { get; }
     DbSet<OnboardingSession> OnboardingSessions { get; }
     DbSet<ServiceApiKey> ServiceApiKeys { get; }

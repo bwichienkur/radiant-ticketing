@@ -275,7 +275,17 @@
 - Integration guide: `docs/INTEGRATIONS.md`
 - API: `/api/integrations/*`, `POST /api/webhooks/github`
 
+## Phase 24 — Product-led differentiation (complete)
+
+- ROI dashboard (`/Admin/Roi`, `GET /api/reporting/roi`) — analysis time saved, drift resolved, architect edits
+- Approval policy engine with rules by risk, department, and application tier
+- `Application.Tier` field (`Standard`, `Critical`, `Low`)
+- Enhancement templates for Security, Performance, and Compliance domains
+- Analysis comparison API and request detail comparison view
+- Architect edit recording and finding human-approval workflow
+- Schema drift finding resolve endpoint
+- Guide: `docs/PRODUCT_DIFFERENTIATION.md`
+
 ## Future enhancements
 
-- ROI dashboard and policy engine (Phase 24)
 - UX modernization — Blazor/React SPA evaluation (Phase 25)

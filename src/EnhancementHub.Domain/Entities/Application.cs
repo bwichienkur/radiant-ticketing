@@ -1,4 +1,5 @@
 using EnhancementHub.Domain.Common;
+using EnhancementHub.Domain.Enums;
 
 namespace EnhancementHub.Domain.Entities;
 
@@ -10,6 +11,7 @@ public class Application : BaseEntity
     public string? Description { get; set; }
     public Guid OwnerTeamId { get; set; }
     public string? RiskSensitiveAreas { get; set; }
+    public ApplicationTier Tier { get; set; } = ApplicationTier.Standard;
 
     public Team OwnerTeam { get; set; } = null!;
     public ICollection<Repository> Repositories { get; set; } = new List<Repository>();

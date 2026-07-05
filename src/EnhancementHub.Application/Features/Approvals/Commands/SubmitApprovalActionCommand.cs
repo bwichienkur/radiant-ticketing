@@ -21,15 +21,18 @@ public sealed class SubmitApprovalActionCommandHandler
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly ICurrentUserService _currentUser;
     private readonly IAuditService _auditService;
+    private readonly IApprovalPolicyEvaluator _policyEvaluator;
 
     public SubmitApprovalActionCommandHandler(
         IEnhancementHubDbContext dbContext,
         ICurrentUserService currentUser,
-        IAuditService auditService)
+        IAuditService auditService,
+        IApprovalPolicyEvaluator policyEvaluator)
     {
         _dbContext = dbContext;
         _currentUser = currentUser;
         _auditService = auditService;
+        _policyEvaluator = policyEvaluator;
     }
 
     public async Task<ApprovalActionDto> Handle(
@@ -47,6 +50,20 @@ public sealed class SubmitApprovalActionCommandHandler
             {
                 throw new ForbiddenException(
                     "Only users with Approver or Admin roles can approve or reject enhancement requests.");
+            }
+        }
+
+        if (request.ActionType == ApprovalActionType.Approve && _currentUser.Role is not null)
+        {
+            var policy = await _policyEvaluator.EvaluateAsync(
+                request.EnhancementRequestId,
+                _currentUser.Role.Value,
+                cancellationToken);
+
+            if (!policy.Allowed)
+            {
+                throw new ForbiddenException(
+                    policy.Message ?? $"Approval blocked by policy '{policy.BlockedByRuleName}'.");
             }
         }
 

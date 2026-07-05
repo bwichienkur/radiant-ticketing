@@ -20,6 +20,7 @@ public class DetailsModel : PageModel
 
     public EnhancementRequestDetailDto? Detail { get; private set; }
     public EnhancementAnalysisDto? Analysis { get; private set; }
+    public AnalysisComparisonDto? Comparison { get; private set; }
     public IReadOnlyList<ApprovalActionDto> ApprovalHistory { get; private set; } = [];
 
     public async Task<IActionResult> OnGetAsync(Guid id, CancellationToken cancellationToken)
@@ -36,6 +37,23 @@ public class DetailsModel : PageModel
             catch
             {
                 Analysis = null;
+            }
+        }
+
+        if (Detail.Analyses.Count >= 2)
+        {
+            var versions = Detail.Analyses.OrderBy(a => a.Version).Select(a => a.Version).ToList();
+            var versionA = versions[^2];
+            var versionB = versions[^1];
+            try
+            {
+                Comparison = await _mediator.Send(
+                    new GetAnalysisComparisonQuery(id, versionA, versionB),
+                    cancellationToken);
+            }
+            catch
+            {
+                Comparison = null;
             }
         }
 

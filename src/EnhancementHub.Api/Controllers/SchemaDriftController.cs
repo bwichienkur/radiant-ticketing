@@ -28,4 +28,8 @@ public sealed class SchemaDriftController : ControllerBase
         [FromQuery] Guid? repositoryId,
         CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new GetDriftReportQuery(connectionId, repositoryId), cancellationToken));
+
+    [HttpPost("findings/{findingId:guid}/resolve")]
+    public async Task<IActionResult> ResolveFinding(Guid findingId, CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new ResolveSchemaDriftFindingCommand(findingId), cancellationToken));
 }

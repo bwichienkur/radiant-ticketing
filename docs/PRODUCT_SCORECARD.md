@@ -13,7 +13,7 @@ Living assessment of product maturity, marketability, and scalability. Updated w
 | 10 | Validated in production at scale with measured outcomes |
 
 **Baseline:** Phase 15 enterprise hardening (July 2026), before Horizons 1–3 work.  
-**Current snapshot:** Phase 23 complete (Horizon 4.1 — polyglot & integrations).
+**Current snapshot:** Phase 24 complete (Horizon 4.2 — product-led differentiation).
 
 Related: [ROADMAP.md](ROADMAP.md) · [PHASES.md](PHASES.md) · [ICP_ONE_PAGER.md](ICP_ONE_PAGER.md)
 
@@ -23,10 +23,10 @@ Related: [ROADMAP.md](ROADMAP.md) · [PHASES.md](PHASES.md) · [ICP_ONE_PAGER.md
 
 | Dimension | Baseline (Phase 15) | Current (Phase 20) | Δ | Target (Horizon 3 exit) |
 |-----------|---------------------|--------------------|---|-------------------------|
-| **Product maturity** | 7.0 | 8.7 | +1.7 | 8.5 |
-| **Marketability** | 4.5 | 7.7 | +3.2 | 8.0 (requires pilot validation) |
+| **Product maturity** | 7.0 | 8.8 | +1.8 | 8.5 |
+| **Marketability** | 4.5 | 7.9 | +3.4 | 8.0 (requires pilot validation) |
 | **Scalability** | 4.0 | 7.5 | +3.5 | 8.0 |
-| **Overall (weighted)** | **5.8** | **8.0** | **+2.2** | **8.0+** |
+| **Overall (weighted)** | **5.8** | **8.1** | **+2.3** | **8.0+** |
 
 Overall = average of the three dimensions (equal weight).
 
@@ -43,8 +43,9 @@ Overall = average of the three dimensions (equal weight).
 | AI operations | 6 | 8.5 | Phase 17: Azure OpenAI, budgets, PII redaction, usage report |
 | Background job reliability | 4 | 8 | Phase 18: Hangfire, admin jobs UI, shared executors |
 | Compliance & audit | 5 | 8.5 | Audit export, retention, SOC 2 map, security whitepaper |
-| Engineering quality | 7 | 7.5 | 146+ automated tests |
-| Integrations & polyglot | 4 | 7.5 | Phase 23: OpenAPI, polyglot symbols, GitHub/Slack/Teams/ServiceNow — [INTEGRATIONS.md](INTEGRATIONS.md) |
+| Engineering quality | 7 | 7.5 | 154 automated tests |
+| Integrations & polyglot | 4 | 7.5 | Phase 23 — [INTEGRATIONS.md](INTEGRATIONS.md) |
+| ROI & policy differentiation | 2 | 7.5 | Phase 24 — [PRODUCT_DIFFERENTIATION.md](PRODUCT_DIFFERENTIATION.md) |
 
 **Notes:** Core workflow was strong at baseline. Gains are in enterprise operability, governance, and admin visibility.
 
@@ -102,8 +103,9 @@ Buyer-facing readiness distinct from dimension averages.
 | **2** — Enterprise buyer requirements | Complete | Product +1.0, Marketability +1.0 |
 | **3** — Scale (Phases 19–20) | Partial | Scalability +2.5 |
 | **3** — Scale (Phases 21–22) | Complete | Scalability → 7.5, Product +0.2 |
-| **4** — Grow (Phase 23) | Partial | Product +0.1, Marketability +0.2 (integrations) |
-| **4** — Grow (Phases 24–26) | Not started | Expected: Marketability → 8+ with case studies |
+| **4** — Grow (Phase 23) | Complete | Product +0.1, Marketability +0.2 |
+| **4** — Grow (Phase 24) | Complete | Product +0.1, Marketability +0.2 (ROI, policy, templates) |
+| **4** — Grow (Phases 25–26) | Not started | Expected: Marketability → 8+ with case studies |
 
 ---
 
@@ -144,6 +146,7 @@ When closing a phase or horizon:
 
 | Date | Phase / milestone | Overall | Notes |
 |------|-------------------|---------|-------|
+| 2026-07-05 | Phase 24 — Product differentiation | 8.0 → 8.1 | ROI dashboard, policy engine, templates, comparison view |
 | 2026-07-05 | Phase 23 — Polyglot & integrations | 7.9 → 8.0 | OpenAPI, polyglot symbols, GitHub/Slack/Teams/ServiceNow |
 | 2026-07-05 | Phase 22 — HA & observability | 7.7 → 7.9 | OTel, Azure Blob DP, Helm chart, Grafana templates |
 | 2026-07-05 | Phase 21 — System Intelligence performance | 7.4 → 7.7 | Incremental graph, paged map API, doc cache, diff-only drift |
@@ -151,4 +154,4 @@ When closing a phase or horizon:
 
 ---
 
-*Last updated: July 2026 — Phase 23 (polyglot & integration expansion).*
+*Last updated: July 2026 — Phase 24 (product-led differentiation).*

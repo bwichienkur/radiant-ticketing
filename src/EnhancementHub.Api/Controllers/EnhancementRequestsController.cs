@@ -38,7 +38,8 @@ public sealed class EnhancementRequestsController : ControllerBase
             request.RequestedDueDate,
             request.Department,
             request.TeamId,
-            request.SupportingNotes), cancellationToken);
+            request.SupportingNotes,
+            request.TemplateId), cancellationToken);
         return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
     }
 
@@ -107,7 +108,8 @@ public sealed class EnhancementRequestsController : ControllerBase
         DateTime? RequestedDueDate,
         string? Department,
         Guid? TeamId,
-        string? SupportingNotes);
+        string? SupportingNotes,
+        Guid? TemplateId = null);
 
     public sealed record UpdateRequest(
         string Title,

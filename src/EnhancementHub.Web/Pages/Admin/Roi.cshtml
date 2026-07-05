@@ -1,0 +1,80 @@
+@page
+@model EnhancementHub.Web.Pages.Admin.RoiModel
+@{
+    ViewData["Title"] = "ROI Dashboard";
+    var report = Model.Report;
+}
+
+<div class="page-header">
+    <h1>ROI Dashboard</h1>
+    <p>Analysis time saved, risk governance, and drift resolution metrics</p>
+</div>
+
+@if (report is null)
+{
+    <div class="card-panel p-4"><p class="text-muted mb-0">Unable to load ROI report.</p></div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="label">Analyses completed</div>
+                <div class="value">@report.TotalAnalysesCompleted</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="label">Avg analysis time</div>
+                <div class="value fs-5">@report.AverageAnalysisDurationMinutes min</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="label">Est. hours saved</div>
+                <div class="value fs-5">@report.EstimatedHoursSaved</div>
+                <div class="small text-muted">vs @report.EstimatedManualAnalysisHoursPerRequest h manual baseline</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="label">High/critical approved</div>
+                <div class="value">@report.HighOrCriticalRiskApprovedCount</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="label">Drift findings resolved</div>
+                <div class="value">@report.DriftFindingsResolved / @report.DriftFindingsTotal</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="label">Architect edits</div>
+                <div class="value">@report.ArchitectEditsRecorded</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="label">Human-approved findings</div>
+                <div class="value">@report.HumanApprovedFindings / @report.AiSuggestedFindings AI suggested</div>
+            </div>
+        </div>
+    </div>
+
+    @if (report.TemplateUsageByCategory.Count > 0)
+    {
+        <div class="card-panel p-4">
+            <h2 class="h6">Template usage by domain</h2>
+            <ul class="mb-0">
+                @foreach (var item in report.TemplateUsageByCategory)
+                {
+                    <li><strong>@item.Category:</strong> @item.RequestCount request(s)</li>
+                }
+            </ul>
+        </div>
+    }
+}

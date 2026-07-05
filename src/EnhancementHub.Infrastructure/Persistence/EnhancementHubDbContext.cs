@@ -60,6 +60,8 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<DocumentationExportCache> DocumentationExportCaches => Set<DocumentationExportCache>();
     public DbSet<OpenApiRegistration> OpenApiRegistrations => Set<OpenApiRegistration>();
     public DbSet<OpenApiEndpoint> OpenApiEndpoints => Set<OpenApiEndpoint>();
+    public DbSet<ApprovalPolicyRule> ApprovalPolicyRules => Set<ApprovalPolicyRule>();
+    public DbSet<EnhancementTemplate> EnhancementTemplates => Set<EnhancementTemplate>();
     public DbSet<OnPremAgent> OnPremAgents => Set<OnPremAgent>();
     public DbSet<OnboardingSession> OnboardingSessions => Set<OnboardingSession>();
     public DbSet<ServiceApiKey> ServiceApiKeys => Set<ServiceApiKey>();
