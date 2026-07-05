@@ -1,4 +1,5 @@
 using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Common.Exceptions;
 using EnhancementHub.Application.Options;
 using EnhancementHub.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -99,16 +100,19 @@ public sealed class TenantBillingService : ITenantBillingService
 {
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly ITenantMeteringService _meteringService;
-    private readonly CommercialOptions _options;
+    private readonly CommercialOptions _commercialOptions;
+    private readonly StripeOptions _stripeOptions;
 
     public TenantBillingService(
         IEnhancementHubDbContext dbContext,
         ITenantMeteringService meteringService,
-        Microsoft.Extensions.Options.IOptions<CommercialOptions> options)
+        Microsoft.Extensions.Options.IOptions<CommercialOptions> commercialOptions,
+        Microsoft.Extensions.Options.IOptions<StripeOptions> stripeOptions)
     {
         _dbContext = dbContext;
         _meteringService = meteringService;
-        _options = options.Value;
+        _commercialOptions = commercialOptions.Value;
+        _stripeOptions = stripeOptions.Value;
     }
 
     public async Task<TenantBillingStatus> GetBillingStatusAsync(
@@ -126,13 +130,25 @@ public sealed class TenantBillingService : ITenantBillingService
                      || usage.AnalysisCountThisMonth > limits.MaxAnalysesPerMonth
                      || usage.StorageBytes > limits.MaxStorageMegabytes * 1024L * 1024L;
 
+        var isTrialActive = tenant.Plan == Domain.Enums.TenantPlan.Trial
+                            && tenant.TrialEndsAt > DateTime.UtcNow;
+        var hasActiveSubscription = HasActiveSubscription(tenant);
+        var isTrialExpired = tenant.Plan == Domain.Enums.TenantPlan.Trial
+                             && !isTrialActive
+                             && !hasActiveSubscription;
+
         return new TenantBillingStatus(
             tenant.Id,
             tenant.Name,
             tenant.Plan.ToString(),
             tenant.Region.ToString(),
-            tenant.Plan == Domain.Enums.TenantPlan.Trial && tenant.TrialEndsAt > DateTime.UtcNow,
+            isTrialActive,
+            isTrialExpired,
             tenant.TrialEndsAt,
+            tenant.SubscriptionStatus.ToString(),
+            tenant.SubscriptionPeriodEnd,
+            hasActiveSubscription,
+            _stripeOptions.Enabled,
             new TenantPlanLimitsStatus(
                 limits.MaxApplications,
                 limits.MaxAnalysesPerMonth,
@@ -144,18 +160,29 @@ public sealed class TenantBillingService : ITenantBillingService
     public async Task EnsureWithinLimitsAsync(Guid tenantId, CancellationToken cancellationToken = default)
     {
         var status = await GetBillingStatusAsync(tenantId, cancellationToken);
+        if (status.IsTrialExpired)
+        {
+            throw new ForbiddenException(
+                "Trial has expired. Upgrade your plan to continue using EnhancementHub.");
+        }
+
         if (status.Limits.IsOverLimit)
         {
-            throw new Application.Common.Exceptions.ForbiddenException(
+            throw new ForbiddenException(
                 "Tenant has exceeded plan limits. Upgrade your plan or reduce usage.");
         }
     }
 
+    internal static bool HasActiveSubscription(Tenant tenant) =>
+        tenant.Plan != Domain.Enums.TenantPlan.Trial
+        || tenant.SubscriptionStatus is Domain.Enums.TenantSubscriptionStatus.Active
+            or Domain.Enums.TenantSubscriptionStatus.Trialing;
+
     internal TenantPlanLimits ResolveLimits(Domain.Enums.TenantPlan plan) =>
         plan switch
         {
-            Domain.Enums.TenantPlan.Team => _options.TeamLimits,
-            Domain.Enums.TenantPlan.Enterprise => _options.EnterpriseLimits,
-            _ => _options.TrialLimits
+            Domain.Enums.TenantPlan.Team => _commercialOptions.TeamLimits,
+            Domain.Enums.TenantPlan.Enterprise => _commercialOptions.EnterpriseLimits,
+            _ => _commercialOptions.TrialLimits
         };
 }

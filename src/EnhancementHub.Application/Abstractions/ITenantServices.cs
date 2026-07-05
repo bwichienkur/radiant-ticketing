@@ -32,7 +32,12 @@ public sealed record TenantBillingStatus(
     string Plan,
     string Region,
     bool IsTrialActive,
+    bool IsTrialExpired,
     DateTime? TrialEndsAt,
+    string SubscriptionStatus,
+    DateTime? SubscriptionPeriodEnd,
+    bool HasActiveSubscription,
+    bool StripeEnabled,
     TenantPlanLimitsStatus Limits,
     TenantUsageSummary Usage);
 
