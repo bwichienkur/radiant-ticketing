@@ -13,7 +13,7 @@ Living assessment of product maturity, marketability, and scalability. Updated w
 | 10 | Validated in production at scale with measured outcomes |
 
 **Baseline:** Phase 15 enterprise hardening (July 2026), before Horizons 1–3 work.  
-**Current snapshot:** Phase 24 complete (Horizon 4.2 — product-led differentiation).
+**Current snapshot:** Phase 25 complete (Horizon 4.3 — UX modernization).
 
 Related: [ROADMAP.md](ROADMAP.md) · [PHASES.md](PHASES.md) · [ICP_ONE_PAGER.md](ICP_ONE_PAGER.md)
 
@@ -23,10 +23,10 @@ Related: [ROADMAP.md](ROADMAP.md) · [PHASES.md](PHASES.md) · [ICP_ONE_PAGER.md
 
 | Dimension | Baseline (Phase 15) | Current (Phase 20) | Δ | Target (Horizon 3 exit) |
 |-----------|---------------------|--------------------|---|-------------------------|
-| **Product maturity** | 7.0 | 8.8 | +1.8 | 8.5 |
-| **Marketability** | 4.5 | 7.9 | +3.4 | 8.0 (requires pilot validation) |
+| **Product maturity** | 7.0 | 9.0 | +2.0 | 8.5 |
+| **Marketability** | 4.5 | 8.0 | +3.5 | 8.0 (requires pilot validation) |
 | **Scalability** | 4.0 | 7.5 | +3.5 | 8.0 |
-| **Overall (weighted)** | **5.8** | **8.1** | **+2.3** | **8.0+** |
+| **Overall (weighted)** | **5.8** | **8.2** | **+2.4** | **8.0+** |
 
 Overall = average of the three dimensions (equal weight).
 
@@ -38,7 +38,7 @@ Overall = average of the three dimensions (equal weight).
 |----------|----------|---------|----------|
 | Core intake → approval → export | 9 | 9 | Phases 1–4 complete |
 | System Intelligence (schema, graph, drift, docs) | 8 | 8.5 | Phase 21 incremental graph, pagination, doc cache |
-| Demo / operator UX | 5 | 8 | Horizon 1 polish; dashboard widgets; System Map UX |
+| Demo / operator UX | 5 | 8.5 | Phase 25 mobile approvals, collaboration, SPA pilot — [UX_MODERNIZATION.md](UX_MODERNIZATION.md) |
 | Identity & authorization | 6 | 8.5 | Phase 16, Entra ID, team membership, API keys |
 | AI operations | 6 | 8.5 | Phase 17: Azure OpenAI, budgets, PII redaction, usage report |
 | Background job reliability | 4 | 8 | Phase 18: Hangfire, admin jobs UI, shared executors |
@@ -105,7 +105,8 @@ Buyer-facing readiness distinct from dimension averages.
 | **3** — Scale (Phases 21–22) | Complete | Scalability → 7.5, Product +0.2 |
 | **4** — Grow (Phase 23) | Complete | Product +0.1, Marketability +0.2 |
 | **4** — Grow (Phase 24) | Complete | Product +0.1, Marketability +0.2 (ROI, policy, templates) |
-| **4** — Grow (Phases 25–26) | Not started | Expected: Marketability → 8+ with case studies |
+| **4** — Grow (Phase 25) | Complete | Product +0.2 (UX, a11y, collaboration) |
+| **4** — Grow (Phase 26) | Not started | Multi-tenant commercial platform |
 
 ---
 
@@ -146,6 +147,7 @@ When closing a phase or horizon:
 
 | Date | Phase / milestone | Overall | Notes |
 |------|-------------------|---------|-------|
+| 2026-07-05 | Phase 25 — UX modernization | 8.1 → 8.2 | SPA pilot, mobile approvals, SignalR collaboration, a11y |
 | 2026-07-05 | Phase 24 — Product differentiation | 8.0 → 8.1 | ROI dashboard, policy engine, templates, comparison view |
 | 2026-07-05 | Phase 23 — Polyglot & integrations | 7.9 → 8.0 | OpenAPI, polyglot symbols, GitHub/Slack/Teams/ServiceNow |
 | 2026-07-05 | Phase 22 — HA & observability | 7.7 → 7.9 | OTel, Azure Blob DP, Helm chart, Grafana templates |
@@ -154,4 +156,4 @@ When closing a phase or horizon:
 
 ---
 
-*Last updated: July 2026 — Phase 24 (product-led differentiation).*
+*Last updated: July 2026 — Phase 25 (UX modernization).*

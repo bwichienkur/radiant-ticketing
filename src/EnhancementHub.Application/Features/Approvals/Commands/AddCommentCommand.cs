@@ -17,13 +17,16 @@ public sealed class AddCommentCommandHandler : IRequestHandler<AddCommentCommand
 {
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly ICurrentUserService _currentUser;
+    private readonly IRequestCollaborationNotifier _collaborationNotifier;
 
     public AddCommentCommandHandler(
         IEnhancementHubDbContext dbContext,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        IRequestCollaborationNotifier collaborationNotifier)
     {
         _dbContext = dbContext;
         _currentUser = currentUser;
+        _collaborationNotifier = collaborationNotifier;
     }
 
     public async Task<ApprovalActionDto> Handle(
@@ -75,6 +78,17 @@ public sealed class AddCommentCommandHandler : IRequestHandler<AddCommentCommand
             .FirstAsync(u => u.Id == _currentUser.UserId.Value, cancellationToken);
 
         approvalAction.User = user;
+
+        await _collaborationNotifier.NotifyCommentAddedAsync(
+            request.EnhancementRequestId,
+            new CollaborationCommentPayload(
+                comment.Id,
+                comment.Content,
+                user.DisplayName,
+                comment.IsInternal,
+                comment.CreatedAt),
+            cancellationToken);
+
         return approvalAction.ToDto();
     }
 }

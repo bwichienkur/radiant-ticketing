@@ -6,6 +6,7 @@ using EnhancementHub.Infrastructure.Security;
 using EnhancementHub.Infrastructure.Services.Notifications;
 using EnhancementHub.Web.Hubs;
 using EnhancementHub.Web.Services;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +18,8 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddEnhancementHubOpenTelemetry(builder.Configuration, "EnhancementHub.Web");
 builder.Services.AddEnhancementHubHealthChecks();
 builder.Services.AddSignalR();
+builder.Services.RemoveAll<IRequestCollaborationNotifier>();
+builder.Services.AddScoped<IRequestCollaborationNotifier, RequestCollaborationNotifier>();
 builder.Services.AddScoped<SignalRNotificationPublisher>();
 builder.Services.AddScoped<INotificationPublisher>(sp => new CompositeNotificationPublisher(
     [
@@ -35,6 +38,8 @@ builder.Services.AddScoped<EnhancementHub.Web.Services.DevAuthService>();
 builder.Services.AddEnhancementHubCookieAuthentication(builder.Configuration);
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -63,7 +68,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapEnhancementHubHealthChecks();
 app.MapEnhancementHubObservabilityEndpoints(builder.Configuration);
+app.MapControllers();
 app.MapRazorPages();
 app.MapHub<PlatformNotificationHub>("/hubs/notifications");
+app.MapHub<EnhancementRequestCollaborationHub>("/hubs/request-collaboration");
 
 app.Run();
