@@ -63,8 +63,19 @@ public class WizardModel : PageModel
         new(6, "Done")
     ];
 
-    public async Task<IActionResult> OnGetAsync(int? step, CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(int? step, string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            if (Id == Guid.Empty)
+            {
+                var started = await _mediator.Send(new StartOnboardingSessionCommand(), cancellationToken);
+                return RedirectToPage("/Spa/OnboardingWizard", new { id = started.Id });
+            }
+
+            return RedirectToPage("/Spa/OnboardingWizard", new { id = Id });
+        }
+
         if (Id == Guid.Empty)
         {
             var started = await _mediator.Send(new StartOnboardingSessionCommand(), cancellationToken);

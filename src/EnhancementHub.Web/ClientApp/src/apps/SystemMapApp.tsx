@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getSystemMap, listApplications } from '../api/spaClient';
+import { getSystemMap, listApplications, rebuildSystemMap } from '../api/spaClient';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { SystemMapGraph } from '../components/SystemMapGraph';
 import { nodeColor } from '../components/systemMapGraph';
@@ -20,6 +20,8 @@ export function SystemMapApp({ initialApplicationId }: SystemMapAppProps) {
   const [error, setError] = useState<string | null>(null);
   const [loadingApps, setLoadingApps] = useState(true);
   const [loadingMap, setLoadingMap] = useState(false);
+  const [rebuilding, setRebuilding] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -105,6 +107,26 @@ export function SystemMapApp({ initialApplicationId }: SystemMapAppProps) {
     [map, selectedNodeId],
   );
 
+  async function handleRebuild() {
+    if (!selectedId || rebuilding) {
+      return;
+    }
+
+    setRebuilding(true);
+    setError(null);
+    setStatusMessage(null);
+    try {
+      const result = await rebuildSystemMap(selectedId);
+      setMap(result);
+      setSelectedNodeId(null);
+      setStatusMessage('System graph rebuilt successfully.');
+    } catch {
+      setError('Failed to rebuild system graph.');
+    } finally {
+      setRebuilding(false);
+    }
+  }
+
   if (loadingApps) {
     return (
       <div aria-busy="true">
@@ -149,6 +171,14 @@ export function SystemMapApp({ initialApplicationId }: SystemMapAppProps) {
           </select>
         </div>
         <div className="col-md-6 d-flex align-items-end justify-content-md-end gap-2 flex-wrap">
+          <button
+            type="button"
+            className="btn btn-sm btn-outline-primary"
+            disabled={!selectedId || rebuilding || loadingMap}
+            onClick={() => void handleRebuild()}
+          >
+            {rebuilding ? 'Rebuilding…' : 'Rebuild graph'}
+          </button>
           <div className="btn-group" role="group" aria-label="View mode">
             <button
               type="button"
@@ -167,6 +197,12 @@ export function SystemMapApp({ initialApplicationId }: SystemMapAppProps) {
           </div>
         </div>
       </div>
+
+      {statusMessage ? (
+        <div className="alert alert-success" role="status">
+          {statusMessage}
+        </div>
+      ) : null}
 
       {error ? (
         <div className="alert alert-danger" role="alert">
@@ -212,8 +248,16 @@ export function SystemMapApp({ initialApplicationId }: SystemMapAppProps) {
           ) : null}
 
           {nodesByType.length === 0 ? (
-            <div className="card-panel p-4">
-              <p className="mb-0 text-muted">No graph nodes yet. Rebuild the graph from the classic system map page.</p>
+            <div className="card-panel p-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+              <p className="mb-0 text-muted">No graph nodes yet. Run discovery, then rebuild the graph.</p>
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                disabled={rebuilding}
+                onClick={() => void handleRebuild()}
+              >
+                {rebuilding ? 'Rebuilding…' : 'Rebuild graph'}
+              </button>
             </div>
           ) : viewMode === 'graph' ? (
             <SystemMapGraph map={map} onNodeSelected={setSelectedNodeId} />

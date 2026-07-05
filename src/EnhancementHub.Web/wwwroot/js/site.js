@@ -379,6 +379,7 @@
         }
 
         let index = 0;
+        const mobileMq = window.matchMedia('(max-width: 991.98px)');
         const overlay = document.createElement('div');
         overlay.className = 'product-tour-overlay';
         overlay.innerHTML = `
@@ -414,7 +415,7 @@
         function positionSpotlight(target) {
             if (!spotlight) return;
             const rect = target.getBoundingClientRect();
-            const pad = 8;
+            const pad = mobileMq.matches ? 4 : 8;
             spotlight.hidden = false;
             spotlight.style.top = `${Math.max(0, rect.top - pad)}px`;
             spotlight.style.left = `${Math.max(0, rect.left - pad)}px`;
@@ -423,6 +424,15 @@
 
             const card = overlay.querySelector('.product-tour-card');
             if (!card) return;
+            card.classList.toggle('product-tour-card-mobile', mobileMq.matches);
+
+            if (mobileMq.matches) {
+                card.style.top = '';
+                card.style.left = '';
+                card.style.right = '';
+                return;
+            }
+
             const cardRect = card.getBoundingClientRect();
             let top = rect.bottom + 12;
             if (top + cardRect.height > window.innerHeight - 16) {
@@ -433,6 +443,14 @@
                 window.innerWidth - cardRect.width - 16,
                 Math.max(16, rect.left)
             )}px`;
+            card.style.right = '';
+        }
+
+        function prepareTarget(target) {
+            const offcanvasEl = document.getElementById('appSidebarOffcanvas');
+            if (mobileMq.matches && offcanvasEl?.contains(target) && typeof bootstrap !== 'undefined') {
+                bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl).show();
+            }
         }
 
         function renderStep() {
@@ -445,7 +463,8 @@
 
             document.querySelectorAll('[data-tour-active]').forEach(el => el.removeAttribute('data-tour-active'));
             target.setAttribute('data-tour-active', 'true');
-            target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            prepareTarget(target);
+            target.scrollIntoView({ block: 'nearest', behavior: mobileMq.matches ? 'auto' : 'smooth' });
 
             titleEl.textContent = step.title;
             bodyEl.textContent = step.body;
@@ -453,7 +472,7 @@
             backBtn.hidden = index === 0;
             nextBtn.textContent = index === steps.length - 1 ? 'Done' : 'Next';
 
-            requestAnimationFrame(() => positionSpotlight(target));
+            window.setTimeout(() => positionSpotlight(target), mobileMq.matches ? 250 : 0);
         }
 
         overlay.querySelector('[data-tour-next]')?.addEventListener('click', () => {

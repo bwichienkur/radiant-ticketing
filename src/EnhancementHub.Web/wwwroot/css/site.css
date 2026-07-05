@@ -1164,3 +1164,20 @@ a.checklist-item-link:focus-visible {
     position: relative;
     z-index: 1081;
 }
+
+@media (max-width: 991.98px) {
+    .product-tour-card-mobile {
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0;
+        top: auto !important;
+        width: 100% !important;
+        max-width: none;
+        border-radius: 1rem 1rem 0 0;
+        padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    }
+
+    .product-tour-spotlight {
+        box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.55);
+    }
+}

@@ -50,12 +50,12 @@ public sealed class Phase31ReactSpaExtendedTests
     }
 
     [Fact]
-    public void ClassicPages_LinkToReactAlternatives()
+    public void ClassicPages_RedirectToReactRoutes()
     {
-        var approve = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/EnhancementRequests/Approve.cshtml"));
-        var wizard = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Onboarding/Wizard.cshtml"));
-        approve.Should().Contain("/Spa/ApprovalQueue");
-        wizard.Should().Contain("/Spa/OnboardingWizard");
+        var approve = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/EnhancementRequests/Approve.cshtml.cs"));
+        var wizard = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Onboarding/Wizard.cshtml.cs"));
+        approve.Should().Contain("RedirectToPage(\"/Spa/ApprovalQueue\"");
+        wizard.Should().Contain("RedirectToPage(\"/Spa/OnboardingWizard\"");
     }
 
     [Fact]

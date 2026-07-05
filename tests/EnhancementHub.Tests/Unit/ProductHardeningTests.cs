@@ -158,11 +158,32 @@ public sealed class ProductHardeningTests
         var details = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/EnhancementRequests/Details.cshtml.cs"));
         var approve = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/EnhancementRequests/Approve.cshtml.cs"));
         var systemMap = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/SystemMap/Index.cshtml.cs"));
+        var onboarding = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Onboarding/Wizard.cshtml.cs"));
 
         details.Should().Contain("RedirectToPage(\"/Spa/RequestDetail\"");
         details.Should().Contain("\"classic\"");
         approve.Should().Contain("RedirectToPage(\"/Spa/ApprovalQueue\"");
         systemMap.Should().Contain("RedirectToPage(\"/Spa/SystemMap\"");
+        onboarding.Should().Contain("RedirectToPage(\"/Spa/OnboardingWizard\"");
+    }
+
+    [Fact]
+    public void SpaBff_ExposesSystemMapRebuild()
+    {
+        var sources = SpaBffTestHelper.ReadAllSpaBffSources();
+        sources.Should().Contain("system-map/{applicationId:guid}/rebuild");
+        sources.Should().Contain("BuildSystemGraphCommand");
+    }
+
+    [Fact]
+    public void ProductTour_HasMobileLayout()
+    {
+        var css = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/wwwroot/css/site.css"));
+        var siteJs = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/wwwroot/js/site.js"));
+
+        css.Should().Contain(".product-tour-card-mobile");
+        siteJs.Should().Contain("product-tour-card-mobile");
+        siteJs.Should().Contain("prepareTarget");
     }
 
     [Fact]

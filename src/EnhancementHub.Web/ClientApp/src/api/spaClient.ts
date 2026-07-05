@@ -76,6 +76,10 @@ export async function getSystemMap(applicationId: string): Promise<SystemMap> {
   return fetchJson<SystemMap>(`/web-api/spa/system-map/${applicationId}`);
 }
 
+export async function rebuildSystemMap(applicationId: string): Promise<SystemMap> {
+  return postJson<SystemMap>(`/web-api/spa/system-map/${applicationId}/rebuild`);
+}
+
 export async function listPendingApprovals(): Promise<PendingApprovalItem[]> {
   return fetchJson<PendingApprovalItem[]>('/web-api/spa/approvals/pending');
 }

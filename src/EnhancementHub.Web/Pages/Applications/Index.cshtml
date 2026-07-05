@@ -9,7 +9,7 @@
         <h1>Applications</h1>
         <p>Registered enterprise applications</p>
     </div>
-    <a asp-page="/Onboarding/Wizard" class="btn btn-primary">Document new application</a>
+    <a href="/Spa/OnboardingWizard" class="btn btn-primary">Document new application</a>
 </div>
 
 @if (!Model.Applications.Any())
@@ -17,7 +17,7 @@
     <div class="card-panel p-5 text-center">
         <h2 class="h5">No applications yet</h2>
         <p class="text-muted mb-4">Use the guided setup wizard to register your first application, connect code and databases, and generate documentation.</p>
-        <a asp-page="/Onboarding/Wizard" class="btn btn-primary">Start setup wizard</a>
+        <a href="/Spa/OnboardingWizard" class="btn btn-primary">Start setup wizard</a>
     </div>
 }
 else

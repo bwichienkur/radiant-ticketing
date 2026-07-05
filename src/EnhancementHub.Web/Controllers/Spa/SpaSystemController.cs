@@ -1,4 +1,5 @@
 using EnhancementHub.Application.Features.Applications.Queries;
+using EnhancementHub.Application.Features.SystemIntelligence.Commands;
 using EnhancementHub.Application.Features.SystemIntelligence.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -22,4 +23,8 @@ public sealed class SpaSystemController : ControllerBase
     [HttpGet("system-map/{applicationId:guid}")]
     public async Task<IActionResult> GetSystemMap(Guid applicationId, CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new GetSystemMapQuery(applicationId), cancellationToken));
+
+    [HttpPost("system-map/{applicationId:guid}/rebuild")]
+    public async Task<IActionResult> RebuildSystemMap(Guid applicationId, CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new BuildSystemGraphCommand(applicationId), cancellationToken));
 }
