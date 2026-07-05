@@ -169,6 +169,15 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 - [x] Self-service signup and trial sandbox
 - [x] Regional deployment (EU data residency)
 
+### 4.5 FinOps & infrastructure cost constraints (Phase 40+)
+- [ ] Wire deployment context into AI analysis and refactor prompts (Phase A)
+- [ ] Application infrastructure profile + request-level budget/hosting preferences (Phase B)
+- [ ] Structured cost impact on analysis output + Request Detail UI (Phase C)
+- [ ] Approval gates by cost risk level (Phase D)
+- [ ] Azure/AWS cost API integration for enterprise estates (Phase E)
+
+See [FINOPS_INFRASTRUCTURE_ROADMAP.md](FINOPS_INFRASTRUCTURE_ROADMAP.md).
+
 **Exit criteria:** Two published case studies; pipeline beyond .NET-only ICP; measurable ROI metrics in product.
 
 ---

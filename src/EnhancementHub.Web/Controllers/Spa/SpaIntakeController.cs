@@ -64,9 +64,14 @@ public sealed class SpaIntakeController : ControllerBase
         Ok(await _mediator.Send(new AttachPolicyUrlCommand(id, request.Url), cancellationToken));
 
     [HttpPost("sessions/{id:guid}/create-request")]
-    public async Task<IActionResult> CreateRequest(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> CreateRequest(
+        Guid id,
+        [FromBody] SpaIntakeCreateRequestRequest? request,
+        CancellationToken cancellationToken)
     {
-        var requestId = await _mediator.Send(new CreateRequestFromIntakeSessionCommand(id), cancellationToken);
+        var requestId = await _mediator.Send(
+            new CreateRequestFromIntakeSessionCommand(id, request?.Overrides),
+            cancellationToken);
         return Ok(new SpaCreatedRequestResponse(requestId));
     }
 }
@@ -76,5 +81,7 @@ public sealed record SpaStartIntakeSessionRequest(string? InitialPrompt);
 public sealed record SpaIntakeMessageRequest(string Message);
 
 public sealed record SpaIntakePolicyUrlRequest(string Url);
+
+public sealed record SpaIntakeCreateRequestRequest(IntakeCopilotSubmitOverridesDto? Overrides);
 
 public sealed record SpaCreatedRequestResponse(Guid Id);

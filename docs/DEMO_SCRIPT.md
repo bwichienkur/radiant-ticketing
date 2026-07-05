@@ -61,9 +61,17 @@ Say:
 
 ---
 
-## Minute 3–5 — Submit enhancement request & AI analysis
+## Minute 3–5 — Intake Copilot & submit enhancement request
 
-**Navigate:** **Requests** → **Submit** (or create from dashboard)
+**Navigate:** **Requests** → **Submit** (`/Spa/CreateRequest`)
+
+**Option A — Intake Copilot (recommended):**
+
+1. In **Intake copilot**, describe the need or upload a policy PDF / paste a policy URL under **Compliance policy intake**
+2. Review the pre-filled form and Compliance template selection (offline mode auto-selects Compliance when policy attached)
+3. **Submit Request** → opens request detail at `/Spa/RequestDetail/{id}`
+
+**Option B — Manual form:**
 
 **Enter a realistic request** (read aloud while typing):
 

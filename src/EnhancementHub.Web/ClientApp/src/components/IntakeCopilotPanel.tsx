@@ -21,9 +21,10 @@ export interface IntakeCopilotFormDraft {
 
 interface IntakeCopilotPanelProps {
   onApplyDraft: (draft: IntakeCopilotFormDraft) => void;
+  onSessionChange?: (sessionId: string | null) => void;
 }
 
-export function IntakeCopilotPanel({ onApplyDraft }: IntakeCopilotPanelProps) {
+export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopilotPanelProps) {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<IntakeCopilotMessage[]>([]);
   const [followUpQuestions, setFollowUpQuestions] = useState<string[]>([]);
@@ -37,6 +38,10 @@ export function IntakeCopilotPanel({ onApplyDraft }: IntakeCopilotPanelProps) {
   const [policyLoading, setPolicyLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    onSessionChange?.(sessionId);
+  }, [sessionId, onSessionChange]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

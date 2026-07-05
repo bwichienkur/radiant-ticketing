@@ -36,6 +36,20 @@ Upload PDF/TXT/MD or paste HTTPS URL
 
 Both endpoints return the same `IntakeCopilotTurnResponse` as a message turn.
 
+## Submit & provenance
+
+When the user started via Intake Copilot, **Submit Request** on Create Request calls:
+
+`POST /web-api/spa/intake/sessions/{id}/create-request`
+
+with optional form overrides (title, description, template, etc.). The handler:
+
+- Links `IntakeCopilotSession.CreatedRequestId` to the new request
+- Appends `Policy source: {label}` to supporting notes when policy was attached
+- Applies user-edited form values over the stored draft
+
+Policy text stored on the session is PII-redacted before persistence.
+
 ## Configuration
 
 ```json

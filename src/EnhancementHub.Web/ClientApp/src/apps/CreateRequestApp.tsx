@@ -1,6 +1,7 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import {
   createEnhancementRequest,
+  createRequestFromIntakeSession,
   getCreateRequestForm,
   getEnhancementTemplate,
 } from '../api/spaClient';
@@ -21,6 +22,7 @@ export function CreateRequestApp({ initialTemplateId }: CreateRequestAppProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState(initialTemplateId ?? '');
+  const [intakeSessionId, setIntakeSessionId] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: '',
     businessDescription: '',
@@ -109,7 +111,7 @@ export function CreateRequestApp({ initialTemplateId }: CreateRequestAppProps) {
     setSubmitting(true);
     setError(null);
     try {
-      const created = await createEnhancementRequest({
+      const payload = {
         title: form.title,
         businessDescription: form.businessDescription,
         desiredOutcome: form.desiredOutcome,
@@ -119,7 +121,11 @@ export function CreateRequestApp({ initialTemplateId }: CreateRequestAppProps) {
         department: form.department || undefined,
         supportingNotes: form.supportingNotes || undefined,
         templateId: selectedTemplateId || undefined,
-      });
+      };
+
+      const created = intakeSessionId
+        ? await createRequestFromIntakeSession(intakeSessionId, payload)
+        : await createEnhancementRequest(payload);
       window.location.href = `/Spa/RequestDetail/${created.id}`;
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit request.');
@@ -145,7 +151,7 @@ export function CreateRequestApp({ initialTemplateId }: CreateRequestAppProps) {
         <p className="mb-0">Use intake copilot, pick a template, or fill the form directly</p>
       </div>
 
-      <IntakeCopilotPanel onApplyDraft={applyCopilotDraft} />
+      <IntakeCopilotPanel onApplyDraft={applyCopilotDraft} onSessionChange={setIntakeSessionId} />
 
       {templates.length > 0 ? (
         <div className="template-card-grid" role="list" aria-label="Enhancement templates">

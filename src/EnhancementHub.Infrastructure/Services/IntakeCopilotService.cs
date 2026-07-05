@@ -56,13 +56,15 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
 
         if (!_chatCompletion.IsConfigured)
         {
-            return BuildMockTurn(
-                lastUserMessage,
-                currentDraft,
-                context,
-                turnCount,
-                policySourceText,
-                policySourceLabel);
+            return await EnrichTurnWithTemplateAsync(
+                BuildMockTurn(
+                    lastUserMessage,
+                    currentDraft,
+                    context,
+                    turnCount,
+                    policySourceText,
+                    policySourceLabel),
+                cancellationToken);
         }
 
         try
@@ -103,25 +105,29 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
 
             if (string.IsNullOrWhiteSpace(completion.Content))
             {
-                return BuildMockTurn(
-                lastUserMessage,
-                currentDraft,
-                context,
-                turnCount,
-                policySourceText,
-                policySourceLabel);
+                return await EnrichTurnWithTemplateAsync(
+                    BuildMockTurn(
+                        lastUserMessage,
+                        currentDraft,
+                        context,
+                        turnCount,
+                        policySourceText,
+                        policySourceLabel),
+                    cancellationToken);
             }
 
             var parsed = JsonSerializer.Deserialize<IntakeCopilotAiResponse>(completion.Content, JsonOptions);
             if (parsed is null)
             {
-                return BuildMockTurn(
-                lastUserMessage,
-                currentDraft,
-                context,
-                turnCount,
-                policySourceText,
-                policySourceLabel);
+                return await EnrichTurnWithTemplateAsync(
+                    BuildMockTurn(
+                        lastUserMessage,
+                        currentDraft,
+                        context,
+                        turnCount,
+                        policySourceText,
+                        policySourceLabel),
+                    cancellationToken);
             }
 
             var draft = MergeDraft(currentDraft, parsed.Draft);
@@ -144,14 +150,35 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Intake copilot AI call failed; using mock intake.");
-            return BuildMockTurn(
-                lastUserMessage,
-                currentDraft,
-                context,
-                turnCount,
-                policySourceText,
-                policySourceLabel);
+            return await EnrichTurnWithTemplateAsync(
+                BuildMockTurn(
+                    lastUserMessage,
+                    currentDraft,
+                    context,
+                    turnCount,
+                    policySourceText,
+                    policySourceLabel),
+                cancellationToken);
         }
+    }
+
+    private async Task<IntakeCopilotTurnResult> EnrichTurnWithTemplateAsync(
+        IntakeCopilotTurnResult turn,
+        CancellationToken cancellationToken)
+    {
+        if (turn.SuggestedTemplateId.HasValue)
+        {
+            return turn;
+        }
+
+        var category = turn.Draft?.SuggestedTemplateDomainCategory;
+        if (string.IsNullOrWhiteSpace(category))
+        {
+            return turn;
+        }
+
+        turn.SuggestedTemplateId = await ResolveTemplateIdAsync(category, cancellationToken);
+        return turn;
     }
 
     private async Task<IntakeContextBundle> BuildContextAsync(string query, CancellationToken cancellationToken)
