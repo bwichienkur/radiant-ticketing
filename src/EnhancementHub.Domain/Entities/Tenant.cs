@@ -16,6 +16,9 @@ public class Tenant : BaseEntity
     public string? StripeSubscriptionId { get; set; }
     public TenantSubscriptionStatus SubscriptionStatus { get; set; } = TenantSubscriptionStatus.None;
     public DateTime? SubscriptionPeriodEnd { get; set; }
+    public TenantIsolationMode IsolationMode { get; set; } = TenantIsolationMode.SharedRowLevel;
+    public string? DatabaseSchemaName { get; set; }
+    public DateTime? SchemaProvisionedAt { get; set; }
 
     public ICollection<User> Users { get; set; } = new List<User>();
     public ICollection<Team> Teams { get; set; } = new List<Team>();

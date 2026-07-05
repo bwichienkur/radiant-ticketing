@@ -38,17 +38,20 @@ public sealed class RegisterTenantCommandHandler : IRequestHandler<RegisterTenan
     private readonly IPasswordHasher _passwordHasher;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
     private readonly CommercialOptions _options;
+    private readonly ITenantIsolationService _tenantIsolationService;
 
     public RegisterTenantCommandHandler(
         IEnhancementHubDbContext dbContext,
         IPasswordHasher passwordHasher,
         IJwtTokenGenerator jwtTokenGenerator,
-        IOptions<CommercialOptions> options)
+        IOptions<CommercialOptions> options,
+        ITenantIsolationService tenantIsolationService)
     {
         _dbContext = dbContext;
         _passwordHasher = passwordHasher;
         _jwtTokenGenerator = jwtTokenGenerator;
         _options = options.Value;
+        _tenantIsolationService = tenantIsolationService;
     }
 
     public async Task<RegisterTenantResultDto> Handle(
@@ -138,6 +141,8 @@ public sealed class RegisterTenantCommandHandler : IRequestHandler<RegisterTenan
         });
 
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        await _tenantIsolationService.TryAutoProvisionAsync(tenant.Id, cancellationToken);
 
         var token = _jwtTokenGenerator.GenerateToken(admin);
         return new RegisterTenantResultDto(

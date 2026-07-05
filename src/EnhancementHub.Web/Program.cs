@@ -1,6 +1,7 @@
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.DependencyInjection;
 using EnhancementHub.Infrastructure.DependencyInjection;
+using EnhancementHub.Infrastructure.Middleware;
 using EnhancementHub.Infrastructure.Persistence;
 using EnhancementHub.Infrastructure.Security;
 using EnhancementHub.Infrastructure.Services.Notifications;
@@ -66,6 +67,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
+app.UseTenantIsolation();
 app.UseAuthorization();
 app.MapEnhancementHubHealthChecks();
 app.MapEnhancementHubObservabilityEndpoints(builder.Configuration);

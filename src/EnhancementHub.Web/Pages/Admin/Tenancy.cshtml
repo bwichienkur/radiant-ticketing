@@ -4,6 +4,7 @@
     ViewData["AdminSection"] = "tenancy";
     ViewData["Title"] = "Tenancy & Billing";
     var billing = Model.Billing;
+    var isolation = Model.Isolation;
 }
 
 <partial name="_AdminNav" />
@@ -72,6 +73,31 @@
     @if (billing.IsOverLimit)
     {
         <div class="alert alert-warning" role="alert">Usage exceeds plan limits. Upgrade to continue scaling.</div>
+    }
+
+    @if (isolation is not null && isolation.IsolationEnabled)
+    {
+        <div class="card-panel p-4 mb-4">
+            <h2 class="h5 mb-3">Data isolation</h2>
+            <dl class="row mb-3">
+                <dt class="col-sm-3">Mode</dt>
+                <dd class="col-sm-9">@isolation.IsolationMode</dd>
+                @if (!string.IsNullOrWhiteSpace(isolation.DatabaseSchemaName))
+                {
+                    <dt class="col-sm-3">Schema</dt>
+                    <dd class="col-sm-9"><code>@isolation.DatabaseSchemaName</code></dd>
+                }
+                <dt class="col-sm-3">Provisioned</dt>
+                <dd class="col-sm-9">@(isolation.IsSchemaProvisioned ? isolation.SchemaProvisionedAt?.ToString("g") ?? "Yes" : "No")</dd>
+            </dl>
+            @if (!isolation.IsSchemaProvisioned)
+            {
+                <form method="post" asp-page-handler="ProvisionSchema">
+                    <button type="submit" class="btn btn-outline-primary">Provision dedicated schema</button>
+                </form>
+                <p class="small text-muted mt-2 mb-0">Recommended for regulated workloads and EU data residency.</p>
+            }
+        </div>
     }
 
     @if (billing.StripeEnabled)

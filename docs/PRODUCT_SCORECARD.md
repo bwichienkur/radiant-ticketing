@@ -13,7 +13,7 @@ Living assessment of product maturity, marketability, and scalability. Updated w
 | 10 | Validated in production at scale with measured outcomes |
 
 **Baseline:** Phase 15 enterprise hardening (July 2026), before Horizons 1–3 work.  
-**Current snapshot:** Phase 28 complete (Horizon 4.4 — Stripe billing).
+**Current snapshot:** Phase 29 complete (Horizon 4.4 — schema-per-tenant isolation).
 
 Related: [ROADMAP.md](ROADMAP.md) · [PHASES.md](PHASES.md) · [ICP_ONE_PAGER.md](ICP_ONE_PAGER.md)
 
@@ -43,10 +43,10 @@ Overall = average of the three dimensions (equal weight).
 | AI operations | 6 | 8.5 | Phase 17: Azure OpenAI, budgets, PII redaction, usage report |
 | Background job reliability | 4 | 8 | Phase 18: Hangfire, admin jobs UI, shared executors |
 | Compliance & audit | 5 | 8.5 | Audit export, retention, SOC 2 map, security whitepaper |
-| Engineering quality | 7 | 7.5 | 186 automated tests |
+| Engineering quality | 7 | 7.5 | 193 automated tests |
 | Integrations & polyglot | 4 | 7.5 | Phase 23 — [INTEGRATIONS.md](INTEGRATIONS.md) |
 | ROI & policy differentiation | 2 | 7.5 | Phase 24 — [PRODUCT_DIFFERENTIATION.md](PRODUCT_DIFFERENTIATION.md) |
-| Multi-tenant commercial platform | 1 | 8.0 | Phase 26–28 — [COMMERCIAL_PLATFORM.md](COMMERCIAL_PLATFORM.md), [STRIPE_BILLING.md](STRIPE_BILLING.md) |
+| Multi-tenant commercial platform | 1 | 8.5 | Phase 26–29 — [COMMERCIAL_PLATFORM.md](COMMERCIAL_PLATFORM.md), [STRIPE_BILLING.md](STRIPE_BILLING.md), [TENANT_ISOLATION.md](TENANT_ISOLATION.md) |
 
 **Notes:** Core workflow was strong at baseline. Gains are in enterprise operability, governance, and admin visibility.
 
@@ -78,7 +78,7 @@ Overall = average of the three dimensions (equal weight).
 | System Intelligence performance | 5 | 7.5 | Phase 21: incremental graph, paged queries, diff-only drift |
 | HA & observability | 3 | 7.5 | Phase 22: OTel, Prometheus, Helm, HA docs |
 | Load-test readiness | 3 | 6 | Architecture supports scale; 200-repo exit criteria not proven |
-| Multi-tenant isolation | 1 | 7 | Phase 26 row-level `TenantId`, metering, regional metadata |
+| Multi-tenant isolation | 1 | 8 | Phase 29 dedicated schema + Phase 26 row-level `TenantId` |
 
 **Notes:** Credible path to 100–500 repos in single-tenant deployments. Horizon 3 exit criteria (load test) not yet met.
 
@@ -149,6 +149,7 @@ When closing a phase or horizon:
 
 | Date | Phase / milestone | Overall | Notes |
 |------|-------------------|---------|-------|
+| 2026-07-05 | Phase 29 — Schema-per-tenant isolation | 8.4 → 8.5 | Dedicated PostgreSQL schemas, search_path routing, provision API |
 | 2026-07-05 | Phase 28 — Stripe billing | 8.3 → 8.4 | Checkout, portal, webhooks, trial enforcement |
 | 2026-07-05 | Phase 26 — Commercial platform | 8.2 → 8.3 | Multi-tenant isolation, metering, trial signup, regional metadata |
 | 2026-07-05 | Phase 25 — UX modernization | 8.1 → 8.2 | SPA pilot, mobile approvals, SignalR collaboration, a11y |
@@ -160,4 +161,4 @@ When closing a phase or horizon:
 
 ---
 
-*Last updated: July 2026 — Phase 28 (Stripe billing).*
+*Last updated: July 2026 — Phase 29 (schema-per-tenant isolation).*
