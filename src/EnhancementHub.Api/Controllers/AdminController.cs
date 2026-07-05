@@ -115,6 +115,28 @@ public sealed class AdminController : ControllerBase
         return NoContent();
     }
 
+    [HttpGet("api-keys")]
+    public async Task<IActionResult> ListServiceApiKeys(CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new ListServiceApiKeysQuery(), cancellationToken));
+
+    [HttpPost("api-keys")]
+    public async Task<IActionResult> CreateServiceApiKey(
+        [FromBody] CreateServiceApiKeyRequest request,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new CreateServiceApiKeyCommand(
+            request.Name,
+            request.Description,
+            request.Role,
+            request.TeamId,
+            request.ExpiresInDays), cancellationToken));
+
+    [HttpDelete("api-keys/{id:guid}")]
+    public async Task<IActionResult> RevokeServiceApiKey(Guid id, CancellationToken cancellationToken)
+    {
+        await _mediator.Send(new RevokeServiceApiKeyCommand(id), cancellationToken);
+        return NoContent();
+    }
+
     [HttpPut("ai-prompts/{id:guid}")]
     public async Task<IActionResult> UpdateAiPrompt(Guid id, [FromBody] UpdatePromptRequest request, CancellationToken cancellationToken)
     {
@@ -131,4 +153,10 @@ public sealed class AdminController : ControllerBase
     public sealed record CreateTeamRequest(string Name, string? Description);
     public sealed record AddTeamMemberRequest(string Email, string DisplayName, UserRole GlobalRole, string TeamRole);
     public sealed record UpdateTeamMemberRoleRequest(string TeamRole);
+    public sealed record CreateServiceApiKeyRequest(
+        string Name,
+        string? Description,
+        UserRole Role,
+        Guid? TeamId,
+        int? ExpiresInDays);
 }

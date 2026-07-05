@@ -54,6 +54,7 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<SchemaDriftReport> SchemaDriftReports => Set<SchemaDriftReport>();
     public DbSet<OnPremAgent> OnPremAgents => Set<OnPremAgent>();
     public DbSet<OnboardingSession> OnboardingSessions => Set<OnboardingSession>();
+    public DbSet<ServiceApiKey> ServiceApiKeys => Set<ServiceApiKey>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
