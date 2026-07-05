@@ -1,10 +1,12 @@
 @page
 @model EnhancementHub.Web.Pages.Admin.RoiModel
 @{
+    ViewData["AdminSection"] = "roi";
     ViewData["Title"] = "ROI Dashboard";
     var report = Model.Report;
 }
 
+<partial name="_AdminNav" />
 <div class="page-header">
     <h1>ROI Dashboard</h1>
     <p>Analysis time saved, risk governance, and drift resolution metrics</p>

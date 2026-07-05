@@ -6,11 +6,26 @@
 }
 
 <div class="login-shell">
+    <section class="login-hero">
+        <div class="login-hero-content">
+            <div class="login-brand-mark">EH</div>
+            <h1 class="login-hero-title">Start your trial</h1>
+            <p class="login-hero-tagline">
+                Spin up a sandbox tenant with metering, regional metadata, and full enhancement workflow in minutes.
+            </p>
+            <ul class="login-feature-list">
+                <li>14-day trial with plan limits preview</li>
+                <li>Self-service workspace and admin account</li>
+                <li>US, EU, or APAC region selection</li>
+            </ul>
+        </div>
+    </section>
+
     <section class="login-panel">
         <div class="login-panel-inner">
             <div class="login-panel-header">
-                <h2 class="h4 mb-1">Start your trial</h2>
-                <p class="text-muted mb-0">Create a sandbox tenant in minutes</p>
+                <h2 class="h4 mb-1">Create trial workspace</h2>
+                <p class="text-muted mb-0">Organization admin account included</p>
             </div>
 
             @if (!string.IsNullOrEmpty(Model.ErrorMessage))

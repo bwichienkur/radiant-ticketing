@@ -1,10 +1,12 @@
 @page
 @model EnhancementHub.Web.Pages.Admin.ObservabilityModel
 @{
+    ViewData["AdminSection"] = "observability";
     ViewData["Title"] = "Observability & HA";
     var status = Model.Status;
 }
 
+<partial name="_AdminNav" />
 <div class="page-header">
     <h1>Observability &amp; HA</h1>
     <p>OpenTelemetry, shared data protection, and high-availability readiness</p>

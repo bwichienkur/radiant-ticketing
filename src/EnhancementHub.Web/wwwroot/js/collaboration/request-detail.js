@@ -1,5 +1,5 @@
 /**
- * Real-time collaboration on enhancement request detail (Phase 25).
+ * Real-time collaboration on enhancement request detail (Phase 25 + 27).
  */
 (function () {
     const panel = document.getElementById('collaboration-panel');
@@ -55,15 +55,34 @@
         const banner = document.getElementById('analysis-update-banner');
         if (banner) {
             banner.classList.remove('d-none');
-            banner.textContent = `Analysis updated (v${payload.version}). Refresh for latest.`;
+            banner.textContent = `Analysis updated (v${payload.version}). Refreshing…`;
+        }
+        if (document.getElementById('request-detail-title')) {
+            setTimeout(() => window.location.reload(), 1200);
         }
     });
 
     connection.start()
         .then(() => connection.invoke('JoinRequest', requestId))
+        .then(() => { renderPresence(); })
         .catch(console.error);
 
     window.addEventListener('beforeunload', () => {
         connection.invoke('LeaveRequest', requestId).catch(() => undefined);
     });
+
+    const analyzing = document.getElementById('analysis-in-progress');
+    if (analyzing) {
+        const poll = setInterval(() => {
+            fetch(window.location.href, { credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(r => r.text())
+                .then(html => {
+                    if (!html.includes('analysis-in-progress')) {
+                        clearInterval(poll);
+                        window.location.reload();
+                    }
+                })
+                .catch(() => undefined);
+        }, 5000);
+    }
 })();

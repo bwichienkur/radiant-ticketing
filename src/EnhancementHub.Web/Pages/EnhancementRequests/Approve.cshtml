@@ -1,12 +1,22 @@
 @page "{id?}"
 @model EnhancementHub.Web.Pages.EnhancementRequests.ApproveModel
+@using EnhancementHub.Domain.Enums
 @{
     ViewData["Title"] = "Approval Queue";
+    ViewData["Breadcrumb"] = "Approvals";
+
+    string RiskClass(RiskLevel risk) => risk switch
+    {
+        RiskLevel.Critical => "text-bg-danger",
+        RiskLevel.High => "text-bg-warning",
+        RiskLevel.Medium => "text-bg-info",
+        _ => "text-bg-success"
+    };
 }
 
 <div class="page-header">
     <h1 id="approval-queue-heading">Approval Queue</h1>
-    <p>Review and action pending enhancement requests</p>
+    <p>Decision-first review with risk context · <kbd>J</kbd>/<kbd>K</kbd> navigate queue</p>
 </div>
 
 <div class="approval-queue-layout row g-3 g-lg-4">
@@ -18,20 +28,29 @@
             </div>
             @if (Model.Pending.Count == 0)
             {
-                <p class="p-3 text-muted mb-0">No requests pending approval.</p>
+                <div class="empty-state py-4">
+                    <p class="text-muted mb-0">No requests pending approval.</p>
+                </div>
             }
             else
             {
                 <ul class="list-group list-group-flush approval-queue-list" role="list">
                     @foreach (var item in Model.Pending)
                     {
+                        var analysis = item.LatestRiskLevel;
                         <li class="list-group-item p-0" role="listitem">
                             <a asp-page="Approve" asp-route-id="@item.Id"
                                class="approval-queue-item list-group-item list-group-item-action @(Model.SelectedRequestId == item.Id ? "active" : "")"
                                aria-current="@(Model.SelectedRequestId == item.Id ? "true" : "false")">
-                                <strong class="d-block">@item.Title</strong>
+                                <div class="d-flex justify-content-between gap-2">
+                                    <strong class="d-block">@item.Title</strong>
+                                    @if (analysis.HasValue)
+                                    {
+                                        <span class="badge @RiskClass(analysis.Value) badge-status">@analysis</span>
+                                    }
+                                </div>
                                 <span class="d-block small approval-queue-meta">
-                                    @(item.SubmittedByUserName ?? "—") · @item.Priority
+                                    @(item.SubmittedByUserName ?? "—") · @item.Priority · @(item.DaysInStatus ?? 0)d waiting
                                 </span>
                             </a>
                         </li>
@@ -45,34 +64,49 @@
         @if (Model.Selected is not null)
         {
             var s = Model.Selected;
+            var latest = s.Analyses.OrderByDescending(a => a.Version).FirstOrDefault();
             <article class="card-panel p-3 p-md-4 approval-queue-detail" aria-labelledby="selected-request-title">
-                <h2 class="h5" id="selected-request-title">@s.Title</h2>
-                <p class="text-muted">@s.BusinessDescription</p>
-                @if (s.Analyses.FirstOrDefault()?.FeatureSummary is not null)
-                {
-                    <div class="alert alert-info" role="status">
-                        <strong>AI Summary:</strong> @s.Analyses.First().FeatureSummary
+                <div class="approval-decision-header">
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                        <div>
+                            <h2 class="h5 mb-1" id="selected-request-title">@s.Title</h2>
+                            <div class="small text-muted">
+                                @s.SubmittedByUserName · @s.Priority priority · @s.Department
+                                @if (latest is not null)
+                                {
+                                    <span> · </span>
+                                    <span class="badge @RiskClass(latest.RiskLevel) badge-status">@latest.RiskLevel risk</span>
+                                    <span class="ms-1">@($"{latest.ConfidenceScore:P0}") confidence</span>
+                                }
+                            </div>
+                        </div>
+                        <a asp-page="Details" asp-route-id="@s.Id" class="btn btn-sm btn-outline-secondary">Full details</a>
                     </div>
-                }
+                    @if (latest?.FeatureSummary is not null)
+                    {
+                        <p class="mb-0 small"><strong>AI summary:</strong> @latest.FeatureSummary</p>
+                    }
+                </div>
 
-                <form method="post" asp-page-handler="Action" class="approval-action-form mb-4">
+                <details class="mb-3" open>
+                    <summary class="fw-semibold mb-2">Business context</summary>
+                    <p class="text-muted mb-0">@s.BusinessDescription</p>
+                </details>
+
+                <form method="post" asp-page-handler="Action" class="approval-action-form approval-decision-form mb-3">
                     <input type="hidden" asp-for="SelectedRequestId" />
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label" for="ActionType">Action</label>
-                            <select class="form-select" asp-for="ActionType" id="ActionType"
-                                    asp-items="Html.GetEnumSelectList<ApprovalActionType>()"></select>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label" for="Comments">Comments</label>
-                            <textarea class="form-control" asp-for="Comments" id="Comments" rows="2"
-                                      aria-describedby="comments-help"></textarea>
-                            <div id="comments-help" class="form-text">Optional notes recorded in the approval audit trail.</div>
-                        </div>
+                    <input type="hidden" asp-for="ActionType" id="ActionType" />
+                    <div class="approval-quick-actions mb-3">
+                        <button type="submit" class="btn btn-success approval-action-btn" onclick="document.getElementById('ActionType').value='@((int)ApprovalActionType.Approve)'">Approve</button>
+                        <button type="submit" class="btn btn-danger approval-action-btn" onclick="document.getElementById('ActionType').value='@((int)ApprovalActionType.Reject)'">Reject</button>
+                        <button type="submit" class="btn btn-outline-warning approval-action-btn" onclick="document.getElementById('ActionType').value='@((int)ApprovalActionType.RequestClarification)'">Request clarification</button>
                     </div>
+                    <label class="form-label" for="Comments">Comments (recorded in audit trail)</label>
+                    <textarea class="form-control" asp-for="Comments" id="Comments" rows="2" aria-describedby="comments-help"></textarea>
+                    <div id="comments-help" class="form-text">Required for rejections in regulated environments.</div>
                     <div class="approval-action-bar d-flex flex-wrap gap-2 mt-3">
-                        <button type="submit" class="btn btn-primary approval-action-btn">Submit Action</button>
-                        <a asp-page="Details" asp-route-id="@s.Id" class="btn btn-outline-secondary approval-action-btn">Full Details</a>
+                        <button type="submit" class="btn btn-primary approval-action-btn" onclick="document.getElementById('ActionType').value=document.getElementById('ActionTypeSelect').value">Submit selected action</button>
+                        <select class="form-select form-select-sm w-auto" id="ActionTypeSelect" asp-for="ActionType" asp-items="Html.GetEnumSelectList<ApprovalActionType>()"></select>
                     </div>
                 </form>
 

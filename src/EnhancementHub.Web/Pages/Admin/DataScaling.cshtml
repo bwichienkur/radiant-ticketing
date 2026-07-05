@@ -1,10 +1,12 @@
 @page
 @model EnhancementHub.Web.Pages.Admin.DataScalingModel
 @{
+    ViewData["AdminSection"] = "scaling";
     ViewData["Title"] = "Data Scaling";
     var status = Model.Status;
 }
 
+<partial name="_AdminNav" />
 <div class="page-header">
     <h1>Data Scaling</h1>
     <p>Vector search offload, read replicas, connection pooling, and archival posture</p>

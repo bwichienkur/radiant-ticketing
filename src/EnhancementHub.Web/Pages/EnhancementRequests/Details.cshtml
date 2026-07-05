@@ -3,6 +3,7 @@
 @using EnhancementHub.Domain.Enums
 @{
     ViewData["Title"] = Model.Detail?.Title ?? "Request Details";
+    ViewData["Breadcrumb"] = "Request detail";
     var r = Model.Detail!;
     var analysis = Model.Analysis;
 
@@ -65,29 +66,52 @@
 }
 else if (r.Status is EnhancementRequestStatus.Submitted or EnhancementRequestStatus.AiAnalyzing)
 {
-    <div class="card-panel p-4 mb-4">
+    <div class="card-panel p-4 mb-4" id="analysis-in-progress">
         <div class="d-flex align-items-center gap-2">
             <span class="spinner-border spinner-border-sm text-primary" role="status" aria-hidden="true"></span>
-            <span>AI analysis is in progress. Refresh this page in a moment.</span>
+            <span>AI analysis is in progress. This page will refresh automatically.</span>
         </div>
+    </div>
+}
+
+@if (analysis is not null && (analysis.AffectedApplications.Count > 0 || analysis.DatabaseChangeRecommendations.Count > 0))
+{
+    <div class="card-panel p-4 mb-4">
+        <h2 class="h6 mb-3">Mission control</h2>
+        <div class="mission-control-grid">
+            <div class="stat-card"><div class="label">Risk</div><div class="value fs-5"><span class="badge @RiskBadgeClass(analysis.RiskLevel)">@analysis.RiskLevel</span></div></div>
+            <div class="stat-card"><div class="label">Confidence</div><div class="value fs-5">@($"{analysis.ConfidenceScore:P0}")</div></div>
+            <div class="stat-card"><div class="label">Affected apps</div><div class="value fs-5">@analysis.AffectedApplications.Count</div></div>
+            <div class="stat-card"><div class="label">DB / API changes</div><div class="value fs-5">@analysis.DatabaseChangeRecommendations.Count / @analysis.ApiChangeRecommendations.Count</div></div>
+        </div>
+        @if (r.TargetApplicationId.HasValue)
+        {
+            <div class="mt-3">
+                <a asp-page="/SystemMap/Index" asp-route-applicationId="@r.TargetApplicationId" class="btn btn-sm btn-outline-primary">Open system map</a>
+            </div>
+        }
     </div>
 }
 
 <div class="row g-4">
     <div class="col-lg-8">
         <div class="card-panel p-4 mb-4">
-            <div class="detail-section">
-                <h3>Original Ask</h3>
-                <p class="mb-2"><strong>Business description</strong></p>
-                <p>@r.BusinessDescription</p>
-                <p class="mb-2"><strong>Desired outcome</strong></p>
-                <p class="mb-0">@r.DesiredOutcome</p>
+            <div class="eh-accordion open" data-eh-accordion>
+                <button type="button" class="eh-accordion-trigger" data-eh-accordion-trigger aria-expanded="true">Original ask</button>
+                <div class="eh-accordion-body" data-eh-accordion-body>
+                    <p class="mb-2"><strong>Business description</strong></p>
+                    <p>@r.BusinessDescription</p>
+                    <p class="mb-2"><strong>Desired outcome</strong></p>
+                    <p class="mb-0">@r.DesiredOutcome</p>
+                </div>
             </div>
             @if (!string.IsNullOrWhiteSpace(r.SupportingNotes))
             {
-                <div class="detail-section">
-                    <h3>Supporting Notes</h3>
-                    <p class="mb-0">@r.SupportingNotes</p>
+                <div class="eh-accordion" data-eh-accordion>
+                    <button type="button" class="eh-accordion-trigger" data-eh-accordion-trigger aria-expanded="false">Supporting notes</button>
+                    <div class="eh-accordion-body" data-eh-accordion-body hidden>
+                        <p class="mb-0">@r.SupportingNotes</p>
+                    </div>
                 </div>
             }
         </div>
@@ -233,8 +257,38 @@ else if (r.Status is EnhancementRequestStatus.Submitted or EnhancementRequestSta
     </div>
 
     <div class="col-lg-4">
-        <div class="card-panel p-3 mb-4">
-            <div class="card-header px-0">Approval History</div>
+        <div class="card-panel p-3 mb-4" id="collaboration-panel" data-request-id="@r.Id">
+            <div class="card-header px-0 d-flex justify-content-between align-items-center">
+                <span>Live collaboration</span>
+                <span id="collaboration-presence" class="small text-muted" aria-live="polite">Connecting…</span>
+            </div>
+            <div class="card-body px-0">
+                <form method="post" asp-page-handler="Comment" class="mb-3">
+                    <input type="hidden" name="id" value="@r.Id" />
+                    <label class="form-label" for="NewComment">Add comment</label>
+                    <textarea class="form-control" asp-for="NewComment" id="NewComment" rows="2"></textarea>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" asp-for="CommentIsInternal" id="CommentIsInternal" />
+                        <label class="form-check-label" for="CommentIsInternal">Internal only</label>
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary btn-sm mt-2">Post comment</button>
+                </form>
+                <div id="collaboration-live-comments" aria-live="polite" aria-relevant="additions">
+                    @foreach (var c in r.Comments.OrderByDescending(x => x.CreatedAt).Take(8))
+                    {
+                        <div class="border-bottom py-2">
+                            <strong>@c.UserDisplayName</strong>
+                            @if (c.IsInternal) { <span class="badge text-bg-warning">Internal</span> }
+                            <span class="small text-muted">@c.CreatedAt.ToString("g")</span>
+                            <p class="small mb-0">@c.Content</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="card-panel p-3">
+            <div class="card-header px-0">Approval history</div>
             <div class="card-body px-0">
                 @if (Model.ApprovalHistory.Count == 0)
                 {
@@ -252,47 +306,6 @@ else if (r.Status is EnhancementRequestStatus.Submitted or EnhancementRequestSta
                         </li>
                     }
                     </ul>
-                }
-            </div>
-        </div>
-
-        <div class="card-panel p-3 mb-4" id="collaboration-panel" data-request-id="@r.Id">
-            <div class="card-header px-0 d-flex justify-content-between align-items-center">
-                <span>Live collaboration</span>
-                <span id="collaboration-presence" class="small text-muted" aria-live="polite">Connecting…</span>
-            </div>
-            <div class="card-body px-0">
-                <p class="small text-muted">Comments from other reviewers appear here in real time.</p>
-                <div id="collaboration-live-comments" aria-live="polite" aria-relevant="additions">
-                    @foreach (var c in r.Comments.TakeLast(5))
-                    {
-                        <div class="border-bottom py-2">
-                            <strong>@c.UserDisplayName</strong>
-                            @if (c.IsInternal) { <span class="badge text-bg-warning">Internal</span> }
-                            <p class="small mb-0">@c.Content</p>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-
-        <div class="card-panel p-3">
-            <div class="card-header px-0">All comments</div>
-            <div class="card-body px-0">
-                @if (r.Comments.Count == 0)
-                {
-                    <p class="text-muted small mb-0">No comments.</p>
-                }
-                else
-                {
-                    @foreach (var c in r.Comments)
-                    {
-                        <div class="border-bottom py-2">
-                            <strong>@c.UserDisplayName</strong>
-                            @if (c.IsInternal) { <span class="badge text-bg-warning">Internal</span> }
-                            <p class="small mb-0">@c.Content</p>
-                        </div>
-                    }
                 }
             </div>
         </div>

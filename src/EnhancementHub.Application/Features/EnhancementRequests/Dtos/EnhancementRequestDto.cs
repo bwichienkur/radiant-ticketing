@@ -18,7 +18,9 @@ public sealed record EnhancementRequestDto(
     EnhancementRequestStatus Status,
     string? SupportingNotes,
     DateTime CreatedAt,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    RiskLevel? LatestRiskLevel = null,
+    int? DaysInStatus = null);
 
 public sealed record EnhancementAttachmentDto(
     Guid Id,

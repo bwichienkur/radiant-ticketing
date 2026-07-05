@@ -1,0 +1,63 @@
+@{
+    var title = ViewData["Title"]?.ToString() ?? "EnhancementHub";
+    var breadcrumb = ViewData["Breadcrumb"] as string;
+}
+
+<header class="app-topbar">
+    <div class="topbar-left">
+        <button type="button" class="btn btn-outline-secondary btn-sm sidebar-toggle-btn" data-sidebar-toggle aria-label="Toggle sidebar">
+            ☰
+        </button>
+        <nav class="topbar-breadcrumb" aria-label="Breadcrumb">
+            <a asp-page="/Index">Home</a>
+            @if (!string.IsNullOrEmpty(breadcrumb))
+            {
+                <span aria-hidden="true">›</span>
+                <span aria-current="page">@breadcrumb</span>
+            }
+            else if (!string.Equals(title, "Dashboard", StringComparison.OrdinalIgnoreCase))
+            {
+                <span aria-hidden="true">›</span>
+                <span aria-current="page">@title</span>
+            }
+        </nav>
+    </div>
+    <div class="topbar-actions">
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-command-trigger aria-label="Open command palette">
+            <span class="d-none d-md-inline">Search</span>
+            <kbd class="command-kbd">⌘K</kbd>
+        </button>
+        <button type="button" class="btn btn-outline-secondary btn-sm" data-theme-toggle aria-label="Toggle theme" aria-pressed="false">◐</button>
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-sm position-relative" type="button" data-bs-toggle="dropdown" aria-label="Notifications">
+                🔔
+                <span id="notification-badge" class="notification-badge d-none">0</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-end notification-panel p-0">
+                <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                    <strong class="small">Notifications</strong>
+                    <button type="button" class="btn btn-link btn-sm p-0" id="notification-mark-read">Mark all read</button>
+                </div>
+                <div id="notification-list" class="notification-list"></div>
+            </div>
+        </div>
+        <span class="topbar-user d-none d-md-inline">@User.Identity?.Name</span>
+        <form method="post" asp-page="/Account/Login" asp-page-handler="Logout" class="d-inline">
+            <button type="submit" class="btn btn-outline-secondary btn-sm">Sign out</button>
+        </form>
+    </div>
+</header>
+
+<div class="modal fade" id="commandPalette" tabindex="-1" aria-labelledby="commandPaletteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content command-palette-content">
+            <div class="modal-header border-0 pb-0">
+                <label id="commandPaletteLabel" class="visually-hidden" for="commandPaletteInput">Command palette</label>
+                <input type="search" class="form-control form-control-lg command-palette-input" id="commandPaletteInput" placeholder="Search pages, requests, applications…" autocomplete="off" />
+            </div>
+            <div class="modal-body pt-2">
+                <div id="commandPaletteResults" class="command-palette-results"></div>
+            </div>
+        </div>
+    </div>
+</div>

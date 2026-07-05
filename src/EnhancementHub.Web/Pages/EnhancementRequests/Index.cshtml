@@ -1,45 +1,137 @@
 @page
 @model EnhancementHub.Web.Pages.EnhancementRequests.IndexModel
+@using EnhancementHub.Domain.Enums
+@using EnhancementHub.Application.Features.EnhancementRequests.Queries
 @{
     ViewData["Title"] = "Enhancement Requests";
+    ViewData["Breadcrumb"] = "Requests";
+
+    string RiskClass(RiskLevel? risk) => risk switch
+    {
+        RiskLevel.Critical => "text-bg-danger",
+        RiskLevel.High => "text-bg-warning",
+        RiskLevel.Medium => "text-bg-info",
+        RiskLevel.Low => "text-bg-success",
+        _ => "text-bg-secondary"
+    };
+
+    string StatusRowClass(EnhancementRequestStatus status) => status switch
+    {
+        EnhancementRequestStatus.PendingApproval => "status-pending",
+        _ => ""
+    };
 }
 
-<div class="page-header d-flex justify-content-between align-items-center">
+<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div>
         <h1>Enhancement Requests</h1>
-        <p>All submitted enhancement requests</p>
+        <p>Triage, search, and open request details</p>
     </div>
     <a asp-page="Create" class="btn btn-primary">New Request</a>
 </div>
 
-<div class="card-panel">
-    <div class="table-responsive">
-        <table class="table table-hover table-enterprise mb-0">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Application</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                    <th>Submitted By</th>
-                    <th>Created</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-            @foreach (var item in Model.Requests)
-            {
-                <tr>
-                    <td>@item.Title</td>
-                    <td>@(item.TargetApplicationName ?? "—")</td>
-                    <td>@item.Priority</td>
-                    <td><span class="badge text-bg-secondary badge-status">@item.Status</span></td>
-                    <td>@(item.SubmittedByUserName ?? "—")</td>
-                    <td>@item.CreatedAt.ToString("g")</td>
-                    <td><a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">View</a></td>
-                </tr>
-            }
-            </tbody>
-        </table>
+<form method="get" class="card-panel p-3 mb-3">
+    <div class="row g-2 align-items-end">
+        <div class="col-md-4">
+            <label class="form-label small" for="search-q">Search</label>
+            <input type="search" class="form-control" id="search-q" name="q" value="@Model.Q" placeholder="Title, submitter, application…" />
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small" for="filter-status">Status</label>
+            <select class="form-select" id="filter-status" name="status" asp-for="Status" asp-items="Html.GetEnumSelectList<EnhancementRequestStatus>()">
+                <option value="">All</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small" for="filter-priority">Priority</label>
+            <select class="form-select" id="filter-priority" name="priority">
+                <option value="">All</option>
+                @foreach (var p in new[] { "Critical", "High", "Medium", "Low" })
+                {
+                    <option value="@p" selected="@(Model.Priority == p)">@p</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label small" for="filter-sort">Sort</label>
+            <select class="form-select" id="filter-sort" name="sort" asp-for="Sort" asp-items="Html.GetEnumSelectList<EnhancementRequestSort>()"></select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Apply</button>
+        </div>
     </div>
-</div>
+    <div class="filter-chips mt-3">
+        <a class="filter-chip @(Model.View == null && Model.Status == null ? "active" : "")" asp-page="Index">All</a>
+        <a class="filter-chip @(Model.Status == EnhancementRequestStatus.PendingApproval ? "active" : "")" asp-page="Index" asp-route-status="@EnhancementRequestStatus.PendingApproval">Pending approval</a>
+        <a class="filter-chip @(Model.Status == EnhancementRequestStatus.Submitted ? "active" : "")" asp-page="Index" asp-route-status="@EnhancementRequestStatus.Submitted">Awaiting analysis</a>
+        <a class="filter-chip @(Model.View == "highrisk" ? "active" : "")" asp-page="Index" asp-route-view="highrisk">High risk</a>
+    </div>
+</form>
+
+@if (Model.Requests.Count == 0)
+{
+    <div class="card-panel empty-state">
+        <div class="empty-state-icon">☰</div>
+        <h2 class="h5">No requests match your filters</h2>
+        <p class="mb-3">Try clearing filters or create a new enhancement request.</p>
+        <a asp-page="Create" class="btn btn-primary">New Request</a>
+    </div>
+}
+else
+{
+    <div class="card-panel table-desktop-only">
+        <div class="table-responsive">
+            <table class="table table-hover table-enterprise mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Title</th>
+                        <th scope="col">Application</th>
+                        <th scope="col">Risk</th>
+                        <th scope="col">Priority</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Submitted By</th>
+                        <th scope="col">Age</th>
+                        <th scope="col"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var item in Model.Requests)
+                {
+                    <tr>
+                        <td><strong>@item.Title</strong></td>
+                        <td>@(item.TargetApplicationName ?? "—")</td>
+                        <td>
+                            @if (item.LatestRiskLevel.HasValue)
+                            {
+                                <span class="badge @RiskClass(item.LatestRiskLevel) badge-status">@item.LatestRiskLevel</span>
+                            }
+                            else { <span class="text-muted">—</span> }
+                        </td>
+                        <td>@item.Priority</td>
+                        <td><span class="badge text-bg-secondary badge-status">@item.Status</span></td>
+                        <td>@(item.SubmittedByUserName ?? "—")</td>
+                        <td>@(item.DaysInStatus ?? 0)d</td>
+                        <td><a asp-page="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">View</a></td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="cards-mobile-only">
+        @foreach (var item in Model.Requests)
+        {
+            <a asp-page="Details" asp-route-id="@item.Id" class="request-card-mobile @StatusRowClass(item.Status) d-block text-decoration-none text-reset">
+                <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                    <strong>@item.Title</strong>
+                    @if (item.LatestRiskLevel.HasValue)
+                    {
+                        <span class="badge @RiskClass(item.LatestRiskLevel) badge-status">@item.LatestRiskLevel</span>
+                    }
+                </div>
+                <div class="small text-muted">@item.Status · @item.Priority · @(item.DaysInStatus ?? 0)d</div>
+            </a>
+        }
+    </div>
+}

@@ -1,0 +1,19 @@
+@{
+    var section = ViewData["AdminSection"]?.ToString() ?? "";
+    bool TabActive(string key) => string.Equals(section, key, StringComparison.OrdinalIgnoreCase);
+}
+
+<nav class="admin-subnav mb-4" aria-label="Admin sections">
+    <a class="admin-subnav-link @(TabActive("settings") ? "active" : "")" asp-page="/Admin/Settings">Settings</a>
+    <a class="admin-subnav-link @(TabActive("jobs") ? "active" : "")" asp-page="/Admin/Jobs">Jobs</a>
+    <a class="admin-subnav-link @(TabActive("roi") ? "active" : "")" asp-page="/Admin/Roi">ROI</a>
+    <a class="admin-subnav-link @(TabActive("teams") ? "active" : "")" asp-page="/Admin/Teams">Teams</a>
+    <a class="admin-subnav-link @(TabActive("tenancy") ? "active" : "")" asp-page="/Admin/Tenancy">Tenancy</a>
+    <a class="admin-subnav-link @(TabActive("apikeys") ? "active" : "")" asp-page="/Admin/ApiKeys">API Keys</a>
+    <a class="admin-subnav-link @(TabActive("auth") ? "active" : "")" asp-page="/Admin/Authentication">Auth</a>
+    <a class="admin-subnav-link @(TabActive("compliance") ? "active" : "")" asp-page="/Admin/Compliance">Compliance</a>
+    <a class="admin-subnav-link @(TabActive("scaling") ? "active" : "")" asp-page="/Admin/DataScaling">Scaling</a>
+    <a class="admin-subnav-link @(TabActive("observability") ? "active" : "")" asp-page="/Admin/Observability">Observability</a>
+    <a class="admin-subnav-link @(TabActive("retention") ? "active" : "")" asp-page="/Admin/Retention">Retention</a>
+    <a class="admin-subnav-link @(TabActive("prompts") ? "active" : "")" asp-page="/Admin/AiPrompts">AI Prompts</a>
+</nav>

@@ -1,6 +1,5 @@
 /**
- * EnhancementHub SPA pilot — request detail shell (Phase 25).
- * Fetches REST API data and renders without full page reload.
+ * EnhancementHub SPA pilot — request detail shell (Phase 27).
  */
 (function () {
     const root = document.getElementById('spa-request-detail');
@@ -14,6 +13,16 @@
         if (statusEl) statusEl.textContent = message;
     }
 
+    function skeleton() {
+        contentEl.innerHTML = `
+            <div class="placeholder-glow">
+                <span class="placeholder col-8 mb-3"></span>
+                <span class="placeholder col-12 mb-2"></span>
+                <span class="placeholder col-11 mb-4"></span>
+                <div class="card-panel p-4"><span class="placeholder col-12"></span></div>
+            </div>`;
+    }
+
     function riskBadgeClass(risk) {
         switch (risk) {
             case 'Critical': return 'text-bg-danger';
@@ -25,6 +34,7 @@
 
     async function load() {
         setStatus('Loading…');
+        skeleton();
         try {
             const [detailRes, analysisRes] = await Promise.all([
                 fetch(`/web-api/spa/requests/${requestId}`, { credentials: 'include' }),
@@ -36,26 +46,42 @@
             let analysis = null;
             if (analysisRes.ok) analysis = await analysisRes.json();
 
+            const affected = analysis?.affectedApplications?.length ?? 0;
+            const dbChanges = analysis?.databaseChangeRecommendations?.length ?? 0;
+            const apiChanges = analysis?.apiChangeRecommendations?.length ?? 0;
+
             contentEl.innerHTML = `
                 <header class="mb-4">
                     <h1 class="h3">${escapeHtml(detail.title)}</h1>
                     <p><span class="badge text-bg-secondary">${escapeHtml(detail.status)}</span>
                        <span class="text-muted ms-2">${escapeHtml(detail.submittedByUserName ?? '')}</span></p>
                 </header>
-                <section class="card-panel p-4 mb-3" aria-labelledby="spa-business-heading">
-                    <h2 id="spa-business-heading" class="h6 text-muted text-uppercase">Business description</h2>
+                ${analysis ? `
+                <section class="card-panel p-4 mb-3">
+                    <h2 class="h6 mb-3">Mission control</h2>
+                    <div class="mission-control-grid">
+                        <div class="stat-card"><div class="label">Risk</div><div class="value fs-5"><span class="badge ${riskBadgeClass(analysis.riskLevel)}">${escapeHtml(analysis.riskLevel)}</span></div></div>
+                        <div class="stat-card"><div class="label">Confidence</div><div class="value fs-5">${Math.round((analysis.confidenceScore ?? 0) * 100)}%</div></div>
+                        <div class="stat-card"><div class="label">Affected apps</div><div class="value fs-5">${affected}</div></div>
+                        <div class="stat-card"><div class="label">DB / API changes</div><div class="value fs-5">${dbChanges} / ${apiChanges}</div></div>
+                    </div>
+                </section>` : ''}
+                <section class="card-panel p-4 mb-3">
+                    <h2 class="h6 text-muted text-uppercase">Business description</h2>
                     <p>${escapeHtml(detail.businessDescription)}</p>
                     <h2 class="h6 text-muted text-uppercase mt-3">Desired outcome</h2>
                     <p class="mb-0">${escapeHtml(detail.desiredOutcome)}</p>
                 </section>
                 ${analysis ? `
-                <section class="card-panel p-4 analysis-summary-banner" aria-labelledby="spa-analysis-heading">
-                    <h2 id="spa-analysis-heading" class="h6">AI analysis (v${analysis.version})</h2>
+                <section class="card-panel p-4 analysis-summary-banner mb-3">
+                    <h2 class="h6">AI analysis (v${analysis.version})</h2>
                     <p class="mb-2">${escapeHtml(analysis.featureSummary ?? 'Analysis complete.')}</p>
                     <span class="badge ${riskBadgeClass(analysis.riskLevel)}">${escapeHtml(analysis.riskLevel)} risk</span>
-                    <span class="ms-2 text-muted">Confidence ${Math.round((analysis.confidenceScore ?? 0) * 100)}%</span>
                 </section>` : ''}
-                <p class="small text-muted mt-3 mb-0">SPA pilot view — data loaded via REST API. See docs/UX_MODERNIZATION.md.</p>`;
+                <div class="d-flex gap-2">
+                    <a href="/EnhancementRequests/Approve" class="btn btn-outline-primary btn-sm">Approval queue</a>
+                    <a href="/SystemMap/Index" class="btn btn-outline-secondary btn-sm">System map</a>
+                </div>`;
 
             setStatus('');
             contentEl.setAttribute('aria-busy', 'false');

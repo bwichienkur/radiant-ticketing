@@ -1,0 +1,71 @@
+@{
+    var path = ViewContext.HttpContext.Request.Path.Value ?? "/";
+    bool NavActive(string segment) => path.StartsWith(segment, StringComparison.OrdinalIgnoreCase);
+    bool NavExact(string segment) => string.Equals(path, segment, StringComparison.OrdinalIgnoreCase);
+    var isAdmin = path.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase);
+}
+
+<aside class="app-sidebar" aria-label="Sidebar">
+    <div class="sidebar-brand">
+        <a asp-page="/Index" class="sidebar-brand-link">
+            <span class="sidebar-brand-mark">EH</span>
+            <span class="sidebar-brand-text">EnhancementHub</span>
+        </a>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Work</div>
+            <a class="sidebar-link @(NavExact("/Index") ? "active" : "")" asp-page="/Index">
+                <span class="sidebar-icon" aria-hidden="true">◉</span> Dashboard
+            </a>
+            <a class="sidebar-link @(NavActive("/EnhancementRequests") ? "active" : "")" asp-page="/EnhancementRequests/Index">
+                <span class="sidebar-icon" aria-hidden="true">☰</span> Requests
+            </a>
+            <a class="sidebar-link @(NavActive("/EnhancementRequests/Approve") ? "active" : "")" asp-page="/EnhancementRequests/Approve">
+                <span class="sidebar-icon" aria-hidden="true">✓</span> Approvals
+            </a>
+            <a class="sidebar-link @(NavActive("/EnhancementRequests/Create") ? "active" : "")" asp-page="/EnhancementRequests/Create">
+                <span class="sidebar-icon" aria-hidden="true">+</span> New request
+            </a>
+            <a class="sidebar-link @(NavActive("/Onboarding") ? "active" : "")" asp-page="/Onboarding/Wizard">
+                <span class="sidebar-icon" aria-hidden="true">⚙</span> Setup
+            </a>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Intelligence</div>
+            <a class="sidebar-link @(NavActive("/Applications") ? "active" : "")" asp-page="/Applications/Index">
+                <span class="sidebar-icon" aria-hidden="true">▣</span> Applications
+            </a>
+            <a class="sidebar-link @(NavActive("/SystemMap") ? "active" : "")" asp-page="/SystemMap/Index">
+                <span class="sidebar-icon" aria-hidden="true">◈</span> System map
+            </a>
+            <a class="sidebar-link @(NavActive("/DatabaseConnections") ? "active" : "")" asp-page="/DatabaseConnections/Index">
+                <span class="sidebar-icon" aria-hidden="true">⬡</span> Databases
+            </a>
+            <a class="sidebar-link @(NavActive("/SchemaDrift") ? "active" : "")" asp-page="/SchemaDrift/Index">
+                <span class="sidebar-icon" aria-hidden="true">↔</span> Drift
+            </a>
+            <a class="sidebar-link @(NavActive("/Documentation") ? "active" : "")" asp-page="/Documentation/Export">
+                <span class="sidebar-icon" aria-hidden="true">📄</span> Docs
+            </a>
+            <a class="sidebar-link @(NavActive("/Refactor") ? "active" : "")" asp-page="/Refactor/Analyze">
+                <span class="sidebar-icon" aria-hidden="true">⟳</span> Refactor
+            </a>
+            <a class="sidebar-link @(NavActive("/Repositories") ? "active" : "")" asp-page="/Repositories/Index">
+                <span class="sidebar-icon" aria-hidden="true">⌂</span> Repositories
+            </a>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Governance</div>
+            <a class="sidebar-link @(NavActive("/Audit") ? "active" : "")" asp-page="/Audit/Index">
+                <span class="sidebar-icon" aria-hidden="true">☷</span> Audit
+            </a>
+            @if (User.IsInRole("Admin"))
+            {
+                <a class="sidebar-link @(isAdmin ? "active" : "")" asp-page="/Admin/Settings">
+                    <span class="sidebar-icon" aria-hidden="true">⚙</span> Admin
+                </a>
+            }
+        </div>
+    </nav>
+</aside>

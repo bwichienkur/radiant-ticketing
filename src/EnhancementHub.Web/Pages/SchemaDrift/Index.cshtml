@@ -1,21 +1,30 @@
 @page
 @model EnhancementHub.Web.Pages.SchemaDrift.IndexModel
-@{ ViewData["Title"] = "Schema Drift"; }
+@{
+    ViewData["Title"] = "Schema Drift";
+    ViewData["Breadcrumb"] = "Schema drift";
+}
 
-<h1 class="h3 mb-4">Schema drift detection</h1>
+<div class="page-header">
+    <h1>Schema drift detection</h1>
+    <p>Compare live database schema against indexed code expectations</p>
+</div>
 
-<form method="get" class="row g-3 mb-4">
-    <div class="col-md-5">
-        <select name="connectionId" class="form-select" required>
-            @foreach (var c in Model.Connections)
-            {
-                <option value="@c.Id" selected="@(Model.ConnectionId == c.Id)">@c.Name (@c.ApplicationName)</option>
-            }
-        </select>
-    </div>
-    <div class="col-auto">
-        <button type="submit" class="btn btn-primary">View report</button>
-        <button type="submit" asp-page-handler="Detect" class="btn btn-outline-secondary">Run detection</button>
+<form method="get" class="card-panel p-3 mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label" for="connectionId">Database connection</label>
+            <select name="connectionId" id="connectionId" class="form-select" required>
+                @foreach (var c in Model.Connections)
+                {
+                    <option value="@c.Id" selected="@(Model.ConnectionId == c.Id)">@c.Name (@c.ApplicationName)</option>
+                }
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">View report</button>
+            <button type="submit" asp-page-handler="Detect" class="btn btn-outline-secondary">Run detection</button>
+        </div>
     </div>
 </form>
 
@@ -24,15 +33,18 @@
     <div class="alert alert-info">@Model.Report.Findings.Count finding(s) detected.</div>
     @foreach (var finding in Model.Report.Findings)
     {
-        <div class="card mb-2 border-@(finding.Severity.ToString().ToLower())">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <strong>@finding.Title</strong>
-                    <span class="badge bg-warning text-dark">@finding.Severity</span>
-                </div>
-                <p class="mb-1 mt-2">@finding.Description</p>
-                <small class="text-muted">Code: @finding.CodeReference | DB: @finding.DatabaseReference</small>
+        <div class="card-panel mb-2 p-3 border-start border-4 border-warning">
+            <div class="d-flex justify-content-between flex-wrap gap-2">
+                <strong>@finding.Title</strong>
+                <span class="badge text-bg-secondary">@finding.Severity</span>
             </div>
+            <p class="small text-muted mb-0 mt-1">@finding.Description</p>
         </div>
     }
+}
+else if (Model.Connections.Count == 0)
+{
+    <div class="card-panel empty-state">
+        <p class="mb-0">Connect a database via onboarding to run drift detection.</p>
+    </div>
 }

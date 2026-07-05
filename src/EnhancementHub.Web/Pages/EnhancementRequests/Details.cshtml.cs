@@ -23,6 +23,12 @@ public class DetailsModel : PageModel
     public AnalysisComparisonDto? Comparison { get; private set; }
     public IReadOnlyList<ApprovalActionDto> ApprovalHistory { get; private set; } = [];
 
+    [BindProperty]
+    public string? NewComment { get; set; }
+
+    [BindProperty]
+    public bool CommentIsInternal { get; set; } = true;
+
     public async Task<IActionResult> OnGetAsync(Guid id, CancellationToken cancellationToken)
     {
         Detail = await _mediator.Send(new GetEnhancementRequestByIdQuery(id), cancellationToken);
@@ -58,5 +64,16 @@ public class DetailsModel : PageModel
         }
 
         return Page();
+    }
+
+    public async Task<IActionResult> OnPostCommentAsync(Guid id, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(NewComment))
+        {
+            return RedirectToPage(new { id });
+        }
+
+        await _mediator.Send(new Application.Features.Approvals.Commands.AddCommentCommand(id, NewComment, CommentIsInternal), cancellationToken);
+        return RedirectToPage(new { id });
     }
 }
