@@ -59,6 +59,15 @@ test.describe('EnhancementHub smoke', () => {
     await expect(page.getByLabel('Title')).toBeVisible();
   });
 
+  test('intake copilot panel mounts on create request', async ({ page }) => {
+    await page.goto('/Spa/CreateRequest');
+    await expect(page.getByRole('heading', { name: 'Intake copilot' })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expect(page.getByLabel('Describe your enhancement')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Draft request' })).toBeVisible();
+  });
+
   test('request list SPA loads backlog', async ({ page }) => {
     await page.goto('/Spa/RequestList');
     await expect(page.getByRole('heading', { name: 'Enhancement Requests' })).toBeVisible({

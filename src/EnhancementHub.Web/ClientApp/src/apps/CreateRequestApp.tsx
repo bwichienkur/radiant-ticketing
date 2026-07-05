@@ -1,9 +1,10 @@
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useState } from 'react';
 import {
   createEnhancementRequest,
   getCreateRequestForm,
   getEnhancementTemplate,
 } from '../api/spaClient';
+import { IntakeCopilotPanel, type IntakeCopilotFormDraft } from '../components/IntakeCopilotPanel';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import type { EnhancementTemplateSummary } from '../types/spa';
 
@@ -59,15 +60,7 @@ export function CreateRequestApp({ initialTemplateId }: CreateRequestAppProps) {
     };
   }, []);
 
-  useEffect(() => {
-    if (!initialTemplateId) {
-      return;
-    }
-
-    void applyTemplate(initialTemplateId);
-  }, [initialTemplateId]);
-
-  async function applyTemplate(templateId: string) {
+  const applyTemplate = useCallback(async (templateId: string) => {
     setSelectedTemplateId(templateId);
     try {
       const template = await getEnhancementTemplate(templateId);
@@ -84,7 +77,32 @@ export function CreateRequestApp({ initialTemplateId }: CreateRequestAppProps) {
     } catch {
       setError('Failed to load template.');
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    if (!initialTemplateId) {
+      return;
+    }
+
+    void applyTemplate(initialTemplateId);
+  }, [initialTemplateId, applyTemplate]);
+
+  const applyCopilotDraft = useCallback((draft: IntakeCopilotFormDraft) => {
+    setForm({
+      title: draft.title,
+      businessDescription: draft.businessDescription,
+      desiredOutcome: draft.desiredOutcome,
+      priority: draft.priority,
+      targetApplicationId: draft.targetApplicationId,
+      requestedDueDate: '',
+      department: draft.department,
+      supportingNotes: draft.supportingNotes,
+    });
+    if (draft.templateId) {
+      setSelectedTemplateId(draft.templateId);
+    }
+    setError(null);
+  }, []);
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
@@ -124,8 +142,10 @@ export function CreateRequestApp({ initialTemplateId }: CreateRequestAppProps) {
     <div aria-live="polite">
       <div className="page-header">
         <h1>New Enhancement Request</h1>
-        <p className="mb-0">Start from a template or describe the business need</p>
+        <p className="mb-0">Use intake copilot, pick a template, or fill the form directly</p>
       </div>
+
+      <IntakeCopilotPanel onApplyDraft={applyCopilotDraft} />
 
       {templates.length > 0 ? (
         <div className="template-card-grid" role="list" aria-label="Enhancement templates">

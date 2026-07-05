@@ -150,6 +150,7 @@ public sealed class ProductHardeningTests
         File.Exists(Path.Combine(spaDir, "SpaSystemController.cs")).Should().BeTrue();
         File.Exists(Path.Combine(spaDir, "SpaOnboardingController.cs")).Should().BeTrue();
         File.Exists(Path.Combine(spaDir, "SpaDashboardController.cs")).Should().BeTrue();
+        File.Exists(Path.Combine(spaDir, "SpaIntakeController.cs")).Should().BeTrue();
         File.Exists(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Controllers/SpaDataController.cs")).Should().BeFalse();
     }
 

@@ -3,6 +3,7 @@ using System;
 using EnhancementHub.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EnhancementHub.Infrastructure.Migrations
 {
     [DbContext(typeof(EnhancementHubDbContext))]
-    partial class EnhancementHubDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260705203256_Phase38IntakeCopilot")]
+    partial class Phase38IntakeCopilot
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");

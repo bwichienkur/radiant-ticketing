@@ -56,6 +56,7 @@ public interface IEnhancementHubDbContext
     DbSet<ServiceApiKey> ServiceApiKeys { get; }
     DbSet<Tenant> Tenants { get; }
     DbSet<TenantUsageSnapshot> TenantUsageSnapshots { get; }
+    DbSet<IntakeCopilotSession> IntakeCopilotSessions { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

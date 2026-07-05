@@ -253,3 +253,39 @@ export interface CreateRequestInput {
 export interface CreatedRequestSummary {
   id: string;
 }
+
+export interface IntakeCopilotMessage {
+  role: string;
+  content: string;
+  occurredAt: string;
+}
+
+export interface IntakeCopilotDraft {
+  title: string;
+  businessDescription: string;
+  desiredOutcome: string;
+  priority: string;
+  targetApplicationId?: string;
+  department?: string;
+  supportingNotes?: string;
+  suggestedTemplateDomainCategory?: string;
+}
+
+export interface IntakeCopilotSession {
+  id: string;
+  status: string;
+  turnCount: number;
+  messages: IntakeCopilotMessage[];
+  draft?: IntakeCopilotDraft;
+  suggestedTemplateId?: string;
+  createdRequestId?: string;
+  lastAssistantMessage?: string;
+}
+
+export interface IntakeCopilotTurnResponse {
+  session: IntakeCopilotSession;
+  assistantMessage: string;
+  followUpQuestions: string[];
+  isComplete: boolean;
+  usedMockAi: boolean;
+}

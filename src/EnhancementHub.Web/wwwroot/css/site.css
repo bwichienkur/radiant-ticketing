@@ -818,6 +818,34 @@ body {
     box-shadow: 0 0 0 1px var(--eh-accent-soft);
 }
 
+.intake-copilot-panel {
+    border-left: 3px solid var(--eh-accent);
+}
+
+.intake-copilot-messages {
+    max-height: 16rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.intake-copilot-message {
+    padding: 0.75rem 1rem;
+    border-radius: var(--eh-radius);
+    background: var(--eh-surface-elevated, var(--eh-surface));
+    border: 1px solid var(--eh-border);
+}
+
+.intake-copilot-message-user {
+    margin-left: 1.5rem;
+    border-color: var(--eh-accent-soft);
+}
+
+.intake-copilot-message-assistant {
+    margin-right: 1.5rem;
+}
+
 .template-card .template-domain {
     font-size: 0.75rem;
     text-transform: uppercase;

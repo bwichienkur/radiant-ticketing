@@ -67,6 +67,7 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<ServiceApiKey> ServiceApiKeys => Set<ServiceApiKey>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<TenantUsageSnapshot> TenantUsageSnapshots => Set<TenantUsageSnapshot>();
+    public DbSet<IntakeCopilotSession> IntakeCopilotSessions => Set<IntakeCopilotSession>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

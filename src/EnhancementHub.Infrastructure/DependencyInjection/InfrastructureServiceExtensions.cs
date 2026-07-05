@@ -230,6 +230,8 @@ public static class InfrastructureServiceExtensions
                 sp.GetRequiredService<IRiskScoringService>(),
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<OpenAiAnalysisService>>()));
 
+        services.AddScoped<IIntakeCopilotService, IntakeCopilotService>();
+
         services.AddScoped<IBackgroundJobStatusService, BackgroundJobStatusService>();
         services.AddSingleton<IAuthenticationConfigurationService, AuthenticationConfigurationService>();
         services.AddScoped<IDataRetentionService, DataRetentionService>();

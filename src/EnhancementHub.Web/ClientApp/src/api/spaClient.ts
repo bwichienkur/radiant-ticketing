@@ -11,6 +11,8 @@ import type {
   EnhancementRequestDetail,
   EnhancementRequestListItem,
   EnhancementTemplate,
+  IntakeCopilotSession,
+  IntakeCopilotTurnResponse,
   GitHubAppStatus,
   OnboardingReview,
   OnboardingSession,
@@ -270,6 +272,25 @@ export async function getEnhancementTemplate(templateId: string): Promise<Enhanc
 
 export async function createEnhancementRequest(input: CreateRequestInput): Promise<CreatedRequestSummary> {
   return postJson('/web-api/spa/requests', input);
+}
+
+export async function startIntakeCopilotSession(initialPrompt?: string): Promise<IntakeCopilotTurnResponse> {
+  return postJson('/web-api/spa/intake/sessions', initialPrompt ? { initialPrompt } : {});
+}
+
+export async function getIntakeCopilotSession(sessionId: string): Promise<IntakeCopilotSession> {
+  return fetchJson(`/web-api/spa/intake/sessions/${sessionId}`);
+}
+
+export async function sendIntakeCopilotMessage(
+  sessionId: string,
+  message: string,
+): Promise<IntakeCopilotTurnResponse> {
+  return postJson(`/web-api/spa/intake/sessions/${sessionId}/messages`, { message });
+}
+
+export async function createRequestFromIntakeSession(sessionId: string): Promise<CreatedRequestSummary> {
+  return postJson(`/web-api/spa/intake/sessions/${sessionId}/create-request`);
 }
 
 export async function listEnhancementRequests(params: {

@@ -1,4 +1,5 @@
 using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Abstractions.Models;
 using EnhancementHub.Application.Options;
 using EnhancementHub.Domain.Entities;
 using EnhancementHub.Domain.Enums;
@@ -10,13 +11,16 @@ namespace EnhancementHub.Infrastructure.Services.Integrations;
 public sealed class ChatIntakeService : IChatIntakeService
 {
     private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IIntakeCopilotService _intakeCopilot;
     private readonly IntegrationsOptions _options;
 
     public ChatIntakeService(
         IEnhancementHubDbContext dbContext,
+        IIntakeCopilotService intakeCopilot,
         IOptions<IntegrationsOptions> options)
     {
         _dbContext = dbContext;
+        _intakeCopilot = intakeCopilot;
         _options = options.Value;
     }
 
@@ -35,6 +39,7 @@ public sealed class ChatIntakeService : IChatIntakeService
             _options.Slack.DefaultPriority,
             null,
             null,
+            IntakeCopilotSource.Slack,
             cancellationToken);
     }
 
@@ -53,6 +58,7 @@ public sealed class ChatIntakeService : IChatIntakeService
             _options.Teams.DefaultPriority,
             payload.TargetApplicationId,
             payload.TeamId,
+            IntakeCopilotSource.Teams,
             cancellationToken);
     }
 
@@ -62,6 +68,7 @@ public sealed class ChatIntakeService : IChatIntakeService
         string defaultPriority,
         Guid? targetApplicationId,
         Guid? teamId,
+        IntakeCopilotSource source,
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(text))
@@ -69,21 +76,66 @@ public sealed class ChatIntakeService : IChatIntakeService
             return new ChatIntakeResult(false, null, "Message text is required.");
         }
 
-        var (title, description) = ParseIntakeText(text);
+        var conversation = new List<IntakeCopilotMessage>
+        {
+            new()
+            {
+                Role = "user",
+                Content = text.Trim(),
+                OccurredAt = DateTime.UtcNow
+            }
+        };
+
+        var turn = await _intakeCopilot.ProcessTurnAsync(
+            conversation,
+            null,
+            turnCount: 1,
+            source,
+            cancellationToken);
+
+        var draft = turn.Draft ?? new IntakeCopilotDraft
+        {
+            Title = TruncateTitle(text),
+            BusinessDescription = text.Trim(),
+            DesiredOutcome = "Submitted via chat integration; review and refine scope.",
+            Priority = defaultPriority
+        };
+
+        if (targetApplicationId.HasValue)
+        {
+            draft.TargetApplicationId = targetApplicationId;
+        }
+
+        if (string.IsNullOrWhiteSpace(draft.Title))
+        {
+            draft.Title = TruncateTitle(text);
+        }
+
+        if (string.IsNullOrWhiteSpace(draft.DesiredOutcome))
+        {
+            draft.DesiredOutcome = "Submitted via chat integration; review and refine scope.";
+        }
+
+        draft.Priority = string.IsNullOrWhiteSpace(draft.Priority) ? defaultPriority : draft.Priority;
+        draft.SupportingNotes = string.IsNullOrWhiteSpace(draft.SupportingNotes)
+            ? $"Submitted by {submitterName} via {source} intake copilot."
+            : $"{draft.SupportingNotes}\nSubmitted by {submitterName} via {source}.";
+
         var submitter = await ResolveOrCreateIntakeUserAsync(submitterName, cancellationToken);
         var now = DateTime.UtcNow;
 
         var request = new EnhancementRequest
         {
             Id = Guid.NewGuid(),
-            Title = title,
-            BusinessDescription = description,
-            DesiredOutcome = "Submitted via chat integration; review and refine scope.",
-            Priority = defaultPriority,
-            TargetApplicationId = targetApplicationId,
+            Title = draft.Title,
+            BusinessDescription = draft.BusinessDescription,
+            DesiredOutcome = draft.DesiredOutcome,
+            Priority = draft.Priority,
+            TargetApplicationId = draft.TargetApplicationId,
             SubmittedByUserId = submitter.Id,
             TeamId = teamId,
-            SupportingNotes = $"Submitted by {submitterName} via integration.",
+            Department = draft.Department,
+            SupportingNotes = draft.SupportingNotes,
             Status = EnhancementRequestStatus.Submitted,
             CreatedAt = now,
             UpdatedAt = now,
@@ -96,27 +148,27 @@ public sealed class ChatIntakeService : IChatIntakeService
         return new ChatIntakeResult(
             true,
             request.Id,
-            $"Enhancement request '{title}' created.");
+            $"Enhancement request '{request.Title}' created via intake copilot.");
     }
 
-    internal static (string Title, string Description) ParseIntakeText(string text)
+    public static (string Title, string Description) ParseIntakeText(string text)
     {
         var parts = text.Split('|', 2, StringSplitOptions.TrimEntries);
         if (parts.Length == 2)
         {
-            return (TrimTitle(parts[0]), parts[1]);
+            return (TruncateTitle(parts[0]), parts[1]);
         }
 
         var lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
         if (lines.Length > 1)
         {
-            return (TrimTitle(lines[0]), string.Join(' ', lines.Skip(1)));
+            return (TruncateTitle(lines[0]), string.Join(' ', lines.Skip(1)));
         }
 
-        return (TrimTitle(text), text);
+        return (TruncateTitle(text), text);
     }
 
-    private static string TrimTitle(string value) =>
+    private static string TruncateTitle(string value) =>
         value.Length <= 500 ? value : value[..500];
 
     private async Task<User> ResolveOrCreateIntakeUserAsync(
