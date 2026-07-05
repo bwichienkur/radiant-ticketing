@@ -45,9 +45,9 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 
 ### 1.1 Positioning & packaging
 - [x] Rewrite landing/README around **outcome** (hours saved, approval-ready packages), not feature list
-- [ ] Define ICP one-pager: ".NET on Azure, 50–500 devs, portfolio governance pain"
-- [ ] Create 10-minute demo script: intake → AI analysis → system map → approval → Jira export
-- [ ] Pricing/packaging draft: pilot vs enterprise license tiers
+- [x] Define ICP one-pager: ".NET on Azure, 50–500 devs, portfolio governance pain" (`docs/ICP_ONE_PAGER.md`)
+- [x] Create 10-minute demo script: intake → AI analysis → system map → approval → Jira export (`docs/DEMO_SCRIPT.md`)
+- [x] Pricing/packaging draft: pilot vs enterprise license tiers (`docs/PRICING.md`)
 
 ### 1.2 Demo-critical UX polish
 - [x] Enhancement request detail: analysis summary above the fold, risk badge, confidence score

@@ -40,7 +40,7 @@ tests/
 
 **Deploy API + Web + Worker** for production. Background jobs run in Worker only.
 
-See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for production checklist, [docs/SECURITY.md](docs/SECURITY.md) for the security whitepaper, and [docs/ROADMAP.md](docs/ROADMAP.md) for the product roadmap.
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for production checklist, [docs/SECURITY.md](docs/SECURITY.md) for the security whitepaper, [docs/ROADMAP.md](docs/ROADMAP.md) for the product roadmap, and [docs/ICP_ONE_PAGER.md](docs/ICP_ONE_PAGER.md) / [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) for sales and pilot enablement.
 
 ---
 
