@@ -303,7 +303,17 @@
 - Admin tenancy dashboard (`/Admin/Tenancy`) and billing API
 - Guide: `docs/COMMERCIAL_PLATFORM.md`
 
+## Phase 27 — UX overhaul (complete)
+
+- Sidebar app shell, command palette (⌘K), notification center, persistent dark mode
+- Dashboard control room with copilot bar, activity feed, and sparkline trends
+- Request list triage (search/filter/sort/mobile cards) and approval queue v2
+- Request detail mission control, accordions, inline collaboration comments
+- Template-card create flow; admin sub-nav; SPA pilot skeleton + mission control
+- Guide: `docs/UX_MODERNIZATION.md` (Phase 27 section)
+
 ## Future enhancements
 
 - Payment provider integration (Stripe) and invoice generation
 - Schema-per-tenant isolation for regulated workloads
+- React migration for SPA hot paths

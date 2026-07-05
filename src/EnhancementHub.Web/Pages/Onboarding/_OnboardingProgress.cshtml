@@ -11,7 +11,7 @@
             var isActive = step.Number == current;
             var isComplete = step.Number < current || Model.Session.Status == EnhancementHub.Domain.Enums.OnboardingSessionStatus.Completed;
             var canNavigate = step.Number <= current && Model.Session.Status != EnhancementHub.Domain.Enums.OnboardingSessionStatus.Completed;
-            <div class="onboarding-step @(isActive ? "active" : null) @(isComplete ? "complete" : null)">
+            <div class="onboarding-step @(isActive ? "active" : null) @(isComplete ? "complete" : null)" @(isActive ? Html.Raw("aria-current=\"step\"") : null)>
                 @if (canNavigate && !isActive)
                 {
                     <a asp-page="./Wizard" asp-route-id="@Model.Session.Id" asp-route-step="@step.Number" class="step-link">

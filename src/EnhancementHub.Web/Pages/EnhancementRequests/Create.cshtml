@@ -2,29 +2,42 @@
 @model EnhancementHub.Web.Pages.EnhancementRequests.CreateModel
 @{
     ViewData["Title"] = "New Enhancement Request";
+    ViewData["Breadcrumb"] = "New request";
 }
 
 <div class="page-header">
     <h1>New Enhancement Request</h1>
-    <p>Describe the business need and desired outcome</p>
+    <p>Start from a template or describe the business need</p>
+</div>
+
+@if (Model.Templates.Count > 0)
+{
+    <div class="template-card-grid" role="list" aria-label="Enhancement templates">
+        @foreach (var t in Model.Templates)
+        {
+            <a asp-page="Create" asp-route-templateId="@t.Id"
+               class="template-card @(Model.Input.TemplateId == t.Id ? "selected" : "")" role="listitem">
+                <div class="template-domain">@t.DomainCategory</div>
+                <div class="fw-semibold mt-1">@t.Name</div>
+                <div class="small text-muted">@t.Title</div>
+            </a>
+        }
+    </div>
+}
+
+<div class="alert alert-light border mb-4">
+    <strong>What happens next:</strong> After submit, AI analyzes the request against linked repositories and schema. Approvers receive the package in the approval queue.
 </div>
 
 <div class="card-panel p-4">
     <form method="post">
         <div class="row g-3">
             <div class="col-md-8">
-                <label class="form-label">Start from template (optional)</label>
-                <select class="form-select" asp-for="Input.TemplateId" asp-items="@(new SelectList(Model.Templates, nameof(EnhancementHub.Application.Features.Templates.Dtos.EnhancementTemplateSummaryDto.Id), nameof(EnhancementHub.Application.Features.Templates.Dtos.EnhancementTemplateSummaryDto.Name), Model.Input.TemplateId))">
-                    <option value="">— None —</option>
-                </select>
-                <div class="form-text">Security, performance, and compliance templates prefill the form.</div>
-            </div>
-            <div class="col-md-8">
-                <label class="form-label">Title</label>
+                <label class="form-label" for="Input_Title">Title</label>
                 <input class="form-control" asp-for="Input.Title" required />
             </div>
             <div class="col-md-4">
-                <label class="form-label">Priority</label>
+                <label class="form-label" for="Input_Priority">Priority</label>
                 <select class="form-select" asp-for="Input.Priority">
                     <option>Low</option>
                     <option selected>Medium</option>
@@ -33,31 +46,33 @@
                 </select>
             </div>
             <div class="col-md-6">
-                <label class="form-label">Target Application</label>
+                <label class="form-label" for="Input_TargetApplicationId">Target Application</label>
                 <select class="form-select" asp-for="Input.TargetApplicationId" asp-items="Model.Applications">
                     <option value="">— Select —</option>
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label">Department</label>
+                <label class="form-label" for="Input_Department">Department</label>
                 <input class="form-control" asp-for="Input.Department" />
             </div>
             <div class="col-md-3">
-                <label class="form-label">Requested Due Date</label>
+                <label class="form-label" for="Input_RequestedDueDate">Requested Due Date</label>
                 <input class="form-control" asp-for="Input.RequestedDueDate" type="date" />
             </div>
             <div class="col-12">
-                <label class="form-label">Business Description</label>
-                <textarea class="form-control" asp-for="Input.BusinessDescription" rows="4" required></textarea>
+                <label class="form-label" for="Input_BusinessDescription">Business Description</label>
+                <textarea class="form-control" asp-for="Input.BusinessDescription" rows="4" required maxlength="4000"></textarea>
+                <div class="form-text">Describe the business problem and current pain.</div>
             </div>
             <div class="col-12">
-                <label class="form-label">Desired Outcome</label>
+                <label class="form-label" for="Input_DesiredOutcome">Desired Outcome</label>
                 <textarea class="form-control" asp-for="Input.DesiredOutcome" rows="3" required></textarea>
             </div>
             <div class="col-12">
-                <label class="form-label">Supporting Notes</label>
+                <label class="form-label" for="Input_SupportingNotes">Supporting Notes</label>
                 <textarea class="form-control" asp-for="Input.SupportingNotes" rows="2"></textarea>
             </div>
+            <input type="hidden" asp-for="Input.TemplateId" />
         </div>
         <div class="mt-4">
             <button type="submit" class="btn btn-primary">Submit Request</button>

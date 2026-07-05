@@ -79,3 +79,21 @@ Future: extract to React + Vite under `src/EnhancementHub.Web/ClientApp/` with s
 ---
 
 *Phase 25 — Horizon 4.3 UX modernization.*
+
+---
+
+## Phase 27 — UX overhaul (complete)
+
+- Collapsible **sidebar app shell** with grouped navigation (Work / Intelligence / Governance)
+- **Top bar** with breadcrumbs, ⌘K command palette, notification center, persistent dark mode
+- **Dashboard control room**: role-based action queue, 7-day sparkline, activity feed, Ask EnhancementHub copilot
+- **Request list triage**: search, filters, sort, saved filter chips, mobile card view, empty states
+- **Approval queue v2**: decision header, risk/age in queue, quick approve/reject/clarify, keyboard J/K
+- **Request detail**: mission control panel, accordions, inline comments, auto-refresh during analysis
+- **Create flow**: visual template cards, “what happens next” guidance
+- **Login/Signup**: trial link, signup hero parity
+- **Admin sub-nav** including Tenancy; legacy pages unified to `.page-header` / `.card-panel`
+- **SPA pilot**: skeleton loading, mission control metrics
+- API: `GET /web-api/ux/search`, `GET /web-api/ux/copilot`
+
+*Phase 27 — UX overhaul.*

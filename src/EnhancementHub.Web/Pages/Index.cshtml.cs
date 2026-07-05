@@ -2,6 +2,7 @@ using EnhancementHub.Application.Features.Onboarding.Dtos;
 using EnhancementHub.Application.Features.Onboarding.Queries;
 using EnhancementHub.Application.Features.Reporting.Dtos;
 using EnhancementHub.Application.Features.Reporting.Queries;
+using EnhancementHub.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -16,6 +17,7 @@ public class IndexModel : PageModel
     public IndexModel(IMediator mediator) => _mediator = mediator;
 
     public DashboardReportDto? Report { get; private set; }
+    public DashboardInsightsDto? Insights { get; private set; }
     public OnboardingStatusDto? OnboardingStatus { get; private set; }
 
     public bool ShowOnboardingChecklist =>
@@ -24,9 +26,12 @@ public class IndexModel : PageModel
             || OnboardingStatus.ActiveSessionId.HasValue
             || OnboardingStatus.ApplicationCount == 0);
 
+    public bool IsApprover => User.IsInRole("Admin") || User.IsInRole("Approver");
+
     public async Task OnGetAsync(CancellationToken cancellationToken)
     {
         Report = await _mediator.Send(new GetDashboardReportQuery(), cancellationToken);
+        Insights = await _mediator.Send(new GetDashboardInsightsQuery(), cancellationToken);
         OnboardingStatus = await _mediator.Send(new GetOnboardingStatusQuery(), cancellationToken);
     }
 }

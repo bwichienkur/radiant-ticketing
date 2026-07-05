@@ -1,9 +1,11 @@
 @page
 @model EnhancementHub.Web.Pages.Admin.AiPromptsModel
 @{
+    ViewData["AdminSection"] = "prompts";
     ViewData["Title"] = "AI Prompt Configuration";
 }
 
+<partial name="_AdminNav" />
 <div class="page-header">
     <h1>AI Prompt Configuration</h1>
     <p>Manage analysis prompt templates</p>

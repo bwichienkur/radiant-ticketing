@@ -2,12 +2,16 @@
 @model EnhancementHub.Web.Pages.IndexModel
 @{
     ViewData["Title"] = "Dashboard";
+    ViewData["Breadcrumb"] = "Dashboard";
+
+    int maxTrend = Model.Insights?.RequestsLast7Days.Max(x => x.Count) ?? 1;
+    if (maxTrend == 0) maxTrend = 1;
 }
 
 <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
     <div>
         <h1>Dashboard</h1>
-        <p>Enhancement request pipeline overview</p>
+        <p>Your enhancement pipeline control room</p>
     </div>
     <div class="d-flex gap-2">
         <a asp-page="/Onboarding/Wizard" class="btn btn-outline-primary">Document an application</a>
@@ -15,7 +19,47 @@
     </div>
 </div>
 
-@if (Model.OnboardingStatus is not null && Model.ShowOnboardingChecklist)
+<div class="copilot-bar">
+    <form id="copilot-form" class="d-flex gap-2 flex-wrap align-items-center">
+        <label for="copilot-input" class="visually-hidden">Ask EnhancementHub</label>
+        <span class="fw-semibold text-nowrap">Ask EnhancementHub</span>
+        <input type="search" id="copilot-input" class="form-control flex-grow-1" placeholder="e.g. show high risk pending approval" autocomplete="off" />
+        <button type="submit" class="btn btn-primary">Ask</button>
+    </form>
+    <div id="copilot-results" class="mt-2"></div>
+</div>
+
+@if (Model.Insights is not null && (Model.IsApprover || Model.Insights.MyAwaitingAnalysis > 0))
+{
+    <div class="row g-3 mb-4">
+        @if (Model.IsApprover && Model.Insights.MyPendingApprovals > 0)
+        {
+            <div class="col-md-6 col-xl-4">
+                <a asp-page="/EnhancementRequests/Approve" class="text-decoration-none">
+                    <div class="stat-card queue-action-card urgent stat-card-link">
+                        <div class="label">Needs your approval</div>
+                        <div class="value text-danger">@Model.Insights.MyPendingApprovals</div>
+                        <div class="small text-muted">Open approval queue →</div>
+                    </div>
+                </a>
+            </div>
+        }
+        @if (Model.Insights.MyAwaitingAnalysis > 0)
+        {
+            <div class="col-md-6 col-xl-4">
+                <a asp-page="/EnhancementRequests/Index" asp-route-status="@EnhancementHub.Domain.Enums.EnhancementRequestStatus.Submitted" class="text-decoration-none">
+                    <div class="stat-card queue-action-card stat-card-link">
+                        <div class="label">Awaiting AI analysis</div>
+                        <div class="value text-info">@Model.Insights.MyAwaitingAnalysis</div>
+                        <div class="small text-muted">View submitted requests →</div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+}
+
+@if (Model.ShowOnboardingChecklist && Model.OnboardingStatus is not null)
 {
     <div class="card-panel p-4 mb-4">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
@@ -60,53 +104,96 @@
 @if (Model.Report is not null)
 {
     <div class="row g-3 mb-4">
-        <div class="col-md-3"><div class="stat-card"><div class="label">Total Requests</div><div class="value">@Model.Report.TotalRequests</div></div></div>
-        <div class="col-md-3">
-            <a asp-page="/EnhancementRequests/Index" class="text-decoration-none">
-                <div class="stat-card stat-card-link">
-                    <div class="label">Awaiting Analysis</div>
-                    <div class="value text-info">@Model.Report.AwaitingAnalysisCount</div>
+        <div class="col-lg-8">
+            <div class="row g-3">
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="label">Total Requests</div>
+                        <div class="value">@Model.Report.TotalRequests</div>
+                    </div>
                 </div>
-            </a>
+                <div class="col-sm-6 col-xl-3">
+                    <a asp-page="/EnhancementRequests/Index" asp-route-status="Submitted" class="text-decoration-none">
+                        <div class="stat-card stat-card-link">
+                            <div class="label">Awaiting Analysis</div>
+                            <div class="value text-info">@Model.Report.AwaitingAnalysisCount</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <a asp-page="/EnhancementRequests/Approve" class="text-decoration-none">
+                        <div class="stat-card stat-card-link">
+                            <div class="label">Pending Approval</div>
+                            <div class="value text-warning">@Model.Report.PendingApprovalCount</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-sm-6 col-xl-3">
+                    <div class="stat-card">
+                        <div class="label">Ready for Dev</div>
+                        <div class="value text-success">@Model.Report.ReadyForDevelopmentCount</div>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-3 mt-0">
+                <div class="col-md-4">
+                    <a asp-page="/EnhancementRequests/Approve" asp-route-view="highrisk" class="text-decoration-none">
+                        <div class="stat-card stat-card-link">
+                            <div class="label">High-Risk Pending</div>
+                            <div class="value text-danger">@Model.Report.HighRiskPendingApprovalCount</div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="label">Avg Approval Time</div>
+                        <div class="value fs-4">@(Model.Report.AverageApprovalTimeHours?.ToString("F1") ?? "—")<span class="fs-6"> hrs</span></div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="label">7-day volume</div>
+                        <div class="sparkline mt-2" role="img" aria-label="Request volume last 7 days">
+                            @foreach (var day in Model.Insights?.RequestsLast7Days ?? [])
+                            {
+                                var height = Math.Max(8, (int)(day.Count * 100.0 / maxTrend));
+                                <div class="sparkline-bar @(day.Count == maxTrend ? "active" : "")" style="height: @(height)%"></div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-md-3"><div class="stat-card"><div class="label">Pending Approval</div><div class="value text-warning">@Model.Report.PendingApprovalCount</div></div></div>
-        <div class="col-md-3"><div class="stat-card"><div class="label">Ready for Dev</div><div class="value text-success">@Model.Report.ReadyForDevelopmentCount</div></div></div>
-    </div>
-    <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <a asp-page="/EnhancementRequests/Approve" class="text-decoration-none">
-                <div class="stat-card stat-card-link">
-                    <div class="label">High-Risk Pending Approval</div>
-                    <div class="value text-danger">@Model.Report.HighRiskPendingApprovalCount</div>
-                </div>
-            </a>
-        </div>
-        <div class="col-md-4"><div class="stat-card"><div class="label">High Risk (all)</div><div class="value text-danger">@Model.Report.HighRiskCount</div></div></div>
-        <div class="col-md-4"><div class="stat-card"><div class="label">Critical Risk</div><div class="value">@Model.Report.CriticalRiskCount</div></div></div>
-    </div>
-    <div class="row g-3">
-        <div class="col-md-4"><div class="stat-card"><div class="label">Avg Approval Time</div><div class="value fs-4">@(Model.Report.AverageApprovalTimeHours?.ToString("F1") ?? "—")<span class="fs-6"> hrs</span></div></div></div>
-        <div class="col-md-4"><div class="stat-card"><div class="label">Statuses Tracked</div><div class="value fs-4">@Model.Report.RequestsByStatus.Count</div></div></div>
-        <div class="col-md-4 d-flex align-items-stretch">
-            <div class="stat-card w-100 d-flex flex-column justify-content-center">
-                <div class="label">Quick actions</div>
-                <div class="d-flex flex-wrap gap-2 mt-2">
-                    <a asp-page="/EnhancementRequests/Approve" class="btn btn-sm btn-outline-warning">Approval queue</a>
-                    <a asp-page="/EnhancementRequests/Create" class="btn btn-sm btn-outline-primary">New request</a>
-                </div>
+        <div class="col-lg-4">
+            <div class="card-panel p-3 h-100">
+                <h2 class="h6 mb-3">Recent activity</h2>
+                @if (Model.Insights?.RecentActivity.Count > 0)
+                {
+                    @foreach (var item in Model.Insights.RecentActivity)
+                    {
+                        <a href="@item.LinkPath" class="activity-feed-item">
+                            <span class="activity-dot"></span>
+                            <div>
+                                <div class="small fw-semibold">@item.Title</div>
+                                <div class="small text-muted">@(item.Subtitle ?? item.EventType) · @item.OccurredAt.ToString("g")</div>
+                            </div>
+                        </a>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted small mb-0">No recent activity yet.</p>
+                }
             </div>
         </div>
     </div>
 }
-
-<button class="btn btn-outline-secondary btn-sm theme-toggle" type="button" onclick="toggleTheme()">Toggle theme</button>
-
-@section Scripts {
-<script>
-function toggleTheme() {
-    const html = document.documentElement;
-    const next = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-bs-theme', next);
-}
-</script>
+else
+{
+    <div class="card-panel empty-state">
+        <div class="empty-state-icon">☰</div>
+        <h2 class="h5">No requests yet</h2>
+        <p class="mb-3">Submit your first enhancement request to populate the dashboard.</p>
+        <a asp-page="/EnhancementRequests/Create" class="btn btn-primary">Create request</a>
+    </div>
 }

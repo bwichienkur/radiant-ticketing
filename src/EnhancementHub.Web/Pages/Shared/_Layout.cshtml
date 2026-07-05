@@ -4,73 +4,33 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - EnhancementHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="~/css/site.css" rel="stylesheet" />
+    <link href="~/css/site.css" rel="stylesheet" asp-append-version="true" />
 </head>
 <body>
     <a class="skip-link" href="#main-content">Skip to main content</a>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm" aria-label="Primary">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-semibold" asp-page="/Index">EnhancementHub</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="mainNav">
-                @if (User.Identity?.IsAuthenticated == true)
-                {
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item"><a class="nav-link" asp-page="/Onboarding/Wizard">Setup</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/Index">Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/Applications/Index">Applications</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/EnhancementRequests/Index">Requests</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/EnhancementRequests/Approve">Approvals</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/SystemMap/Index">System Map</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/DatabaseConnections/Index">Databases</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/SchemaDrift/Index">Drift</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/Documentation/Export">Docs</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/Refactor/Analyze">Refactor</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/Repositories/Index">Repositories</a></li>
-                        <li class="nav-item"><a class="nav-link" asp-page="/Audit/Index">Audit</a></li>
-                        @if (User.IsInRole("Admin"))
-                        {
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Admin</a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" asp-page="/Admin/Settings">Settings</a></li>
-                                    <li><a class="dropdown-item" asp-page="/Admin/AiPrompts">AI Prompts</a></li>
-                                    <li><a class="dropdown-item" asp-page="/Admin/Jobs">Background Jobs</a></li>
-                                    <li><a class="dropdown-item" asp-page="/Admin/DataScaling">Data Scaling</a></li>
-                                    <li><a class="dropdown-item" asp-page="/Admin/Observability">Observability &amp; HA</a></li>
-                                    <li><a class="dropdown-item" asp-page="/Admin/Roi">ROI Dashboard</a></li>
-                                    <li><a class="dropdown-item" asp-page="/Admin/Retention">Data Retention</a></li>
-                                    <li><a class="dropdown-item" asp-page="/Admin/Compliance">SOC 2 Readiness</a></li>
-                                    <li><a class="dropdown-item" asp-page="/Admin/Teams">Teams</a></li>
-                                    <li><a class="dropdown-item" asp-page="/Admin/ApiKeys">API Keys</a></li>
-                                    <li><a class="dropdown-item" asp-page="/Admin/Authentication">Authentication</a></li>
-                                </ul>
-                            </li>
-                        }
-                    </ul>
-                    <span class="navbar-text text-white-50 me-3">@User.Identity.Name</span>
-                    <form method="post" asp-page="/Account/Login" asp-page-handler="Logout" class="d-inline">
-                        <button type="submit" class="btn btn-outline-light btn-sm">Sign out</button>
-                    </form>
-                }
-                else
-                {
-                    <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-page="/Account/Login">Sign in</a>
-                        </li>
-                    </ul>
-                }
+
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="app-shell">
+            <partial name="_SidebarNav" />
+            <div class="app-main">
+                <partial name="_AppTopBar" />
+                <main id="main-content" class="app-content" tabindex="-1">
+                    @RenderBody()
+                </main>
             </div>
         </div>
-    </nav>
-
-    <main id="main-content" class="container-fluid py-4 px-4" tabindex="-1">
-        @RenderBody()
-    </main>
+    }
+    else
+    {
+        <main id="main-content" tabindex="-1">
+            @RenderBody()
+        </main>
+    }
 
     <div id="notification-toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
 
@@ -78,32 +38,8 @@
     @if (User.Identity?.IsAuthenticated == true)
     {
         <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
-        <script>
-            (() => {
-                const container = document.getElementById('notification-toast-container');
-                const connection = new signalR.HubConnectionBuilder()
-                    .withUrl('/hubs/notifications')
-                    .withAutomaticReconnect()
-                    .build();
-
-                connection.on('PlatformNotification', payload => {
-                    const toast = document.createElement('div');
-                    toast.className = 'toast show mb-2 border-0 shadow';
-                    toast.innerHTML = `
-                        <div class="toast-header">
-                            <strong class="me-auto">${payload.title ?? 'EnhancementHub'}</strong>
-                            <small class="text-muted">now</small>
-                            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-                        </div>
-                        <div class="toast-body">${payload.message ?? ''}</div>`;
-                    container.appendChild(toast);
-                    setTimeout(() => toast.remove(), 8000);
-                });
-
-                connection.start().catch(console.error);
-            })();
-        </script>
     }
+    <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

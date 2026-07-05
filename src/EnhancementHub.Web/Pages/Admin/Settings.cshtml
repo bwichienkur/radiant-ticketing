@@ -1,9 +1,11 @@
 @page
 @model EnhancementHub.Web.Pages.Admin.SettingsModel
 @{
+    ViewData["AdminSection"] = "settings";
     ViewData["Title"] = "System Settings";
 }
 
+<partial name="_AdminNav" />
 <div class="page-header">
     <h1>System Settings</h1>
     <p>Configure platform behavior</p>

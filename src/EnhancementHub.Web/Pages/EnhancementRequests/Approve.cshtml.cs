@@ -34,7 +34,11 @@ public class ApproveModel : PageModel
 
     public async Task OnGetAsync(Guid? id, CancellationToken cancellationToken)
     {
-        Pending = await _mediator.Send(new ListEnhancementRequestsQuery(EnhancementRequestStatus.PendingApproval), cancellationToken);
+        Pending = await _mediator.Send(
+            new ListEnhancementRequestsQuery(
+                EnhancementRequestStatus.PendingApproval,
+                Sort: EnhancementRequestSort.HighestRisk),
+            cancellationToken);
         if (id.HasValue)
         {
             SelectedRequestId = id;
