@@ -117,7 +117,9 @@ public sealed record RepositoryStatusDto(
     string Name,
     IndexingStatus IndexingStatus,
     DateTime? LastIndexedAt,
-    int IndexedFileCount);
+    int IndexedFileCount,
+    string? LastCommitHash,
+    bool IncrementalIndexingEnabled);
 
 public sealed record AuditLogDto(
     Guid Id,

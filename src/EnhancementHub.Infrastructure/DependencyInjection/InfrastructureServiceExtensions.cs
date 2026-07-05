@@ -154,6 +154,8 @@ public static class InfrastructureServiceExtensions
 
         services.Configure<Options.AiOptions>(configuration.GetSection(Options.AiOptions.SectionName));
         services.Configure<Options.RetentionOptions>(configuration.GetSection(Options.RetentionOptions.SectionName));
+        services.Configure<Application.Options.IndexingOptions>(configuration.GetSection(Application.Options.IndexingOptions.SectionName));
+        services.AddScoped<IGitRepositoryHistoryService, GitRepositoryHistoryService>();
         services.PostConfigure<Options.AiOptions>(options =>
         {
             if (string.IsNullOrWhiteSpace(options.OpenAI.ApiKey))
