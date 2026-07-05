@@ -221,10 +221,7 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
                 </div>
                 <div className="d-flex gap-2">
                   <a href={`/Spa/RequestDetail/${selected.id}`} className="btn btn-sm btn-outline-primary">
-                    React detail
-                  </a>
-                  <a href={`/EnhancementRequests/Details?id=${selected.id}`} className="btn btn-sm btn-outline-secondary">
-                    Classic view
+                    View details
                   </a>
                 </div>
               </div>

@@ -1,3 +1,4 @@
+using EnhancementHub.Tests.Common;
 using FluentAssertions;
 
 namespace EnhancementHub.Tests.Unit;
@@ -20,12 +21,12 @@ public sealed class Phase36EngineeringDebtTests
     }
 
     [Fact]
-    public void SpaDataController_RequiresAuthorization()
+    public void SpaBff_RequiresAuthorization()
     {
-        var controller = File.ReadAllText(GetPath("src/EnhancementHub.Web/Controllers/SpaDataController.cs"));
-        controller.Should().Contain("[Authorize]");
-        controller.Should().Contain("upload-zip");
-        controller.Should().Contain("on-prem-agent");
+        var sources = SpaBffTestHelper.ReadAllSpaBffSources();
+        sources.Should().Contain("[Authorize]");
+        sources.Should().Contain("upload-zip");
+        sources.Should().Contain("on-prem-agent");
     }
 
     private static string GetPath(string relativePath) =>

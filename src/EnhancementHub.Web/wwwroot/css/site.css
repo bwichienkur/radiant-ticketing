@@ -1115,3 +1115,52 @@ a.checklist-item-link:focus-visible {
     outline: 3px solid var(--eh-accent);
     outline-offset: 2px;
 }
+
+/* First-run product tour */
+.product-tour-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1080;
+    pointer-events: none;
+}
+
+.product-tour-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    pointer-events: auto;
+}
+
+.product-tour-spotlight {
+    position: fixed;
+    border-radius: 0.5rem;
+    box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.45);
+    pointer-events: none;
+    transition: top 0.2s ease, left 0.2s ease, width 0.2s ease, height 0.2s ease;
+    z-index: 1;
+}
+
+.product-tour-card {
+    position: fixed;
+    width: min(22rem, calc(100vw - 2rem));
+    background: var(--eh-surface);
+    border: 1px solid var(--eh-border);
+    border-radius: 0.75rem;
+    box-shadow: 0 1rem 2.5rem rgba(15, 23, 42, 0.2);
+    padding: 1rem 1.1rem;
+    pointer-events: auto;
+    z-index: 2;
+}
+
+.product-tour-progress {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--eh-text-muted);
+    margin-bottom: 0.5rem;
+}
+
+[data-tour-active] {
+    position: relative;
+    z-index: 1081;
+}

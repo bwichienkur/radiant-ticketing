@@ -161,9 +161,9 @@
         { title: 'Dashboard', url: '/Index', keys: ['home', 'dashboard'] },
         { title: 'New Request', url: '/EnhancementRequests/Create', keys: ['new', 'create'] },
         { title: 'Requests', url: '/EnhancementRequests/Index', keys: ['requests'] },
-        { title: 'Approval Queue', url: '/EnhancementRequests/Approve', keys: ['approve', 'approval'] },
-        { title: 'System Map', url: '/SystemMap/Index', keys: ['map', 'graph'] },
-        { title: 'Onboarding', url: '/Onboarding/Wizard', keys: ['setup', 'wizard'] },
+        { title: 'Approval Queue', url: '/Spa/ApprovalQueue', keys: ['approve', 'approval'] },
+        { title: 'System Map', url: '/Spa/SystemMap', keys: ['map', 'graph'] },
+        { title: 'Onboarding', url: '/Spa/OnboardingWizard', keys: ['setup', 'wizard'] },
         { title: 'Applications', url: '/Applications/Index', keys: ['apps'] },
         { title: 'Schema Drift', url: '/SchemaDrift/Index', keys: ['drift'] },
         { title: 'Admin Settings', url: '/Admin/Settings', keys: ['admin', 'settings'] },
@@ -335,6 +335,153 @@
         });
     }
 
+    function initProductTour() {
+        const STORAGE_TOUR = 'eh-product-tour-seen';
+        if (localStorage.getItem(STORAGE_TOUR) === 'true') {
+            return;
+        }
+
+        const steps = [
+            {
+                target: '[data-tour="dashboard-header"]',
+                title: 'Welcome to EnhancementHub',
+                body: 'Your dashboard shows pipeline health, recent activity, and quick actions.'
+            },
+            {
+                target: '[data-tour="copilot"]',
+                title: 'Ask EnhancementHub',
+                body: 'Search requests in plain language — try “show high risk pending approval”.'
+            },
+            {
+                target: '[data-command-trigger]',
+                title: 'Command palette',
+                body: 'Press Ctrl+K (or ⌘K) to jump to any page, request, or application.'
+            },
+            {
+                target: '[data-tour="pipeline-stats"]',
+                title: 'Pipeline metrics',
+                body: 'Track volume, approvals, and risk at a glance. Click a card to drill in.'
+            },
+            {
+                target: '[data-tour="nav-approvals"]',
+                title: 'Approval queue',
+                body: 'Review AI-analyzed requests and approve or reject with one click.'
+            },
+            {
+                target: '[data-tour="new-request"]',
+                title: 'Submit enhancements',
+                body: 'Create a new request to start AI analysis and governance workflow.'
+            }
+        ].filter(step => document.querySelector(step.target));
+
+        if (steps.length === 0) {
+            return;
+        }
+
+        let index = 0;
+        const overlay = document.createElement('div');
+        overlay.className = 'product-tour-overlay';
+        overlay.innerHTML = `
+            <div class="product-tour-backdrop" data-tour-dismiss></div>
+            <div class="product-tour-spotlight" hidden></div>
+            <div class="product-tour-card" role="dialog" aria-modal="true" aria-labelledby="product-tour-title">
+                <div class="product-tour-progress" id="product-tour-progress"></div>
+                <h2 class="h6 mb-2" id="product-tour-title"></h2>
+                <p class="small text-muted mb-3" id="product-tour-body"></p>
+                <div class="d-flex justify-content-between align-items-center gap-2">
+                    <button type="button" class="btn btn-link btn-sm px-0" data-tour-skip>Skip tour</button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" data-tour-back hidden>Back</button>
+                        <button type="button" class="btn btn-primary btn-sm" data-tour-next>Next</button>
+                    </div>
+                </div>
+            </div>`;
+        document.body.appendChild(overlay);
+
+        const spotlight = overlay.querySelector('.product-tour-spotlight');
+        const titleEl = overlay.querySelector('#product-tour-title');
+        const bodyEl = overlay.querySelector('#product-tour-body');
+        const progressEl = overlay.querySelector('#product-tour-progress');
+        const backBtn = overlay.querySelector('[data-tour-back]');
+        const nextBtn = overlay.querySelector('[data-tour-next]');
+
+        function finishTour() {
+            localStorage.setItem(STORAGE_TOUR, 'true');
+            overlay.remove();
+            document.querySelectorAll('[data-tour-active]').forEach(el => el.removeAttribute('data-tour-active'));
+        }
+
+        function positionSpotlight(target) {
+            if (!spotlight) return;
+            const rect = target.getBoundingClientRect();
+            const pad = 8;
+            spotlight.hidden = false;
+            spotlight.style.top = `${Math.max(0, rect.top - pad)}px`;
+            spotlight.style.left = `${Math.max(0, rect.left - pad)}px`;
+            spotlight.style.width = `${rect.width + pad * 2}px`;
+            spotlight.style.height = `${rect.height + pad * 2}px`;
+
+            const card = overlay.querySelector('.product-tour-card');
+            if (!card) return;
+            const cardRect = card.getBoundingClientRect();
+            let top = rect.bottom + 12;
+            if (top + cardRect.height > window.innerHeight - 16) {
+                top = Math.max(16, rect.top - cardRect.height - 12);
+            }
+            card.style.top = `${top}px`;
+            card.style.left = `${Math.min(
+                window.innerWidth - cardRect.width - 16,
+                Math.max(16, rect.left)
+            )}px`;
+        }
+
+        function renderStep() {
+            const step = steps[index];
+            const target = document.querySelector(step.target);
+            if (!target) {
+                finishTour();
+                return;
+            }
+
+            document.querySelectorAll('[data-tour-active]').forEach(el => el.removeAttribute('data-tour-active'));
+            target.setAttribute('data-tour-active', 'true');
+            target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+
+            titleEl.textContent = step.title;
+            bodyEl.textContent = step.body;
+            progressEl.textContent = `Step ${index + 1} of ${steps.length}`;
+            backBtn.hidden = index === 0;
+            nextBtn.textContent = index === steps.length - 1 ? 'Done' : 'Next';
+
+            requestAnimationFrame(() => positionSpotlight(target));
+        }
+
+        overlay.querySelector('[data-tour-next]')?.addEventListener('click', () => {
+            if (index >= steps.length - 1) {
+                finishTour();
+                return;
+            }
+            index += 1;
+            renderStep();
+        });
+
+        backBtn?.addEventListener('click', () => {
+            if (index > 0) {
+                index -= 1;
+                renderStep();
+            }
+        });
+
+        overlay.querySelector('[data-tour-skip]')?.addEventListener('click', finishTour);
+        overlay.querySelector('[data-tour-dismiss]')?.addEventListener('click', finishTour);
+        window.addEventListener('resize', () => {
+            const target = document.querySelector(steps[index]?.target ?? '');
+            if (target) positionSpotlight(target);
+        });
+
+        renderStep();
+    }
+
     function initApprovalQueue() {
         const form = document.querySelector('.approval-decision-form');
         if (!form) return;
@@ -368,6 +515,7 @@
     initCopilot();
     initAccordions();
     initApprovalQueue();
+    initProductTour();
 
     window.EhUx = { toggleTheme, addNotification };
 })();

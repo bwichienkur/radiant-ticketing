@@ -133,14 +133,58 @@ public sealed class ProductHardeningTests
     }
 
     [Fact]
-    public void SpaDataController_ExposesApprovalHistoryBff()
+    public void SpaBff_ExposesApprovalHistoryBff()
     {
-        var controller = File.ReadAllText(Path.Combine(
-            GetRepoRoot(),
-            "src/EnhancementHub.Web/Controllers/SpaDataController.cs"));
+        var sources = SpaBffTestHelper.ReadAllSpaBffSources();
+        sources.Should().Contain("requests/{id:guid}/approval-history");
+        sources.Should().Contain("GetApprovalHistoryQuery");
+    }
 
-        controller.Should().Contain("requests/{id:guid}/approval-history");
-        controller.Should().Contain("GetApprovalHistoryQuery");
+    [Fact]
+    public void SpaBff_IsSplitIntoFeatureControllers()
+    {
+        var spaDir = Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Controllers/Spa");
+        Directory.Exists(spaDir).Should().BeTrue();
+        File.Exists(Path.Combine(spaDir, "SpaRequestsController.cs")).Should().BeTrue();
+        File.Exists(Path.Combine(spaDir, "SpaApprovalsController.cs")).Should().BeTrue();
+        File.Exists(Path.Combine(spaDir, "SpaSystemController.cs")).Should().BeTrue();
+        File.Exists(Path.Combine(spaDir, "SpaOnboardingController.cs")).Should().BeTrue();
+        File.Exists(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Controllers/SpaDataController.cs")).Should().BeFalse();
+    }
+
+    [Fact]
+    public void ClassicPages_RedirectToReactByDefault()
+    {
+        var details = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/EnhancementRequests/Details.cshtml.cs"));
+        var approve = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/EnhancementRequests/Approve.cshtml.cs"));
+        var systemMap = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/SystemMap/Index.cshtml.cs"));
+
+        details.Should().Contain("RedirectToPage(\"/Spa/RequestDetail\"");
+        details.Should().Contain("\"classic\"");
+        approve.Should().Contain("RedirectToPage(\"/Spa/ApprovalQueue\"");
+        systemMap.Should().Contain("RedirectToPage(\"/Spa/SystemMap\"");
+    }
+
+    [Fact]
+    public void SidebarNav_PointsToReactRoutes()
+    {
+        var nav = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Shared/_SidebarNav.cshtml"));
+        nav.Should().Contain("/Spa/ApprovalQueue");
+        nav.Should().Contain("/Spa/OnboardingWizard");
+        nav.Should().Contain("/Spa/SystemMap");
+    }
+
+    [Fact]
+    public void ProductTour_IsImplementedOnDashboard()
+    {
+        var siteJs = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/wwwroot/js/site.js"));
+        var css = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/wwwroot/css/site.css"));
+        var dashboard = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Index.cshtml"));
+
+        siteJs.Should().Contain("initProductTour");
+        siteJs.Should().Contain("eh-product-tour-seen");
+        css.Should().Contain(".product-tour-overlay");
+        dashboard.Should().Contain("data-tour=");
     }
 
     [Fact]

@@ -1,3 +1,4 @@
+using EnhancementHub.Tests.Common;
 using FluentAssertions;
 
 namespace EnhancementHub.Tests.Unit;
@@ -5,16 +6,16 @@ namespace EnhancementHub.Tests.Unit;
 public sealed class Phase37ReactOnboardingAdvancedTests
 {
     [Fact]
-    public void SpaDataController_ExposesAdvancedOnboardingBff()
+    public void SpaBff_ExposesAdvancedOnboardingBff()
     {
-        var controller = File.ReadAllText(GetPath("src/EnhancementHub.Web/Controllers/SpaDataController.cs"));
-        controller.Should().Contain("upload-zip");
-        controller.Should().Contain("clone-github-app");
-        controller.Should().Contain("clone-git");
-        controller.Should().Contain("build-connection-string");
-        controller.Should().Contain("on-prem-agent");
-        controller.Should().Contain("export-docs");
-        controller.Should().Contain("GetGitHubAppStatusQuery");
+        var sources = SpaBffTestHelper.ReadAllSpaBffSources();
+        sources.Should().Contain("upload-zip");
+        sources.Should().Contain("clone-github-app");
+        sources.Should().Contain("clone-git");
+        sources.Should().Contain("build-connection-string");
+        sources.Should().Contain("on-prem-agent");
+        sources.Should().Contain("export-docs");
+        sources.Should().Contain("GetGitHubAppStatusQuery");
     }
 
     [Fact]

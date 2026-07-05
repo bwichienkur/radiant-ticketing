@@ -165,9 +165,6 @@ export function SystemMapApp({ initialApplicationId }: SystemMapAppProps) {
               List
             </button>
           </div>
-          <a href="/SystemMap/Index" className="btn btn-outline-secondary btn-sm">
-            Classic map view
-          </a>
         </div>
       </div>
 

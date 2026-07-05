@@ -29,8 +29,13 @@ public class DetailsModel : PageModel
     [BindProperty]
     public bool CommentIsInternal { get; set; } = true;
 
-    public async Task<IActionResult> OnGetAsync(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(Guid id, string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToPage("/Spa/RequestDetail", new { id });
+        }
+
         Detail = await _mediator.Send(new GetEnhancementRequestByIdQuery(id), cancellationToken);
         ApprovalHistory = await _mediator.Send(new GetApprovalHistoryQuery(id), cancellationToken);
 
@@ -74,6 +79,6 @@ public class DetailsModel : PageModel
         }
 
         await _mediator.Send(new Application.Features.Approvals.Commands.AddCommentCommand(id, NewComment, CommentIsInternal), cancellationToken);
-        return RedirectToPage(new { id });
+        return RedirectToPage("/Spa/RequestDetail", new { id });
     }
 }

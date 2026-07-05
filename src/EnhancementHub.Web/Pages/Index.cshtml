@@ -8,18 +8,18 @@
     if (maxTrend == 0) maxTrend = 1;
 }
 
-<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2" data-tour="dashboard-header">
     <div>
         <h1>Dashboard</h1>
         <p>Your enhancement pipeline control room</p>
     </div>
     <div class="d-flex gap-2">
-        <a asp-page="/Onboarding/Wizard" class="btn btn-outline-primary">Document an application</a>
-        <a asp-page="/EnhancementRequests/Create" class="btn btn-primary">New Request</a>
+        <a href="/Spa/OnboardingWizard" class="btn btn-outline-primary">Document an application</a>
+        <a asp-page="/EnhancementRequests/Create" class="btn btn-primary" data-tour="new-request">New Request</a>
     </div>
 </div>
 
-<div class="copilot-bar">
+<div class="copilot-bar" data-tour="copilot">
     <form id="copilot-form" class="d-flex gap-2 flex-wrap align-items-center">
         <label for="copilot-input" class="visually-hidden">Ask EnhancementHub</label>
         <span class="fw-semibold text-nowrap">Ask EnhancementHub</span>
@@ -35,7 +35,7 @@
         @if (Model.IsApprover && Model.Insights.MyPendingApprovals > 0)
         {
             <div class="col-md-6 col-xl-4">
-                <a asp-page="/EnhancementRequests/Approve" class="text-decoration-none">
+                <a href="/Spa/ApprovalQueue" class="text-decoration-none">
                     <div class="stat-card queue-action-card urgent stat-card-link">
                         <div class="label">Needs your approval</div>
                         <div class="value text-danger">@Model.Insights.MyPendingApprovals</div>
@@ -61,7 +61,7 @@
 
 @if (Model.ShowOnboardingChecklist && Model.OnboardingStatus is not null)
 {
-    <div class="card-panel p-4 mb-4">
+    <div class="card-panel p-4 mb-4" data-tour="onboarding-checklist">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
             <div>
                 <h2 class="h5 mb-1">Getting started</h2>
@@ -69,11 +69,11 @@
             </div>
             @if (Model.OnboardingStatus.ActiveSessionId.HasValue)
             {
-                <a asp-page="/Onboarding/Wizard" asp-route-id="@Model.OnboardingStatus.ActiveSessionId" class="btn btn-sm btn-primary">Resume wizard</a>
+                <a href="/Spa/OnboardingWizard/@Model.OnboardingStatus.ActiveSessionId" class="btn btn-sm btn-primary">Resume wizard</a>
             }
             else
             {
-                <a asp-page="/Onboarding/Wizard" class="btn btn-sm btn-primary">Start wizard</a>
+                <a href="/Spa/OnboardingWizard" class="btn btn-sm btn-primary">Start wizard</a>
             }
         </div>
         <div class="onboarding-checklist">
@@ -103,7 +103,7 @@
 
 @if (Model.Report is not null)
 {
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-4" data-tour="pipeline-stats">
         <div class="col-lg-8">
             <div class="row g-3">
                 <div class="col-sm-6 col-xl-3">
@@ -121,7 +121,7 @@
                     </a>
                 </div>
                 <div class="col-sm-6 col-xl-3">
-                    <a asp-page="/EnhancementRequests/Approve" class="text-decoration-none">
+                    <a href="/Spa/ApprovalQueue" class="text-decoration-none">
                         <div class="stat-card stat-card-link">
                             <div class="label">Pending Approval</div>
                             <div class="value text-warning">@Model.Report.PendingApprovalCount</div>
@@ -137,7 +137,7 @@
             </div>
             <div class="row g-3 mt-0">
                 <div class="col-md-4">
-                    <a asp-page="/EnhancementRequests/Approve" asp-route-view="highrisk" class="text-decoration-none">
+                    <a href="/Spa/ApprovalQueue?view=highrisk" class="text-decoration-none">
                         <div class="stat-card stat-card-link">
                             <div class="label">High-Risk Pending</div>
                             <div class="value text-danger">@Model.Report.HighRiskPendingApprovalCount</div>

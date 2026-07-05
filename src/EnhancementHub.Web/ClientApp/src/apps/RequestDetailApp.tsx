@@ -135,9 +135,6 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
           <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => void reload()}>
             Retry
           </button>
-          <a href={`/EnhancementRequests/Details/${requestId}`} className="btn btn-sm btn-outline-secondary">
-            Classic view
-          </a>
         </div>
       </div>
     );
@@ -159,12 +156,12 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
           </p>
         </div>
         <div className="d-flex flex-wrap gap-2">
-          <a href="/EnhancementRequests/Approve" className="btn btn-outline-primary btn-sm">
+          <a href="/Spa/ApprovalQueue" className="btn btn-outline-primary btn-sm">
             Approval queue
           </a>
           {detail.targetApplicationId ? (
             <a
-              href={`/SystemMap/Index?applicationId=${detail.targetApplicationId}`}
+              href={`/Spa/SystemMap?applicationId=${detail.targetApplicationId}`}
               className="btn btn-outline-secondary btn-sm"
             >
               System map
@@ -197,13 +194,10 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
           {detail.targetApplicationId ? (
             <div className="mb-3">
               <a
-                href={`/SystemMap/Index?applicationId=${detail.targetApplicationId}`}
-                className="btn btn-sm btn-outline-primary me-2"
+                href={`/Spa/SystemMap?applicationId=${detail.targetApplicationId}`}
+                className="btn btn-sm btn-outline-primary"
               >
                 Open system map
-              </a>
-              <a href="/Spa/SystemMap" className="btn btn-sm btn-outline-secondary">
-                Interactive graph
               </a>
             </div>
           ) : null}

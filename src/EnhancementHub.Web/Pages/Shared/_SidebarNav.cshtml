@@ -1,6 +1,7 @@
 @{
     var path = ViewContext.HttpContext.Request.Path.Value ?? "/";
-    bool NavActive(string segment) => path.StartsWith(segment, StringComparison.OrdinalIgnoreCase);
+    bool NavActive(params string[] segments) =>
+        segments.Any(s => path.StartsWith(s, StringComparison.OrdinalIgnoreCase));
     bool NavExact(string segment) => string.Equals(path, segment, StringComparison.OrdinalIgnoreCase);
     var isAdmin = path.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase);
 }
@@ -18,16 +19,16 @@
             <a class="sidebar-link @(NavExact("/Index") ? "active" : "")" asp-page="/Index">
                 <span class="sidebar-icon" aria-hidden="true">◉</span> Dashboard
             </a>
-            <a class="sidebar-link @(NavActive("/EnhancementRequests") ? "active" : "")" asp-page="/EnhancementRequests/Index">
+            <a class="sidebar-link @(NavActive("/EnhancementRequests") && !NavActive("/EnhancementRequests/Approve") ? "active" : "")" asp-page="/EnhancementRequests/Index">
                 <span class="sidebar-icon" aria-hidden="true">☰</span> Requests
             </a>
-            <a class="sidebar-link @(NavActive("/EnhancementRequests/Approve") ? "active" : "")" asp-page="/EnhancementRequests/Approve">
+            <a class="sidebar-link @(NavActive("/Spa/ApprovalQueue", "/EnhancementRequests/Approve") ? "active" : "")" href="/Spa/ApprovalQueue" data-tour="nav-approvals">
                 <span class="sidebar-icon" aria-hidden="true">✓</span> Approvals
             </a>
             <a class="sidebar-link @(NavActive("/EnhancementRequests/Create") ? "active" : "")" asp-page="/EnhancementRequests/Create">
                 <span class="sidebar-icon" aria-hidden="true">+</span> New request
             </a>
-            <a class="sidebar-link @(NavActive("/Onboarding") ? "active" : "")" asp-page="/Onboarding/Wizard">
+            <a class="sidebar-link @(NavActive("/Spa/OnboardingWizard", "/Onboarding") ? "active" : "")" href="/Spa/OnboardingWizard" data-tour="nav-setup">
                 <span class="sidebar-icon" aria-hidden="true">⚙</span> Setup
             </a>
         </div>
@@ -36,7 +37,7 @@
             <a class="sidebar-link @(NavActive("/Applications") ? "active" : "")" asp-page="/Applications/Index">
                 <span class="sidebar-icon" aria-hidden="true">▣</span> Applications
             </a>
-            <a class="sidebar-link @(NavActive("/SystemMap") ? "active" : "")" asp-page="/SystemMap/Index">
+            <a class="sidebar-link @(NavActive("/Spa/SystemMap", "/SystemMap") ? "active" : "")" href="/Spa/SystemMap">
                 <span class="sidebar-icon" aria-hidden="true">◈</span> System map
             </a>
             <a class="sidebar-link @(NavActive("/DatabaseConnections") ? "active" : "")" asp-page="/DatabaseConnections/Index">

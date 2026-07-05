@@ -26,8 +26,13 @@ public class IndexModel : PageModel
     [TempData]
     public string? StatusMessage { get; set; }
 
-    public async Task OnGetAsync(Guid? applicationId, CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(Guid? applicationId, string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToPage("/Spa/SystemMap", applicationId.HasValue ? new { applicationId } : null);
+        }
+
         IsLoading = true;
         Applications = await _mediator.Send(new ListApplicationsQuery(), cancellationToken);
         SelectedApplicationId = applicationId ?? Applications.FirstOrDefault()?.Id;
@@ -45,6 +50,6 @@ public class IndexModel : PageModel
         IsBuilding = true;
         await _mediator.Send(new BuildSystemGraphCommand(applicationId), cancellationToken);
         StatusMessage = "System graph rebuilt successfully.";
-        return RedirectToPage(new { applicationId });
+        return RedirectToPage(new { applicationId, layout = "classic" });
     }
 }

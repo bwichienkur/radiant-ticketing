@@ -1,3 +1,4 @@
+using EnhancementHub.Tests.Common;
 using FluentAssertions;
 
 namespace EnhancementHub.Tests.Unit;
@@ -20,14 +21,16 @@ public sealed class Phase31ReactSpaExtendedTests
     }
 
     [Fact]
-    public void SpaDataController_ExposesApprovalAndOnboardingBff()
+    public void SpaBff_ExposesApprovalAndOnboardingBff()
     {
-        var controller = File.ReadAllText(GetPath("src/EnhancementHub.Web/Controllers/SpaDataController.cs"));
-        controller.Should().Contain("approvals/pending");
-        controller.Should().Contain("SubmitApprovalActionCommand");
-        controller.Should().Contain("onboarding/start");
-        controller.Should().Contain("advance-review");
-        controller.Should().Contain("QueueApplicationDiscoveryCommand");
+        var sources = SpaBffTestHelper.ReadAllSpaBffSources();
+        sources.Should().Contain("web-api/spa/approvals");
+        sources.Should().Contain("[HttpGet(\"pending\")]");
+        sources.Should().Contain("SubmitApprovalActionCommand");
+        sources.Should().Contain("web-api/spa/onboarding");
+        sources.Should().Contain("[HttpPost(\"start\")]");
+        sources.Should().Contain("advance-review");
+        sources.Should().Contain("QueueApplicationDiscoveryCommand");
     }
 
     [Fact]
