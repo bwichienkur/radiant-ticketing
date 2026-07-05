@@ -13,7 +13,7 @@ Living assessment of product maturity, marketability, and scalability. Updated w
 | 10 | Validated in production at scale with measured outcomes |
 
 **Baseline:** Phase 15 enterprise hardening (July 2026), before Horizons 1–3 work.  
-**Current snapshot:** Phase 29 complete (Horizon 4.4 — schema-per-tenant isolation).
+**Current snapshot:** Phase 30 complete (Horizon 4.3 — React SPA migration).
 
 Related: [ROADMAP.md](ROADMAP.md) · [PHASES.md](PHASES.md) · [ICP_ONE_PAGER.md](ICP_ONE_PAGER.md)
 
@@ -38,12 +38,12 @@ Overall = average of the three dimensions (equal weight).
 |----------|----------|---------|----------|
 | Core intake → approval → export | 9 | 9 | Phases 1–4 complete |
 | System Intelligence (schema, graph, drift, docs) | 8 | 8.5 | Phase 21 incremental graph, pagination, doc cache |
-| Demo / operator UX | 5 | 8.5 | Phase 25 mobile approvals, collaboration, SPA pilot — [UX_MODERNIZATION.md](UX_MODERNIZATION.md) |
+| Demo / operator UX | 5 | 9.0 | Phase 30 React SPA for request detail + system map — [UX_MODERNIZATION.md](UX_MODERNIZATION.md) |
 | Identity & authorization | 6 | 8.5 | Phase 16, Entra ID, team membership, API keys |
 | AI operations | 6 | 8.5 | Phase 17: Azure OpenAI, budgets, PII redaction, usage report |
 | Background job reliability | 4 | 8 | Phase 18: Hangfire, admin jobs UI, shared executors |
 | Compliance & audit | 5 | 8.5 | Audit export, retention, SOC 2 map, security whitepaper |
-| Engineering quality | 7 | 7.5 | 193 automated tests |
+| Engineering quality | 7 | 7.5 | 200 automated tests |
 | Integrations & polyglot | 4 | 7.5 | Phase 23 — [INTEGRATIONS.md](INTEGRATIONS.md) |
 | ROI & policy differentiation | 2 | 7.5 | Phase 24 — [PRODUCT_DIFFERENTIATION.md](PRODUCT_DIFFERENTIATION.md) |
 | Multi-tenant commercial platform | 1 | 8.5 | Phase 26–29 — [COMMERCIAL_PLATFORM.md](COMMERCIAL_PLATFORM.md), [STRIPE_BILLING.md](STRIPE_BILLING.md), [TENANT_ISOLATION.md](TENANT_ISOLATION.md) |
@@ -149,6 +149,7 @@ When closing a phase or horizon:
 
 | Date | Phase / milestone | Overall | Notes |
 |------|-------------------|---------|-------|
+| 2026-07-05 | Phase 30 — React SPA migration | 8.5 → 8.6 | Vite ClientApp, request detail + system map hot paths |
 | 2026-07-05 | Phase 29 — Schema-per-tenant isolation | 8.4 → 8.5 | Dedicated PostgreSQL schemas, search_path routing, provision API |
 | 2026-07-05 | Phase 28 — Stripe billing | 8.3 → 8.4 | Checkout, portal, webhooks, trial enforcement |
 | 2026-07-05 | Phase 26 — Commercial platform | 8.2 → 8.3 | Multi-tenant isolation, metering, trial signup, regional metadata |
@@ -161,4 +162,4 @@ When closing a phase or horizon:
 
 ---
 
-*Last updated: July 2026 — Phase 29 (schema-per-tenant isolation).*
+*Last updated: July 2026 — Phase 30 (React SPA migration).*

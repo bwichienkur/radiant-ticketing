@@ -1,5 +1,7 @@
 using EnhancementHub.Application.Features.Analysis.Queries;
+using EnhancementHub.Application.Features.Applications.Queries;
 using EnhancementHub.Application.Features.EnhancementRequests.Queries;
+using EnhancementHub.Application.Features.SystemIntelligence.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -31,4 +33,12 @@ public sealed class SpaDataController : ControllerBase
             return NotFound();
         }
     }
+
+    [HttpGet("applications")]
+    public async Task<IActionResult> ListApplications(CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new ListApplicationsQuery(), cancellationToken));
+
+    [HttpGet("system-map/{applicationId:guid}")]
+    public async Task<IActionResult> GetSystemMap(Guid applicationId, CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetSystemMapQuery(applicationId), cancellationToken));
 }

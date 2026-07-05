@@ -331,6 +331,15 @@
 - Auto-provision on Enterprise upgrade; admin provision CTA on `/Admin/Tenancy`
 - Guide: `docs/TENANT_ISOLATION.md`
 
+## Phase 30 — React SPA migration (complete)
+
+- React + Vite + TypeScript `ClientApp` with MSBuild integration
+- Migrated hot paths: `/Spa/RequestDetail/{id}`, `/Spa/SystemMap`
+- BFF endpoints: `web-api/spa/applications`, `web-api/spa/system-map/{id}`
+- Shared React components: mission control, loading skeleton
+- Built bundles published to `wwwroot/spa/react/`
+- Guide: `docs/UX_MODERNIZATION.md` (Phase 30 section)
+
 ## Future enhancements
 
-- React migration for SPA hot paths
+- React migration for onboarding wizard and approval queue
