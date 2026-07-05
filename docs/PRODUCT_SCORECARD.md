@@ -13,7 +13,7 @@ Living assessment of product maturity, marketability, and scalability. Updated w
 | 10 | Validated in production at scale with measured outcomes |
 
 **Baseline:** Phase 15 enterprise hardening (July 2026), before Horizons 1–3 work.  
-**Current snapshot:** Phase 20 complete (Horizons 1–2 done; Horizon 3 partial).
+**Current snapshot:** Phase 21 complete (Horizons 1–2 done; Horizon 3 partial through Phase 21).
 
 Related: [ROADMAP.md](ROADMAP.md) · [PHASES.md](PHASES.md) · [ICP_ONE_PAGER.md](ICP_ONE_PAGER.md)
 
@@ -23,21 +23,21 @@ Related: [ROADMAP.md](ROADMAP.md) · [PHASES.md](PHASES.md) · [ICP_ONE_PAGER.md
 
 | Dimension | Baseline (Phase 15) | Current (Phase 20) | Δ | Target (Horizon 3 exit) |
 |-----------|---------------------|--------------------|---|-------------------------|
-| **Product maturity** | 7.0 | 8.3 | +1.3 | 8.5 |
+| **Product maturity** | 7.0 | 8.5 | +1.5 | 8.5 |
 | **Marketability** | 4.5 | 7.5 | +3.0 | 8.0 (requires pilot validation) |
-| **Scalability** | 4.0 | 6.5 | +2.5 | 8.0 |
-| **Overall (weighted)** | **5.8** | **7.4** | **+1.6** | **8.0+** |
+| **Scalability** | 4.0 | 7.0 | +3.0 | 8.0 |
+| **Overall (weighted)** | **5.8** | **7.7** | **+1.9** | **8.0+** |
 
 Overall = average of the three dimensions (equal weight).
 
 ---
 
-## Product maturity — 7.0 → 8.3
+## Product maturity — 7.0 → 8.5
 
 | Sub-area | Baseline | Current | Evidence |
 |----------|----------|---------|----------|
 | Core intake → approval → export | 9 | 9 | Phases 1–4 complete |
-| System Intelligence (schema, graph, drift, docs) | 8 | 8 | Phases 5–7; perf work deferred to Phase 21 |
+| System Intelligence (schema, graph, drift, docs) | 8 | 8.5 | Phase 21 incremental graph, pagination, doc cache |
 | Demo / operator UX | 5 | 8 | Horizon 1 polish; dashboard widgets; System Map UX |
 | Identity & authorization | 6 | 8.5 | Phase 16, Entra ID, team membership, API keys |
 | AI operations | 6 | 8.5 | Phase 17: Azure OpenAI, budgets, PII redaction, usage report |
@@ -64,7 +64,7 @@ Overall = average of the three dimensions (equal weight).
 
 ---
 
-## Scalability — 4.0 → 6.5
+## Scalability — 4.0 → 7.0
 
 | Sub-area | Baseline | Current | Evidence |
 |----------|----------|---------|----------|
@@ -72,7 +72,7 @@ Overall = average of the three dimensions (equal weight).
 | Job orchestration at scale | 4 | 8 | Hangfire, `indexing` queue, retry |
 | Data layer / reporting | 4 | 7 | Phase 20: read replica, pool tuning, archival — [DATA_SCALING.md](DATA_SCALING.md) |
 | Vector search at scale | 5 | 7 | Qdrant/Azure Search + `/Admin/DataScaling` |
-| System Intelligence performance | 5 | 5 | Phase 21 not started (full graph rebuilds) |
+| System Intelligence performance | 5 | 7.5 | Phase 21: incremental graph, paged queries, diff-only drift |
 | HA & observability | 3 | 4 | Health checks only; Phase 22 (OTel, HA reference) open |
 | Load-test readiness | 3 | 6 | Architecture supports scale; 200-repo exit criteria not proven |
 
@@ -88,7 +88,7 @@ Buyer-facing readiness distinct from dimension averages.
 |------|----------|---------|------------------------|
 | Design-partner pilot (deploy → export without dev help) | 5 | 8 | Horizon 1 exit — **met** |
 | Enterprise security questionnaire (SSO, Azure AI, durable jobs, audit) | 5 | 8 | Horizon 2 exit — **met** |
-| Large portfolio single-tenant (100–500 repos, 500+ users) | 3 | 6 | Horizon 3 — **partial** (Phases 21–22) |
+| Large portfolio single-tenant (100–500 repos, 500+ users) | 3 | 7 | Horizon 3 — **partial** (Phase 22 HA/observability) |
 | Multi-tenant SaaS commercial platform | 1 | 1 | Horizon 4 / Phase 26 — **not started** |
 
 ---
@@ -122,10 +122,9 @@ From [ROADMAP.md](ROADMAP.md). **Measured values are blank until a design-partne
 ## Known score limiters (current)
 
 1. No validated pilot or NPS data (caps Marketability at ~7.5 until measured).
-2. System Intelligence full-graph rebuilds (Phase 21).
-3. No OpenTelemetry / HA reference architecture (Phase 22).
-4. No load-test evidence for Horizon 3 exit criteria.
-5. Multi-tenant commercial platform not started (Phase 26).
+2. No OpenTelemetry / HA reference architecture (Phase 22).
+3. No load-test evidence for Horizon 3 exit criteria.
+4. Multi-tenant commercial platform not started (Phase 26).
 
 ---
 
@@ -144,8 +143,9 @@ When closing a phase or horizon:
 
 | Date | Phase / milestone | Overall | Notes |
 |------|-------------------|---------|-------|
+| 2026-07-05 | Phase 21 — System Intelligence performance | 7.4 → 7.7 | Incremental graph, paged map API, doc cache, diff-only drift |
 | 2026-07-05 | Phase 20 — initial scorecard | 5.8 → 7.4 | Baseline Phase 15; Horizons 1–2 complete; Horizon 3 partial (19–20) |
 
 ---
 
-*Last updated: July 2026 — Phase 20 (Data layer scaling).*
+*Last updated: July 2026 — Phase 21 (System Intelligence performance).*

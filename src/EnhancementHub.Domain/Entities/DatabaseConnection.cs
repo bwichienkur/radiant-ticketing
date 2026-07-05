@@ -13,6 +13,7 @@ public class DatabaseConnection : BaseEntity
     public string? DatabaseName { get; set; }
     public bool IsReadOnly { get; set; }
     public DateTime? LastScannedAt { get; set; }
+    public DateTime? LastDriftScanAt { get; set; }
     public string ScanStatus { get; set; } = "Pending";
     public string? ScanError { get; set; }
 

@@ -58,6 +58,18 @@ public sealed record SystemMapDto(
     IReadOnlyList<SystemGraphEdgeDto> Edges,
     DateTime? BuiltAt);
 
+public sealed record SystemMapPagedDto(
+    Guid ApplicationId,
+    string? ApplicationName,
+    IReadOnlyList<SystemGraphNodeDto> Nodes,
+    IReadOnlyList<SystemGraphEdgeDto> Edges,
+    DateTime? BuiltAt,
+    int TotalNodeCount,
+    int Page,
+    int PageSize,
+    int MaxDepth,
+    bool Truncated);
+
 public sealed record ErdDiagramDto(
     Guid ApplicationId,
     string Mermaid);

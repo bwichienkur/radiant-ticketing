@@ -30,7 +30,7 @@ public sealed class DetectSchemaDriftCommandHandler
     {
         await _accessService.EnsureAccessibleConnectionAsync(request.ConnectionId, cancellationToken);
 
-        await _detector.DetectDriftAsync(request.ConnectionId, cancellationToken);
+        await _detector.DetectDriftIfStaleAsync(request.ConnectionId, forceFullScan: false, cancellationToken);
         return await _mediator.Send(
             new Queries.GetDriftReportQuery(request.ConnectionId, request.RepositoryId),
             cancellationToken);

@@ -1,7 +1,10 @@
 using System.Text;
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Abstractions.Models;
+using EnhancementHub.Application.Options;
+using EnhancementHub.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace EnhancementHub.Infrastructure.Services.SystemIntelligence;
 
@@ -9,13 +12,19 @@ public sealed class DocumentationExportService : IDocumentationExportService
 {
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly ISystemGraphBuilder _graphBuilder;
+    private readonly ISystemIntelligenceFingerprintService _fingerprintService;
+    private readonly SystemIntelligenceOptions _options;
 
     public DocumentationExportService(
         IEnhancementHubDbContext dbContext,
-        ISystemGraphBuilder graphBuilder)
+        ISystemGraphBuilder graphBuilder,
+        ISystemIntelligenceFingerprintService fingerprintService,
+        IOptions<SystemIntelligenceOptions> options)
     {
         _dbContext = dbContext;
         _graphBuilder = graphBuilder;
+        _fingerprintService = fingerprintService;
+        _options = options.Value;
     }
 
     public async Task<DocumentationBundle> ExportAsync(Guid applicationId, CancellationToken cancellationToken = default)
@@ -23,6 +32,30 @@ public sealed class DocumentationExportService : IDocumentationExportService
         var application = await _dbContext.Applications
             .FirstOrDefaultAsync(a => a.Id == applicationId, cancellationToken)
             ?? throw new InvalidOperationException($"Application {applicationId} not found.");
+
+        var fingerprint = await _fingerprintService.ComputeApplicationFingerprintAsync(applicationId, cancellationToken);
+        var now = DateTime.UtcNow;
+
+        if (_options.DocumentationCacheEnabled)
+        {
+            var cached = await _dbContext.DocumentationExportCaches
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.ApplicationId == applicationId, cancellationToken);
+
+            if (cached is not null
+                && cached.ExpiresAt > now
+                && cached.SourceFingerprint == fingerprint)
+            {
+                return new DocumentationBundle
+                {
+                    ApplicationId = applicationId,
+                    ApplicationName = application.Name,
+                    MarkdownDocumentation = cached.MarkdownDocumentation,
+                    MermaidErd = cached.MermaidErd,
+                    GeneratedAt = cached.GeneratedAt
+                };
+            }
+        }
 
         var graph = await _graphBuilder.BuildForApplicationAsync(applicationId, cancellationToken);
 
@@ -35,20 +68,64 @@ public sealed class DocumentationExportService : IDocumentationExportService
 
         var markdown = BuildMarkdown(application.Name, connections, graph);
         var mermaid = BuildMermaidErd(connections);
-
-        return new DocumentationBundle
+        var bundle = new DocumentationBundle
         {
             ApplicationId = applicationId,
             ApplicationName = application.Name,
             MarkdownDocumentation = markdown,
             MermaidErd = mermaid,
-            GeneratedAt = DateTime.UtcNow
+            GeneratedAt = now
         };
+
+        if (_options.DocumentationCacheEnabled)
+        {
+            await UpsertCacheAsync(applicationId, fingerprint, bundle, cancellationToken);
+        }
+
+        return bundle;
+    }
+
+    private async Task UpsertCacheAsync(
+        Guid applicationId,
+        string fingerprint,
+        DocumentationBundle bundle,
+        CancellationToken cancellationToken)
+    {
+        var existing = await _dbContext.DocumentationExportCaches
+            .FirstOrDefaultAsync(c => c.ApplicationId == applicationId, cancellationToken);
+
+        var expiresAt = bundle.GeneratedAt.AddMinutes(Math.Clamp(_options.DocumentationCacheTtlMinutes, 5, 10_080));
+        if (existing is null)
+        {
+            _dbContext.DocumentationExportCaches.Add(new DocumentationExportCache
+            {
+                Id = Guid.NewGuid(),
+                ApplicationId = applicationId,
+                MarkdownDocumentation = bundle.MarkdownDocumentation,
+                MermaidErd = bundle.MermaidErd,
+                SourceFingerprint = fingerprint,
+                GeneratedAt = bundle.GeneratedAt,
+                ExpiresAt = expiresAt,
+                CreatedAt = bundle.GeneratedAt,
+                UpdatedAt = bundle.GeneratedAt
+            });
+        }
+        else
+        {
+            existing.MarkdownDocumentation = bundle.MarkdownDocumentation;
+            existing.MermaidErd = bundle.MermaidErd;
+            existing.SourceFingerprint = fingerprint;
+            existing.GeneratedAt = bundle.GeneratedAt;
+            existing.ExpiresAt = expiresAt;
+            existing.UpdatedAt = bundle.GeneratedAt;
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private static string BuildMarkdown(
         string applicationName,
-        IReadOnlyList<Domain.Entities.DatabaseConnection> connections,
+        IReadOnlyList<DatabaseConnection> connections,
         SystemGraphDto graph)
     {
         var sb = new StringBuilder();
@@ -88,7 +165,7 @@ public sealed class DocumentationExportService : IDocumentationExportService
         return sb.ToString();
     }
 
-    private static string BuildMermaidErd(IReadOnlyList<Domain.Entities.DatabaseConnection> connections)
+    private static string BuildMermaidErd(IReadOnlyList<DatabaseConnection> connections)
     {
         var sb = new StringBuilder();
         sb.AppendLine("erDiagram");

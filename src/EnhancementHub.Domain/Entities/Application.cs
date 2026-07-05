@@ -19,5 +19,6 @@ public class Application : BaseEntity
     public ICollection<DatabaseConnection> DatabaseConnections { get; set; } = new List<DatabaseConnection>();
     public ICollection<SystemGraphNode> GraphNodes { get; set; } = new List<SystemGraphNode>();
     public ICollection<SystemGraphSnapshot> SystemGraphSnapshots { get; set; } = new List<SystemGraphSnapshot>();
+    public ICollection<DocumentationExportCache> DocumentationExportCaches { get; set; } = new List<DocumentationExportCache>();
     public ICollection<OnPremAgent> OnPremAgents { get; set; } = new List<OnPremAgent>();
 }

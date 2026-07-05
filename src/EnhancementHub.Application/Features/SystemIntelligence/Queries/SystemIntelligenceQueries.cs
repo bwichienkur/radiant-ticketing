@@ -87,6 +87,60 @@ public sealed class GetSystemMapQueryHandler : IRequestHandler<GetSystemMapQuery
     private sealed record SnapshotEdge(string FromId, string ToId, string Label);
 }
 
+public sealed record GetSystemMapPagedQuery(
+    Guid ApplicationId,
+    int? MaxDepth = null,
+    int Page = 1,
+    int? PageSize = null,
+    string? RootNodeId = null) : IRequest<SystemMapPagedDto>;
+
+public sealed class GetSystemMapPagedQueryHandler : IRequestHandler<GetSystemMapPagedQuery, SystemMapPagedDto>
+{
+    private readonly IMediator _mediator;
+    private readonly Microsoft.Extensions.Options.IOptions<Application.Options.SystemIntelligenceOptions> _options;
+
+    public GetSystemMapPagedQueryHandler(
+        IMediator mediator,
+        Microsoft.Extensions.Options.IOptions<Application.Options.SystemIntelligenceOptions> options)
+    {
+        _mediator = mediator;
+        _options = options;
+    }
+
+    public async Task<SystemMapPagedDto> Handle(GetSystemMapPagedQuery request, CancellationToken cancellationToken)
+    {
+        var map = await _mediator.Send(new GetSystemMapQuery(request.ApplicationId), cancellationToken);
+        var pageSize = Math.Clamp(
+            request.PageSize ?? _options.Value.GraphQueryDefaultPageSize,
+            1,
+            _options.Value.GraphQueryMaxPageSize);
+        var maxDepth = Math.Clamp(
+            request.MaxDepth ?? _options.Value.GraphQueryDefaultMaxDepth,
+            1,
+            20);
+
+        var filtered = Application.Common.SystemGraphQueryHelper.Apply(
+            map.Nodes,
+            map.Edges,
+            request.RootNodeId,
+            maxDepth,
+            request.Page,
+            pageSize);
+
+        return new SystemMapPagedDto(
+            map.ApplicationId,
+            map.ApplicationName,
+            filtered.Nodes,
+            filtered.Edges,
+            map.BuiltAt,
+            filtered.TotalNodeCount,
+            request.Page,
+            pageSize,
+            maxDepth,
+            filtered.Truncated);
+    }
+}
+
 public sealed record GetDatabaseSchemaQuery(Guid ConnectionId) : IRequest<DatabaseSchemaDto>;
 
 public sealed class GetDatabaseSchemaQueryHandler : IRequestHandler<GetDatabaseSchemaQuery, DatabaseSchemaDto>

@@ -46,7 +46,19 @@ public sealed class DocumentationExportServiceTests : IDisposable
                 Edges = []
             });
 
-        _sut = new DocumentationExportService(_dbContext, graphBuilder.Object);
+        var fingerprintService = new Mock<ISystemIntelligenceFingerprintService>();
+        fingerprintService
+            .Setup(f => f.ComputeApplicationFingerprintAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync("TEST-FINGERPRINT");
+
+        _sut = new DocumentationExportService(
+            _dbContext,
+            graphBuilder.Object,
+            fingerprintService.Object,
+            Microsoft.Extensions.Options.Options.Create(new Application.Options.SystemIntelligenceOptions
+            {
+                DocumentationCacheEnabled = false
+            }));
     }
 
     [Fact]
