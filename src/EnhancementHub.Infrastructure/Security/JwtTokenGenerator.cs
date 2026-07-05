@@ -24,13 +24,18 @@ public sealed class JwtTokenGenerator : IJwtTokenGenerator
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        var claims = new[]
+        var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(ClaimTypes.Name, user.DisplayName),
-            new Claim(ClaimTypes.Role, user.Role.ToString())
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+            new(JwtRegisteredClaimNames.Email, user.Email),
+            new(ClaimTypes.Name, user.DisplayName),
+            new(ClaimTypes.Role, user.Role.ToString())
         };
+
+        if (user.TenantId.HasValue)
+        {
+            claims.Add(new Claim("tenant_id", user.TenantId.Value.ToString()));
+        }
 
         var token = new JwtSecurityToken(
             issuer,

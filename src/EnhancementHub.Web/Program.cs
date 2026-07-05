@@ -32,6 +32,7 @@ builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/");
     options.Conventions.AllowAnonymousToPage("/Account/Login");
+    options.Conventions.AllowAnonymousToPage("/Account/Signup");
 });
 builder.Services.AddScoped<EnhancementHub.Web.Services.DevAuthService>();
 

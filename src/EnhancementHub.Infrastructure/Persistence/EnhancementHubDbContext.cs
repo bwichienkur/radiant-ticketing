@@ -65,6 +65,8 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<OnPremAgent> OnPremAgents => Set<OnPremAgent>();
     public DbSet<OnboardingSession> OnboardingSessions => Set<OnboardingSession>();
     public DbSet<ServiceApiKey> ServiceApiKeys => Set<ServiceApiKey>();
+    public DbSet<Tenant> Tenants => Set<Tenant>();
+    public DbSet<TenantUsageSnapshot> TenantUsageSnapshots => Set<TenantUsageSnapshot>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

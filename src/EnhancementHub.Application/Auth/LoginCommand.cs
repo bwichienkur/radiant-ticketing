@@ -35,6 +35,6 @@ public sealed class LoginCommandHandler : IRequestHandler<LoginCommand, LoginRes
         }
 
         var token = _jwtTokenGenerator.GenerateToken(user);
-        return new LoginResult(token, user.Id, user.Email, user.DisplayName, user.Role);
+        return new LoginResult(token, user.Id, user.Email, user.DisplayName, user.Role, user.TenantId);
     }
 }

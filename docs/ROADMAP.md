@@ -164,10 +164,10 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 - [x] Accessibility (WCAG 2.1 AA) pass on core flows
 
 ### 4.4 Commercial platform (Phase 26 — optional)
-- [ ] Multi-tenant data isolation (schema-per-tenant or row-level security)
-- [ ] Billing/metering (applications, analyses, storage)
-- [ ] Self-service signup and trial sandbox
-- [ ] Regional deployment (EU data residency)
+- [x] Multi-tenant data isolation (schema-per-tenant or row-level security)
+- [x] Billing/metering (applications, analyses, storage)
+- [x] Self-service signup and trial sandbox
+- [x] Regional deployment (EU data residency)
 
 **Exit criteria:** Two published case studies; pipeline beyond .NET-only ICP; measurable ROI metrics in product.
 

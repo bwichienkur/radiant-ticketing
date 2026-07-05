@@ -6,6 +6,9 @@ public class Team : BaseEntity
 {
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public Guid? TenantId { get; set; }
+
+    public Tenant? Tenant { get; set; }
 
     public ICollection<TeamMember> Members { get; set; } = new List<TeamMember>();
     public ICollection<Application> OwnedApplications { get; set; } = new List<Application>();

@@ -2,7 +2,13 @@ using EnhancementHub.Domain.Enums;
 
 namespace EnhancementHub.Application.Common.Models;
 
-public sealed record LoginResult(string Token, Guid UserId, string Email, string DisplayName, UserRole Role);
+public sealed record LoginResult(
+    string Token,
+    Guid UserId,
+    string Email,
+    string DisplayName,
+    UserRole Role,
+    Guid? TenantId = null);
 
 public sealed record DashboardReportDto(
     int TotalRequests,

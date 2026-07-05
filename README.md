@@ -178,7 +178,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-160 tests covering UX modernization, product differentiation, polyglot integrations, HA observability, System Intelligence performance, data layer scaling, indexing scale, incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
+167 tests covering commercial platform, UX modernization, product differentiation, polyglot integrations, HA observability, System Intelligence performance, data layer scaling, indexing scale, incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
 
 ---
 
@@ -198,7 +198,10 @@ dotnet test
 - `GET /api/reporting/roi` — ROI metrics (Admin)
 - `GET /api/templates` — enhancement domain templates
 - `GET /api/analysis/{requestId}/compare` — AI vs architect comparison
+- `POST /api/tenants/register` — self-service trial signup (anonymous)
+- `GET /api/tenants/current/billing` — plan limits and usage metering
+- `GET /api/tenants` — list tenants (Admin)
 
-See [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) and [docs/PRODUCT_DIFFERENTIATION.md](docs/PRODUCT_DIFFERENTIATION.md).
+See [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md), [docs/PRODUCT_DIFFERENTIATION.md](docs/PRODUCT_DIFFERENTIATION.md), and [docs/COMMERCIAL_PLATFORM.md](docs/COMMERCIAL_PLATFORM.md).
 
 Full Swagger available at `/swagger` in Development.

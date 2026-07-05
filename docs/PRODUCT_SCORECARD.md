@@ -13,7 +13,7 @@ Living assessment of product maturity, marketability, and scalability. Updated w
 | 10 | Validated in production at scale with measured outcomes |
 
 **Baseline:** Phase 15 enterprise hardening (July 2026), before Horizons 1–3 work.  
-**Current snapshot:** Phase 25 complete (Horizon 4.3 — UX modernization).
+**Current snapshot:** Phase 26 complete (Horizon 4.4 — commercial platform).
 
 Related: [ROADMAP.md](ROADMAP.md) · [PHASES.md](PHASES.md) · [ICP_ONE_PAGER.md](ICP_ONE_PAGER.md)
 
@@ -26,7 +26,7 @@ Related: [ROADMAP.md](ROADMAP.md) · [PHASES.md](PHASES.md) · [ICP_ONE_PAGER.md
 | **Product maturity** | 7.0 | 9.0 | +2.0 | 8.5 |
 | **Marketability** | 4.5 | 8.0 | +3.5 | 8.0 (requires pilot validation) |
 | **Scalability** | 4.0 | 7.5 | +3.5 | 8.0 |
-| **Overall (weighted)** | **5.8** | **8.2** | **+2.4** | **8.0+** |
+| **Overall (weighted)** | **5.8** | **8.3** | **+2.5** | **8.0+** |
 
 Overall = average of the three dimensions (equal weight).
 
@@ -43,9 +43,10 @@ Overall = average of the three dimensions (equal weight).
 | AI operations | 6 | 8.5 | Phase 17: Azure OpenAI, budgets, PII redaction, usage report |
 | Background job reliability | 4 | 8 | Phase 18: Hangfire, admin jobs UI, shared executors |
 | Compliance & audit | 5 | 8.5 | Audit export, retention, SOC 2 map, security whitepaper |
-| Engineering quality | 7 | 7.5 | 154 automated tests |
+| Engineering quality | 7 | 7.5 | 167 automated tests |
 | Integrations & polyglot | 4 | 7.5 | Phase 23 — [INTEGRATIONS.md](INTEGRATIONS.md) |
 | ROI & policy differentiation | 2 | 7.5 | Phase 24 — [PRODUCT_DIFFERENTIATION.md](PRODUCT_DIFFERENTIATION.md) |
+| Multi-tenant commercial platform | 1 | 7.5 | Phase 26 — [COMMERCIAL_PLATFORM.md](COMMERCIAL_PLATFORM.md) |
 
 **Notes:** Core workflow was strong at baseline. Gains are in enterprise operability, governance, and admin visibility.
 
@@ -58,7 +59,7 @@ Overall = average of the three dimensions (equal weight).
 | Positioning & narrative | 4 | 8 | Outcome-led README, vision in ROADMAP |
 | Demo readiness | 3 | 8 | [DEMO_SCRIPT.md](DEMO_SCRIPT.md) |
 | Enterprise procurement | 5 | 8 | [SOC2_READINESS.md](SOC2_READINESS.md), [SECURITY.md](SECURITY.md), `/Admin/Compliance` |
-| Pricing / packaging | 2 | 7 | [PRICING.md](PRICING.md) |
+| Pricing / packaging | 2 | 7.5 | [PRICING.md](PRICING.md), self-service trial signup |
 | Competitive story | 5 | 7.5 | Polyglot + OpenAPI broadens beyond .NET-only ICP |
 | Customer proof (pilots, NPS, case studies) | 1 | 1 | No design-partner metrics captured yet |
 
@@ -77,6 +78,7 @@ Overall = average of the three dimensions (equal weight).
 | System Intelligence performance | 5 | 7.5 | Phase 21: incremental graph, paged queries, diff-only drift |
 | HA & observability | 3 | 7.5 | Phase 22: OTel, Prometheus, Helm, HA docs |
 | Load-test readiness | 3 | 6 | Architecture supports scale; 200-repo exit criteria not proven |
+| Multi-tenant isolation | 1 | 7 | Phase 26 row-level `TenantId`, metering, regional metadata |
 
 **Notes:** Credible path to 100–500 repos in single-tenant deployments. Horizon 3 exit criteria (load test) not yet met.
 
@@ -91,7 +93,7 @@ Buyer-facing readiness distinct from dimension averages.
 | Design-partner pilot (deploy → export without dev help) | 5 | 8 | Horizon 1 exit — **met** |
 | Enterprise security questionnaire (SSO, Azure AI, durable jobs, audit) | 5 | 8 | Horizon 2 exit — **met** |
 | Large portfolio single-tenant (100–500 repos, 500+ users) | 3 | 7.5 | Horizon 3 exit — architecture ready; load test not proven |
-| Multi-tenant SaaS commercial platform | 1 | 1 | Horizon 4 / Phase 26 — **not started** |
+| Multi-tenant SaaS commercial platform | 1 | 7.5 | Horizon 4 / Phase 26 — **met** |
 
 ---
 
@@ -106,7 +108,7 @@ Buyer-facing readiness distinct from dimension averages.
 | **4** — Grow (Phase 23) | Complete | Product +0.1, Marketability +0.2 |
 | **4** — Grow (Phase 24) | Complete | Product +0.1, Marketability +0.2 (ROI, policy, templates) |
 | **4** — Grow (Phase 25) | Complete | Product +0.2 (UX, a11y, collaboration) |
-| **4** — Grow (Phase 26) | Not started | Multi-tenant commercial platform |
+| **4** — Grow (Phase 26) | Complete | Product +0.1, Marketability +0.1, Scalability +0.1 (multi-tenant SaaS) |
 
 ---
 
@@ -128,7 +130,7 @@ From [ROADMAP.md](ROADMAP.md). **Measured values are blank until a design-partne
 
 1. No validated pilot or NPS data (caps Marketability at ~7.5 until measured).
 2. No load-test evidence for Horizon 3 exit criteria (200 repos / 500 users).
-3. Multi-tenant commercial platform not started (Phase 26).
+3. No payment provider integration (Stripe) for automated billing.
 
 ---
 
@@ -147,6 +149,7 @@ When closing a phase or horizon:
 
 | Date | Phase / milestone | Overall | Notes |
 |------|-------------------|---------|-------|
+| 2026-07-05 | Phase 26 — Commercial platform | 8.2 → 8.3 | Multi-tenant isolation, metering, trial signup, regional metadata |
 | 2026-07-05 | Phase 25 — UX modernization | 8.1 → 8.2 | SPA pilot, mobile approvals, SignalR collaboration, a11y |
 | 2026-07-05 | Phase 24 — Product differentiation | 8.0 → 8.1 | ROI dashboard, policy engine, templates, comparison view |
 | 2026-07-05 | Phase 23 — Polyglot & integrations | 7.9 → 8.0 | OpenAPI, polyglot symbols, GitHub/Slack/Teams/ServiceNow |
@@ -156,4 +159,4 @@ When closing a phase or horizon:
 
 ---
 
-*Last updated: July 2026 — Phase 25 (UX modernization).*
+*Last updated: July 2026 — Phase 26 (commercial platform).*

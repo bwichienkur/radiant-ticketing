@@ -1,0 +1,54 @@
+@page
+@model EnhancementHub.Web.Pages.Account.SignupModel
+@{
+    ViewData["Title"] = "Start trial";
+    Layout = "_LoginLayout";
+}
+
+<div class="login-shell">
+    <section class="login-panel">
+        <div class="login-panel-inner">
+            <div class="login-panel-header">
+                <h2 class="h4 mb-1">Start your trial</h2>
+                <p class="text-muted mb-0">Create a sandbox tenant in minutes</p>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger mt-4" role="alert">@Model.ErrorMessage</div>
+            }
+
+            <form method="post" class="mt-4">
+                <div class="mb-3">
+                    <label class="form-label" for="OrganizationName">Organization name</label>
+                    <input asp-for="Input.OrganizationName" class="form-control login-input" id="OrganizationName" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="Slug">Workspace slug</label>
+                    <input asp-for="Input.Slug" class="form-control login-input" id="Slug" required aria-describedby="slugHelp" />
+                    <div id="slugHelp" class="form-text">Lowercase letters, numbers, hyphens only.</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="Region">Region</label>
+                    <select asp-for="Input.Region" class="form-select login-input" id="Region" asp-items="Model.Regions"></select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="AdminDisplayName">Your name</label>
+                    <input asp-for="Input.AdminDisplayName" class="form-control login-input" id="AdminDisplayName" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="AdminEmail">Work email</label>
+                    <input asp-for="Input.AdminEmail" type="email" class="form-control login-input" id="AdminEmail" required />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="AdminPassword">Password</label>
+                    <input asp-for="Input.AdminPassword" type="password" class="form-control login-input" id="AdminPassword" required minlength="8" />
+                </div>
+                <button type="submit" class="btn btn-primary w-100 login-submit-btn">Create trial workspace</button>
+            </form>
+            <p class="small text-muted mt-3 mb-0 text-center">
+                Already have an account? <a asp-page="/Account/Login">Sign in</a>
+            </p>
+        </div>
+    </section>
+</div>
