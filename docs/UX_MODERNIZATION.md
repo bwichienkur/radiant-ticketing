@@ -114,6 +114,18 @@ Future: extract to React + Vite under `src/EnhancementHub.Web/ClientApp/` with s
 
 ---
 
+## Phase 32 — Cytoscape system map graph (complete)
+
+- **Interactive graph** on `/Spa/SystemMap` — Cytoscape.js canvas with cose layout, zoom/pan, node tap selection
+- **Graph/list toggle** — graph view for exploration; list view for full node/edge data
+- **Performance guard** — caps graph at 400 nodes; truncation banner links users to list view
+- **Type styling** — node colors by artifact type (Table, Controller, Entity, etc.)
+- Styles in `site.css` (`.system-map-graph-canvas`)
+
+*Phase 32 — Cytoscape system map graph.*
+
+---
+
 ## Phase 27 — UX overhaul (complete)
 
 - Collapsible **sidebar app shell** with grouped navigation (Work / Intelligence / Governance)

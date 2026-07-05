@@ -348,6 +348,11 @@
 - Classic Razor views retain links to React alternatives
 - Guide: `docs/UX_MODERNIZATION.md` (Phase 31 section)
 
-## Future enhancements
+## Phase 32 — Cytoscape system map graph (complete)
 
-- Graph visualization library (Cytoscape/D3) for React system map
+- Interactive Cytoscape.js graph on `/Spa/SystemMap` with zoom, pan, and node selection
+- Graph/list toggle; type-colored nodes; performance cap at 400 nodes with list fallback
+- `SystemMapGraph` component and `systemMapGraph` helpers in React `ClientApp`
+- Guide: `docs/UX_MODERNIZATION.md` (Phase 32 section)
+
+## Future enhancements
