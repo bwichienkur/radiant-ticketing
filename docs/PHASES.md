@@ -265,7 +265,17 @@
 - Kubernetes Helm chart: `deploy/helm/enhancementhub/`
 - Local observability stack: `docker-compose.observability.yml`
 
+## Phase 23 — Polyglot & integration expansion (complete)
+
+- OpenAPI 3 spec registration and endpoint ingestion (`OpenApiRegistration`, `OpenApiEndpoint`)
+- Partner polyglot symbol ingestion API for Java, Python, TypeScript, and JavaScript
+- GitHub push webhook with HMAC verification → auto-index when `Repository.AutoIndexOnPush=true`
+- Slack and Teams chat intake endpoints for enhancement request submission
+- ServiceNow outbound exporter and inbound webhook status sync
+- Integration guide: `docs/INTEGRATIONS.md`
+- API: `/api/integrations/*`, `POST /api/webhooks/github`
+
 ## Future enhancements
 
-- GitHub App webhook-driven automatic re-index on push
-- Support for monorepo subdirectory selection during onboarding
+- ROI dashboard and policy engine (Phase 24)
+- UX modernization — Blazor/React SPA evaluation (Phase 25)

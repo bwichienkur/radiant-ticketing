@@ -47,6 +47,8 @@ public interface IEnhancementHubDbContext
     DbSet<SystemGraphSnapshot> SystemGraphSnapshots { get; }
     DbSet<SchemaDriftReport> SchemaDriftReports { get; }
     DbSet<DocumentationExportCache> DocumentationExportCaches { get; }
+    DbSet<OpenApiRegistration> OpenApiRegistrations { get; }
+    DbSet<OpenApiEndpoint> OpenApiEndpoints { get; }
     DbSet<OnPremAgent> OnPremAgents { get; }
     DbSet<OnboardingSession> OnboardingSessions { get; }
     DbSet<ServiceApiKey> ServiceApiKeys { get; }

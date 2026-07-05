@@ -13,6 +13,7 @@ public class Repository : BaseEntity
     public string? GitTokenSecretName { get; set; }
     public string? SourceSubdirectory { get; set; }
     public int IndexingPriority { get; set; }
+    public bool AutoIndexOnPush { get; set; } = true;
     public DateTime? LastIndexedAt { get; set; }
     public IndexingStatus IndexingStatus { get; set; }
 

@@ -145,11 +145,11 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 **Goal:** Broaden addressable market and deepen competitive moat.
 
 ### 4.1 Polyglot & integration expansion (Phase 23)
-- [ ] OpenAPI/Swagger ingestion for non-.NET APIs
-- [ ] Java/Python tree-sitter or LSP-based symbol extraction (or partner integration)
-- [ ] GitHub App webhooks → automatic re-index on push
-- [ ] Slack / Teams intake bot (submit enhancement from chat)
-- [ ] ServiceNow bi-directional sync (optional)
+- [x] OpenAPI/Swagger ingestion for non-.NET APIs
+- [x] Java/Python tree-sitter or LSP-based symbol extraction (or partner integration)
+- [x] GitHub App webhooks → automatic re-index on push
+- [x] Slack / Teams intake bot (submit enhancement from chat)
+- [x] ServiceNow bi-directional sync (optional)
 
 ### 4.2 Product-led differentiation (Phase 24)
 - [ ] ROI dashboard: analysis time saved, risk prevented, drift findings resolved
@@ -243,4 +243,4 @@ Avoid distracting from pilot closure:
 
 ---
 
-*Last updated: July 2026 — aligns with Phase 15 enterprise hardening baseline.*
+*Last updated: July 2026 — Phase 23 (polyglot & integration expansion).*

@@ -7,6 +7,7 @@ using EnhancementHub.Infrastructure.Persistence;
 using EnhancementHub.Infrastructure.Persistence.Repositories;
 using EnhancementHub.Infrastructure.Security;
 using EnhancementHub.Infrastructure.Services;
+using EnhancementHub.Infrastructure.Services.Integrations;
 using EnhancementHub.Infrastructure.Services.Notifications;
 using EnhancementHub.Infrastructure.Services.SystemIntelligence;
 using Hangfire;
@@ -155,10 +156,17 @@ public static class InfrastructureServiceExtensions
         services.Configure<Application.Options.IndexingOptions>(configuration.GetSection(Application.Options.IndexingOptions.SectionName));
         services.Configure<Application.Options.SystemIntelligenceOptions>(
             configuration.GetSection(Application.Options.SystemIntelligenceOptions.SectionName));
+        services.Configure<Application.Options.IntegrationsOptions>(
+            configuration.GetSection(Application.Options.IntegrationsOptions.SectionName));
         services.AddScoped<IGitRepositoryHistoryService, GitRepositoryHistoryService>();
         services.AddScoped<IIndexFreshnessService, IndexFreshnessService>();
         services.AddScoped<IDataScalingStatusService, DataScalingStatusService>();
         services.AddScoped<IObservabilityStatusService, ObservabilityStatusService>();
+        services.AddScoped<IOpenApiIngestionService, OpenApiIngestionService>();
+        services.AddScoped<IPolyglotSymbolIngestionService, PolyglotSymbolIngestionService>();
+        services.AddScoped<IChatIntakeService, ChatIntakeService>();
+        services.AddScoped<IGitHubWebhookService, GitHubWebhookService>();
+        services.AddScoped<IServiceNowSyncService, ServiceNowSyncService>();
         services.AddScoped<HangfireRepositoryIndexingDispatcher>();
         services.PostConfigure<Options.AiOptions>(options =>
         {
@@ -241,6 +249,12 @@ public static class InfrastructureServiceExtensions
                 sp.GetRequiredService<IHttpClientFactory>().CreateClient(ExternalTicketsHttpClientName),
                 configuration,
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<JiraTicketExporter>>()));
+
+        services.AddScoped<IExternalTicketExporter, ServiceNowTicketExporter>(sp =>
+            new ServiceNowTicketExporter(
+                sp.GetRequiredService<IHttpClientFactory>().CreateClient(ExternalTicketsHttpClientName),
+                configuration,
+                sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<ServiceNowTicketExporter>>()));
 
         services.AddScoped<IExternalTicketExporterFactory, ExternalTicketExporterFactory>();
         services.AddScoped<IDatabaseSchemaScanner, DatabaseSchemaScanner>();
