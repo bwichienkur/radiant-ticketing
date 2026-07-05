@@ -236,6 +236,15 @@
 - Hangfire per-repository indexing jobs on dedicated `indexing` queue when `Indexing:ShardJobsPerRepository=true`
 - Admin index freshness report: `GET /api/admin/indexing/freshness` and `/Admin/Jobs` dashboard
 
+## Phase 20 — Data layer scaling (complete)
+
+- Read replica connection for reporting via `ConnectionStrings:Reporting` and `IReportingDbContext`
+- Vector search production validation with Qdrant/Azure Search recommendations (`/Admin/DataScaling`)
+- Npgsql connection pool tuning via `DatabaseScaling` config section
+- Parallel schema scan concurrency limit (`SchemaScanMaxConcurrency`)
+- AI prompt run JSON archival before retention purge (`Retention:ArchiveAiPromptRunsBeforeDelete`)
+- Deployment guide: `docs/DATA_SCALING.md`
+
 ## Future enhancements
 
 - GitHub App webhook-driven automatic re-index on push

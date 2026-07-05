@@ -47,6 +47,9 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
             services.RemoveAll<DbContextOptions<EnhancementHubDbContext>>();
             services.RemoveAll<EnhancementHubDbContext>();
             services.RemoveAll<IEnhancementHubDbContext>();
+            services.RemoveAll<DbContextOptions<ReportingDbContext>>();
+            services.RemoveAll<ReportingDbContext>();
+            services.RemoveAll<IReportingDbContext>();
 
             _connection = new SqliteConnection("Data Source=:memory:");
             _connection.Open();
@@ -57,7 +60,13 @@ public class TestWebApplicationFactory : WebApplicationFactory<Program>
                 var connection = sp.GetRequiredService<DbConnection>();
                 options.UseSqlite(connection);
             });
+            services.AddDbContext<ReportingDbContext>((sp, options) =>
+            {
+                var connection = sp.GetRequiredService<DbConnection>();
+                options.UseSqlite(connection);
+            });
             services.AddScoped<IEnhancementHubDbContext>(sp => sp.GetRequiredService<EnhancementHubDbContext>());
+            services.AddScoped<IReportingDbContext>(sp => sp.GetRequiredService<ReportingDbContext>());
 
             CustomizeServices(services);
         });

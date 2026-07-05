@@ -12,6 +12,11 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     {
     }
 
+    protected EnhancementHubDbContext(DbContextOptions options)
+        : base(options)
+    {
+    }
+
     public DbSet<User> Users => Set<User>();
     public DbSet<Team> Teams => Set<Team>();
     public DbSet<TeamMember> TeamMembers => Set<TeamMember>();

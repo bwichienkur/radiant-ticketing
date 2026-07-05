@@ -8,9 +8,9 @@ namespace EnhancementHub.Application.Features.Reporting.Queries;
 public sealed class GetAiUsageReportQueryHandler
     : IRequestHandler<GetAiUsageReportQuery, AiUsageReportDto>
 {
-    private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IReportingDbContext _dbContext;
 
-    public GetAiUsageReportQueryHandler(IEnhancementHubDbContext dbContext) =>
+    public GetAiUsageReportQueryHandler(IReportingDbContext dbContext) =>
         _dbContext = dbContext;
 
     public async Task<AiUsageReportDto> Handle(

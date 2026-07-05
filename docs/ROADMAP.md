@@ -3,6 +3,8 @@
 Strategic roadmap derived from product, marketability, and scalability evaluation (July 2026).
 Organized into four horizons: **Now**, **Next**, **Scale**, and **Grow**.
 
+Track scores over time in [PRODUCT_SCORECARD.md](PRODUCT_SCORECARD.md).
+
 ---
 
 ## Vision
@@ -116,10 +118,10 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 - [x] Index freshness SLA metrics (% repos indexed within N hours)
 
 ### 3.2 Data layer scaling (Phase 20)
-- [ ] Default vector offload to Qdrant or Azure Search for large deployments
-- [ ] Read replica support for reporting queries
-- [ ] Audit log and `AiPromptRun` archival/partitioning strategy
-- [ ] Connection pool tuning and scan concurrency limits
+- [x] Default vector offload to Qdrant or Azure Search for large deployments
+- [x] Read replica support for reporting queries
+- [x] Audit log and `AiPromptRun` archival/partitioning strategy
+- [x] Connection pool tuning and scan concurrency limits
 
 ### 3.3 System Intelligence performance (Phase 21)
 - [ ] Incremental system graph updates (not full rebuild)

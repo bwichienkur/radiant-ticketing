@@ -1,4 +1,3 @@
-using EnhancementHub.Api.Extensions;
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.DependencyInjection;
 using EnhancementHub.Infrastructure.DependencyInjection;

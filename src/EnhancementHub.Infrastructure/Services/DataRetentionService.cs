@@ -5,6 +5,7 @@ using EnhancementHub.Infrastructure.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace EnhancementHub.Infrastructure.Services;
 
@@ -81,12 +82,16 @@ public sealed class DataRetentionService : IDataRetentionService
 
                 if (!dryRun)
                 {
-                    _dbContext.RetrievedContextItems.RemoveRange(contextItems);
-
                     var entities = await _dbContext.AiPromptRuns
                         .Where(r => runs.Contains(r.Id))
                         .ToListAsync(cancellationToken);
 
+                    if (_options.ArchiveAiPromptRunsBeforeDelete)
+                    {
+                        await ArchiveAiPromptRunsAsync(entities, cancellationToken);
+                    }
+
+                    _dbContext.RetrievedContextItems.RemoveRange(contextItems);
                     _dbContext.AiPromptRuns.RemoveRange(entities);
                     await _dbContext.SaveChangesAsync(cancellationToken);
                 }
@@ -162,4 +167,42 @@ public sealed class DataRetentionService : IDataRetentionService
         _options.AttachmentsDays > 0
             ? DateTime.UtcNow.AddDays(-_options.AttachmentsDays)
             : null;
+
+    private async Task ArchiveAiPromptRunsAsync(
+        IReadOnlyList<AiPromptRun> runs,
+        CancellationToken cancellationToken)
+    {
+        if (runs.Count == 0)
+        {
+            return;
+        }
+
+        var archiveRoot = _options.ArchivePath
+            ?? Path.Combine(AppContext.BaseDirectory, "archives", "ai-prompt-runs");
+        Directory.CreateDirectory(archiveRoot);
+
+        var fileName = $"ai-prompt-runs-{DateTime.UtcNow:yyyyMMddHHmmss}.json";
+        var filePath = Path.Combine(archiveRoot, fileName);
+
+        var payload = runs.Select(r => new
+        {
+            r.Id,
+            r.EnhancementRequestId,
+            r.WorkflowStep,
+            r.ModelName,
+            r.Status,
+            r.TotalTokens,
+            r.EstimatedCostUsd,
+            r.StartedAt,
+            r.CompletedAt,
+            r.CreatedAt
+        });
+
+        await File.WriteAllTextAsync(
+            filePath,
+            JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true }),
+            cancellationToken);
+
+        _logger.LogInformation("Archived {Count} AI prompt runs to {FilePath}", runs.Count, filePath);
+    }
 }

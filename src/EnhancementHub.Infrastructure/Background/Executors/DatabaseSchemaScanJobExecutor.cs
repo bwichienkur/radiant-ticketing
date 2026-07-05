@@ -1,23 +1,27 @@
 using EnhancementHub.Application.Abstractions;
-using EnhancementHub.Domain.Entities;
+using EnhancementHub.Application.Options;
 using EnhancementHub.Infrastructure.Security;
 using EnhancementHub.Infrastructure.Services.SystemIntelligence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace EnhancementHub.Infrastructure.Background.Executors;
 
 public sealed class DatabaseSchemaScanJobExecutor
 {
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly DatabaseScalingOptions _scalingOptions;
     private readonly ILogger<DatabaseSchemaScanJobExecutor> _logger;
 
     public DatabaseSchemaScanJobExecutor(
         IServiceScopeFactory scopeFactory,
+        IOptions<DatabaseScalingOptions> scalingOptions,
         ILogger<DatabaseSchemaScanJobExecutor> logger)
     {
         _scopeFactory = scopeFactory;
+        _scalingOptions = scalingOptions.Value;
         _logger = logger;
     }
 
@@ -25,34 +29,50 @@ public sealed class DatabaseSchemaScanJobExecutor
     {
         using var scope = _scopeFactory.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IEnhancementHubDbContext>();
-        var scannerFactory = scope.ServiceProvider.GetRequiredService<DatabaseSchemaScannerFactory>();
-        var ingestionService = scope.ServiceProvider.GetRequiredService<DatabaseSchemaIngestionService>();
-        var secretProtector = scope.ServiceProvider.GetRequiredService<ISecretProtector>();
 
         var pendingConnections = await dbContext.DatabaseConnections
             .Where(c => c.ScanStatus == "Pending" && !c.IsReadOnly)
+            .Select(c => c.Id)
             .ToListAsync(cancellationToken);
 
-        foreach (var connection in pendingConnections)
+        var maxConcurrency = Math.Clamp(_scalingOptions.SchemaScanMaxConcurrency, 1, 16);
+        using var gate = new SemaphoreSlim(maxConcurrency);
+
+        var tasks = pendingConnections.Select(async connectionId =>
         {
-            await ScanConnectionAsync(
-                connection,
-                dbContext,
-                scannerFactory,
-                ingestionService,
-                secretProtector,
-                cancellationToken);
-        }
+            await gate.WaitAsync(cancellationToken);
+            try
+            {
+                using var innerScope = _scopeFactory.CreateScope();
+                await ScanConnectionAsync(connectionId, innerScope.ServiceProvider, cancellationToken);
+            }
+            finally
+            {
+                gate.Release();
+            }
+        });
+
+        await Task.WhenAll(tasks);
     }
 
     private async Task ScanConnectionAsync(
-        DatabaseConnection connection,
-        IEnhancementHubDbContext dbContext,
-        DatabaseSchemaScannerFactory scannerFactory,
-        DatabaseSchemaIngestionService ingestionService,
-        ISecretProtector secretProtector,
+        Guid connectionId,
+        IServiceProvider services,
         CancellationToken cancellationToken)
     {
+        var dbContext = services.GetRequiredService<IEnhancementHubDbContext>();
+        var scannerFactory = services.GetRequiredService<DatabaseSchemaScannerFactory>();
+        var ingestionService = services.GetRequiredService<DatabaseSchemaIngestionService>();
+        var secretProtector = services.GetRequiredService<ISecretProtector>();
+
+        var connection = await dbContext.DatabaseConnections
+            .FirstOrDefaultAsync(c => c.Id == connectionId, cancellationToken);
+
+        if (connection is null || connection.ScanStatus != "Pending" || connection.IsReadOnly)
+        {
+            return;
+        }
+
         connection.ScanStatus = "InProgress";
         connection.UpdatedAt = DateTime.UtcNow;
         await dbContext.SaveChangesAsync(cancellationToken);

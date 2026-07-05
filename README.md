@@ -40,7 +40,7 @@ tests/
 
 **Deploy API + Web + Worker** for production. Background jobs run in Worker only.
 
-See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for production checklist, [docs/SECURITY.md](docs/SECURITY.md) for the security whitepaper, [docs/ROADMAP.md](docs/ROADMAP.md) for the product roadmap, and [docs/ICP_ONE_PAGER.md](docs/ICP_ONE_PAGER.md) / [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) for sales and pilot enablement.
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for production checklist, [docs/DATA_SCALING.md](docs/DATA_SCALING.md) for vector offload and read replicas, [docs/SECURITY.md](docs/SECURITY.md) for the security whitepaper, [docs/ROADMAP.md](docs/ROADMAP.md) for the product roadmap, [docs/PRODUCT_SCORECARD.md](docs/PRODUCT_SCORECARD.md) for maturity scores, and [docs/ICP_ONE_PAGER.md](docs/ICP_ONE_PAGER.md) / [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) for sales and pilot enablement.
 
 ---
 
@@ -151,7 +151,9 @@ Key settings in `appsettings.json`:
     "MaxFilesPerRun": 5000,
     "FreshnessSlaHours": 24,
     "ShardJobsPerRepository": true
-  }
+  },
+  "DatabaseScaling": { "MaxPoolSize": 100, "SchemaScanMaxConcurrency": 2 },
+  "ConnectionStrings": { "Default": "...", "Reporting": "..." }
 }
 ```
 
@@ -176,7 +178,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-125+ tests covering indexing scale, incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
+129+ tests covering data layer scaling, indexing scale, incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
 
 ---
 
