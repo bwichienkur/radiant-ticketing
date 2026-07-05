@@ -36,7 +36,8 @@ try
 
     builder.Services.AddAuthorization();
     builder.Services.AddEnhancementHubRateLimiting();
-    builder.Services.AddControllers();
+    builder.Services.AddControllers()
+        .AddEnhancementHubApiVersioning();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 

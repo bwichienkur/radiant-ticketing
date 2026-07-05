@@ -63,7 +63,7 @@ else
                 <div class="card-header px-0">Stale repositories (top @freshness.StaleRepositories.Count)</div>
                 <div class="table-responsive">
                     <table class="table table-enterprise mb-0">
-                        <thead><tr><th>Repository</th><th>Application</th><th>Last indexed</th><th>Hours stale</th><th>Status</th></tr></thead>
+                        <thead><tr><th scope="col">Repository</th><th scope="col">Application</th><th scope="col">Last indexed</th><th scope="col">Hours stale</th><th scope="col">Status</th></tr></thead>
                         <tbody>
                         @foreach (var repo in freshness.StaleRepositories)
                         {
@@ -104,7 +104,7 @@ else
         <div class="card-header px-0">Scheduled jobs</div>
         <div class="table-responsive">
             <table class="table table-enterprise mb-0">
-                <thead><tr><th>Job</th><th>Description</th><th>Schedule</th><th>Last run</th><th>Next run</th></tr></thead>
+                <thead><tr><th scope="col">Job</th><th scope="col">Description</th><th scope="col">Schedule</th><th scope="col">Last run</th><th scope="col">Next run</th></tr></thead>
                 <tbody>
                 @foreach (var job in status.Jobs)
                 {
@@ -137,7 +137,7 @@ else
         {
             <div class="table-responsive">
                 <table class="table table-enterprise mb-0">
-                    <thead><tr><th>Job ID</th><th>Name</th><th>Failed at</th><th>Error</th><th></th></tr></thead>
+                    <thead><tr><th scope="col">Job ID</th><th scope="col">Name</th><th scope="col">Failed at</th><th scope="col">Error</th><th scope="col"></th></tr></thead>
                     <tbody>
                     @foreach (var failed in status.FailedJobs)
                     {

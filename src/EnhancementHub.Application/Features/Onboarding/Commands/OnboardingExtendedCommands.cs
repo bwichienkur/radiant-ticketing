@@ -87,6 +87,11 @@ public sealed class QueueApplicationDiscoveryCommandHandler
             .FirstOrDefaultAsync(s => s.Id == request.OnboardingSessionId, cancellationToken)
             ?? throw new NotFoundException(nameof(Domain.Entities.OnboardingSession), request.OnboardingSessionId);
 
+        if (session.DiscoveryJobState is DiscoveryJobState.Queued or DiscoveryJobState.Running)
+        {
+            return OnboardingSessionMapper.ToDto(session);
+        }
+
         session.DiscoveryJobState = DiscoveryJobState.Queued;
         session.DiscoveryStatus = "Queued for discovery...";
         session.LastError = null;

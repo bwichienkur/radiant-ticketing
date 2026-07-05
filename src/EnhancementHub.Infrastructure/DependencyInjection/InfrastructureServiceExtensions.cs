@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Npgsql;
 using Polly;
 using Polly.Extensions.Http;
@@ -38,9 +39,10 @@ public static class InfrastructureServiceExtensions
     {
         services.AddHttpContextAccessor();
 
-        var connectionString = configuration.GetConnectionString("Default")
+        var defaultConnectionString = configuration.GetConnectionString("Default")
             ?? "Data Source=enhancementhub.db";
-        var provider = ResolveDatabaseProvider(configuration, connectionString);
+        var reportingConnectionString = configuration.GetConnectionString("Reporting") ?? defaultConnectionString;
+        var provider = ResolveDatabaseProvider(configuration, defaultConnectionString);
         var scalingOptions = configuration
             .GetSection(Application.Options.DatabaseScalingOptions.SectionName)
             .Get<Application.Options.DatabaseScalingOptions>()
@@ -51,13 +53,16 @@ public static class InfrastructureServiceExtensions
 
         services.AddDbContext<EnhancementHubDbContext>((sp, options) =>
         {
+            var connectionString = ResolveConnectionString(sp, defaultConnectionString);
             ConfigureDbContextOptions(options, connectionString, provider, scalingOptions);
             options.AddInterceptors(sp.GetRequiredService<TenantSearchPathConnectionInterceptor>());
         });
 
-        var reportingConnection = configuration.GetConnectionString("Reporting") ?? connectionString;
-        services.AddDbContext<ReportingDbContext>(options =>
-            ConfigureDbContextOptions(options, reportingConnection, provider, scalingOptions));
+        services.AddDbContext<ReportingDbContext>((sp, options) =>
+        {
+            var connectionString = ResolveConnectionString(sp, reportingConnectionString);
+            ConfigureDbContextOptions(options, connectionString, provider, scalingOptions);
+        });
         services.AddScoped<IReportingDbContext>(sp => sp.GetRequiredService<ReportingDbContext>());
 
         services.AddScoped<IEnhancementHubDbContext>(sp => sp.GetRequiredService<EnhancementHubDbContext>());
@@ -281,11 +286,11 @@ public static class InfrastructureServiceExtensions
 
         if (registerBackgroundJobs)
         {
-            RegisterBackgroundJobs(services, configuration, connectionString, provider);
+            RegisterBackgroundJobs(services, configuration, defaultConnectionString, provider);
         }
         else if (registerHangfireMonitoring)
         {
-            RegisterHangfireMonitoringStorage(services, configuration, connectionString, provider);
+            RegisterHangfireMonitoringStorage(services, configuration, defaultConnectionString, provider);
         }
 
         return services;
@@ -431,6 +436,17 @@ public static class InfrastructureServiceExtensions
             MinPoolSize = Math.Max(0, scalingOptions.MinPoolSize)
         };
         return builder.ConnectionString;
+    }
+
+    private static string ResolveConnectionString(IServiceProvider serviceProvider, string connectionString)
+    {
+        if (!connectionString.Contains("Data Source=", StringComparison.OrdinalIgnoreCase))
+        {
+            return connectionString;
+        }
+
+        var contentRoot = serviceProvider.GetRequiredService<IHostEnvironment>().ContentRootPath;
+        return SqliteConnectionStringResolver.Resolve(connectionString, contentRoot);
     }
 
     private enum DatabaseProvider

@@ -126,6 +126,29 @@ Future: extract to React + Vite under `src/EnhancementHub.Web/ClientApp/` with s
 
 ---
 
+## Phase 33 — React request detail collaboration (complete)
+
+- **SignalR hub** — `/hubs/request-collaboration` wired in React via `useRequestCollaboration`
+- **Live comments** — `CommentAdded` events + BFF `POST /web-api/spa/requests/{id}/comments`
+- **Presence** — `UserJoined` / `UserLeft` viewer list
+- **Analysis refresh** — `AnalysisUpdated` from `TriggerAiAnalysisCommand` triggers SPA refetch
+- **Polling fallback** — auto-refresh while status is `Analyzing`
+
+*Phase 33 — React request detail collaboration.*
+
+---
+
+## Phase 37 — React onboarding advanced flows (complete)
+
+- **Code connection tabs** — local path, ZIP upload, GitHub App clone, Git URL clone
+- **Database tabs** — direct connection string, builder, on-prem agent registration
+- **BFF endpoints** — `upload-zip`, `clone-github-app`, `clone-git`, `build-connection-string`, `on-prem-agent`, `export-docs`
+- **Review** — documentation export download link
+
+*Phase 37 — React onboarding advanced flows.*
+
+---
+
 ## Phase 27 — UX overhaul (complete)
 
 - Collapsible **sidebar app shell** with grouped navigation (Work / Intelligence / Governance)

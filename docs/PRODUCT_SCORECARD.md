@@ -13,7 +13,7 @@ Living assessment of product maturity, marketability, and scalability. Updated w
 | 10 | Validated in production at scale with measured outcomes |
 
 **Baseline:** Phase 15 enterprise hardening (July 2026), before Horizons 1–3 work.  
-**Current snapshot:** Phase 32 complete (Horizon 4.4 — Cytoscape system map graph).
+**Current snapshot:** Phase 37 complete (Horizon 4.8 — React onboarding advanced flows).
 
 Related: [ROADMAP.md](ROADMAP.md) · [PHASES.md](PHASES.md) · [ICP_ONE_PAGER.md](ICP_ONE_PAGER.md)
 
@@ -38,12 +38,12 @@ Overall = average of the three dimensions (equal weight).
 |----------|----------|---------|----------|
 | Core intake → approval → export | 9 | 9 | Phases 1–4 complete |
 | System Intelligence (schema, graph, drift, docs) | 8 | 8.5 | Phase 21 incremental graph, pagination, doc cache |
-| Demo / operator UX | 5 | 9.5 | Phase 32 Cytoscape graph + Phase 31 React approval queue + onboarding wizard |
+| Demo / operator UX | 5 | 9.5 | Phase 37 advanced onboarding + Phase 33 SignalR collaboration + Phase 32 Cytoscape graph |
 | Identity & authorization | 6 | 8.5 | Phase 16, Entra ID, team membership, API keys |
 | AI operations | 6 | 8.5 | Phase 17: Azure OpenAI, budgets, PII redaction, usage report |
 | Background job reliability | 4 | 8 | Phase 18: Hangfire, admin jobs UI, shared executors |
 | Compliance & audit | 5 | 8.5 | Audit export, retention, SOC 2 map, security whitepaper |
-| Engineering quality | 7 | 7.5 | 214 automated tests |
+| Engineering quality | 7 | 8.0 | 235 automated tests |
 | Integrations & polyglot | 4 | 7.5 | Phase 23 — [INTEGRATIONS.md](INTEGRATIONS.md) |
 | ROI & policy differentiation | 2 | 7.5 | Phase 24 — [PRODUCT_DIFFERENTIATION.md](PRODUCT_DIFFERENTIATION.md) |
 | Multi-tenant commercial platform | 1 | 8.5 | Phase 26–29 — [COMMERCIAL_PLATFORM.md](COMMERCIAL_PLATFORM.md), [STRIPE_BILLING.md](STRIPE_BILLING.md), [TENANT_ISOLATION.md](TENANT_ISOLATION.md) |
@@ -77,7 +77,7 @@ Overall = average of the three dimensions (equal weight).
 | Vector search at scale | 5 | 7 | Qdrant/Azure Search + `/Admin/DataScaling` |
 | System Intelligence performance | 5 | 7.5 | Phase 21: incremental graph, paged queries, diff-only drift |
 | HA & observability | 3 | 7.5 | Phase 22: OTel, Prometheus, Helm, HA docs |
-| Load-test readiness | 3 | 6 | Architecture supports scale; 200-repo exit criteria not proven |
+| Load-test readiness | 3 | 6.5 | Phase 35 k6 harness — [LOAD_TEST.md](LOAD_TEST.md); exit criteria not yet proven |
 | Multi-tenant isolation | 1 | 8 | Phase 29 dedicated schema + Phase 26 row-level `TenantId` |
 
 **Notes:** Credible path to 100–500 repos in single-tenant deployments. Horizon 3 exit criteria (load test) not yet met.
@@ -149,6 +149,11 @@ When closing a phase or horizon:
 
 | Date | Phase / milestone | Overall | Notes |
 |------|-------------------|---------|-------|
+| 2026-07-05 | Phase 37 — React onboarding advanced | 8.7 → 8.7 | ZIP/GitHub App/on-prem in React wizard |
+| 2026-07-05 | Phase 36 — API v1 + idempotency | 8.7 → 8.7 | Versioned routes, discovery queue guard |
+| 2026-07-05 | Phase 35 — Load-test harness | 8.7 → 8.7 | k6 scripts + LOAD_TEST.md |
+| 2026-07-05 | Phase 34 — Accessibility hardening | 8.7 → 8.7 | Graph keyboard nav, a11y CI |
+| 2026-07-05 | Phase 33 — React collaboration | 8.7 → 8.7 | SignalR on React request detail |
 | 2026-07-05 | Phase 32 — Cytoscape system map graph | 8.7 → 8.7 | Interactive graph on React system map |
 | 2026-07-05 | Phase 31 — React approval & onboarding | 8.6 → 8.7 | Approval queue + wizard React SPAs |
 | 2026-07-05 | Phase 30 — React SPA migration | 8.5 → 8.6 | Vite ClientApp, request detail + system map hot paths |
@@ -164,4 +169,4 @@ When closing a phase or horizon:
 
 ---
 
-*Last updated: July 2026 — Phase 32 (Cytoscape system map graph).*
+*Last updated: July 2026 — Phase 37 (React onboarding advanced flows).*

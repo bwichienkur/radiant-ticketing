@@ -1,0 +1,89 @@
+1
+00:00:00,000 --> 00:00:04,000
+1. Sign in
+Role-based access for submitters, approvers, and admins.
+
+2
+00:00:04,000 --> 00:00:09,000
+2. Dashboard
+Backlog health, action queue, and activity feed for operators.
+
+3
+00:00:09,000 --> 00:00:14,000
+3. Submit request
+Capture business intent, priority, and target application.
+
+4
+00:00:14,000 --> 00:00:18,000
+4. Request triage
+Search, filter, and sort the enhancement backlog.
+
+5
+00:00:18,000 --> 00:00:24,000
+5. Request detail
+AI analysis, mission control metrics, and impact recommendations.
+
+6
+00:00:24,000 --> 00:00:30,000
+6. React collaboration
+SignalR live comments and presence on the React SPA.
+
+7
+00:00:30,000 --> 00:00:35,000
+7. System Map
+Code and database artifacts linked in a knowledge graph.
+
+8
+00:00:35,000 --> 00:00:42,000
+8. Cytoscape graph
+Interactive zoom, pan, and type-colored nodes.
+
+9
+00:00:42,000 --> 00:00:47,000
+9. Schema drift
+Compare live database schema against code mappings.
+
+10
+00:00:47,000 --> 00:00:52,000
+10. Approval queue
+Human approve, reject, or clarify before export.
+
+11
+00:00:52,000 --> 00:00:57,000
+11. React approvals
+Mobile-friendly queue with keyboard navigation.
+
+12
+00:00:57,000 --> 00:01:03,000
+12. Onboarding wizard
+Register app, connect code, database, and run discovery.
+
+13
+00:01:03,000 --> 00:01:07,000
+13. Applications
+Team-scoped portfolio with repos and intelligence.
+
+14
+00:01:07,000 --> 00:01:12,000
+14. Database connections
+Read-only schema registration for drift and ERD.
+
+15
+00:01:12,000 --> 00:01:16,000
+15. Background jobs
+Hangfire indexing, discovery, and AI analysis queues.
+
+16
+00:01:16,000 --> 00:01:21,000
+16. Tenancy & billing
+Plans, Stripe checkout, and schema-per-tenant isolation.
+
+17
+00:01:21,000 --> 00:01:26,000
+17. Compliance
+SOC 2 readiness, retention, and audit export.
+
+18
+00:01:26,000 --> 00:01:31,000
+18. End-to-end flow
+Intake → grounded AI → human approval → ticket export.

@@ -11,6 +11,7 @@ using EnhancementHub.Domain.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
 
 namespace EnhancementHub.Web.Controllers;
 
@@ -39,6 +40,15 @@ public sealed class SpaDataController : ControllerBase
             return NotFound();
         }
     }
+
+    [HttpPost("requests/{id:guid}/comments")]
+    public async Task<IActionResult> AddComment(
+        Guid id,
+        [FromBody] SpaAddCommentRequest request,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(
+            new AddCommentCommand(id, request.Content, request.IsInternal),
+            cancellationToken));
 
     [HttpGet("applications")]
     public async Task<IActionResult> ListApplications(CancellationToken cancellationToken) =>
@@ -225,7 +235,164 @@ public sealed class SpaDataController : ControllerBase
             session.ApplicationId), cancellationToken));
     }
 
+    [HttpGet("onboarding/github-app/status")]
+    public async Task<IActionResult> GetGitHubAppStatus(CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetGitHubAppStatusQuery(), cancellationToken));
+
+    [HttpPost("onboarding/{sessionId:guid}/upload-zip")]
+    public async Task<IActionResult> UploadOnboardingZip(
+        Guid sessionId,
+        IFormFile zipFile,
+        [FromForm] string? repositoryName,
+        CancellationToken cancellationToken)
+    {
+        var session = await _mediator.Send(new GetOnboardingSessionQuery(sessionId), cancellationToken);
+        if (!session.ApplicationId.HasValue)
+        {
+            return BadRequest(new { message = "Complete application basics first." });
+        }
+
+        if (zipFile is null || zipFile.Length == 0)
+        {
+            return BadRequest(new { message = "ZIP file is required." });
+        }
+
+        if (!string.Equals(Path.GetExtension(zipFile.FileName), ".zip", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new { message = "Only .zip archives are supported." });
+        }
+
+        var name = string.IsNullOrWhiteSpace(repositoryName)
+            ? Path.GetFileNameWithoutExtension(zipFile.FileName)
+            : repositoryName.Trim();
+
+        await using var stream = zipFile.OpenReadStream();
+        var result = await _mediator.Send(new UploadRepositoryArchiveCommand(
+            session.ApplicationId.Value,
+            name,
+            stream), cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(new { message = result.ErrorMessage ?? "Failed to extract repository archive." });
+        }
+
+        var advanced = await _mediator.Send(new AdvanceOnboardingSessionCommand(
+            sessionId,
+            OnboardingStep.ConnectDatabase,
+            session.ApplicationId), cancellationToken);
+
+        return Ok(advanced);
+    }
+
+    [HttpPost("onboarding/{sessionId:guid}/clone-github-app")]
+    public async Task<IActionResult> CloneGitHubAppRepository(
+        Guid sessionId,
+        [FromBody] SpaGitHubAppCloneRequest request,
+        CancellationToken cancellationToken)
+    {
+        var session = await _mediator.Send(new GetOnboardingSessionQuery(sessionId), cancellationToken);
+        if (!session.ApplicationId.HasValue)
+        {
+            return BadRequest(new { message = "Complete application basics first." });
+        }
+
+        var result = await _mediator.Send(new CloneGitHubAppRepositoryCommand(
+            session.ApplicationId.Value,
+            request.RepositoryName,
+            request.Owner,
+            request.Repository,
+            request.DefaultBranch,
+            request.InstallationId), cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(new { message = result.ErrorMessage ?? "GitHub App clone failed." });
+        }
+
+        var advanced = await _mediator.Send(new AdvanceOnboardingSessionCommand(
+            sessionId,
+            OnboardingStep.ConnectDatabase,
+            session.ApplicationId), cancellationToken);
+
+        return Ok(advanced);
+    }
+
+    [HttpPost("onboarding/{sessionId:guid}/clone-git")]
+    public async Task<IActionResult> CloneGitRepository(
+        Guid sessionId,
+        [FromBody] SpaGitCloneRequest request,
+        CancellationToken cancellationToken)
+    {
+        var session = await _mediator.Send(new GetOnboardingSessionQuery(sessionId), cancellationToken);
+        if (!session.ApplicationId.HasValue)
+        {
+            return BadRequest(new { message = "Complete application basics first." });
+        }
+
+        var result = await _mediator.Send(new CloneGitRepositoryCommand(
+            session.ApplicationId.Value,
+            request.RepositoryName,
+            request.RepositoryUrl,
+            request.DefaultBranch,
+            request.AccessToken), cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(new { message = result.ErrorMessage ?? "Git clone failed." });
+        }
+
+        var advanced = await _mediator.Send(new AdvanceOnboardingSessionCommand(
+            sessionId,
+            OnboardingStep.ConnectDatabase,
+            session.ApplicationId), cancellationToken);
+
+        return Ok(advanced);
+    }
+
+    [HttpPost("onboarding/build-connection-string")]
+    public async Task<IActionResult> BuildConnectionString(
+        [FromBody] SpaBuildConnectionStringRequest request,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new BuildDatabaseConnectionStringQuery(
+            request.Provider,
+            request.Host,
+            request.Port,
+            request.Database,
+            request.Username,
+            request.Password,
+            request.IntegratedSecurity), cancellationToken));
+
+    [HttpPost("onboarding/{sessionId:guid}/on-prem-agent")]
+    public async Task<IActionResult> SetupOnPremAgent(
+        Guid sessionId,
+        [FromBody] SpaOnPremAgentRequest request,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new SetupOnPremAgentForOnboardingCommand(
+            sessionId,
+            request.ApplicationId,
+            request.ConnectionName,
+            request.Provider), cancellationToken));
+
+    [HttpGet("onboarding/{sessionId:guid}/export-docs")]
+    public async Task<IActionResult> ExportOnboardingDocs(Guid sessionId, CancellationToken cancellationToken)
+    {
+        var session = await _mediator.Send(new GetOnboardingSessionQuery(sessionId), cancellationToken);
+        if (!session.ApplicationId.HasValue)
+        {
+            return BadRequest(new { message = "Application is required before export." });
+        }
+
+        var export = await _mediator.Send(
+            new ExportDocumentationCommand(session.ApplicationId.Value, DocumentationExportFormat.Both),
+            cancellationToken);
+
+        return File(Encoding.UTF8.GetBytes(export.Content), export.ContentType, export.FileName);
+    }
+
     public sealed record SpaApprovalActionRequest(ApprovalActionType ActionType, string? Comments);
+
+    public sealed record SpaAddCommentRequest(string Content, bool IsInternal = false);
 
     public sealed record SpaValidatePathRequest(string Path);
 
@@ -246,4 +413,31 @@ public sealed class SpaDataController : ControllerBase
         DatabaseProviderType Provider,
         string ConnectionString,
         bool IsReadOnly);
+
+    public sealed record SpaGitHubAppCloneRequest(
+        string RepositoryName,
+        string Owner,
+        string Repository,
+        string DefaultBranch,
+        long? InstallationId);
+
+    public sealed record SpaGitCloneRequest(
+        string RepositoryName,
+        string RepositoryUrl,
+        string DefaultBranch,
+        string? AccessToken);
+
+    public sealed record SpaBuildConnectionStringRequest(
+        DatabaseProviderType Provider,
+        string Host,
+        int Port,
+        string Database,
+        string? Username,
+        string? Password,
+        bool IntegratedSecurity);
+
+    public sealed record SpaOnPremAgentRequest(
+        Guid ApplicationId,
+        string ConnectionName,
+        DatabaseProviderType Provider);
 }
