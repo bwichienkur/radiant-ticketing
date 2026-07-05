@@ -1,6 +1,6 @@
 using EnhancementHub.Application.Common.Exceptions;
-using EnhancementHub.Api.Extensions;
 using EnhancementHub.Api.Middleware;
+using EnhancementHub.Api.Extensions;
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.DependencyInjection;
 using EnhancementHub.Infrastructure.DependencyInjection;
@@ -57,7 +57,7 @@ try
     var app = builder.Build();
 
     app.UseSerilogRequestLogging();
-    app.UseMiddleware<CorrelationIdMiddleware>();
+    app.UseCorrelationId();
     app.UseMiddleware<ExceptionHandlingMiddleware>();
 
     if (app.Environment.IsDevelopment())

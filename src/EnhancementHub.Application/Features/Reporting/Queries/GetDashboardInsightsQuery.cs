@@ -52,7 +52,7 @@ public sealed class GetDashboardInsightsQueryHandler
                 a.User.DisplayName,
                 a.CreatedAt,
                 a.EnhancementRequestId,
-                $"/EnhancementRequests/Details/{a.EnhancementRequestId}"))
+                $"/Spa/RequestDetail/{a.EnhancementRequestId}"))
             .ToListAsync(cancellationToken);
 
         var recentAnalyses = await _dbContext.EnhancementAnalyses
@@ -66,7 +66,7 @@ public sealed class GetDashboardInsightsQueryHandler
                 $"{a.RiskLevel} risk",
                 a.CreatedAt,
                 a.EnhancementRequestId,
-                $"/EnhancementRequests/Details/{a.EnhancementRequestId}"))
+                $"/Spa/RequestDetail/{a.EnhancementRequestId}"))
             .ToListAsync(cancellationToken);
 
         var activity = recentApprovals

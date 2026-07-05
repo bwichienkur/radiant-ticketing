@@ -1,3 +1,4 @@
+using EnhancementHub.Tests.Common;
 using FluentAssertions;
 
 namespace EnhancementHub.Tests.Unit;
@@ -21,11 +22,11 @@ public sealed class Phase33ReactCollaborationTests
     }
 
     [Fact]
-    public void SpaDataController_ExposesCommentBff()
+    public void SpaBff_ExposesCommentBff()
     {
-        var controller = File.ReadAllText(GetPath("src/EnhancementHub.Web/Controllers/SpaDataController.cs"));
-        controller.Should().Contain("requests/{id:guid}/comments");
-        controller.Should().Contain("AddCommentCommand");
+        var sources = SpaBffTestHelper.ReadAllSpaBffSources();
+        sources.Should().Contain("requests/{id:guid}/comments");
+        sources.Should().Contain("AddCommentCommand");
     }
 
     [Fact]

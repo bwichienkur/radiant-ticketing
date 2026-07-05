@@ -51,13 +51,13 @@ Say:
 
 ## Minute 2–3 — Onboarding (skip or 30-second flash)
 
-**If greenfield demo:** **Setup** → Onboarding Wizard (`/Onboarding/Wizard`)
+**If greenfield demo:** **Setup** → Onboarding Wizard (`/Spa/OnboardingWizard`)
 
 **Say:**
 
 > "New deployments walk through application registration, repository connection, and database scan. Most pilots reuse existing apps—we'll skip to an already-onboarded portfolio."
 
-**If seeded demo:** Jump to **Applications** (`/Applications/Index`) and show *Radiant Commerce Platform*.
+**If seeded demo:** Jump to **Applications** (`/Applications/Index`) and show *Radiant Commerce Platform* — or open the pre-seeded request directly at `/Spa/RequestDetail/279c38dc-8da4-400b-828f-711726210eb6`.
 
 ---
 
@@ -74,7 +74,7 @@ Say:
 | Desired outcome | Reason code stored and visible in order history API |
 | Priority | Medium |
 
-**Submit** → open request **detail** page.
+**Submit** → open request **detail** at `/Spa/RequestDetail/{id}` (React view loads automatically from the list).
 
 **Trigger analysis** (if not auto-run): click **Run AI analysis** / wait for Worker.
 
@@ -96,15 +96,13 @@ Say:
 
 ## Minute 5–7 — System Map & schema intelligence
 
-**Navigate:** **System Map** (`/SystemMap/Index`) → select demo application
+**Navigate:** **System Map** (`/Spa/SystemMap`) → select demo application (*Radiant Commerce Platform*)
 
 **Show:**
 
-- Graph linking API controllers, entities, database tables
-- Tab groupings by node type
-- Empty/loading states if indexing still running (have a screenshot backup)
-
-**Optional 30 sec:** **Drift** (`/SchemaDrift/Index`) — one drift finding if seeded
+- Interactive Cytoscape graph linking API controllers, entities, database tables
+- Graph / list toggle and **Rebuild graph** (no need to leave React)
+- Optional: **Drift** (`/SchemaDrift/Index`) — one drift finding if seeded
 
 **Say:**
 
@@ -114,7 +112,7 @@ Say:
 
 ## Minute 7–8 — Human approval gate
 
-**Navigate:** **Approvals** (`/EnhancementRequests/Approve`)
+**Navigate:** **Approvals** (`/Spa/ApprovalQueue`)
 
 **Show:**
 
@@ -173,7 +171,7 @@ Say:
 |----------|--------|
 | Where does data live? | Customer infrastructure; PostgreSQL/SQLite; optional S3 for attachments |
 | Which AI models? | OpenAI or Azure OpenAI; configurable per workflow; PII redaction optional |
-| Multi-tenant SaaS? | Not yet—single-tenant self-hosted is the current model |
+| Multi-tenant SaaS? | **Yes** — self-service signup, Stripe billing, row-level and optional schema-per-tenant isolation. Single-tenant self-hosted remains supported for regulated deployments. |
 | Non-.NET repos? | Indexing optimized for .NET; polyglot expansion on roadmap |
 | How long to deploy? | Docker Compose &lt; 1 day; production hardening 1–2 weeks with IT |
 | Security review? | Share [SECURITY.md](SECURITY.md) and [SOC2_READINESS.md](SOC2_READINESS.md) |

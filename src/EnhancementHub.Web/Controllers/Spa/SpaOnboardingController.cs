@@ -1,7 +1,3 @@
-using EnhancementHub.Application.Features.Analysis.Queries;
-using EnhancementHub.Application.Features.Applications.Queries;
-using EnhancementHub.Application.Features.Approvals.Commands;
-using EnhancementHub.Application.Features.EnhancementRequests.Queries;
 using EnhancementHub.Application.Features.Onboarding.Commands;
 using EnhancementHub.Application.Features.Onboarding.Queries;
 using EnhancementHub.Application.Features.Repositories.Commands;
@@ -13,77 +9,26 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 
-namespace EnhancementHub.Web.Controllers;
+namespace EnhancementHub.Web.Controllers.Spa;
 
 [ApiController]
 [Authorize]
-[Route("web-api/spa")]
-public sealed class SpaDataController : ControllerBase
+[Route("web-api/spa/onboarding")]
+public sealed class SpaOnboardingController : ControllerBase
 {
     private readonly IMediator _mediator;
 
-    public SpaDataController(IMediator mediator) => _mediator = mediator;
+    public SpaOnboardingController(IMediator mediator) => _mediator = mediator;
 
-    [HttpGet("requests/{id:guid}")]
-    public async Task<IActionResult> GetRequest(Guid id, CancellationToken cancellationToken) =>
-        Ok(await _mediator.Send(new GetEnhancementRequestByIdQuery(id), cancellationToken));
-
-    [HttpGet("analysis/{requestId:guid}")]
-    public async Task<IActionResult> GetAnalysis(Guid requestId, CancellationToken cancellationToken)
-    {
-        try
-        {
-            return Ok(await _mediator.Send(new GetEnhancementAnalysisQuery(requestId), cancellationToken));
-        }
-        catch (Application.Common.Exceptions.NotFoundException)
-        {
-            return NotFound();
-        }
-    }
-
-    [HttpPost("requests/{id:guid}/comments")]
-    public async Task<IActionResult> AddComment(
-        Guid id,
-        [FromBody] SpaAddCommentRequest request,
-        CancellationToken cancellationToken) =>
-        Ok(await _mediator.Send(
-            new AddCommentCommand(id, request.Content, request.IsInternal),
-            cancellationToken));
-
-    [HttpGet("applications")]
-    public async Task<IActionResult> ListApplications(CancellationToken cancellationToken) =>
-        Ok(await _mediator.Send(new ListApplicationsQuery(), cancellationToken));
-
-    [HttpGet("system-map/{applicationId:guid}")]
-    public async Task<IActionResult> GetSystemMap(Guid applicationId, CancellationToken cancellationToken) =>
-        Ok(await _mediator.Send(new GetSystemMapQuery(applicationId), cancellationToken));
-
-    [HttpGet("approvals/pending")]
-    public async Task<IActionResult> ListPendingApprovals(CancellationToken cancellationToken) =>
-        Ok(await _mediator.Send(
-            new ListEnhancementRequestsQuery(
-                EnhancementRequestStatus.PendingApproval,
-                Sort: EnhancementRequestSort.HighestRisk),
-            cancellationToken));
-
-    [HttpPost("approvals/{id:guid}/action")]
-    public async Task<IActionResult> SubmitApprovalAction(
-        Guid id,
-        [FromBody] SpaApprovalActionRequest request,
-        CancellationToken cancellationToken) =>
-        Ok(await _mediator.Send(
-            new SubmitApprovalActionCommand(id, request.ActionType, request.Comments),
-            cancellationToken));
-
-    [HttpPost("onboarding/start")]
+    [HttpPost("start")]
     public async Task<IActionResult> StartOnboarding(CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new StartOnboardingSessionCommand(), cancellationToken));
 
-    [HttpGet("onboarding/{sessionId:guid}")]
+    [HttpGet("{sessionId:guid}")]
     public async Task<IActionResult> GetOnboardingSession(Guid sessionId, CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new GetOnboardingSessionQuery(sessionId), cancellationToken));
 
-    [HttpGet("onboarding/{sessionId:guid}/review")]
+    [HttpGet("{sessionId:guid}/review")]
     public async Task<IActionResult> GetOnboardingReview(Guid sessionId, CancellationToken cancellationToken)
     {
         var session = await _mediator.Send(new GetOnboardingSessionQuery(sessionId), cancellationToken);
@@ -97,13 +42,13 @@ public sealed class SpaDataController : ControllerBase
             cancellationToken));
     }
 
-    [HttpPost("onboarding/validate-path")]
+    [HttpPost("validate-path")]
     public async Task<IActionResult> ValidateRepositoryPath(
         [FromBody] SpaValidatePathRequest request,
         CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new ValidateRepositoryPathQuery(request.Path), cancellationToken));
 
-    [HttpPost("onboarding/{sessionId:guid}/basics")]
+    [HttpPost("{sessionId:guid}/basics")]
     public async Task<IActionResult> SubmitOnboardingBasics(
         Guid sessionId,
         [FromBody] SpaOnboardingBasicsRequest request,
@@ -125,7 +70,7 @@ public sealed class SpaDataController : ControllerBase
         return Ok(session);
     }
 
-    [HttpPost("onboarding/{sessionId:guid}/repository")]
+    [HttpPost("{sessionId:guid}/repository")]
     public async Task<IActionResult> SubmitOnboardingRepository(
         Guid sessionId,
         [FromBody] SpaOnboardingRepositoryRequest request,
@@ -159,7 +104,7 @@ public sealed class SpaDataController : ControllerBase
         return Ok(advanced);
     }
 
-    [HttpPost("onboarding/{sessionId:guid}/database")]
+    [HttpPost("{sessionId:guid}/database")]
     public async Task<IActionResult> SubmitOnboardingDatabase(
         Guid sessionId,
         [FromBody] SpaOnboardingDatabaseRequest request,
@@ -187,7 +132,7 @@ public sealed class SpaDataController : ControllerBase
         return Ok(advanced);
     }
 
-    [HttpPost("onboarding/{sessionId:guid}/skip-database")]
+    [HttpPost("{sessionId:guid}/skip-database")]
     public async Task<IActionResult> SkipOnboardingDatabase(Guid sessionId, CancellationToken cancellationToken)
     {
         var session = await _mediator.Send(new GetOnboardingSessionQuery(sessionId), cancellationToken);
@@ -200,7 +145,7 @@ public sealed class SpaDataController : ControllerBase
         return Ok(advanced);
     }
 
-    [HttpPost("onboarding/{sessionId:guid}/discovery")]
+    [HttpPost("{sessionId:guid}/discovery")]
     public async Task<IActionResult> QueueOnboardingDiscovery(Guid sessionId, CancellationToken cancellationToken)
     {
         var session = await _mediator.Send(new GetOnboardingSessionQuery(sessionId), cancellationToken);
@@ -216,11 +161,11 @@ public sealed class SpaDataController : ControllerBase
         return Ok(updated);
     }
 
-    [HttpPost("onboarding/{sessionId:guid}/complete")]
+    [HttpPost("{sessionId:guid}/complete")]
     public async Task<IActionResult> CompleteOnboarding(Guid sessionId, CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new CompleteOnboardingSessionCommand(sessionId), cancellationToken));
 
-    [HttpPost("onboarding/{sessionId:guid}/advance-review")]
+    [HttpPost("{sessionId:guid}/advance-review")]
     public async Task<IActionResult> AdvanceOnboardingToReview(Guid sessionId, CancellationToken cancellationToken)
     {
         var session = await _mediator.Send(new GetOnboardingSessionQuery(sessionId), cancellationToken);
@@ -235,11 +180,11 @@ public sealed class SpaDataController : ControllerBase
             session.ApplicationId), cancellationToken));
     }
 
-    [HttpGet("onboarding/github-app/status")]
+    [HttpGet("github-app/status")]
     public async Task<IActionResult> GetGitHubAppStatus(CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new GetGitHubAppStatusQuery(), cancellationToken));
 
-    [HttpPost("onboarding/{sessionId:guid}/upload-zip")]
+    [HttpPost("{sessionId:guid}/upload-zip")]
     public async Task<IActionResult> UploadOnboardingZip(
         Guid sessionId,
         IFormFile zipFile,
@@ -285,7 +230,7 @@ public sealed class SpaDataController : ControllerBase
         return Ok(advanced);
     }
 
-    [HttpPost("onboarding/{sessionId:guid}/clone-github-app")]
+    [HttpPost("{sessionId:guid}/clone-github-app")]
     public async Task<IActionResult> CloneGitHubAppRepository(
         Guid sessionId,
         [FromBody] SpaGitHubAppCloneRequest request,
@@ -318,7 +263,7 @@ public sealed class SpaDataController : ControllerBase
         return Ok(advanced);
     }
 
-    [HttpPost("onboarding/{sessionId:guid}/clone-git")]
+    [HttpPost("{sessionId:guid}/clone-git")]
     public async Task<IActionResult> CloneGitRepository(
         Guid sessionId,
         [FromBody] SpaGitCloneRequest request,
@@ -350,7 +295,7 @@ public sealed class SpaDataController : ControllerBase
         return Ok(advanced);
     }
 
-    [HttpPost("onboarding/build-connection-string")]
+    [HttpPost("build-connection-string")]
     public async Task<IActionResult> BuildConnectionString(
         [FromBody] SpaBuildConnectionStringRequest request,
         CancellationToken cancellationToken) =>
@@ -363,7 +308,7 @@ public sealed class SpaDataController : ControllerBase
             request.Password,
             request.IntegratedSecurity), cancellationToken));
 
-    [HttpPost("onboarding/{sessionId:guid}/on-prem-agent")]
+    [HttpPost("{sessionId:guid}/on-prem-agent")]
     public async Task<IActionResult> SetupOnPremAgent(
         Guid sessionId,
         [FromBody] SpaOnPremAgentRequest request,
@@ -374,7 +319,7 @@ public sealed class SpaDataController : ControllerBase
             request.ConnectionName,
             request.Provider), cancellationToken));
 
-    [HttpGet("onboarding/{sessionId:guid}/export-docs")]
+    [HttpGet("{sessionId:guid}/export-docs")]
     public async Task<IActionResult> ExportOnboardingDocs(Guid sessionId, CancellationToken cancellationToken)
     {
         var session = await _mediator.Send(new GetOnboardingSessionQuery(sessionId), cancellationToken);
@@ -389,55 +334,4 @@ public sealed class SpaDataController : ControllerBase
 
         return File(Encoding.UTF8.GetBytes(export.Content), export.ContentType, export.FileName);
     }
-
-    public sealed record SpaApprovalActionRequest(ApprovalActionType ActionType, string? Comments);
-
-    public sealed record SpaAddCommentRequest(string Content, bool IsInternal = false);
-
-    public sealed record SpaValidatePathRequest(string Path);
-
-    public sealed record SpaOnboardingBasicsRequest(
-        string Name,
-        string? BusinessDomain,
-        string? Purpose,
-        string? RiskSensitiveAreas,
-        string? OwnerTeamName);
-
-    public sealed record SpaOnboardingRepositoryRequest(
-        string RepositoryName,
-        string RepositoryPath,
-        string DefaultBranch);
-
-    public sealed record SpaOnboardingDatabaseRequest(
-        string ConnectionName,
-        DatabaseProviderType Provider,
-        string ConnectionString,
-        bool IsReadOnly);
-
-    public sealed record SpaGitHubAppCloneRequest(
-        string RepositoryName,
-        string Owner,
-        string Repository,
-        string DefaultBranch,
-        long? InstallationId);
-
-    public sealed record SpaGitCloneRequest(
-        string RepositoryName,
-        string RepositoryUrl,
-        string DefaultBranch,
-        string? AccessToken);
-
-    public sealed record SpaBuildConnectionStringRequest(
-        DatabaseProviderType Provider,
-        string Host,
-        int Port,
-        string Database,
-        string? Username,
-        string? Password,
-        bool IntegratedSecurity);
-
-    public sealed record SpaOnPremAgentRequest(
-        Guid ApplicationId,
-        string ConnectionName,
-        DatabaseProviderType Provider);
 }

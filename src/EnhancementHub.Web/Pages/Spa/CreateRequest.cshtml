@@ -1,0 +1,12 @@
+@page
+@model EnhancementHub.Web.Pages.Spa.CreateRequestModel
+@{
+    ViewData["Title"] = "New request";
+    ViewData["Breadcrumb"] = "New request";
+}
+
+<div id="spa-create-request-root" data-template-id="@(Model.TemplateId?.ToString() ?? string.Empty)"></div>
+
+@section Scripts {
+    <script type="module" src="~/spa/react/create-request.js" asp-append-version="true"></script>
+}

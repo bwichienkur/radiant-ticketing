@@ -11,8 +11,28 @@ const NODE_COLORS: Record<string, string> = {
   Repository: '#b07aa1',
 };
 
+export interface GraphTheme {
+  labelColor: string;
+  edgeColor: string;
+  edgeLabelColor: string;
+  selectionColor: string;
+  canvasBackground: string;
+}
+
 export function nodeColor(type: string): string {
   return NODE_COLORS[type] ?? '#9c755f';
+}
+
+export function readGraphThemeFromDocument(doc: Document = document): GraphTheme {
+  const style = getComputedStyle(doc.documentElement);
+
+  return {
+    labelColor: style.getPropertyValue('--eh-text').trim() || '#1f2937',
+    edgeColor: style.getPropertyValue('--eh-muted').trim() || '#94a3b8',
+    edgeLabelColor: style.getPropertyValue('--eh-muted').trim() || '#64748b',
+    selectionColor: style.getPropertyValue('--eh-accent').trim() || '#2563eb',
+    canvasBackground: style.getPropertyValue('--eh-surface-muted').trim() || '#f8fafc',
+  };
 }
 
 export interface CytoscapeElement {
@@ -64,7 +84,7 @@ export function buildCytoscapeElements(
   };
 }
 
-export function buildCytoscapeStyles(): Stylesheet[] {
+export function buildCytoscapeStyles(theme: GraphTheme = readGraphThemeFromDocument()): Stylesheet[] {
   return [
     {
       selector: 'node',
@@ -75,7 +95,7 @@ export function buildCytoscapeStyles(): Stylesheet[] {
         'font-size': 10,
         'text-wrap': 'wrap',
         'text-max-width': '90px',
-        color: '#1f2937',
+        color: theme.labelColor,
         'background-color': '#9c755f',
         width: 36,
         height: 36,
@@ -89,13 +109,13 @@ export function buildCytoscapeStyles(): Stylesheet[] {
       selector: 'edge',
       style: {
         width: 1.5,
-        'line-color': '#94a3b8',
-        'target-arrow-color': '#94a3b8',
+        'line-color': theme.edgeColor,
+        'target-arrow-color': theme.edgeColor,
         'target-arrow-shape': 'triangle',
         'curve-style': 'bezier',
         label: 'data(edgeLabel)',
         'font-size': 8,
-        color: '#64748b',
+        color: theme.edgeLabelColor,
         'text-rotation': 'autorotate',
       },
     },
@@ -103,14 +123,14 @@ export function buildCytoscapeStyles(): Stylesheet[] {
       selector: 'node:selected',
       style: {
         'border-width': 3,
-        'border-color': '#2563eb',
+        'border-color': theme.selectionColor,
       },
     },
     {
       selector: 'edge:selected',
       style: {
-        'line-color': '#2563eb',
-        'target-arrow-color': '#2563eb',
+        'line-color': theme.selectionColor,
+        'target-arrow-color': theme.selectionColor,
         width: 2.5,
       },
     },

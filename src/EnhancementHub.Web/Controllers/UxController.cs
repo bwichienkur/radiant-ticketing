@@ -46,7 +46,7 @@ public sealed class UxController : ControllerBase
             type = "request",
             title = r.Title,
             subtitle = $"{r.Status} · {r.Priority}",
-            url = $"/EnhancementRequests/Details/{r.Id}"
+            url = $"/Spa/RequestDetail/{r.Id}"
         }).ToList();
 
         var pages = GetStaticPages()
@@ -63,7 +63,7 @@ public sealed class UxController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(q))
         {
-            return Ok(new { answer = "Ask about requests, approvals, or high-risk items.", items = Array.Empty<object>() });
+            return Ok(new { answer = "Try keywords like high risk, pending approval, or system map.", items = Array.Empty<object>() });
         }
 
         var lower = q.ToLowerInvariant();
@@ -99,7 +99,7 @@ public sealed class UxController : ControllerBase
             type = "request",
             title = r.Title,
             subtitle = $"{r.LatestRiskLevel?.ToString() ?? "—"} risk · {r.Status}",
-            url = $"/EnhancementRequests/Details/{r.Id}"
+            url = $"/Spa/RequestDetail/{r.Id}"
         });
 
         return Ok(new { answer, items = results });
@@ -108,15 +108,11 @@ public sealed class UxController : ControllerBase
     private static IEnumerable<(string title, string url, string[] keywords)> GetStaticPages() =>
     [
         ("Dashboard", "/Index", ["home", "overview", "metrics"]),
-        ("Enhancement Requests", "/EnhancementRequests/Index", ["requests", "intake"]),
-        ("Approval Queue", "/EnhancementRequests/Approve", ["approve", "pending"]),
-        ("New Request", "/EnhancementRequests/Create", ["create", "submit"]),
-        ("System Map", "/Spa/SystemMap", ["graph", "architecture", "map", "react"]),
-        ("System Map (classic)", "/SystemMap/Index", ["graph", "architecture"]),
-        ("Approval Queue", "/Spa/ApprovalQueue", ["approve", "pending", "react"]),
-        ("Approval Queue (classic)", "/EnhancementRequests/Approve", ["approve", "pending"]),
-        ("Onboarding Wizard", "/Spa/OnboardingWizard", ["setup", "onboard", "react"]),
-        ("Onboarding Wizard (classic)", "/Onboarding/Wizard", ["setup", "onboard"]),
+        ("Enhancement Requests", "/Spa/RequestList", ["requests", "intake"]),
+        ("Approval Queue", "/Spa/ApprovalQueue", ["approve", "pending"]),
+        ("New Request", "/Spa/CreateRequest", ["create", "submit"]),
+        ("System Map", "/Spa/SystemMap", ["graph", "architecture", "map"]),
+        ("Onboarding Wizard", "/Spa/OnboardingWizard", ["setup", "onboard", "wizard"]),
         ("Schema Drift", "/SchemaDrift/Index", ["drift", "schema"]),
         ("ROI Dashboard", "/Admin/Roi", ["roi", "metrics", "admin"]),
         ("Tenancy & Billing", "/Admin/Tenancy", ["tenant", "billing", "commercial"])

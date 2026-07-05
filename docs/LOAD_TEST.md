@@ -32,9 +32,17 @@ k6 run tests/load/k6-smoke.js
 
 The smoke script exercises:
 
-- `GET /health`
+- `GET /health/ready`
 - `GET /api/v1/EnhancementRequests` (authenticated)
 - `GET /api/v1/applications` (authenticated)
+
+For the latest measured run, see [LOAD_TEST_RESULTS.md](LOAD_TEST_RESULTS.md).
+
+To run with API lifecycle managed automatically:
+
+```bash
+node scripts/run-load-test-smoke.mjs
+```
 
 ---
 

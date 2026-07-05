@@ -1,0 +1,341 @@
+using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Domain.Entities;
+using EnhancementHub.Domain.Enums;
+using EnhancementHub.Infrastructure.Persistence;
+using EnhancementHub.Infrastructure.Services;
+using EnhancementHub.Tests.Common;
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace EnhancementHub.Tests.Unit;
+
+public sealed class ProductHardeningTests
+{
+    [Fact]
+    public async Task EnhancementRequestAccessService_FiltersRequestsByTenant_ForAdmin()
+    {
+        await using var factory = new TestWebApplicationFactory();
+        using var scope = factory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<EnhancementHubDbContext>();
+        await factory.EnsureDatabaseInitializedAsync();
+
+        var tenantA = Guid.NewGuid();
+        var tenantB = Guid.NewGuid();
+        var now = DateTime.UtcNow;
+
+        db.Tenants.AddRange(
+            new Tenant
+            {
+                Id = tenantA,
+                Name = "Tenant A",
+                Slug = "tenant-a",
+                Plan = TenantPlan.Team,
+                Region = TenantRegion.US,
+                IsActive = true,
+                CreatedAt = now,
+                UpdatedAt = now
+            },
+            new Tenant
+            {
+                Id = tenantB,
+                Name = "Tenant B",
+                Slug = "tenant-b",
+                Plan = TenantPlan.Team,
+                Region = TenantRegion.US,
+                IsActive = true,
+                CreatedAt = now,
+                UpdatedAt = now
+            });
+
+        var adminA = new User
+        {
+            Id = Guid.NewGuid(),
+            Email = "admin-a@test.local",
+            DisplayName = "Admin A",
+            Role = UserRole.Admin,
+            TenantId = tenantA,
+            PasswordHash = "hash",
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+        var submitterB = new User
+        {
+            Id = Guid.NewGuid(),
+            Email = "submitter-b@test.local",
+            DisplayName = "Submitter B",
+            Role = UserRole.Submitter,
+            TenantId = tenantB,
+            PasswordHash = "hash",
+            CreatedAt = now,
+            UpdatedAt = now
+        };
+
+        db.Users.AddRange(adminA, submitterB);
+        db.EnhancementRequests.AddRange(
+            new EnhancementRequest
+            {
+                Id = Guid.NewGuid(),
+                Title = "Tenant A request",
+                BusinessDescription = "A",
+                DesiredOutcome = "B",
+                Priority = "Low",
+                SubmittedByUserId = adminA.Id,
+                Status = EnhancementRequestStatus.Submitted,
+                CreatedAt = now,
+                UpdatedAt = now
+            },
+            new EnhancementRequest
+            {
+                Id = Guid.NewGuid(),
+                Title = "Tenant B request",
+                BusinessDescription = "A",
+                DesiredOutcome = "B",
+                Priority = "Low",
+                SubmittedByUserId = submitterB.Id,
+                Status = EnhancementRequestStatus.Submitted,
+                CreatedAt = now,
+                UpdatedAt = now
+            });
+        await db.SaveChangesAsync();
+
+        var accessService = new EnhancementRequestAccessService(
+            db,
+            new TestCurrentUser(adminA.Id, adminA.Email, adminA.DisplayName, UserRole.Admin),
+            new TestCurrentTenant(tenantA));
+
+        var visible = await accessService.ApplyVisibilityFilter(db.EnhancementRequests).ToListAsync();
+        visible.Should().ContainSingle(r => r.SubmittedByUserId == adminA.Id);
+        visible.Should().NotContain(r => r.SubmittedByUserId == submitterB.Id);
+    }
+
+    [Fact]
+    public void Layout_IncludesMobileSidebarOffcanvas()
+    {
+        var layout = File.ReadAllText(Path.Combine(
+            GetRepoRoot(),
+            "src/EnhancementHub.Web/Pages/Shared/_Layout.cshtml"));
+
+        layout.Should().Contain("appSidebarOffcanvas");
+        layout.Should().Contain("app-sidebar-offcanvas");
+    }
+
+    [Fact]
+    public void DashboardChecklist_UsesActionableLinks()
+    {
+        var app = File.ReadAllText(Path.Combine(
+            GetRepoRoot(),
+            "src/EnhancementHub.Web/ClientApp/src/apps/DashboardApp.tsx"));
+
+        app.Should().Contain("checklist-item-link");
+        app.Should().Contain("/Spa/OnboardingWizard");
+        app.Should().Contain("/Spa/SystemMap");
+    }
+
+    [Fact]
+    public void SpaBff_ExposesApprovalHistoryBff()
+    {
+        var sources = SpaBffTestHelper.ReadAllSpaBffSources();
+        sources.Should().Contain("requests/{id:guid}/approval-history");
+        sources.Should().Contain("GetApprovalHistoryQuery");
+    }
+
+    [Fact]
+    public void SpaBff_IsSplitIntoFeatureControllers()
+    {
+        var spaDir = Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Controllers/Spa");
+        Directory.Exists(spaDir).Should().BeTrue();
+        File.Exists(Path.Combine(spaDir, "SpaRequestsController.cs")).Should().BeTrue();
+        File.Exists(Path.Combine(spaDir, "SpaApprovalsController.cs")).Should().BeTrue();
+        File.Exists(Path.Combine(spaDir, "SpaSystemController.cs")).Should().BeTrue();
+        File.Exists(Path.Combine(spaDir, "SpaOnboardingController.cs")).Should().BeTrue();
+        File.Exists(Path.Combine(spaDir, "SpaDashboardController.cs")).Should().BeTrue();
+        File.Exists(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Controllers/SpaDataController.cs")).Should().BeFalse();
+    }
+
+    [Fact]
+    public void ClassicPages_RedirectToReactByDefault()
+    {
+        var details = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/EnhancementRequests/Details.cshtml.cs"));
+        var approve = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/EnhancementRequests/Approve.cshtml.cs"));
+        var systemMap = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/SystemMap/Index.cshtml.cs"));
+        var onboarding = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Onboarding/Wizard.cshtml.cs"));
+        var requestList = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/EnhancementRequests/Index.cshtml.cs"));
+
+        details.Should().Contain("RedirectToPage(\"/Spa/RequestDetail\"");
+        details.Should().Contain("\"classic\"");
+        approve.Should().Contain("RedirectToPage(\"/Spa/ApprovalQueue\"");
+        systemMap.Should().Contain("RedirectToPage(\"/Spa/SystemMap\"");
+        onboarding.Should().Contain("RedirectToPage(\"/Spa/OnboardingWizard\"");
+        requestList.Should().Contain("RedirectToPage(\"/Spa/RequestList\"");
+    }
+
+    [Fact]
+    public void SpaBff_ExposesSystemMapRebuild()
+    {
+        var sources = SpaBffTestHelper.ReadAllSpaBffSources();
+        sources.Should().Contain("system-map/{applicationId:guid}/rebuild");
+        sources.Should().Contain("BuildSystemGraphCommand");
+    }
+
+    [Fact]
+    public void Dashboard_UsesPipelineSearchNotGenerativeCopilot()
+    {
+        var app = File.ReadAllText(Path.Combine(
+            GetRepoRoot(),
+            "src/EnhancementHub.Web/ClientApp/src/apps/DashboardApp.tsx"));
+        var page = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Index.cshtml"));
+
+        page.Should().Contain("spa-dashboard-root");
+        app.Should().Contain("Pipeline search");
+        app.Should().Contain("not a generative AI chat");
+        app.Should().NotContain("Ask EnhancementHub");
+    }
+
+    [Fact]
+    public void DashboardAndCreateRequest_UseReactSpa()
+    {
+        var sources = SpaBffTestHelper.ReadAllSpaBffSources();
+        sources.Should().Contain("web-api/spa/dashboard");
+        sources.Should().Contain("requests/create-form");
+        sources.Should().Contain("CreateEnhancementRequestCommand");
+
+        File.Exists(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Spa/CreateRequest.cshtml")).Should().BeTrue();
+        File.Exists(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/ClientApp/src/apps/CreateRequestApp.tsx")).Should().BeTrue();
+    }
+
+    [Fact]
+    public void PlaywrightSmokeHarness_Exists()
+    {
+        File.Exists(Path.Combine(GetRepoRoot(), "tests/e2e/smoke.spec.ts")).Should().BeTrue();
+        File.Exists(Path.Combine(GetRepoRoot(), "scripts/run-e2e-smoke.mjs")).Should().BeTrue();
+        File.Exists(Path.Combine(GetRepoRoot(), ".github/workflows/e2e-smoke.yml")).Should().BeTrue();
+    }
+
+    [Fact]
+    public void ProductTour_HasMobileLayout()
+    {
+        var css = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/wwwroot/css/site.css"));
+        var siteJs = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/wwwroot/js/site.js"));
+
+        css.Should().Contain(".product-tour-card-mobile");
+        siteJs.Should().Contain("product-tour-card-mobile");
+        siteJs.Should().Contain("prepareTarget");
+    }
+
+    [Fact]
+    public void LoadTestSmokeHarness_Exists()
+    {
+        File.Exists(Path.Combine(GetRepoRoot(), "scripts/run-load-test-smoke.mjs")).Should().BeTrue();
+        File.Exists(Path.Combine(GetRepoRoot(), "docs/LOAD_TEST_RESULTS.md")).Should().BeTrue();
+    }
+
+    [Fact]
+    public void RequestList_UsesReactSpa()
+    {
+        var sources = SpaBffTestHelper.ReadAllSpaBffSources();
+        sources.Should().Contain("[HttpGet(\"requests\")]");
+        sources.Should().Contain("ListEnhancementRequestsQuery");
+
+        File.Exists(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Spa/RequestList.cshtml")).Should().BeTrue();
+        File.Exists(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/ClientApp/src/apps/RequestListApp.tsx")).Should().BeTrue();
+
+        var index = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/EnhancementRequests/Index.cshtml.cs"));
+        index.Should().Contain("RedirectToPage(\"/Spa/RequestList\"");
+    }
+
+    [Fact]
+    public void SidebarNav_PointsToReactRoutes()
+    {
+        var nav = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Shared/_SidebarNav.cshtml"));
+        nav.Should().Contain("/Spa/ApprovalQueue");
+        nav.Should().Contain("/Spa/OnboardingWizard");
+        nav.Should().Contain("/Spa/SystemMap");
+        nav.Should().Contain("/Spa/RequestList");
+    }
+
+    [Fact]
+    public void ProductTour_IsImplementedOnDashboard()
+    {
+        var siteJs = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/wwwroot/js/site.js"));
+        var css = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/wwwroot/css/site.css"));
+        var dashboardApp = File.ReadAllText(Path.Combine(
+            GetRepoRoot(),
+            "src/EnhancementHub.Web/ClientApp/src/apps/DashboardApp.tsx"));
+
+        siteJs.Should().Contain("initProductTour");
+        siteJs.Should().Contain("eh-product-tour-seen");
+        css.Should().Contain(".product-tour-overlay");
+        dashboardApp.Should().Contain("data-tour=");
+    }
+
+    [Fact]
+    public void RequestDetailApp_IncludesApprovalHistoryAndAnalysisSections()
+    {
+        var app = File.ReadAllText(Path.Combine(
+            GetRepoRoot(),
+            "src/EnhancementHub.Web/ClientApp/src/apps/RequestDetailApp.tsx"));
+
+        app.Should().Contain("getApprovalHistory");
+        app.Should().Contain("Approval history");
+        app.Should().Contain("AnalysisDetailSections");
+    }
+
+    [Fact]
+    public void CommandPalette_SupportsKeyboardNavigation()
+    {
+        var siteJs = File.ReadAllText(Path.Combine(
+            GetRepoRoot(),
+            "src/EnhancementHub.Web/wwwroot/js/site.js"));
+
+        siteJs.Should().Contain("ArrowDown");
+        siteJs.Should().Contain("ArrowUp");
+        siteJs.Should().Contain("navigateActiveResult");
+    }
+
+    [Fact]
+    public void ProductionEvalProfile_Exists()
+    {
+        File.Exists(Path.Combine(GetRepoRoot(), "docker-compose.eval.yml")).Should().BeTrue();
+        var doc = File.ReadAllText(Path.Combine(GetRepoRoot(), "docs/PRODUCTION_EVAL.md"));
+        doc.Should().Contain("docker-compose.eval.yml");
+    }
+
+    private static string GetRepoRoot()
+    {
+        var dir = AppContext.BaseDirectory;
+        while (dir is not null && !File.Exists(Path.Combine(dir, "EnhancementHub.sln")))
+        {
+            dir = Directory.GetParent(dir)?.FullName;
+        }
+
+        return dir ?? throw new InvalidOperationException("Repo root not found");
+    }
+
+    private sealed class TestCurrentUser : ICurrentUserService
+    {
+        public TestCurrentUser(Guid userId, string email, string displayName, UserRole role)
+        {
+            UserId = userId;
+            Email = email;
+            DisplayName = displayName;
+            Role = role;
+            IsAuthenticated = true;
+        }
+
+        public Guid? UserId { get; }
+        public string? Email { get; }
+        public string? DisplayName { get; }
+        public UserRole? Role { get; }
+        public bool IsAuthenticated { get; }
+        public string? IpAddress => "127.0.0.1";
+    }
+
+    private sealed class TestCurrentTenant : ICurrentTenantService
+    {
+        public TestCurrentTenant(Guid? tenantId) => TenantId = tenantId;
+
+        public Guid? TenantId { get; }
+        public bool HasTenantContext => TenantId.HasValue;
+    }
+}

@@ -24,8 +24,13 @@ public class CreateModel : PageModel
     public SelectList? Applications { get; private set; }
     public IReadOnlyList<EnhancementTemplateSummaryDto> Templates { get; private set; } = [];
 
-    public async Task OnGetAsync(Guid? templateId, CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(Guid? templateId, string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToPage("/Spa/CreateRequest", templateId.HasValue ? new { templateId } : null);
+        }
+
         await LoadLookupsAsync(cancellationToken);
 
         if (templateId.HasValue)
@@ -38,6 +43,8 @@ public class CreateModel : PageModel
             Input.Priority = template.Priority;
             Input.SupportingNotes = template.SupportingNotes;
         }
+
+        return Page();
     }
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
@@ -60,7 +67,7 @@ public class CreateModel : PageModel
             Input.SupportingNotes,
             Input.TemplateId), cancellationToken);
 
-        return RedirectToPage("Details", new { id = result.Id });
+        return RedirectToPage("/Spa/RequestDetail", new { id = result.Id });
     }
 
     private async Task LoadLookupsAsync(CancellationToken cancellationToken)

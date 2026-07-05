@@ -12,8 +12,30 @@ export interface EnhancementRequestDetail {
   status: string;
   businessDescription: string;
   desiredOutcome: string;
+  priority?: string;
+  supportingNotes?: string;
+  targetApplicationId?: string;
   submittedByUserName?: string;
+  createdAt?: string;
   comments?: CommentSummary[];
+}
+
+export interface AffectedApplicationItem {
+  applicationId: string;
+  applicationName?: string;
+  impactDescription: string;
+}
+
+export interface DatabaseChangeItem {
+  tableName: string;
+  changeType: string;
+  description: string;
+}
+
+export interface ApiChangeItem {
+  endpoint: string;
+  changeType: string;
+  description: string;
 }
 
 export interface EnhancementAnalysis {
@@ -22,9 +44,21 @@ export interface EnhancementAnalysis {
   featureSummary?: string;
   confidenceScore: number;
   riskLevel: string;
-  affectedApplications?: unknown[];
-  databaseChangeRecommendations?: unknown[];
-  apiChangeRecommendations?: unknown[];
+  riskExplanation?: string;
+  technicalRequirements?: string;
+  testingPlan?: string;
+  needsClarification?: boolean;
+  affectedApplications?: AffectedApplicationItem[];
+  databaseChangeRecommendations?: DatabaseChangeItem[];
+  apiChangeRecommendations?: ApiChangeItem[];
+}
+
+export interface ApprovalHistoryItem {
+  id: string;
+  actionType: string;
+  userDisplayName: string;
+  comments?: string;
+  createdAt: string;
 }
 
 export interface ApplicationSummary {
@@ -59,6 +93,17 @@ export interface PendingApprovalItem {
   submittedByUserName?: string;
   priority: string;
   latestRiskLevel?: string;
+  daysInStatus?: number;
+}
+
+export interface EnhancementRequestListItem {
+  id: string;
+  title: string;
+  priority: string;
+  status: string | number;
+  targetApplicationName?: string;
+  submittedByUserName?: string;
+  latestRiskLevel?: string | number;
   daysInStatus?: number;
 }
 
@@ -125,4 +170,86 @@ export interface RepositoryPathValidation {
   errorMessage?: string;
   csharpFileCount: number;
   controllerCount: number;
+}
+
+export interface DashboardActivityItem {
+  eventType: string;
+  title: string;
+  subtitle?: string;
+  occurredAt: string;
+  entityId?: string;
+  linkPath: string;
+}
+
+export interface DailyRequestCount {
+  date: string;
+  count: number;
+}
+
+export interface DashboardInsights {
+  recentActivity: DashboardActivityItem[];
+  requestsLast7Days: DailyRequestCount[];
+  myPendingApprovals: number;
+  myAwaitingAnalysis: number;
+}
+
+export interface DashboardReport {
+  totalRequests: number;
+  pendingApprovalCount: number;
+  awaitingAnalysisCount: number;
+  highRiskPendingApprovalCount: number;
+  readyForDevelopmentCount: number;
+  averageApprovalTimeHours?: number;
+}
+
+export interface OnboardingStatus {
+  applicationCount: number;
+  repositoryCount: number;
+  databaseConnectionCount: number;
+  hasIndexedRepository: boolean;
+  hasSystemGraph: boolean;
+  activeSessionId?: string;
+}
+
+export interface DashboardPageData {
+  report: DashboardReport;
+  insights: DashboardInsights;
+  onboardingStatus: OnboardingStatus;
+  isApprover: boolean;
+  showOnboardingChecklist: boolean;
+}
+
+export interface EnhancementTemplateSummary {
+  id: string;
+  name: string;
+  domainCategory: string;
+  title: string;
+  priority: string;
+}
+
+export interface EnhancementTemplate extends EnhancementTemplateSummary {
+  businessDescription: string;
+  desiredOutcome: string;
+  supportingNotes?: string;
+}
+
+export interface CreateRequestFormData {
+  applications: ApplicationSummary[];
+  templates: EnhancementTemplateSummary[];
+}
+
+export interface CreateRequestInput {
+  title: string;
+  businessDescription: string;
+  desiredOutcome: string;
+  priority: string;
+  targetApplicationId?: string;
+  requestedDueDate?: string;
+  department?: string;
+  supportingNotes?: string;
+  templateId?: string;
+}
+
+export interface CreatedRequestSummary {
+  id: string;
 }

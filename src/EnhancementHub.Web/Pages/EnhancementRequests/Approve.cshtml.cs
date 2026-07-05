@@ -32,8 +32,13 @@ public class ApproveModel : PageModel
 
     public EnhancementRequestDetailDto? Selected { get; private set; }
 
-    public async Task OnGetAsync(Guid? id, CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(Guid? id, string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToPage("/Spa/ApprovalQueue", id.HasValue ? new { id } : null);
+        }
+
         Pending = await _mediator.Send(
             new ListEnhancementRequestsQuery(
                 EnhancementRequestStatus.PendingApproval,
@@ -49,6 +54,8 @@ public class ApproveModel : PageModel
             SelectedRequestId = Pending[0].Id;
             Selected = await _mediator.Send(new GetEnhancementRequestByIdQuery(Pending[0].Id), cancellationToken);
         }
+
+        return Page();
     }
 
     public async Task<IActionResult> OnPostActionAsync(CancellationToken cancellationToken)
@@ -56,14 +63,17 @@ public class ApproveModel : PageModel
         if (!SelectedRequestId.HasValue) return RedirectToPage();
 
         await _mediator.Send(new SubmitApprovalActionCommand(SelectedRequestId.Value, ActionType, Comments), cancellationToken);
-        return RedirectToPage(new { id = SelectedRequestId });
+        return RedirectToPage("/Spa/ApprovalQueue", new { id = SelectedRequestId });
     }
 
     public async Task<IActionResult> OnPostCommentAsync(CancellationToken cancellationToken)
     {
-        if (!SelectedRequestId.HasValue || string.IsNullOrWhiteSpace(NewComment)) return RedirectToPage(new { id = SelectedRequestId });
+        if (!SelectedRequestId.HasValue || string.IsNullOrWhiteSpace(NewComment))
+        {
+            return RedirectToPage("/Spa/ApprovalQueue", new { id = SelectedRequestId });
+        }
 
         await _mediator.Send(new AddCommentCommand(SelectedRequestId.Value, NewComment, true), cancellationToken);
-        return RedirectToPage(new { id = SelectedRequestId });
+        return RedirectToPage("/Spa/ApprovalQueue", new { id = SelectedRequestId });
     }
 }

@@ -1,0 +1,12 @@
+@page
+@model EnhancementHub.Web.Pages.Spa.RequestListModel
+@{
+    ViewData["Title"] = "Enhancement Requests";
+    ViewData["Breadcrumb"] = "Requests";
+}
+
+<div id="spa-request-list-root"></div>
+
+@section Scripts {
+    <script type="module" src="~/spa/react/request-list.js" asp-append-version="true"></script>
+}

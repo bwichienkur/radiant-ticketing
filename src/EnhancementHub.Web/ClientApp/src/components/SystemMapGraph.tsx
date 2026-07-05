@@ -1,7 +1,7 @@
 import cytoscape, { type Core } from 'cytoscape';
 import { useEffect, useRef, useState } from 'react';
 import type { SystemMap } from '../types/spa';
-import { buildCytoscapeElements, buildCytoscapeStyles } from './systemMapGraph';
+import { buildCytoscapeElements, buildCytoscapeStyles, readGraphThemeFromDocument } from './systemMapGraph';
 
 interface SystemMapGraphProps {
   map: SystemMap;
@@ -21,10 +21,15 @@ export function SystemMapGraph({ map, onNodeSelected }: SystemMapGraphProps) {
 
     const { elements } = buildCytoscapeElements(map.nodes, map.edges);
 
+    const theme = readGraphThemeFromDocument();
+    if (containerRef.current) {
+      containerRef.current.style.background = theme.canvasBackground;
+    }
+
     const cy = cytoscape({
       container: containerRef.current,
       elements,
-      style: buildCytoscapeStyles(),
+      style: buildCytoscapeStyles(theme),
       minZoom: 0.2,
       maxZoom: 2.5,
       wheelSensitivity: 0.2,
@@ -54,6 +59,25 @@ export function SystemMapGraph({ map, onNodeSelected }: SystemMapGraphProps) {
       cyRef.current = null;
     };
   }, [map, onNodeSelected]);
+
+  useEffect(() => {
+    const cy = cyRef.current;
+    if (!cy) {
+      return;
+    }
+
+    function applyTheme() {
+      const theme = readGraphThemeFromDocument();
+      cy!.style(buildCytoscapeStyles(theme));
+      if (containerRef.current) {
+        containerRef.current.style.background = theme.canvasBackground;
+      }
+    }
+
+    const observer = new MutationObserver(applyTheme);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme'] });
+    return () => observer.disconnect();
+  }, [map]);
 
   useEffect(() => {
     function onResize() {

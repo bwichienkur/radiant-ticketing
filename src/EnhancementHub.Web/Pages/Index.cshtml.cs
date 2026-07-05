@@ -1,9 +1,3 @@
-using EnhancementHub.Application.Features.Onboarding.Dtos;
-using EnhancementHub.Application.Features.Onboarding.Queries;
-using EnhancementHub.Application.Features.Reporting.Dtos;
-using EnhancementHub.Application.Features.Reporting.Queries;
-using EnhancementHub.Domain.Enums;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -12,26 +6,7 @@ namespace EnhancementHub.Web.Pages;
 [Authorize]
 public class IndexModel : PageModel
 {
-    private readonly IMediator _mediator;
-
-    public IndexModel(IMediator mediator) => _mediator = mediator;
-
-    public DashboardReportDto? Report { get; private set; }
-    public DashboardInsightsDto? Insights { get; private set; }
-    public OnboardingStatusDto? OnboardingStatus { get; private set; }
-
-    public bool ShowOnboardingChecklist =>
-        OnboardingStatus is not null
-        && (!OnboardingStatus.HasSystemGraph
-            || OnboardingStatus.ActiveSessionId.HasValue
-            || OnboardingStatus.ApplicationCount == 0);
-
-    public bool IsApprover => User.IsInRole("Admin") || User.IsInRole("Approver");
-
-    public async Task OnGetAsync(CancellationToken cancellationToken)
+    public void OnGet()
     {
-        Report = await _mediator.Send(new GetDashboardReportQuery(), cancellationToken);
-        Insights = await _mediator.Send(new GetDashboardInsightsQuery(), cancellationToken);
-        OnboardingStatus = await _mediator.Send(new GetOnboardingStatusQuery(), cancellationToken);
     }
 }

@@ -21,6 +21,7 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
   const [detailLoading, setDetailLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [actionInFlight, setActionInFlight] = useState(false);
 
   const loadQueue = useCallback(async () => {
     setLoading(true);
@@ -102,12 +103,13 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
   }, [pending, selectedId]);
 
   async function handleAction(actionType: string) {
-    if (!selectedId) {
+    if (!selectedId || actionInFlight) {
       return;
     }
 
     setError(null);
     setActionMessage(null);
+    setActionInFlight(true);
     try {
       await submitApprovalAction(selectedId, actionType, comments || undefined);
       setActionMessage(`Action submitted: ${actionType}`);
@@ -115,6 +117,8 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
       await loadQueue();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to submit approval action.');
+    } finally {
+      setActionInFlight(false);
     }
   }
 
@@ -178,8 +182,11 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
 
       <div className="col-lg-8">
         {error ? (
-          <div className="alert alert-danger" role="alert">
-            {error}
+          <div className="alert alert-danger d-flex flex-wrap justify-content-between align-items-center gap-2" role="alert">
+            <span>{error}</span>
+            <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => void loadQueue()}>
+              Retry
+            </button>
           </div>
         ) : null}
         {actionMessage ? (
@@ -214,10 +221,7 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
                 </div>
                 <div className="d-flex gap-2">
                   <a href={`/Spa/RequestDetail/${selected.id}`} className="btn btn-sm btn-outline-primary">
-                    React detail
-                  </a>
-                  <a href={`/EnhancementRequests/Details?id=${selected.id}`} className="btn btn-sm btn-outline-secondary">
-                    Classic view
+                    View details
                   </a>
                 </div>
               </div>
@@ -234,18 +238,29 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
             </details>
 
             <div className="approval-quick-actions mb-3 d-flex flex-wrap gap-2">
-              <button type="button" className="btn btn-success approval-action-btn" onClick={() => void handleAction('Approve')}>
-                Approve
+              <button
+                type="button"
+                className="btn btn-success approval-action-btn"
+                disabled={actionInFlight}
+                onClick={() => void handleAction('Approve')}
+              >
+                {actionInFlight ? 'Submitting…' : 'Approve'}
               </button>
               <button
                 type="button"
                 className="btn btn-outline-warning approval-action-btn"
+                disabled={actionInFlight}
                 onClick={() => void handleAction('RequestClarification')}
               >
-                Request clarification
+                {actionInFlight ? 'Submitting…' : 'Request clarification'}
               </button>
-              <button type="button" className="btn btn-outline-danger approval-action-btn" onClick={() => void handleAction('Reject')}>
-                Reject
+              <button
+                type="button"
+                className="btn btn-outline-danger approval-action-btn"
+                disabled={actionInFlight}
+                onClick={() => void handleAction('Reject')}
+              >
+                {actionInFlight ? 'Submitting…' : 'Reject'}
               </button>
             </div>
 

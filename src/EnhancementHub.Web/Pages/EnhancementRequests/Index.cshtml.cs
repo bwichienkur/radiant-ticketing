@@ -32,8 +32,13 @@ public class IndexModel : PageModel
 
     public IReadOnlyList<EnhancementRequestDto> Requests { get; private set; } = [];
 
-    public async Task OnGetAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToPage("/Spa/RequestList", new { q = Q, status = Status, priority = Priority, view = View, sort = Sort });
+        }
+
         RiskLevel? minRisk = View == "highrisk" ? RiskLevel.High : null;
         if (View == "mine" && User.Identity?.Name is not null)
         {
@@ -50,5 +55,7 @@ public class IndexModel : PageModel
                 MinRisk: minRisk,
                 Sort: Sort),
             cancellationToken);
+
+        return Page();
     }
 }

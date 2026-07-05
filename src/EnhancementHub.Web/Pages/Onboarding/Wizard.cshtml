@@ -400,7 +400,7 @@
                     <input type="hidden" asp-for="SessionId" />
                     <button type="submit" class="btn btn-primary">Download documentation</button>
                 </form>
-                <a asp-page="/SystemMap/Index" asp-route-applicationId="@Model.Session.ApplicationId" class="btn btn-outline-primary">View system map</a>
+                <a href="/Spa/SystemMap?applicationId=@Model.Session.ApplicationId" class="btn btn-outline-primary">View system map</a>
                 <a asp-page="/SchemaDrift/Index" class="btn btn-outline-secondary">Review drift</a>
                 <form method="post" asp-page-handler="Complete" class="d-inline">
                     <input type="hidden" asp-for="SessionId" />

@@ -1,4 +1,5 @@
 using EnhancementHub.Application.Common;
+using EnhancementHub.Tests.Common;
 using FluentAssertions;
 
 namespace EnhancementHub.Tests.Unit;
@@ -27,12 +28,9 @@ public sealed class Phase25UxModernizationTests
     [Fact]
     public void SpaPilot_HasWebApiEndpoint()
     {
-        var controller = File.ReadAllText(Path.Combine(
-            GetRepoRoot(),
-            "src/EnhancementHub.Web/Controllers/SpaDataController.cs"));
-
-        controller.Should().Contain("web-api/spa");
-        controller.Should().Contain("GetEnhancementRequestByIdQuery");
+        var sources = SpaBffTestHelper.ReadAllSpaBffSources();
+        sources.Should().Contain("web-api/spa");
+        sources.Should().Contain("GetEnhancementRequestByIdQuery");
     }
 
     [Fact]

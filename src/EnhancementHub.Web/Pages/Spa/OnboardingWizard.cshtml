@@ -1,21 +1,9 @@
 @page "{id:guid?}"
 @model EnhancementHub.Web.Pages.Spa.OnboardingWizardModel
 @{
-    ViewData["Title"] = "Onboarding Wizard (React)";
+    ViewData["Title"] = "Setup";
+    ViewData["Breadcrumb"] = "Setup";
 }
-
-<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
-    <div>
-        <h1>Document your application</h1>
-        <p class="text-muted mb-0">React onboarding wizard — guided setup for code, database, and discovery</p>
-    </div>
-  @if (Model.SessionId.HasValue)
-  {
-    <a asp-page="/Onboarding/Wizard" asp-route-id="@Model.SessionId" class="btn btn-outline-secondary btn-sm">
-      Classic wizard
-    </a>
-  }
-</div>
 
 <div id="spa-onboarding-wizard-root" data-session-id="@(Model.SessionId?.ToString() ?? string.Empty)"></div>
 

@@ -10,17 +10,22 @@ public sealed class EnhancementRequestAccessService : IEnhancementRequestAccessS
 {
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly ICurrentUserService _currentUser;
+    private readonly ICurrentTenantService _currentTenant;
 
     public EnhancementRequestAccessService(
         IEnhancementHubDbContext dbContext,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        ICurrentTenantService currentTenant)
     {
         _dbContext = dbContext;
         _currentUser = currentUser;
+        _currentTenant = currentTenant;
     }
 
     public IQueryable<EnhancementRequest> ApplyVisibilityFilter(IQueryable<EnhancementRequest> query)
     {
+        query = ApplyTenantFilter(query);
+
         if (_currentUser.Role == UserRole.Admin)
         {
             return query;
@@ -44,6 +49,25 @@ public sealed class EnhancementRequestAccessService : IEnhancementRequestAccessS
                 && _dbContext.Applications.Any(a =>
                     a.Id == r.TargetApplicationId
                     && teamIds.Contains(a.OwnerTeamId))));
+    }
+
+    private IQueryable<EnhancementRequest> ApplyTenantFilter(IQueryable<EnhancementRequest> query)
+    {
+        if (!_currentTenant.TenantId.HasValue)
+        {
+            return query;
+        }
+
+        var tenantId = _currentTenant.TenantId.Value;
+
+        return query.Where(r =>
+            _dbContext.Users.Any(u => u.Id == r.SubmittedByUserId && u.TenantId == tenantId)
+            || (r.TeamId.HasValue
+                && _dbContext.Teams.Any(t => t.Id == r.TeamId && t.TenantId == tenantId))
+            || (r.TargetApplicationId.HasValue
+                && _dbContext.Applications.Any(a =>
+                    a.Id == r.TargetApplicationId
+                    && _dbContext.Teams.Any(t => t.Id == a.OwnerTeamId && t.TenantId == tenantId))));
     }
 
     public async Task<EnhancementRequest> GetAccessibleRequestAsync(
