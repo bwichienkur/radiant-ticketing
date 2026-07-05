@@ -67,6 +67,10 @@ public sealed class AdminController : ControllerBase
     public async Task<IActionResult> GetSoc2ReadinessReport(CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new GetSoc2ReadinessReportQuery(), cancellationToken));
 
+    [HttpGet("indexing/freshness")]
+    public async Task<IActionResult> GetIndexFreshnessReport(CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetIndexFreshnessReportQuery(), cancellationToken));
+
     [HttpGet("teams")]
     public async Task<IActionResult> ListTeams(CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new ListTeamsQuery(), cancellationToken));

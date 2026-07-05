@@ -225,13 +225,16 @@
 - Hashed key storage; plain key shown once at creation
 - API: `GET/POST /api/admin/api-keys`, `DELETE /api/admin/api-keys/{id}`
 
-## Phase 19 — Incremental indexing at scale (started)
+## Phase 19 — Incremental indexing at scale (complete)
 
 - Git diff-based incremental repository indexing when `Indexing:IncrementalEnabled=true`
 - Tracks `RepositoryBranch.LastCommitHash` after each index run
 - Processes only changed/deleted files; full reindex when prior commit is missing or diff fails
-- Configurable via `Indexing:MaxFilesPerRun` (default 5000)
+- Configurable via `Indexing:MaxFilesPerRun` (default 5000) and `Indexing:FreshnessSlaHours` (default 24)
 - Repository status API exposes last commit hash and incremental flag
+- Monorepo subdirectory scoping via `Repository.SourceSubdirectory` and priority via `Repository.IndexingPriority`
+- Hangfire per-repository indexing jobs on dedicated `indexing` queue when `Indexing:ShardJobsPerRepository=true`
+- Admin index freshness report: `GET /api/admin/indexing/freshness` and `/Admin/Jobs` dashboard
 
 ## Future enhancements
 

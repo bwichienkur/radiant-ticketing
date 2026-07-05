@@ -16,7 +16,9 @@ public sealed record RegisterRepositoryCommand(
     string Url,
     ExternalTicketProvider Provider,
     string DefaultBranch = "main",
-    string? GitTokenSecretName = null) : IRequest<RepositoryDto>;
+    string? GitTokenSecretName = null,
+    string? SourceSubdirectory = null,
+    int IndexingPriority = 0) : IRequest<RepositoryDto>;
 
 public sealed class RegisterRepositoryCommandHandler
     : IRequestHandler<RegisterRepositoryCommand, RepositoryDto>
@@ -53,6 +55,8 @@ public sealed class RegisterRepositoryCommandHandler
             Provider = request.Provider,
             DefaultBranch = request.DefaultBranch,
             GitTokenSecretName = request.GitTokenSecretName,
+            SourceSubdirectory = request.SourceSubdirectory?.Trim().Replace('\\', '/'),
+            IndexingPriority = request.IndexingPriority,
             IndexingStatus = IndexingStatus.Pending,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

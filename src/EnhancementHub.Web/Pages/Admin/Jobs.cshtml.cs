@@ -16,12 +16,16 @@ public class JobsModel : PageModel
     public JobsModel(IMediator mediator) => _mediator = mediator;
 
     public BackgroundJobsStatusDto? Status { get; private set; }
+    public IndexFreshnessReportDto? Freshness { get; private set; }
 
     [TempData]
     public string? StatusMessage { get; set; }
 
-    public async Task OnGetAsync(CancellationToken cancellationToken) =>
+    public async Task OnGetAsync(CancellationToken cancellationToken)
+    {
         Status = await _mediator.Send(new GetBackgroundJobsStatusQuery(), cancellationToken);
+        Freshness = await _mediator.Send(new GetIndexFreshnessReportQuery(), cancellationToken);
+    }
 
     public async Task<IActionResult> OnPostRetryAsync(string jobId, CancellationToken cancellationToken)
     {

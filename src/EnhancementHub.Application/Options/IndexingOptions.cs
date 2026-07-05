@@ -7,4 +7,6 @@ public sealed class IndexingOptions
     public bool IncrementalEnabled { get; set; } = true;
 
     public int MaxFilesPerRun { get; set; } = 5000;
+
+    public int FreshnessSlaHours { get; set; } = 24;
 }

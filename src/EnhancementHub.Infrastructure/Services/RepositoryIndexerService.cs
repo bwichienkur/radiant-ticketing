@@ -63,15 +63,20 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
 
         try
         {
-            var rootPath = ResolveRepositoryPath(repository);
+            var repositoryRoot = ResolveRepositoryPath(repository);
+            var indexRoot = ResolveIndexRoot(repositoryRoot, repository.SourceSubdirectory);
             var branch = await GetOrCreateBranchAsync(repository, cancellationToken);
-            var incrementalPlan = await ResolveIncrementalPlanAsync(rootPath, branch, cancellationToken);
+            var incrementalPlan = await ResolveIncrementalPlanAsync(
+                repositoryRoot,
+                repository.SourceSubdirectory,
+                branch,
+                cancellationToken);
             var isIncremental = incrementalPlan.IsIncremental;
 
             RepositoryScanResult? scan = null;
             if (!isIncremental || incrementalPlan.HasCSharpChanges)
             {
-                scan = await _scanner.ScanAsync(rootPath, cancellationToken);
+                scan = await _scanner.ScanAsync(indexRoot, cancellationToken);
                 await PersistEntityMappingsAsync(repositoryId, scan.EntityMappings, cancellationToken);
             }
 
@@ -102,7 +107,7 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
                         continue;
                     }
 
-                    var absolutePath = Path.Combine(rootPath, relativePath.Replace('/', Path.DirectorySeparatorChar));
+                    var absolutePath = Path.Combine(indexRoot, relativePath.Replace('/', Path.DirectorySeparatorChar));
                     if (!File.Exists(absolutePath))
                     {
                         continue;
@@ -111,7 +116,7 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
                     var updated = await ProcessFileAsync(
                         repositoryId,
                         branch.Id,
-                        rootPath,
+                        indexRoot,
                         absolutePath,
                         relativePath,
                         scan,
@@ -131,7 +136,7 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
             else
             {
                 var files = Directory
-                    .EnumerateFiles(rootPath, "*.*", SearchOption.AllDirectories)
+                    .EnumerateFiles(indexRoot, "*.*", SearchOption.AllDirectories)
                     .Where(f => SourceExtensions.Contains(Path.GetExtension(f), StringComparer.OrdinalIgnoreCase))
                     .Where(f => !IsExcludedPath(f))
                     .Take(_indexingOptions.MaxFilesPerRun)
@@ -142,13 +147,13 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
                 foreach (var absolutePath in files)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    var relativePath = Path.GetRelativePath(rootPath, absolutePath).Replace('\\', '/');
+                    var relativePath = Path.GetRelativePath(indexRoot, absolutePath).Replace('\\', '/');
                     seenPaths.Add(relativePath);
 
                     var updated = await ProcessFileAsync(
                         repositoryId,
                         branch.Id,
-                        rootPath,
+                        indexRoot,
                         absolutePath,
                         relativePath,
                         scan,
@@ -239,11 +244,12 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
     }
 
     private async Task<IncrementalIndexingPlan> ResolveIncrementalPlanAsync(
-        string rootPath,
+        string repositoryRoot,
+        string? sourceSubdirectory,
         RepositoryBranch branch,
         CancellationToken cancellationToken)
     {
-        var headCommit = _gitHistory.GetHeadCommitHash(rootPath);
+        var headCommit = _gitHistory.GetHeadCommitHash(repositoryRoot);
         if (!_indexingOptions.IncrementalEnabled
             || string.IsNullOrWhiteSpace(branch.LastCommitHash)
             || string.IsNullOrWhiteSpace(headCommit))
@@ -251,7 +257,7 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
             return IncrementalIndexingPlan.Full(headCommit);
         }
 
-        var changes = await _gitHistory.GetChangesSinceAsync(rootPath, branch.LastCommitHash, cancellationToken);
+        var changes = await _gitHistory.GetChangesSinceAsync(repositoryRoot, branch.LastCommitHash, cancellationToken);
         if (changes.RequiresFullReindex)
         {
             _logger.LogInformation(
@@ -271,14 +277,24 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
         }
 
         var changedPaths = changes.ChangedPaths
+            .Select(path => MapGitPathToIndexPath(path, sourceSubdirectory))
+            .Where(path => path is not null)
+            .Select(path => path!)
             .Where(ShouldIndexPath)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var deletedPaths = changes.DeletedPaths
+            .Select(path => MapGitPathToIndexPath(path, sourceSubdirectory))
+            .Where(path => path is not null)
+            .Select(path => path!)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
 
         return new IncrementalIndexingPlan(
             IsIncremental: true,
             ChangedPaths: changedPaths,
-            DeletedPaths: changes.DeletedPaths,
+            DeletedPaths: deletedPaths,
             HasCSharpChanges: changedPaths.Any(p => p.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)),
             HeadCommitHash: changes.HeadCommitHash ?? headCommit);
     }
@@ -412,6 +428,49 @@ public sealed class RepositoryIndexerService : IRepositoryIndexer
         }
 
         throw new DirectoryNotFoundException($"Repository path for '{repository.Name}' is not available.");
+    }
+
+    private static string ResolveIndexRoot(string repositoryRoot, string? sourceSubdirectory)
+    {
+        if (string.IsNullOrWhiteSpace(sourceSubdirectory))
+        {
+            return repositoryRoot;
+        }
+
+        var indexRoot = Path.Combine(
+            repositoryRoot,
+            sourceSubdirectory.Trim().Replace('/', Path.DirectorySeparatorChar));
+
+        if (!Directory.Exists(indexRoot))
+        {
+            throw new DirectoryNotFoundException(
+                $"Source subdirectory '{sourceSubdirectory}' was not found in repository root.");
+        }
+
+        return indexRoot;
+    }
+
+    internal static string? MapGitPathToIndexPath(string gitPath, string? sourceSubdirectory)
+    {
+        var normalized = gitPath.Replace('\\', '/').TrimStart('/');
+        if (string.IsNullOrWhiteSpace(sourceSubdirectory))
+        {
+            return normalized;
+        }
+
+        var prefix = sourceSubdirectory.Trim().Trim('/').Replace('\\', '/');
+        if (normalized.Equals(prefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return string.Empty;
+        }
+
+        var scopedPrefix = prefix + "/";
+        if (!normalized.StartsWith(scopedPrefix, StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        return normalized[scopedPrefix.Length..];
     }
 
     private async Task<RepositoryBranch> GetOrCreateBranchAsync(Repository repository, CancellationToken cancellationToken)

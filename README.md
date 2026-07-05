@@ -146,7 +146,12 @@ Key settings in `appsettings.json`:
   "OpenAI": { "ApiKey": "", "Model": "gpt-4o-mini" },
   "VectorSearch": { "Provider": "InMemory|PgVector|Qdrant|AzureSearch" },
   "Storage": { "Provider": "Local|S3" },
-  "Indexing": { "IncrementalEnabled": true, "MaxFilesPerRun": 5000 }
+  "Indexing": {
+    "IncrementalEnabled": true,
+    "MaxFilesPerRun": 5000,
+    "FreshnessSlaHours": 24,
+    "ShardJobsPerRepository": true
+  }
 }
 ```
 
@@ -171,7 +176,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-120+ tests covering incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
+125+ tests covering indexing scale, incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
 
 ---
 
