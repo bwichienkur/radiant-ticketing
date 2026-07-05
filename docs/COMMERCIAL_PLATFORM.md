@@ -35,7 +35,7 @@ Platform admins without a `tenant_id` claim retain cross-tenant visibility (exis
 }
 ```
 
-Set `SelfServiceSignupEnabled` to `false` in production until billing integration is ready.
+Set `SelfServiceSignupEnabled` to `false` in production until Stripe billing is configured (see [STRIPE_BILLING.md](STRIPE_BILLING.md)).
 
 ---
 

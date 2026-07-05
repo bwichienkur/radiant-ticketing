@@ -312,8 +312,17 @@
 - Template-card create flow; admin sub-nav; SPA pilot skeleton + mission control
 - Guide: `docs/UX_MODERNIZATION.md` (Phase 27 section)
 
+## Phase 28 — Stripe billing (complete)
+
+- Stripe Checkout and Billing Portal integration (`StripeOptions`, `IStripeBillingService`)
+- Tenant subscription fields (`StripeCustomerId`, `StripeSubscriptionId`, `SubscriptionStatus`)
+- Billing API: `POST /api/billing/checkout`, `POST /api/billing/portal`
+- Stripe webhooks: `POST /api/webhooks/stripe` for checkout and subscription lifecycle
+- Trial expiry enforcement in `TenantBillingService.EnsureWithinLimitsAsync`
+- Admin upgrade CTAs on `/Admin/Tenancy`
+- Guide: `docs/STRIPE_BILLING.md`
+
 ## Future enhancements
 
-- Payment provider integration (Stripe) and invoice generation
 - Schema-per-tenant isolation for regulated workloads
 - React migration for SPA hot paths

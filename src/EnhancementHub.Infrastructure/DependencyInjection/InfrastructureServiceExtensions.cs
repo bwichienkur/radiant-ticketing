@@ -169,9 +169,12 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IServiceNowSyncService, ServiceNowSyncService>();
         services.Configure<Application.Options.CommercialOptions>(
             configuration.GetSection(Application.Options.CommercialOptions.SectionName));
+        services.Configure<Application.Options.StripeOptions>(
+            configuration.GetSection(Application.Options.StripeOptions.SectionName));
         services.AddScoped<ICurrentTenantService, CurrentTenantService>();
         services.AddScoped<ITenantMeteringService, TenantMeteringService>();
         services.AddScoped<ITenantBillingService, TenantBillingService>();
+        services.AddScoped<IStripeBillingService, StripeBillingService>();
         services.AddScoped<IApprovalPolicyEvaluator, ApprovalPolicyEvaluator>();
         services.AddSingleton<IRequestCollaborationNotifier, NoOpRequestCollaborationNotifier>();
         services.AddScoped<HangfireRepositoryIndexingDispatcher>();

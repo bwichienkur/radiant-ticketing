@@ -14,6 +14,8 @@ public class TenantConfiguration : IEntityTypeConfiguration<Tenant>
         builder.Property(x => x.Slug).HasMaxLength(100).IsRequired();
         builder.HasIndex(x => x.Slug).IsUnique();
         builder.Property(x => x.BillingEmail).HasMaxLength(320);
+        builder.Property(x => x.StripeCustomerId).HasMaxLength(128);
+        builder.Property(x => x.StripeSubscriptionId).HasMaxLength(128);
     }
 }
 
