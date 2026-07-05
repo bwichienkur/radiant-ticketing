@@ -1,8 +1,8 @@
 # EnhancementHub — Product Demo Video
 
-**Video:** `/opt/cursor/artifacts/demo/enhancementhub-demo.mp4` (~87 seconds, 1280×720)  
-**Subtitles:** `/opt/cursor/artifacts/demo/narration.srt`  
-**Regenerate:** `node scripts/record-demo-video.mjs` (requires Web on `:5001`)
+**Video:** `artifacts/demo/enhancementhub-demo.mp4` (~6 min, 1280×720, continuous screen recording)  
+**Subtitles:** `artifacts/demo/narration.srt`  
+**Regenerate:** `node scripts/record-demo-video.mjs` (requires Web on `:5001`, login `admin@enhancementhub.dev` / `password123`)
 
 ---
 
