@@ -114,10 +114,16 @@ public sealed class EnhancementRequestStatusTests : IDisposable
         currentUser.SetupGet(x => x.UserId).Returns(approverId);
         currentUser.SetupGet(x => x.Role).Returns(UserRole.Approver);
 
+        var policyEvaluator = new Mock<IApprovalPolicyEvaluator>();
+        policyEvaluator
+            .Setup(x => x.EvaluateAsync(It.IsAny<Guid>(), It.IsAny<UserRole>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ApprovalPolicyEvaluationResult(true, null, null));
+
         var handler = new SubmitApprovalActionCommandHandler(
             _dbContext,
             currentUser.Object,
-            new AuditService(_dbContext, currentUser.Object));
+            new AuditService(_dbContext, currentUser.Object),
+            policyEvaluator.Object);
 
         var result = await handler.Handle(
             new SubmitApprovalActionCommand(requestId, actionType, "Test comment"),

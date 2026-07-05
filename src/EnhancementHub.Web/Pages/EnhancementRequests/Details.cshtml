@@ -174,6 +174,57 @@ else if (r.Status is EnhancementRequestStatus.Submitted or EnhancementRequestSta
                 }
             </div>
         }
+
+        @if (Model.Comparison is not null)
+        {
+            var cmp = Model.Comparison;
+            <div class="card-panel p-4 mb-4">
+                <div class="detail-section">
+                    <h3>AI vs architect comparison</h3>
+                    <p class="text-muted small">Version @cmp.VersionA → @cmp.VersionB · @cmp.ArchitectEditsBetweenVersions architect edit(s)</p>
+                </div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <div class="stat-card">
+                            <div class="label">Risk (v@cmp.VersionA → v@cmp.VersionB)</div>
+                            <div class="value fs-6">@cmp.RiskLevelA → @cmp.RiskLevelB</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="stat-card">
+                            <div class="label">Confidence</div>
+                            <div class="value fs-6">@($"{cmp.ConfidenceScoreA:P0}") → @($"{cmp.ConfidenceScoreB:P0}")</div>
+                        </div>
+                    </div>
+                </div>
+                @if (cmp.FieldChanges.Any(f => f.Changed))
+                {
+                    <table class="table table-sm">
+                        <thead><tr><th>Field</th><th>Before</th><th>After</th></tr></thead>
+                        <tbody>
+                        @foreach (var field in cmp.FieldChanges.Where(f => f.Changed))
+                        {
+                            <tr>
+                                <td>@field.FieldName</td>
+                                <td class="small text-muted">@(field.ValueA ?? "—")</td>
+                                <td class="small">@(field.ValueB ?? "—")</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                }
+                @if (cmp.FindingChanges.Any(f => f.ChangeType != EnhancementHub.Application.Features.Analysis.Dtos.ComparisonChangeType.Unchanged))
+                {
+                    <h4 class="h6 mt-3">Finding changes</h4>
+                    <ul class="small mb-0">
+                    @foreach (var finding in cmp.FindingChanges.Where(f => f.ChangeType != EnhancementHub.Application.Features.Analysis.Dtos.ComparisonChangeType.Unchanged))
+                    {
+                        <li>@finding.ChangeType: @finding.Title (@finding.Category)</li>
+                    }
+                    </ul>
+                }
+            </div>
+        }
     </div>
 
     <div class="col-lg-4">

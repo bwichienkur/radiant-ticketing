@@ -30,4 +30,49 @@ public sealed class AnalysisController : ControllerBase
     [EnableRateLimiting(RateLimitingExtensions.AiAnalysisPolicy)]
     public async Task<IActionResult> Reanalyze(Guid requestId, CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new RequestReanalysisCommand(requestId), cancellationToken));
+
+    [HttpGet("{requestId:guid}/compare")]
+    public async Task<IActionResult> Compare(
+        Guid requestId,
+        [FromQuery] int versionA,
+        [FromQuery] int? versionB,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(
+            new GetAnalysisComparisonQuery(requestId, versionA, versionB),
+            cancellationToken));
+
+    [HttpPost("findings/{findingId:guid}/approve")]
+    public async Task<IActionResult> ApproveFinding(
+        Guid findingId,
+        [FromBody] ApproveFindingRequest? body,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(
+            new ApproveAnalysisFindingCommand(findingId, body?.Approved ?? true),
+            cancellationToken));
+
+    [HttpPost("{requestId:guid}/architect-edit")]
+    public async Task<IActionResult> RecordArchitectEdit(
+        Guid requestId,
+        [FromBody] ArchitectEditRequest body,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(
+            new RecordArchitectAnalysisEditCommand(
+                requestId,
+                body.EnhancementAnalysisId,
+                body.FeatureSummary,
+                body.TechnicalRequirements,
+                body.TestingPlan,
+                body.RolloutPlan,
+                body.Comments),
+            cancellationToken));
+
+    public sealed record ApproveFindingRequest(bool Approved = true);
+
+    public sealed record ArchitectEditRequest(
+        Guid EnhancementAnalysisId,
+        string? FeatureSummary,
+        string? TechnicalRequirements,
+        string? TestingPlan,
+        string? RolloutPlan,
+        string? Comments);
 }

@@ -4,6 +4,7 @@ using EnhancementHub.Domain.Entities;
 using EnhancementHub.Domain.Enums;
 using FluentValidation;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace EnhancementHub.Application.Features.EnhancementRequests.Commands;
 
@@ -16,7 +17,8 @@ public sealed record CreateEnhancementRequestCommand(
     DateTime? RequestedDueDate,
     string? Department,
     Guid? TeamId,
-    string? SupportingNotes) : IRequest<EnhancementRequestDto>;
+    string? SupportingNotes,
+    Guid? TemplateId = null) : IRequest<EnhancementRequestDto>;
 
 public sealed class CreateEnhancementRequestCommandValidator : AbstractValidator<CreateEnhancementRequestCommand>
 {
@@ -52,19 +54,56 @@ public sealed class CreateEnhancementRequestCommandHandler
             throw new UnauthorizedAccessException("User must be authenticated to create enhancement requests.");
         }
 
+        var title = request.Title;
+        var businessDescription = request.BusinessDescription;
+        var desiredOutcome = request.DesiredOutcome;
+        var priority = request.Priority;
+        var supportingNotes = request.SupportingNotes;
+
+        if (request.TemplateId.HasValue)
+        {
+            var template = await _dbContext.EnhancementTemplates
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Id == request.TemplateId.Value && t.IsActive, cancellationToken)
+                ?? throw new Common.Exceptions.NotFoundException("EnhancementTemplate", request.TemplateId.Value);
+
+            title = string.IsNullOrWhiteSpace(title) ? template.Title : title;
+            businessDescription = string.IsNullOrWhiteSpace(businessDescription)
+                ? template.BusinessDescription
+                : businessDescription;
+            desiredOutcome = string.IsNullOrWhiteSpace(desiredOutcome)
+                ? template.DesiredOutcome
+                : desiredOutcome;
+            priority = string.IsNullOrWhiteSpace(priority) ? template.Priority : priority;
+
+            var templateNote = $"Template: {template.DomainCategory} | {template.Name}";
+            if (!string.IsNullOrWhiteSpace(template.SupportingNotes))
+            {
+                supportingNotes = string.IsNullOrWhiteSpace(supportingNotes)
+                    ? $"{templateNote}\n{template.SupportingNotes}"
+                    : $"{templateNote}\n{supportingNotes}";
+            }
+            else
+            {
+                supportingNotes = string.IsNullOrWhiteSpace(supportingNotes)
+                    ? templateNote
+                    : $"{templateNote}\n{supportingNotes}";
+            }
+        }
+
         var entity = new EnhancementRequest
         {
             Id = Guid.NewGuid(),
-            Title = request.Title,
-            BusinessDescription = request.BusinessDescription,
-            DesiredOutcome = request.DesiredOutcome,
-            Priority = request.Priority,
+            Title = title,
+            BusinessDescription = businessDescription,
+            DesiredOutcome = desiredOutcome,
+            Priority = priority,
             TargetApplicationId = request.TargetApplicationId,
             RequestedDueDate = request.RequestedDueDate,
             SubmittedByUserId = _currentUser.UserId.Value,
             Department = request.Department,
             TeamId = request.TeamId,
-            SupportingNotes = request.SupportingNotes,
+            SupportingNotes = supportingNotes,
             Status = EnhancementRequestStatus.Submitted,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,

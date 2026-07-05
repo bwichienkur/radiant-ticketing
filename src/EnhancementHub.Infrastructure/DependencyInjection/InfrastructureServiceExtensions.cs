@@ -167,6 +167,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IChatIntakeService, ChatIntakeService>();
         services.AddScoped<IGitHubWebhookService, GitHubWebhookService>();
         services.AddScoped<IServiceNowSyncService, ServiceNowSyncService>();
+        services.AddScoped<IApprovalPolicyEvaluator, ApprovalPolicyEvaluator>();
         services.AddScoped<HangfireRepositoryIndexingDispatcher>();
         services.PostConfigure<Options.AiOptions>(options =>
         {

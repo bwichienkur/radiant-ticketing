@@ -152,10 +152,10 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 - [x] ServiceNow bi-directional sync (optional)
 
 ### 4.2 Product-led differentiation (Phase 24)
-- [ ] ROI dashboard: analysis time saved, risk prevented, drift findings resolved
-- [ ] Policy engine: approval rules by risk level, department, application tier
-- [ ] Enhancement templates by domain (security, performance, compliance)
-- [ ] Comparison view: AI recommendation vs architect edits (learning signal)
+- [x] ROI dashboard: analysis time saved, risk prevented, drift findings resolved
+- [x] Policy engine: approval rules by risk level, department, application tier
+- [x] Enhancement templates by domain (security, performance, compliance)
+- [x] Comparison view: AI recommendation vs architect edits (learning signal)
 
 ### 4.3 UX modernization (Phase 25)
 - [ ] Evaluate Blazor/React SPA for high-traffic pages (detail, system map, wizard)
@@ -243,4 +243,4 @@ Avoid distracting from pilot closure:
 
 ---
 
-*Last updated: July 2026 — Phase 23 (polyglot & integration expansion).*
+*Last updated: July 2026 — Phase 24 (product-led differentiation).*

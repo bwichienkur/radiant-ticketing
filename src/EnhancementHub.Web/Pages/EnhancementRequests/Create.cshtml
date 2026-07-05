@@ -13,6 +13,13 @@
     <form method="post">
         <div class="row g-3">
             <div class="col-md-8">
+                <label class="form-label">Start from template (optional)</label>
+                <select class="form-select" asp-for="Input.TemplateId" asp-items="@(new SelectList(Model.Templates, nameof(EnhancementHub.Application.Features.Templates.Dtos.EnhancementTemplateSummaryDto.Id), nameof(EnhancementHub.Application.Features.Templates.Dtos.EnhancementTemplateSummaryDto.Name), Model.Input.TemplateId))">
+                    <option value="">— None —</option>
+                </select>
+                <div class="form-text">Security, performance, and compliance templates prefill the form.</div>
+            </div>
+            <div class="col-md-8">
                 <label class="form-label">Title</label>
                 <input class="form-control" asp-for="Input.Title" required />
             </div>

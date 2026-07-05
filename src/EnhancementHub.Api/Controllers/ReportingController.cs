@@ -17,4 +17,9 @@ public sealed class ReportingController : ControllerBase
     [HttpGet("dashboard")]
     public async Task<IActionResult> Dashboard(CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new GetDashboardReportQuery(), cancellationToken));
+
+    [HttpGet("roi")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Roi(CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetRoiReportQuery(), cancellationToken));
 }
