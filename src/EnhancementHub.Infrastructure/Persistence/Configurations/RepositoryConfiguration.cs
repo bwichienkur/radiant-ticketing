@@ -14,6 +14,7 @@ public class RepositoryConfiguration : IEntityTypeConfiguration<Repository>
         builder.Property(x => x.Url).HasMaxLength(2048).IsRequired();
         builder.Property(x => x.DefaultBranch).HasMaxLength(128).IsRequired();
         builder.Property(x => x.GitTokenSecretName).HasMaxLength(256);
+        builder.Property(x => x.SourceSubdirectory).HasMaxLength(512);
         builder.HasIndex(x => x.ApplicationId);
         builder.HasOne(x => x.Application)
             .WithMany(a => a.Repositories)

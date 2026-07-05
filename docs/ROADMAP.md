@@ -111,9 +111,9 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 
 ### 3.1 Indexing at scale (Phase 19)
 - [x] Incremental indexing (git diff since last indexed commit)
-- [ ] Per-repository job sharding across Worker instances
-- [ ] Large monorepo mode: subdirectory scoping, file count limits, priority queues
-- [ ] Index freshness SLA metrics (% repos indexed within N hours)
+- [x] Per-repository job sharding across Worker instances (Hangfire `indexing` queue)
+- [x] Large monorepo mode: subdirectory scoping, file count limits, priority queues
+- [x] Index freshness SLA metrics (% repos indexed within N hours)
 
 ### 3.2 Data layer scaling (Phase 20)
 - [ ] Default vector offload to Qdrant or Azure Search for large deployments

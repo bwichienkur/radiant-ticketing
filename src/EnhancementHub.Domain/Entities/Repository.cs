@@ -11,6 +11,8 @@ public class Repository : BaseEntity
     public ExternalTicketProvider Provider { get; set; }
     public string DefaultBranch { get; set; } = "main";
     public string? GitTokenSecretName { get; set; }
+    public string? SourceSubdirectory { get; set; }
+    public int IndexingPriority { get; set; }
     public DateTime? LastIndexedAt { get; set; }
     public IndexingStatus IndexingStatus { get; set; }
 

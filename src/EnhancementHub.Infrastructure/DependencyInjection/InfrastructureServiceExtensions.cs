@@ -156,6 +156,8 @@ public static class InfrastructureServiceExtensions
         services.Configure<Options.RetentionOptions>(configuration.GetSection(Options.RetentionOptions.SectionName));
         services.Configure<Application.Options.IndexingOptions>(configuration.GetSection(Application.Options.IndexingOptions.SectionName));
         services.AddScoped<IGitRepositoryHistoryService, GitRepositoryHistoryService>();
+        services.AddScoped<IIndexFreshnessService, IndexFreshnessService>();
+        services.AddScoped<HangfireRepositoryIndexingDispatcher>();
         services.PostConfigure<Options.AiOptions>(options =>
         {
             if (string.IsNullOrWhiteSpace(options.OpenAI.ApiKey))
@@ -312,7 +314,10 @@ public static class InfrastructureServiceExtensions
                         SchemaName = configuration["BackgroundJobs:HangfireSchema"] ?? "hangfire"
                     }));
 
-            services.AddHangfireServer();
+            services.AddHangfireServer(options =>
+            {
+                options.Queues = ["default", "indexing"];
+            });
             services.AddHostedService<HangfireRecurringJobInitializer>();
             return;
         }

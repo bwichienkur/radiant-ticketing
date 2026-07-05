@@ -36,6 +36,51 @@ else
         <div class="col-md-3"><div class="stat-card"><div class="label">Schema Scans Pending</div><div class="value">@status.QueueCounts.PendingDatabaseSchemaScans</div></div></div>
     </div>
 
+    @if (Model.Freshness is not null)
+    {
+        var freshness = Model.Freshness;
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="label">Index freshness (@freshness.SlaHours h SLA)</div>
+                    <div class="value fs-4">@freshness.FreshnessPercent<span class="fs-6">%</span></div>
+                </div>
+            </div>
+            <div class="col-md-3"><div class="stat-card"><div class="label">Fresh repositories</div><div class="value">@freshness.FreshCount / @freshness.TotalRepositories</div></div></div>
+            <div class="col-md-3"><div class="stat-card"><div class="label">Stale repositories</div><div class="value text-warning">@freshness.StaleCount</div></div></div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="label">SLA status</div>
+                    <div class="value fs-5 @(freshness.SlaMet ? "text-success" : "text-danger")">@(freshness.SlaMet ? "Met" : "Missed")</div>
+                </div>
+            </div>
+        </div>
+
+        @if (freshness.StaleRepositories.Count > 0)
+        {
+            <div class="card-panel mb-4">
+                <div class="card-header px-0">Stale repositories (top @freshness.StaleRepositories.Count)</div>
+                <div class="table-responsive">
+                    <table class="table table-enterprise mb-0">
+                        <thead><tr><th>Repository</th><th>Application</th><th>Last indexed</th><th>Hours stale</th><th>Status</th></tr></thead>
+                        <tbody>
+                        @foreach (var repo in freshness.StaleRepositories)
+                        {
+                            <tr>
+                                <td>@repo.Name</td>
+                                <td>@(repo.ApplicationName ?? "—")</td>
+                                <td class="small">@(repo.LastIndexedAt?.ToString("u") ?? "Never")</td>
+                                <td>@(repo.HoursSinceIndexed?.ToString("0.#") ?? "—")</td>
+                                <td>@repo.IndexingStatus</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    }
+
     @if (status.Hangfire is not null)
     {
         <div class="row g-3 mb-4">
