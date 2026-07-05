@@ -170,7 +170,7 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 - [x] Regional deployment (EU data residency)
 
 ### 4.5 FinOps & infrastructure cost constraints (Phase 40+)
-- [ ] Wire deployment context into AI analysis and refactor prompts (Phase A)
+- [x] Wire deployment context into AI analysis and refactor prompts (Phase A)
 - [ ] Application infrastructure profile + request-level budget/hosting preferences (Phase B)
 - [ ] Structured cost impact on analysis output + Request Detail UI (Phase C)
 - [ ] Approval gates by cost risk level (Phase D)

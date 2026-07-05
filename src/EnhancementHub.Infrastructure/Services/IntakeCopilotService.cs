@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Abstractions.Models;
+using EnhancementHub.Application.Common;
 using EnhancementHub.Application.Features.Applications.Dtos;
 using EnhancementHub.Application.Features.Applications.Queries;
 using EnhancementHub.Application.Features.Templates.Queries;
@@ -74,6 +75,8 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
                 Use the provided application and knowledge context to ask specific follow-up questions.
                 When a compliance or policy document is attached, extract key obligations and map them to
                 concrete software changes — prefer suggestedTemplateDomainCategory Compliance when appropriate.
+                Honor deployment and infrastructure constraints in application context; avoid recommending
+                new paid cloud services when constraints prefer existing hosting.
                 Return ONLY valid JSON with:
                 assistantMessage (string),
                 followUpQuestions (string array, max 3, empty when enough info),
@@ -217,7 +220,13 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
             .Select(g => new { ApplicationId = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.ApplicationId, x => x.Count, cancellationToken);
 
-        return new IntakeContextBundle(applications, profileByApp, knowledge, graphCounts);
+        var deploymentNotesByApp = await _dbContext.Applications
+            .AsNoTracking()
+            .Where(a => appIds.Contains(a.Id))
+            .Select(a => new { a.Id, a.DeploymentNotes })
+            .ToDictionaryAsync(x => x.Id, x => x.DeploymentNotes, cancellationToken);
+
+        return new IntakeContextBundle(applications, profileByApp, knowledge, graphCounts, deploymentNotesByApp);
     }
 
     private static string BuildUserPrompt(
@@ -239,13 +248,15 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
             context.Profiles.TryGetValue(app.Id, out var profile);
             context.GraphCounts.TryGetValue(app.Id, out var nodeCount);
             sb.AppendLine($"- Id={app.Id} Name={app.Name} Domain={app.BusinessDomain ?? "n/a"}");
-            if (profile is not null)
+            context.DeploymentNotesByApp.TryGetValue(app.Id, out var deploymentNotes);
+            var infrastructureContext = ApplicationAnalysisContextFormatter.Format(profile, deploymentNotes);
+            if (!string.IsNullOrWhiteSpace(infrastructureContext))
             {
-                var components = profile.KeyComponents;
-                if (!string.IsNullOrWhiteSpace(components))
-                {
-                    sb.AppendLine($"  KeyComponents: {Truncate(components, 400)}");
-                }
+                sb.AppendLine($"  Infrastructure: {Truncate(infrastructureContext, 600)}");
+            }
+            else if (profile is not null && !string.IsNullOrWhiteSpace(profile.KeyComponents))
+            {
+                sb.AppendLine($"  KeyComponents: {Truncate(profile.KeyComponents, 400)}");
             }
 
             if (nodeCount > 0)
@@ -473,18 +484,21 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
             IReadOnlyList<ApplicationDto> applications,
             IReadOnlyDictionary<Guid, Domain.Entities.ApplicationProfile> profiles,
             IReadOnlyList<KnowledgeSearchResult> knowledge,
-            IReadOnlyDictionary<Guid, int> graphCounts)
+            IReadOnlyDictionary<Guid, int> graphCounts,
+            IReadOnlyDictionary<Guid, string?> deploymentNotesByApp)
         {
             Applications = applications;
             Profiles = profiles;
             Knowledge = knowledge;
             GraphCounts = graphCounts;
+            DeploymentNotesByApp = deploymentNotesByApp;
         }
 
         public IReadOnlyList<ApplicationDto> Applications { get; }
         public IReadOnlyDictionary<Guid, Domain.Entities.ApplicationProfile> Profiles { get; }
         public IReadOnlyList<KnowledgeSearchResult> Knowledge { get; }
         public IReadOnlyDictionary<Guid, int> GraphCounts { get; }
+        public IReadOnlyDictionary<Guid, string?> DeploymentNotesByApp { get; }
     }
 
     private sealed class IntakeCopilotAiResponse

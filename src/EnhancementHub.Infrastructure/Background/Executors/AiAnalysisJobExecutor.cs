@@ -1,5 +1,6 @@
 using System.Text.Json;
 using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Common;
 using EnhancementHub.Domain.Entities;
 using EnhancementHub.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -72,13 +73,17 @@ public sealed class AiAnalysisJobExecutor
 
         try
         {
-            var repositoryContext = request.TargetApplication?.Profiles.FirstOrDefault()?.KeyComponents;
+            var profile = request.TargetApplication?.Profiles.FirstOrDefault();
+            var applicationContext = ApplicationAnalysisContextFormatter.Format(
+                profile,
+                request.TargetApplication?.DeploymentNotes);
             var description = $"{request.BusinessDescription}\n\nDesired outcome: {request.DesiredOutcome}";
             var result = await aiService.AnalyzeEnhancementAsync(
                 request.Id,
                 request.Title,
                 description,
-                repositoryContext,
+                repositoryContext: null,
+                applicationContext,
                 cancellationToken);
 
             var riskScore = riskScoring.CalculateRiskScore(result, null);

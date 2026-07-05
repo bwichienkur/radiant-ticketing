@@ -1,5 +1,6 @@
 using System.Text.Json;
 using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Common;
 using EnhancementHub.Application.Common.Exceptions;
 using EnhancementHub.Application.Common.Mappings;
 using EnhancementHub.Application.Features.Analysis.Dtos;
@@ -84,13 +85,17 @@ public sealed class TriggerAiAnalysisCommandHandler
 
         try
         {
-            var repositoryContext = enhancementRequest.TargetApplication?.Profiles.FirstOrDefault()?.KeyComponents;
+            var profile = enhancementRequest.TargetApplication?.Profiles.FirstOrDefault();
+            var applicationContext = ApplicationAnalysisContextFormatter.Format(
+                profile,
+                enhancementRequest.TargetApplication?.DeploymentNotes);
             var description = $"{enhancementRequest.BusinessDescription}\n\nDesired outcome: {enhancementRequest.DesiredOutcome}";
             var result = await _aiAnalysisService.AnalyzeEnhancementAsync(
                 enhancementRequest.Id,
                 enhancementRequest.Title,
                 description,
-                repositoryContext,
+                repositoryContext: null,
+                applicationContext,
                 cancellationToken);
 
             await PopulateAnalysisFromResultAsync(

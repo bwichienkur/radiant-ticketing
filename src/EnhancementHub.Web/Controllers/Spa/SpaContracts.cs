@@ -30,7 +30,8 @@ public sealed record SpaOnboardingBasicsRequest(
     string? BusinessDomain,
     string? Purpose,
     string? RiskSensitiveAreas,
-    string? OwnerTeamName);
+    string? OwnerTeamName,
+    string? DeploymentNotes);
 
 public sealed record SpaOnboardingRepositoryRequest(
     string RepositoryName,

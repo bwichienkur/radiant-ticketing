@@ -44,6 +44,10 @@ public sealed class ApplicationProfileGenerator
             existing.ExternalIntegrations = string.Join(", ", scan.Controllers.Select(c => c.Name));
             existing.InternalDependencies = string.Join(", ", scan.Namespaces.Select(n => n.Name).Distinct().Take(30));
             existing.RiskSensitiveAreas = repository.Application?.RiskSensitiveAreas;
+            if (!string.IsNullOrWhiteSpace(repository.Application?.DeploymentNotes))
+            {
+                existing.DeploymentNotes = repository.Application.DeploymentNotes;
+            }
             existing.GeneratedAt = DateTime.UtcNow;
             existing.UpdatedAt = DateTime.UtcNow;
             await _dbContext.SaveChangesAsync(cancellationToken);
@@ -62,6 +66,7 @@ public sealed class ApplicationProfileGenerator
             ExternalIntegrations = string.Join(", ", scan.Controllers.Select(c => c.Name)),
             InternalDependencies = string.Join(", ", scan.Namespaces.Select(n => n.Name).Distinct().Take(30)),
             RiskSensitiveAreas = repository.Application?.RiskSensitiveAreas,
+            DeploymentNotes = repository.Application?.DeploymentNotes,
             GeneratedAt = DateTime.UtcNow,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

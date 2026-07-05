@@ -128,6 +128,7 @@ export async function submitOnboardingBasics(
     purpose?: string;
     riskSensitiveAreas?: string;
     ownerTeamName?: string;
+    deploymentNotes?: string;
   },
 ): Promise<OnboardingSession> {
   return postJson<OnboardingSession>(`/web-api/spa/onboarding/${sessionId}/basics`, payload);

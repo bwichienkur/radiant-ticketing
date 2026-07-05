@@ -452,6 +452,7 @@ public static class DevDataSeeder
             BusinessDomain = "E-Commerce",
             Purpose = "Order management and fulfillment",
             Description = "Demo application for architecture intelligence",
+            DeploymentNotes = "Azure App Service (Linux), Azure SQL, existing Hangfire Worker — prefer in-process/Worker over new Azure Functions; no new paid SaaS without approval.",
             OwnerTeamId = teamId,
             CreatedAt = now,
             UpdatedAt = now

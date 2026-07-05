@@ -48,6 +48,7 @@ public class EntityConfigurations : IEntityTypeConfiguration<Team>,
     {
         builder.ToTable("Applications");
         builder.Property(x => x.Name).HasMaxLength(200).IsRequired();
+        builder.Property(x => x.DeploymentNotes).HasMaxLength(4000);
         builder.HasOne(x => x.OwnerTeam).WithMany(t => t.OwnedApplications).HasForeignKey(x => x.OwnerTeamId);
     }
 

@@ -34,6 +34,7 @@ public sealed class RefactorPlanGeneratorService : IRefactorPlanGenerator
         Guid? databaseConnectionId,
         Guid? repositoryId,
         RefactorBlastRadiusResult? blastRadius,
+        string? infrastructureContext = null,
         CancellationToken cancellationToken = default)
     {
         if (!_chatCompletion.IsConfigured)
@@ -46,12 +47,16 @@ public sealed class RefactorPlanGeneratorService : IRefactorPlanGenerator
             ? "No blast radius analysis provided."
             : JsonSerializer.Serialize(blastRadius, JsonOptions);
 
+        var infrastructureSection = string.IsNullOrWhiteSpace(infrastructureContext)
+            ? string.Empty
+            : $"\nInfrastructure context:\n{infrastructureContext}\n";
+
         var userPrompt = _piiRedaction.Redact($"""
             Target change: {targetDescription}
             EnhancementRequestId: {enhancementRequestId}
             DatabaseConnectionId: {databaseConnectionId}
             RepositoryId: {repositoryId}
-            Blast radius: {blastRadiusSummary}
+            Blast radius: {blastRadiusSummary}{infrastructureSection}
             """);
 
         var completion = await _chatCompletion.CompleteAsync(
@@ -62,6 +67,8 @@ public sealed class RefactorPlanGeneratorService : IRefactorPlanGenerator
                     You are a database migration architect. Return JSON with:
                     title (string), targetDescription (string), riskLevel (Low|Medium|High|Critical),
                     confidenceScore (number 0-1), migrationSteps (array of { order, description, sqlScript, rollbackScript }).
+                    When migration options imply new cloud database tiers or services, note tradeoffs in step descriptions
+                    and prefer approaches compatible with the infrastructure context. Honor deployment constraints.
                     """,
                 UserPrompt = userPrompt
             },

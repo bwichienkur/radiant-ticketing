@@ -52,7 +52,7 @@ App deployment profile (defaults)
 
 | Phase | Scope | Status |
 |-------|--------|--------|
-| **A — Prompt grounding** | Wire existing profile fields; extend analysis/refactor prompts with cost-awareness instructions | Planned |
+| **A — Prompt grounding** | Wire existing profile fields; extend analysis/refactor prompts with cost-awareness instructions | Done |
 | **B — Structured preferences** | `ApplicationInfrastructureProfile` + optional request constraints | Planned |
 | **C — Cost impact output** | `infrastructureImplications` on analysis; UI on Request Detail | Planned |
 | **D — Governance** | Approval rules by cost risk; FinOps dashboard slice | Planned |
