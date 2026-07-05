@@ -26,7 +26,7 @@
         <input type="search" id="copilot-input" class="form-control flex-grow-1" placeholder="e.g. show high risk pending approval" autocomplete="off" />
         <button type="submit" class="btn btn-primary">Ask</button>
     </form>
-    <div id="copilot-results" class="mt-2"></div>
+    <div id="copilot-results" class="mt-2" aria-live="polite"></div>
 </div>
 
 @if (Model.Insights is not null && (Model.IsApprover || Model.Insights.MyAwaitingAnalysis > 0))

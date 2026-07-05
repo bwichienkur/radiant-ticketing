@@ -1,5 +1,6 @@
 import type {
   ApplicationSummary,
+  ApprovalHistoryItem,
   ApprovalRequestDetail,
   DatabaseConnectionStringResult,
   EnhancementAnalysis,
@@ -53,6 +54,10 @@ export async function getRequestAnalysis(requestId: string): Promise<Enhancement
   }
 
   return response.json() as Promise<EnhancementAnalysis>;
+}
+
+export async function getApprovalHistory(requestId: string): Promise<ApprovalHistoryItem[]> {
+  return fetchJson<ApprovalHistoryItem[]>(`/web-api/spa/requests/${requestId}/approval-history`);
 }
 
 export async function postRequestComment(

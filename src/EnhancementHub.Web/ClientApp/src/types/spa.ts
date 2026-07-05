@@ -12,8 +12,30 @@ export interface EnhancementRequestDetail {
   status: string;
   businessDescription: string;
   desiredOutcome: string;
+  priority?: string;
+  supportingNotes?: string;
+  targetApplicationId?: string;
   submittedByUserName?: string;
+  createdAt?: string;
   comments?: CommentSummary[];
+}
+
+export interface AffectedApplicationItem {
+  applicationId: string;
+  applicationName?: string;
+  impactDescription: string;
+}
+
+export interface DatabaseChangeItem {
+  tableName: string;
+  changeType: string;
+  description: string;
+}
+
+export interface ApiChangeItem {
+  endpoint: string;
+  changeType: string;
+  description: string;
 }
 
 export interface EnhancementAnalysis {
@@ -22,9 +44,21 @@ export interface EnhancementAnalysis {
   featureSummary?: string;
   confidenceScore: number;
   riskLevel: string;
-  affectedApplications?: unknown[];
-  databaseChangeRecommendations?: unknown[];
-  apiChangeRecommendations?: unknown[];
+  riskExplanation?: string;
+  technicalRequirements?: string;
+  testingPlan?: string;
+  needsClarification?: boolean;
+  affectedApplications?: AffectedApplicationItem[];
+  databaseChangeRecommendations?: DatabaseChangeItem[];
+  apiChangeRecommendations?: ApiChangeItem[];
+}
+
+export interface ApprovalHistoryItem {
+  id: string;
+  actionType: string;
+  userDisplayName: string;
+  comments?: string;
+  createdAt: string;
 }
 
 export interface ApplicationSummary {

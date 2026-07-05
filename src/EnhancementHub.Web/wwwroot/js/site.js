@@ -178,10 +178,28 @@
 
         const bsModal = bootstrap.Modal.getOrCreateInstance(modal);
         let debounce;
+        let activeIndex = 0;
+
+        function getResultLinks() {
+            return Array.from(results.querySelectorAll('.command-result'));
+        }
+
+        function setActiveIndex(index) {
+            const links = getResultLinks();
+            if (links.length === 0) {
+                activeIndex = 0;
+                return;
+            }
+
+            activeIndex = ((index % links.length) + links.length) % links.length;
+            links.forEach((link, i) => link.classList.toggle('active', i === activeIndex));
+            links[activeIndex].scrollIntoView({ block: 'nearest' });
+        }
 
         function renderResults(items) {
             if (items.length === 0) {
                 results.innerHTML = '<p class="text-muted small px-3 py-2 mb-0">No results</p>';
+                activeIndex = 0;
                 return;
             }
             results.innerHTML = items.map((item, i) => `
@@ -190,6 +208,22 @@
                     <span class="command-result-title">${escapeHtml(item.title)}</span>
                     <span class="command-result-sub">${escapeHtml(item.subtitle ?? '')}</span>
                 </a>`).join('');
+            activeIndex = 0;
+        }
+
+        function navigateActiveResult() {
+            const links = getResultLinks();
+            const target = links[activeIndex];
+            if (target?.dataset.url) {
+                window.location.href = target.dataset.url;
+            }
+        }
+
+        function openPalette() {
+            input.value = '';
+            renderResults(commandPages.map(p => ({ type: 'page', title: p.title, subtitle: 'Navigate', url: p.url })));
+            bsModal.show();
+            setTimeout(() => input.focus(), 100);
         }
 
         function localSearch(q) {
@@ -221,22 +255,42 @@
             if (link) window.location.href = link.dataset.url;
         });
 
-        document.addEventListener('keydown', e => {
-            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-                e.preventDefault();
-                input.value = '';
-                renderResults(commandPages.map(p => ({ type: 'page', title: p.title, subtitle: 'Navigate', url: p.url })));
-                bsModal.show();
-                setTimeout(() => input.focus(), 100);
+        results.addEventListener('mousemove', e => {
+            const link = e.target.closest('.command-result');
+            if (!link) return;
+            const links = getResultLinks();
+            const index = links.indexOf(link);
+            if (index >= 0) {
+                setActiveIndex(index);
             }
         });
 
-        document.querySelector('[data-command-trigger]')?.addEventListener('click', () => {
-            input.value = '';
-            renderResults(commandPages.map(p => ({ type: 'page', title: p.title, subtitle: 'Navigate', url: p.url })));
-            bsModal.show();
-            setTimeout(() => input.focus(), 100);
+        input.addEventListener('keydown', e => {
+            const links = getResultLinks();
+            if (links.length === 0) {
+                return;
+            }
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                setActiveIndex(activeIndex + 1);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                setActiveIndex(activeIndex - 1);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                navigateActiveResult();
+            }
         });
+
+        document.addEventListener('keydown', e => {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                openPalette();
+            }
+        });
+
+        document.querySelector('[data-command-trigger]')?.addEventListener('click', openPalette);
     }
 
     function initCopilot() {

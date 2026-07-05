@@ -1,0 +1,29 @@
+# Production-like evaluation overrides for buyer demos.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.eval.yml up --build
+
+services:
+  api:
+    environment:
+      Database__Provider: PostgreSQL
+      VectorSearch__Provider: PgVector
+      VectorSearch__Dimensions: 64
+      BackgroundJobs__Provider: Hangfire
+      BackgroundJobs__HangfireSchema: hangfire
+      Observability__Enabled: "true"
+
+  web:
+    environment:
+      Database__Provider: PostgreSQL
+      VectorSearch__Provider: PgVector
+      VectorSearch__Dimensions: 64
+      Onboarding__ApiBaseUrl: http://api:8080
+      Observability__Enabled: "true"
+
+  worker:
+    environment:
+      Database__Provider: PostgreSQL
+      VectorSearch__Provider: PgVector
+      VectorSearch__Dimensions: 64
+      BackgroundJobs__Provider: Hangfire
+      BackgroundJobs__HangfireSchema: hangfire
+      Observability__Enabled: "true"

@@ -132,6 +132,49 @@ public sealed class ProductHardeningTests
         page.Should().Contain("/Spa/SystemMap");
     }
 
+    [Fact]
+    public void SpaDataController_ExposesApprovalHistoryBff()
+    {
+        var controller = File.ReadAllText(Path.Combine(
+            GetRepoRoot(),
+            "src/EnhancementHub.Web/Controllers/SpaDataController.cs"));
+
+        controller.Should().Contain("requests/{id:guid}/approval-history");
+        controller.Should().Contain("GetApprovalHistoryQuery");
+    }
+
+    [Fact]
+    public void RequestDetailApp_IncludesApprovalHistoryAndAnalysisSections()
+    {
+        var app = File.ReadAllText(Path.Combine(
+            GetRepoRoot(),
+            "src/EnhancementHub.Web/ClientApp/src/apps/RequestDetailApp.tsx"));
+
+        app.Should().Contain("getApprovalHistory");
+        app.Should().Contain("Approval history");
+        app.Should().Contain("AnalysisDetailSections");
+    }
+
+    [Fact]
+    public void CommandPalette_SupportsKeyboardNavigation()
+    {
+        var siteJs = File.ReadAllText(Path.Combine(
+            GetRepoRoot(),
+            "src/EnhancementHub.Web/wwwroot/js/site.js"));
+
+        siteJs.Should().Contain("ArrowDown");
+        siteJs.Should().Contain("ArrowUp");
+        siteJs.Should().Contain("navigateActiveResult");
+    }
+
+    [Fact]
+    public void ProductionEvalProfile_Exists()
+    {
+        File.Exists(Path.Combine(GetRepoRoot(), "docker-compose.eval.yml")).Should().BeTrue();
+        var doc = File.ReadAllText(Path.Combine(GetRepoRoot(), "docs/PRODUCTION_EVAL.md"));
+        doc.Should().Contain("docker-compose.eval.yml");
+    }
+
     private static string GetRepoRoot()
     {
         var dir = AppContext.BaseDirectory;

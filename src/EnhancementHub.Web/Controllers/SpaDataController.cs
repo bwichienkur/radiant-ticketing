@@ -1,3 +1,4 @@
+using EnhancementHub.Application.Features.Approvals.Queries;
 using EnhancementHub.Application.Features.Analysis.Queries;
 using EnhancementHub.Application.Features.Applications.Queries;
 using EnhancementHub.Application.Features.Approvals.Commands;
@@ -40,6 +41,10 @@ public sealed class SpaDataController : ControllerBase
             return NotFound();
         }
     }
+
+    [HttpGet("requests/{id:guid}/approval-history")]
+    public async Task<IActionResult> GetApprovalHistory(Guid id, CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetApprovalHistoryQuery(id), cancellationToken));
 
     [HttpPost("requests/{id:guid}/comments")]
     public async Task<IActionResult> AddComment(
