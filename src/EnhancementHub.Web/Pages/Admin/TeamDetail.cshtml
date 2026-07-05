@@ -1,0 +1,150 @@
+@page "{id:guid}"
+@model EnhancementHub.Web.Pages.Admin.TeamDetailModel
+@using EnhancementHub.Application.Features.Admin.Dtos
+@using EnhancementHub.Domain.Enums
+@{
+    ViewData["Title"] = Model.Team?.Name ?? "Team";
+    var team = Model.Team;
+}
+
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+        <h1>@(team?.Name ?? "Team")</h1>
+        <p>@(team?.Description ?? "Manage members and roles")</p>
+    </div>
+    <a class="btn btn-outline-secondary btn-sm" asp-page="/Admin/Teams">← All teams</a>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-info">@Model.StatusMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+@if (team is null)
+{
+    <div class="card-panel p-4"><p class="text-muted mb-0">Team not found.</p></div>
+}
+else
+{
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card-panel p-4">
+                <h2 class="h6 mb-3">Invite member</h2>
+                <form method="post" asp-page-handler="Invite">
+                    <input type="hidden" asp-for="TeamId" />
+                    <div class="mb-3">
+                        <label asp-for="InviteEmail" class="form-label">Email</label>
+                        <input asp-for="InviteEmail" type="email" class="form-control" required maxlength="320" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="InviteDisplayName" class="form-label">Display name</label>
+                        <input asp-for="InviteDisplayName" class="form-control" required maxlength="200" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="InviteGlobalRole" class="form-label">Global role</label>
+                        <select asp-for="InviteGlobalRole" class="form-select" asp-items="Html.GetEnumSelectList<UserRole>()"></select>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="InviteTeamRole" class="form-label">Team role</label>
+                        <select asp-for="InviteTeamRole" class="form-select">
+                            @foreach (var role in TeamMemberRoles.All)
+                            {
+                                <option value="@role">@role</option>
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add to team</button>
+                </form>
+                <p class="text-muted small mt-3 mb-0">
+                    New users receive a temporary password (<code>password123</code>). Ask them to change it after first sign-in.
+                </p>
+            </div>
+
+            @if (team.Applications.Count > 0)
+            {
+                <div class="card-panel p-4 mt-4">
+                    <h2 class="h6 mb-3">Owned applications</h2>
+                    <ul class="small mb-0">
+                        @foreach (var app in team.Applications)
+                        {
+                            <li>@app.Name</li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card-panel">
+                <div class="card-header px-3 pt-3">Members (@team.Members.Count)</div>
+                @if (team.Members.Count == 0)
+                {
+                    <div class="p-4 text-muted">No members yet. Invite users to grant access to this team's applications.</div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-enterprise mb-0">
+                            <thead>
+                                <tr>
+                                    <th>User</th>
+                                    <th>Global role</th>
+                                    <th>Team role</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var member in team.Members)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@member.DisplayName</strong>
+                                            <div class="small text-muted">@member.Email</div>
+                                            @if (!member.IsActive)
+                                            {
+                                                <span class="badge text-bg-warning">Inactive</span>
+                                            }
+                                        </td>
+                                        <td>@member.GlobalRole</td>
+                                        <td>
+                                            <form method="post" asp-page-handler="UpdateRole" class="d-flex gap-2 align-items-center">
+                                                <input type="hidden" asp-for="TeamId" />
+                                                <input type="hidden" name="MemberId" value="@member.Id" />
+                                                <select name="NewTeamRole" class="form-select form-select-sm">
+                                                    @foreach (var role in TeamMemberRoles.All)
+                                                    {
+                                                        if (member.TeamRole == role)
+                                                        {
+                                                            <option value="@role" selected="selected">@role</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@role">@role</option>
+                                                        }
+                                                    }
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-outline-primary">Save</button>
+                                            </form>
+                                        </td>
+                                        <td class="text-end">
+                                            <form method="post" asp-page-handler="Remove" onsubmit="return confirm('Remove this member from the team?');">
+                                                <input type="hidden" asp-for="TeamId" />
+                                                <input type="hidden" name="MemberId" value="@member.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
