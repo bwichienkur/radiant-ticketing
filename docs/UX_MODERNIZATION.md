@@ -97,6 +97,23 @@ Future: extract to React + Vite under `src/EnhancementHub.Web/ClientApp/` with s
 
 ---
 
+## Phase 31 — React approval & onboarding (complete)
+
+- **Approval queue** — `/Spa/ApprovalQueue` with pending list, risk badges, approve/clarify/reject, J/K navigation
+- **Onboarding wizard** — `/Spa/OnboardingWizard` with 6-step flow, path validation, discovery polling, review summary
+- **BFF endpoints** (`SpaDataController`):
+  - `GET /web-api/spa/approvals/pending`
+  - `POST /web-api/spa/approvals/{id}/action`
+  - `POST /web-api/spa/onboarding/start`
+  - `GET /web-api/spa/onboarding/{sessionId}`
+  - `POST /web-api/spa/onboarding/{sessionId}/basics|repository|database|skip-database|discovery|advance-review|complete`
+- Advanced onboarding (ZIP, GitHub App, on-prem agent) remains on classic `/Onboarding/Wizard`
+- Command palette updated with React routes
+
+*Phase 31 — React approval & onboarding.*
+
+---
+
 ## Phase 27 — UX overhaul (complete)
 
 - Collapsible **sidebar app shell** with grouped navigation (Work / Intelligence / Governance)

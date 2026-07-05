@@ -8,6 +8,7 @@
 <div class="page-header">
     <h1>Document your application</h1>
     <p class="text-muted">Guided setup to connect code, scan databases, and generate architecture documentation.</p>
+    <a asp-page="/Spa/OnboardingWizard" asp-route-id="@Model.SessionId" class="btn btn-outline-primary btn-sm mt-2">React wizard</a>
 </div>
 
 @if (Model.Session.Status == EnhancementHub.Domain.Enums.OnboardingSessionStatus.InProgress && Model.Session.CurrentStep != EnhancementHub.Domain.Enums.OnboardingStep.Complete)

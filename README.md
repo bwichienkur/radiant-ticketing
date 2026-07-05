@@ -178,7 +178,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-200 tests covering React SPA migration, schema-per-tenant isolation, Stripe billing, UX overhaul, commercial platform, product differentiation, polyglot integrations, HA observability, System Intelligence performance, data layer scaling, indexing scale, incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
+208 tests covering React approval queue and onboarding wizard, React SPA migration, schema-per-tenant isolation, Stripe billing, UX overhaul, commercial platform, product differentiation, polyglot integrations, HA observability, System Intelligence performance, data layer scaling, indexing scale, incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
 
 ---
 

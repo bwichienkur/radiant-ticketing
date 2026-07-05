@@ -11,6 +11,8 @@ export default defineConfig({
       input: {
         'request-detail': resolve(__dirname, 'src/entries/request-detail.tsx'),
         'system-map': resolve(__dirname, 'src/entries/system-map.tsx'),
+        'approval-queue': resolve(__dirname, 'src/entries/approval-queue.tsx'),
+        'onboarding-wizard': resolve(__dirname, 'src/entries/onboarding-wizard.tsx'),
       },
       output: {
         entryFileNames: '[name].js',
