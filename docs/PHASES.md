@@ -340,6 +340,14 @@
 - Built bundles published to `wwwroot/spa/react/`
 - Guide: `docs/UX_MODERNIZATION.md` (Phase 30 section)
 
+## Phase 31 — React approval & onboarding (complete)
+
+- React approval queue at `/Spa/ApprovalQueue` with J/K navigation and quick actions
+- React onboarding wizard at `/Spa/OnboardingWizard` with step progress and discovery polling
+- BFF endpoints for approvals and onboarding under `web-api/spa/*`
+- Classic Razor views retain links to React alternatives
+- Guide: `docs/UX_MODERNIZATION.md` (Phase 31 section)
+
 ## Future enhancements
 
-- React migration for onboarding wizard and approval queue
+- Graph visualization library (Cytoscape/D3) for React system map

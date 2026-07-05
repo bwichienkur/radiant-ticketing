@@ -113,7 +113,10 @@ public sealed class UxController : ControllerBase
         ("New Request", "/EnhancementRequests/Create", ["create", "submit"]),
         ("System Map", "/Spa/SystemMap", ["graph", "architecture", "map", "react"]),
         ("System Map (classic)", "/SystemMap/Index", ["graph", "architecture"]),
-        ("Onboarding Wizard", "/Onboarding/Wizard", ["setup", "onboard"]),
+        ("Approval Queue", "/Spa/ApprovalQueue", ["approve", "pending", "react"]),
+        ("Approval Queue (classic)", "/EnhancementRequests/Approve", ["approve", "pending"]),
+        ("Onboarding Wizard", "/Spa/OnboardingWizard", ["setup", "onboard", "react"]),
+        ("Onboarding Wizard (classic)", "/Onboarding/Wizard", ["setup", "onboard"]),
         ("Schema Drift", "/SchemaDrift/Index", ["drift", "schema"]),
         ("ROI Dashboard", "/Admin/Roi", ["roi", "metrics", "admin"]),
         ("Tenancy & Billing", "/Admin/Tenancy", ["tenant", "billing", "commercial"])
