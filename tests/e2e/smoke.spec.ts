@@ -66,6 +66,8 @@ test.describe('EnhancementHub smoke', () => {
     });
     await expect(page.getByLabel('Describe your enhancement')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Draft request' })).toBeVisible();
+    await expect(page.getByText('Compliance policy intake')).toBeVisible();
+    await expect(page.getByLabel('Policy document URL')).toBeVisible();
   });
 
   test('request list SPA loads backlog', async ({ page }) => {

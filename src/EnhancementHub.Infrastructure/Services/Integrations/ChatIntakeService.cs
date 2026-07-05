@@ -91,6 +91,8 @@ public sealed class ChatIntakeService : IChatIntakeService
             null,
             turnCount: 1,
             source,
+            policySourceText: null,
+            policySourceLabel: null,
             cancellationToken);
 
         var draft = turn.Draft ?? new IntakeCopilotDraft

@@ -289,6 +289,34 @@ export async function sendIntakeCopilotMessage(
   return postJson(`/web-api/spa/intake/sessions/${sessionId}/messages`, { message });
 }
 
+export async function attachIntakePolicyDocument(
+  sessionId: string,
+  file: File,
+): Promise<IntakeCopilotTurnResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`/web-api/spa/intake/sessions/${sessionId}/policy-document`, {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorBody = (await response.json().catch(() => null)) as { message?: string } | null;
+    throw new Error(errorBody?.message ?? `Request failed: ${response.status}`);
+  }
+
+  return response.json() as Promise<IntakeCopilotTurnResponse>;
+}
+
+export async function attachIntakePolicyUrl(
+  sessionId: string,
+  url: string,
+): Promise<IntakeCopilotTurnResponse> {
+  return postJson(`/web-api/spa/intake/sessions/${sessionId}/policy-url`, { url });
+}
+
 export async function createRequestFromIntakeSession(sessionId: string): Promise<CreatedRequestSummary> {
   return postJson(`/web-api/spa/intake/sessions/${sessionId}/create-request`);
 }

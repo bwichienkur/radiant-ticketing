@@ -10,5 +10,7 @@ public interface IIntakeCopilotService
         IntakeCopilotDraft? currentDraft,
         int turnCount,
         IntakeCopilotSource source,
+        string? policySourceText = null,
+        string? policySourceLabel = null,
         CancellationToken cancellationToken = default);
 }

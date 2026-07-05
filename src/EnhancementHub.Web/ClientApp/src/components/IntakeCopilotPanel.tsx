@@ -1,5 +1,7 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import {
+  attachIntakePolicyDocument,
+  attachIntakePolicyUrl,
   getIntakeCopilotSession,
   sendIntakeCopilotMessage,
   startIntakeCopilotSession,
@@ -30,6 +32,10 @@ export function IntakeCopilotPanel({ onApplyDraft }: IntakeCopilotPanelProps) {
   const [error, setError] = useState<string | null>(null);
   const [isComplete, setIsComplete] = useState(false);
   const [usedMockAi, setUsedMockAi] = useState(false);
+  const [policyLabel, setPolicyLabel] = useState<string | null>(null);
+  const [policyUrl, setPolicyUrl] = useState('');
+  const [policyLoading, setPolicyLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -123,6 +129,7 @@ export function IntakeCopilotPanel({ onApplyDraft }: IntakeCopilotPanelProps) {
     setFollowUpQuestions(response.followUpQuestions);
     setIsComplete(response.isComplete);
     setUsedMockAi(response.usedMockAi);
+    setPolicyLabel(response.session.policySourceLabel ?? null);
 
     if (response.session.draft) {
       onApplyDraft(draftToForm(response.session.draft, response.session.suggestedTemplateId));
@@ -146,6 +153,49 @@ export function IntakeCopilotPanel({ onApplyDraft }: IntakeCopilotPanelProps) {
     setInput(question);
   }
 
+  async function handlePolicyFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file || policyLoading) {
+      return;
+    }
+
+    setPolicyLoading(true);
+    setError(null);
+    try {
+      const id = await ensureSession();
+      const response = await attachIntakePolicyDocument(id, file);
+      applyTurn(response);
+    } catch {
+      setError('Failed to read policy document. Use PDF, TXT, or Markdown.');
+    } finally {
+      setPolicyLoading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  }
+
+  async function handlePolicyUrlSubmit(event: FormEvent) {
+    event.preventDefault();
+    const url = policyUrl.trim();
+    if (!url || policyLoading) {
+      return;
+    }
+
+    setPolicyLoading(true);
+    setError(null);
+    try {
+      const id = await ensureSession();
+      const response = await attachIntakePolicyUrl(id, url);
+      applyTurn(response);
+      setPolicyUrl('');
+    } catch {
+      setError('Failed to fetch policy URL. Check the address and try again.');
+    } finally {
+      setPolicyLoading(false);
+    }
+  }
+
   return (
     <section className="card-panel p-4 mb-4 intake-copilot-panel" aria-label="Intake copilot">
       <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
@@ -159,6 +209,51 @@ export function IntakeCopilotPanel({ onApplyDraft }: IntakeCopilotPanelProps) {
         {usedMockAi ? (
           <span className="badge text-bg-secondary">Offline draft mode</span>
         ) : null}
+      </div>
+
+      <div className="mb-3 p-3 border rounded bg-light-subtle">
+        <div className="small fw-semibold mb-2">Compliance policy intake</div>
+        <p className="small text-muted mb-2">
+          Attach a policy document or paste a public HTTPS URL. The copilot will extract obligations
+          and draft a compliance-oriented enhancement request.
+        </p>
+        {policyLabel ? (
+          <div className="alert alert-info py-2 small mb-2" role="status">
+            Policy attached: <strong>{policyLabel}</strong>
+          </div>
+        ) : null}
+        <div className="d-flex flex-wrap gap-2 align-items-center mb-2">
+          <input
+            ref={fileInputRef}
+            type="file"
+            id="intake-policy-file"
+            className="form-control form-control-sm"
+            style={{ maxWidth: '16rem' }}
+            accept=".pdf,.txt,.md,.csv"
+            onChange={(event) => void handlePolicyFileChange(event)}
+            disabled={policyLoading || loading}
+            aria-label="Upload policy document"
+          />
+        </div>
+        <form className="d-flex flex-wrap gap-2" onSubmit={(e) => void handlePolicyUrlSubmit(e)}>
+          <input
+            type="url"
+            className="form-control form-control-sm"
+            style={{ minWidth: '14rem', flex: '1 1 14rem' }}
+            placeholder="https://example.com/privacy-policy"
+            value={policyUrl}
+            onChange={(event) => setPolicyUrl(event.target.value)}
+            disabled={policyLoading || loading}
+            aria-label="Policy document URL"
+          />
+          <button
+            type="submit"
+            className="btn btn-outline-primary btn-sm"
+            disabled={policyLoading || loading || !policyUrl.trim()}
+          >
+            Fetch URL
+          </button>
+        </form>
       </div>
 
       {messages.length > 0 ? (

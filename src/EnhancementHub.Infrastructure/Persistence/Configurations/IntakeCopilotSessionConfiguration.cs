@@ -12,6 +12,8 @@ public sealed class IntakeCopilotSessionConfiguration : IEntityTypeConfiguration
         builder.Property(x => x.MessagesJson).IsRequired();
         builder.Property(x => x.DraftJson).HasMaxLength(8000);
         builder.Property(x => x.LastAssistantMessage).HasMaxLength(4000);
+        builder.Property(x => x.PolicySourceLabel).HasMaxLength(512);
+        builder.Property(x => x.PolicySourceText).HasMaxLength(50000);
         builder.HasIndex(x => x.UserId);
         builder.HasIndex(x => x.Status);
         builder.HasOne(x => x.User)

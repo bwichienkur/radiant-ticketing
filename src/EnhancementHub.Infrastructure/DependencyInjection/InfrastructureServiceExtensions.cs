@@ -30,6 +30,7 @@ public static class InfrastructureServiceExtensions
     public const string QdrantHttpClientName = "Qdrant";
     public const string TeamsWebhookHttpClientName = "TeamsWebhook";
     public const string GitHubAppHttpClientName = "GitHubApp";
+    public const string PolicyUrlFetcherHttpClientName = "PolicyUrlFetcher";
 
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
@@ -231,6 +232,8 @@ public static class InfrastructureServiceExtensions
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<OpenAiAnalysisService>>()));
 
         services.AddScoped<IIntakeCopilotService, IntakeCopilotService>();
+        services.AddScoped<IDocumentTextExtractor, DocumentTextExtractor>();
+        services.AddScoped<IPolicyUrlFetcher, PolicyUrlFetcher>();
 
         services.AddScoped<IBackgroundJobStatusService, BackgroundJobStatusService>();
         services.AddSingleton<IAuthenticationConfigurationService, AuthenticationConfigurationService>();
@@ -255,6 +258,11 @@ public static class InfrastructureServiceExtensions
         services.AddHttpClient(GitHubAppHttpClientName, client =>
         {
             client.BaseAddress = new Uri("https://api.github.com/");
+        });
+
+        services.AddHttpClient(PolicyUrlFetcherHttpClientName, client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(15);
         });
 
         services.AddScoped<IExternalTicketExporter, GitHubTicketExporter>(sp =>

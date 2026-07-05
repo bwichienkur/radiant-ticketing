@@ -143,6 +143,8 @@ public sealed class SendIntakeCopilotMessageCommandHandler
             draft,
             session.TurnCount + 1,
             session.Source,
+            session.PolicySourceText,
+            session.PolicySourceLabel,
             cancellationToken);
 
         messages.Add(new IntakeCopilotMessage
@@ -311,7 +313,9 @@ internal static class IntakeCopilotMapper
             draft is null ? null : ToDraftDto(draft),
             session.SuggestedTemplateId,
             session.CreatedRequestId,
-            session.LastAssistantMessage);
+            session.LastAssistantMessage,
+            session.PolicySourceLabel,
+            !string.IsNullOrWhiteSpace(session.PolicySourceText));
     }
 
     public static IntakeCopilotDraftDto ToDraftDto(IntakeCopilotDraft draft) =>
