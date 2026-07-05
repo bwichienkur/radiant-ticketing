@@ -77,26 +77,26 @@
             }
         </div>
         <div class="onboarding-checklist">
-            <div class="checklist-item @(Model.OnboardingStatus.ApplicationCount > 0 ? "done" : "")">
+            <a class="checklist-item checklist-item-link @(Model.OnboardingStatus.ApplicationCount > 0 ? "done" : "")" href="/Spa/OnboardingWizard">
                 <span class="check">@(Model.OnboardingStatus.ApplicationCount > 0 ? "✓" : "1")</span>
                 <span>Register an application</span>
-            </div>
-            <div class="checklist-item @(Model.OnboardingStatus.RepositoryCount > 0 ? "done" : "")">
+            </a>
+            <a class="checklist-item checklist-item-link @(Model.OnboardingStatus.RepositoryCount > 0 ? "done" : "")" href="/Spa/OnboardingWizard">
                 <span class="check">@(Model.OnboardingStatus.RepositoryCount > 0 ? "✓" : "2")</span>
                 <span>Connect a repository</span>
-            </div>
-            <div class="checklist-item @(Model.OnboardingStatus.DatabaseConnectionCount > 0 ? "done" : "")">
+            </a>
+            <a class="checklist-item checklist-item-link @(Model.OnboardingStatus.DatabaseConnectionCount > 0 ? "done" : "")" asp-page="/DatabaseConnections/Index">
                 <span class="check">@(Model.OnboardingStatus.DatabaseConnectionCount > 0 ? "✓" : "3")</span>
                 <span>Connect a database</span>
-            </div>
-            <div class="checklist-item @(Model.OnboardingStatus.HasIndexedRepository ? "done" : "")">
+            </a>
+            <a class="checklist-item checklist-item-link @(Model.OnboardingStatus.HasIndexedRepository ? "done" : "")" asp-page="/Repositories/Index">
                 <span class="check">@(Model.OnboardingStatus.HasIndexedRepository ? "✓" : "4")</span>
                 <span>Run code discovery</span>
-            </div>
-            <div class="checklist-item @(Model.OnboardingStatus.HasSystemGraph ? "done" : "")">
+            </a>
+            <a class="checklist-item checklist-item-link @(Model.OnboardingStatus.HasSystemGraph ? "done" : "")" href="/Spa/SystemMap">
                 <span class="check">@(Model.OnboardingStatus.HasSystemGraph ? "✓" : "5")</span>
-                <span>Build system map & export docs</span>
-            </div>
+                <span>Build system map &amp; export docs</span>
+            </a>
         </div>
     </div>
 }

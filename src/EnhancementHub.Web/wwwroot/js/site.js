@@ -27,14 +27,36 @@
     function initSidebar() {
         const shell = document.querySelector('.app-shell');
         const toggle = document.querySelector('[data-sidebar-toggle]');
-        if (!shell || !toggle) return;
+        const offcanvasEl = document.getElementById('appSidebarOffcanvas');
+        if (!toggle) return;
 
-        const collapsed = localStorage.getItem('eh-sidebar-collapsed') === 'true';
-        if (collapsed) shell.classList.add('sidebar-collapsed');
+        const mobileMq = window.matchMedia('(max-width: 991.98px)');
+        let offcanvas = offcanvasEl && typeof bootstrap !== 'undefined'
+            ? bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl)
+            : null;
+
+        if (shell) {
+            const collapsed = localStorage.getItem('eh-sidebar-collapsed') === 'true';
+            if (collapsed) shell.classList.add('sidebar-collapsed');
+        }
 
         toggle.addEventListener('click', () => {
+            if (mobileMq.matches && offcanvas) {
+                offcanvas.toggle();
+                return;
+            }
+
+            if (!shell) return;
             shell.classList.toggle('sidebar-collapsed');
             localStorage.setItem('eh-sidebar-collapsed', shell.classList.contains('sidebar-collapsed'));
+        });
+
+        offcanvasEl?.querySelectorAll('.sidebar-link').forEach((link) => {
+            link.addEventListener('click', () => {
+                if (mobileMq.matches) {
+                    offcanvas?.hide();
+                }
+            });
         });
     }
 

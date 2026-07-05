@@ -171,7 +171,8 @@ public sealed class Phase15EnterpriseHardeningTests
 
         var accessService = new EnhancementRequestAccessService(
             db,
-            new TestCurrentUserService(owner.Id, owner.Email, owner.DisplayName, UserRole.Submitter));
+            new TestCurrentUserService(owner.Id, owner.Email, owner.DisplayName, UserRole.Submitter),
+            new TestCurrentTenant());
 
         var visible = await accessService.ApplyVisibilityFilter(db.EnhancementRequests).ToListAsync();
         visible.Should().ContainSingle(r => r.SubmittedByUserId == owner.Id);
@@ -194,6 +195,12 @@ public sealed class Phase15EnterpriseHardeningTests
         public UserRole? Role { get; }
         public bool IsAuthenticated { get; }
         public string? IpAddress => "127.0.0.1";
+    }
+
+    private sealed class TestCurrentTenant : ICurrentTenantService
+    {
+        public Guid? TenantId => null;
+        public bool HasTenantContext => false;
     }
 
     private sealed class TestHostEnvironment : Microsoft.Extensions.Hosting.IHostEnvironment
