@@ -160,3 +160,85 @@ export interface RepositoryPathValidation {
   csharpFileCount: number;
   controllerCount: number;
 }
+
+export interface DashboardActivityItem {
+  eventType: string;
+  title: string;
+  subtitle?: string;
+  occurredAt: string;
+  entityId?: string;
+  linkPath: string;
+}
+
+export interface DailyRequestCount {
+  date: string;
+  count: number;
+}
+
+export interface DashboardInsights {
+  recentActivity: DashboardActivityItem[];
+  requestsLast7Days: DailyRequestCount[];
+  myPendingApprovals: number;
+  myAwaitingAnalysis: number;
+}
+
+export interface DashboardReport {
+  totalRequests: number;
+  pendingApprovalCount: number;
+  awaitingAnalysisCount: number;
+  highRiskPendingApprovalCount: number;
+  readyForDevelopmentCount: number;
+  averageApprovalTimeHours?: number;
+}
+
+export interface OnboardingStatus {
+  applicationCount: number;
+  repositoryCount: number;
+  databaseConnectionCount: number;
+  hasIndexedRepository: boolean;
+  hasSystemGraph: boolean;
+  activeSessionId?: string;
+}
+
+export interface DashboardPageData {
+  report: DashboardReport;
+  insights: DashboardInsights;
+  onboardingStatus: OnboardingStatus;
+  isApprover: boolean;
+  showOnboardingChecklist: boolean;
+}
+
+export interface EnhancementTemplateSummary {
+  id: string;
+  name: string;
+  domainCategory: string;
+  title: string;
+  priority: string;
+}
+
+export interface EnhancementTemplate extends EnhancementTemplateSummary {
+  businessDescription: string;
+  desiredOutcome: string;
+  supportingNotes?: string;
+}
+
+export interface CreateRequestFormData {
+  applications: ApplicationSummary[];
+  templates: EnhancementTemplateSummary[];
+}
+
+export interface CreateRequestInput {
+  title: string;
+  businessDescription: string;
+  desiredOutcome: string;
+  priority: string;
+  targetApplicationId?: string;
+  requestedDueDate?: string;
+  department?: string;
+  supportingNotes?: string;
+  templateId?: string;
+}
+
+export interface CreatedRequestSummary {
+  id: string;
+}

@@ -123,13 +123,13 @@ public sealed class ProductHardeningTests
     [Fact]
     public void DashboardChecklist_UsesActionableLinks()
     {
-        var page = File.ReadAllText(Path.Combine(
+        var app = File.ReadAllText(Path.Combine(
             GetRepoRoot(),
-            "src/EnhancementHub.Web/Pages/Index.cshtml"));
+            "src/EnhancementHub.Web/ClientApp/src/apps/DashboardApp.tsx"));
 
-        page.Should().Contain("checklist-item-link");
-        page.Should().Contain("/Spa/OnboardingWizard");
-        page.Should().Contain("/Spa/SystemMap");
+        app.Should().Contain("checklist-item-link");
+        app.Should().Contain("/Spa/OnboardingWizard");
+        app.Should().Contain("/Spa/SystemMap");
     }
 
     [Fact]
@@ -149,6 +149,7 @@ public sealed class ProductHardeningTests
         File.Exists(Path.Combine(spaDir, "SpaApprovalsController.cs")).Should().BeTrue();
         File.Exists(Path.Combine(spaDir, "SpaSystemController.cs")).Should().BeTrue();
         File.Exists(Path.Combine(spaDir, "SpaOnboardingController.cs")).Should().BeTrue();
+        File.Exists(Path.Combine(spaDir, "SpaDashboardController.cs")).Should().BeTrue();
         File.Exists(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Controllers/SpaDataController.cs")).Should().BeFalse();
     }
 
@@ -178,10 +179,27 @@ public sealed class ProductHardeningTests
     [Fact]
     public void Dashboard_UsesPipelineSearchNotGenerativeCopilot()
     {
-        var dashboard = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Index.cshtml"));
-        dashboard.Should().Contain("Pipeline search");
-        dashboard.Should().Contain("not a generative AI chat");
-        dashboard.Should().NotContain("Ask EnhancementHub");
+        var app = File.ReadAllText(Path.Combine(
+            GetRepoRoot(),
+            "src/EnhancementHub.Web/ClientApp/src/apps/DashboardApp.tsx"));
+        var page = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Index.cshtml"));
+
+        page.Should().Contain("spa-dashboard-root");
+        app.Should().Contain("Pipeline search");
+        app.Should().Contain("not a generative AI chat");
+        app.Should().NotContain("Ask EnhancementHub");
+    }
+
+    [Fact]
+    public void DashboardAndCreateRequest_UseReactSpa()
+    {
+        var sources = SpaBffTestHelper.ReadAllSpaBffSources();
+        sources.Should().Contain("web-api/spa/dashboard");
+        sources.Should().Contain("requests/create-form");
+        sources.Should().Contain("CreateEnhancementRequestCommand");
+
+        File.Exists(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Spa/CreateRequest.cshtml")).Should().BeTrue();
+        File.Exists(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/ClientApp/src/apps/CreateRequestApp.tsx")).Should().BeTrue();
     }
 
     [Fact]
@@ -217,12 +235,14 @@ public sealed class ProductHardeningTests
     {
         var siteJs = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/wwwroot/js/site.js"));
         var css = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/wwwroot/css/site.css"));
-        var dashboard = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Index.cshtml"));
+        var dashboardApp = File.ReadAllText(Path.Combine(
+            GetRepoRoot(),
+            "src/EnhancementHub.Web/ClientApp/src/apps/DashboardApp.tsx"));
 
         siteJs.Should().Contain("initProductTour");
         siteJs.Should().Contain("eh-product-tour-seen");
         css.Should().Contain(".product-tour-overlay");
-        dashboard.Should().Contain("data-tour=");
+        dashboardApp.Should().Contain("data-tour=");
     }
 
     [Fact]

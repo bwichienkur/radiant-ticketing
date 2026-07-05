@@ -110,7 +110,7 @@ public sealed class UxController : ControllerBase
         ("Dashboard", "/Index", ["home", "overview", "metrics"]),
         ("Enhancement Requests", "/EnhancementRequests/Index", ["requests", "intake"]),
         ("Approval Queue", "/Spa/ApprovalQueue", ["approve", "pending"]),
-        ("New Request", "/EnhancementRequests/Create", ["create", "submit"]),
+        ("New Request", "/Spa/CreateRequest", ["create", "submit"]),
         ("System Map", "/Spa/SystemMap", ["graph", "architecture", "map"]),
         ("Onboarding Wizard", "/Spa/OnboardingWizard", ["setup", "onboard", "wizard"]),
         ("Schema Drift", "/SchemaDrift/Index", ["drift", "schema"]),

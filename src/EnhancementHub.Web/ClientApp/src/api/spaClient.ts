@@ -2,9 +2,14 @@ import type {
   ApplicationSummary,
   ApprovalHistoryItem,
   ApprovalRequestDetail,
+  CreateRequestFormData,
+  CreateRequestInput,
+  CreatedRequestSummary,
+  DashboardPageData,
   DatabaseConnectionStringResult,
   EnhancementAnalysis,
   EnhancementRequestDetail,
+  EnhancementTemplate,
   GitHubAppStatus,
   OnboardingReview,
   OnboardingSession,
@@ -235,4 +240,33 @@ export async function setupOnPremAgent(
 
 export function getOnboardingExportDocsUrl(sessionId: string): string {
   return `/web-api/spa/onboarding/${sessionId}/export-docs`;
+}
+
+export async function getDashboard(): Promise<DashboardPageData> {
+  return fetchJson('/web-api/spa/dashboard');
+}
+
+export async function searchPipeline(query: string): Promise<
+  Array<{ type?: string; title: string; subtitle?: string; url: string }>
+> {
+  const response = await fetch(`/web-api/ux/copilot?q=${encodeURIComponent(query)}`, {
+    credentials: 'include',
+  });
+  if (!response.ok) {
+    throw new Error(`Search failed: ${response.status}`);
+  }
+  const data = (await response.json()) as { items?: unknown[] };
+  return (data.items ?? data) as Array<{ type?: string; title: string; subtitle?: string; url: string }>;
+}
+
+export async function getCreateRequestForm(): Promise<CreateRequestFormData> {
+  return fetchJson('/web-api/spa/requests/create-form');
+}
+
+export async function getEnhancementTemplate(templateId: string): Promise<EnhancementTemplate> {
+  return fetchJson(`/web-api/spa/templates/${templateId}`);
+}
+
+export async function createEnhancementRequest(input: CreateRequestInput): Promise<CreatedRequestSummary> {
+  return postJson('/web-api/spa/requests', input);
 }

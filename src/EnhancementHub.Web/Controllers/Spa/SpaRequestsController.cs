@@ -1,7 +1,10 @@
 using EnhancementHub.Application.Features.Analysis.Queries;
 using EnhancementHub.Application.Features.Approvals.Commands;
 using EnhancementHub.Application.Features.Approvals.Queries;
+using EnhancementHub.Application.Features.Applications.Queries;
+using EnhancementHub.Application.Features.EnhancementRequests.Commands;
 using EnhancementHub.Application.Features.EnhancementRequests.Queries;
+using EnhancementHub.Application.Features.Templates.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -45,5 +48,35 @@ public sealed class SpaRequestsController : ControllerBase
         CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(
             new AddCommentCommand(id, request.Content, request.IsInternal),
+            cancellationToken));
+
+    [HttpGet("requests/create-form")]
+    public async Task<IActionResult> GetCreateForm(CancellationToken cancellationToken)
+    {
+        var applications = await _mediator.Send(new ListApplicationsQuery(), cancellationToken);
+        var templates = await _mediator.Send(new ListEnhancementTemplatesQuery(), cancellationToken);
+        return Ok(new SpaCreateRequestFormResponse(applications, templates));
+    }
+
+    [HttpGet("templates/{id:guid}")]
+    public async Task<IActionResult> GetTemplate(Guid id, CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetEnhancementTemplateQuery(id), cancellationToken));
+
+    [HttpPost("requests")]
+    public async Task<IActionResult> CreateRequest(
+        [FromBody] SpaCreateRequestInput request,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(
+            new CreateEnhancementRequestCommand(
+                request.Title,
+                request.BusinessDescription,
+                request.DesiredOutcome,
+                request.Priority,
+                request.TargetApplicationId,
+                request.RequestedDueDate,
+                request.Department,
+                null,
+                request.SupportingNotes,
+                request.TemplateId),
             cancellationToken));
 }

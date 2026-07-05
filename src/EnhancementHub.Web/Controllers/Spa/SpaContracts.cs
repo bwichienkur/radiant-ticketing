@@ -1,3 +1,5 @@
+using EnhancementHub.Application.Features.Applications.Dtos;
+using EnhancementHub.Application.Features.Templates.Dtos;
 using EnhancementHub.Domain.Enums;
 
 namespace EnhancementHub.Web.Controllers.Spa;
@@ -5,6 +7,21 @@ namespace EnhancementHub.Web.Controllers.Spa;
 public sealed record SpaApprovalActionRequest(ApprovalActionType ActionType, string? Comments);
 
 public sealed record SpaAddCommentRequest(string Content, bool IsInternal = false);
+
+public sealed record SpaCreateRequestInput(
+    string Title,
+    string BusinessDescription,
+    string DesiredOutcome,
+    string Priority,
+    Guid? TargetApplicationId,
+    DateTime? RequestedDueDate,
+    string? Department,
+    string? SupportingNotes,
+    Guid? TemplateId);
+
+public sealed record SpaCreateRequestFormResponse(
+    IReadOnlyList<ApplicationDto> Applications,
+    IReadOnlyList<EnhancementTemplateSummaryDto> Templates);
 
 public sealed record SpaValidatePathRequest(string Path);
 

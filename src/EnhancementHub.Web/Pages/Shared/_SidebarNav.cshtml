@@ -25,7 +25,7 @@
             <a class="sidebar-link @(NavActive("/Spa/ApprovalQueue", "/EnhancementRequests/Approve") ? "active" : "")" href="/Spa/ApprovalQueue" data-tour="nav-approvals">
                 <span class="sidebar-icon" aria-hidden="true">✓</span> Approvals
             </a>
-            <a class="sidebar-link @(NavActive("/EnhancementRequests/Create") ? "active" : "")" asp-page="/EnhancementRequests/Create">
+            <a class="sidebar-link @(NavActive("/EnhancementRequests/Create", "/Spa/CreateRequest") ? "active" : "")" href="/Spa/CreateRequest">
                 <span class="sidebar-icon" aria-hidden="true">+</span> New request
             </a>
             <a class="sidebar-link @(NavActive("/Spa/OnboardingWizard", "/Onboarding") ? "active" : "")" href="/Spa/OnboardingWizard" data-tour="nav-setup">

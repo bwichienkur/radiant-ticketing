@@ -26,10 +26,13 @@ public sealed class Phase27UxOverhaulTests
     [Fact]
     public void Dashboard_HasCopilotBarAndActivityFeed()
     {
+        var app = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/apps/DashboardApp.tsx"));
         var page = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Index.cshtml"));
-        page.Should().Contain("copilot-bar");
-        page.Should().Contain("Recent activity");
-        page.Should().Contain("sparkline");
+
+        page.Should().Contain("spa-dashboard-root");
+        app.Should().Contain("copilot-bar");
+        app.Should().Contain("Recent activity");
+        app.Should().Contain("sparkline");
     }
 
     [Fact]
