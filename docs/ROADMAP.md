@@ -110,7 +110,7 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 **Goal:** Support 100–500 repositories and 500+ users in a single-tenant deployment.
 
 ### 3.1 Indexing at scale (Phase 19)
-- [ ] Incremental indexing (git diff since last indexed commit)
+- [x] Incremental indexing (git diff since last indexed commit)
 - [ ] Per-repository job sharding across Worker instances
 - [ ] Large monorepo mode: subdirectory scoping, file count limits, priority queues
 - [ ] Index freshness SLA metrics (% repos indexed within N hours)

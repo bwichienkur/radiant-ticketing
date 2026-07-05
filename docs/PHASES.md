@@ -225,6 +225,14 @@
 - Hashed key storage; plain key shown once at creation
 - API: `GET/POST /api/admin/api-keys`, `DELETE /api/admin/api-keys/{id}`
 
+## Phase 19 — Incremental indexing at scale (started)
+
+- Git diff-based incremental repository indexing when `Indexing:IncrementalEnabled=true`
+- Tracks `RepositoryBranch.LastCommitHash` after each index run
+- Processes only changed/deleted files; full reindex when prior commit is missing or diff fails
+- Configurable via `Indexing:MaxFilesPerRun` (default 5000)
+- Repository status API exposes last commit hash and incremental flag
+
 ## Future enhancements
 
 - GitHub App webhook-driven automatic re-index on push

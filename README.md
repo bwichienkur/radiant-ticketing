@@ -145,7 +145,8 @@ Key settings in `appsettings.json`:
   "DataProtection": { "ApplicationName": "EnhancementHub", "KeysPath": "" },
   "OpenAI": { "ApiKey": "", "Model": "gpt-4o-mini" },
   "VectorSearch": { "Provider": "InMemory|PgVector|Qdrant|AzureSearch" },
-  "Storage": { "Provider": "Local|S3" }
+  "Storage": { "Provider": "Local|S3" },
+  "Indexing": { "IncrementalEnabled": true, "MaxFilesPerRun": 5000 }
 }
 ```
 
@@ -170,7 +171,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-112+ tests covering service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
+120+ tests covering incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
 
 ---
 
