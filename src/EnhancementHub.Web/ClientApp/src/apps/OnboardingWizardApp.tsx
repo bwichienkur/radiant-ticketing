@@ -43,6 +43,7 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
     purpose: '',
     riskSensitiveAreas: '',
     ownerTeamName: '',
+    deploymentNotes: '',
   });
   const [database, setDatabase] = useState({
     connectionName: '',
@@ -179,6 +180,7 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
           purpose: basics.purpose || undefined,
           riskSensitiveAreas: basics.riskSensitiveAreas || undefined,
           ownerTeamName: basics.ownerTeamName || undefined,
+          deploymentNotes: basics.deploymentNotes || undefined,
         }),
       (updated) => setSession(updated),
     );
@@ -292,6 +294,19 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
                   value={basics.ownerTeamName}
                   onChange={(event) => setBasics({ ...basics, ownerTeamName: event.target.value })}
                 />
+              </div>
+              <div className="col-12">
+                <label className="form-label">Deployment &amp; infrastructure notes</label>
+                <textarea
+                  className="form-control"
+                  rows={3}
+                  placeholder="e.g. Azure App Service (P1v3), prefer existing Worker over new Azure Functions; avoid new paid SaaS"
+                  value={basics.deploymentNotes}
+                  onChange={(event) => setBasics({ ...basics, deploymentNotes: event.target.value })}
+                />
+                <div className="form-text">
+                  Used by AI analysis to respect hosting and cost constraints when recommending changes.
+                </div>
               </div>
             </div>
             <button type="submit" className="btn btn-primary mt-4" disabled={submitting}>

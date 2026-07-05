@@ -35,6 +35,7 @@ public sealed class OpenAiAnalysisService : IAiAnalysisService
         string title,
         string description,
         string? repositoryContext,
+        string? applicationContext = null,
         CancellationToken cancellationToken = default)
     {
         if (!_chatCompletion.IsConfigured)
@@ -45,7 +46,11 @@ public sealed class OpenAiAnalysisService : IAiAnalysisService
             return CreateMockAnalysis(title, description);
         }
 
-        var prompt = _promptSanitizer.BuildStructuredPrompt(title, description, repositoryContext);
+        var prompt = _promptSanitizer.BuildStructuredPrompt(
+            title,
+            description,
+            repositoryContext,
+            applicationContext);
 
         var completion = await _chatCompletion.CompleteAsync(
             new ChatCompletionRequest
@@ -55,6 +60,9 @@ public sealed class OpenAiAnalysisService : IAiAnalysisService
                     You are a software architecture analyst. Return JSON with:
                     summary (string), impactedAreas (string[]), recommendations (string[]),
                     risks (string[]), estimatedEffortHours (number), modelUsed (string).
+                    When recommendations imply new cloud services, external APIs, or hosting changes,
+                    call that out in risks or recommendations and suggest a lower-cost alternative when feasible.
+                    Honor deployment and infrastructure constraints in the user prompt.
                     """,
                 UserPrompt = prompt
             },

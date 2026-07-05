@@ -11,6 +11,7 @@ public class Application : BaseEntity
     public string? Description { get; set; }
     public Guid OwnerTeamId { get; set; }
     public string? RiskSensitiveAreas { get; set; }
+    public string? DeploymentNotes { get; set; }
     public ApplicationTier Tier { get; set; } = ApplicationTier.Standard;
 
     public Team OwnerTeam { get; set; } = null!;

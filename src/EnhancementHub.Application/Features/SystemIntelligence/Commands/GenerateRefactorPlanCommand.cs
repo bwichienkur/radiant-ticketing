@@ -1,5 +1,6 @@
 using System.Text.Json;
 using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Common;
 using EnhancementHub.Application.Features.SystemIntelligence.Dtos;
 using EnhancementHub.Domain.Entities;
 using EnhancementHub.Domain.Enums;
@@ -46,6 +47,20 @@ public sealed class GenerateRefactorPlanCommandHandler
             .AsNoTracking()
             .FirstOrDefaultAsync(r => r.ApplicationId == request.ApplicationId, cancellationToken);
 
+        var application = await _dbContext.Applications
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Id == request.ApplicationId, cancellationToken);
+
+        var profile = await _dbContext.ApplicationProfiles
+            .AsNoTracking()
+            .Where(p => p.ApplicationId == request.ApplicationId)
+            .OrderByDescending(p => p.UpdatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var infrastructureContext = ApplicationAnalysisContextFormatter.Format(
+            profile,
+            application?.DeploymentNotes);
+
         var blastRadius = await _blastRadiusService.AnalyzeAsync(
             request.ApplicationId,
             request.Target,
@@ -57,6 +72,7 @@ public sealed class GenerateRefactorPlanCommandHandler
             databaseConnectionId: connection?.Id,
             repositoryId: repository?.Id,
             blastRadius,
+            infrastructureContext,
             cancellationToken);
 
         var migrationMarkdown = string.Join(

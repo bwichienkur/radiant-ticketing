@@ -11,5 +11,6 @@ public interface IRefactorPlanGenerator
         Guid? databaseConnectionId,
         Guid? repositoryId,
         RefactorBlastRadiusResult? blastRadius,
+        string? infrastructureContext = null,
         CancellationToken cancellationToken = default);
 }

@@ -9,5 +9,6 @@ public interface IAiAnalysisService
         string title,
         string description,
         string? repositoryContext,
+        string? applicationContext = null,
         CancellationToken cancellationToken = default);
 }

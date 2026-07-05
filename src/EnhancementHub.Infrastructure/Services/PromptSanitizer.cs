@@ -46,7 +46,11 @@ public sealed class PromptSanitizer
         return normalized;
     }
 
-    public string BuildStructuredPrompt(string title, string description, string? repositoryContext)
+    public string BuildStructuredPrompt(
+        string title,
+        string description,
+        string? repositoryContext,
+        string? applicationContext = null)
     {
         var sb = new StringBuilder();
         sb.AppendLine("Analyze the following enhancement request for a software repository.");
@@ -55,7 +59,13 @@ public sealed class PromptSanitizer
         sb.AppendLine($"Title: {SanitizeUserInput(title, 500)}");
         sb.AppendLine($"Description: {SanitizeUserInput(description)}");
 
-        if (!string.IsNullOrWhiteSpace(repositoryContext))
+        if (!string.IsNullOrWhiteSpace(applicationContext))
+        {
+            sb.AppendLine();
+            sb.AppendLine("Application & infrastructure context:");
+            sb.AppendLine(SanitizeUserInput(applicationContext, 6000));
+        }
+        else if (!string.IsNullOrWhiteSpace(repositoryContext))
         {
             sb.AppendLine();
             sb.AppendLine("Repository context:");

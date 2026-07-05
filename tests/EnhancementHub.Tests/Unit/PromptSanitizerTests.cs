@@ -68,4 +68,18 @@ public sealed class PromptSanitizerTests
         prompt.Should().Contain("Repository context:");
         prompt.Should().Contain("OrdersController");
     }
+
+    [Fact]
+    public void BuildStructuredPrompt_PrefersApplicationContextOverRepositoryContext()
+    {
+        var prompt = _sut.BuildStructuredPrompt(
+            "Title",
+            "Description",
+            repositoryContext: "legacy repo snippet",
+            applicationContext: "Azure App Service constraints");
+
+        prompt.Should().Contain("Application & infrastructure context:");
+        prompt.Should().Contain("Azure App Service constraints");
+        prompt.Should().NotContain("legacy repo snippet");
+    }
 }

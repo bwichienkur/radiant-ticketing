@@ -17,7 +17,8 @@ public sealed record CreateApplicationCommand(
     string? Purpose,
     string? Description,
     string? RiskSensitiveAreas,
-    string? OwnerTeamName = null) : IRequest<ApplicationDto>;
+    string? OwnerTeamName = null,
+    string? DeploymentNotes = null) : IRequest<ApplicationDto>;
 
 public sealed class CreateApplicationCommandValidator : AbstractValidator<CreateApplicationCommand>
 {
@@ -27,6 +28,7 @@ public sealed class CreateApplicationCommandValidator : AbstractValidator<Create
         RuleFor(x => x.BusinessDomain).MaximumLength(200);
         RuleFor(x => x.Purpose).MaximumLength(1000);
         RuleFor(x => x.Description).MaximumLength(4000);
+        RuleFor(x => x.DeploymentNotes).MaximumLength(4000);
     }
 }
 
@@ -55,6 +57,7 @@ public sealed class CreateApplicationCommandHandler
             Purpose = request.Purpose?.Trim(),
             Description = request.Description?.Trim(),
             RiskSensitiveAreas = request.RiskSensitiveAreas?.Trim(),
+            DeploymentNotes = request.DeploymentNotes?.Trim(),
             OwnerTeamId = team.Id,
             CreatedAt = now,
             UpdatedAt = now

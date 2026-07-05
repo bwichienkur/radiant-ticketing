@@ -60,7 +60,8 @@ public sealed class SpaOnboardingController : ControllerBase
             request.Purpose,
             null,
             request.RiskSensitiveAreas,
-            request.OwnerTeamName), cancellationToken);
+            request.OwnerTeamName,
+            request.DeploymentNotes), cancellationToken);
 
         var session = await _mediator.Send(new AdvanceOnboardingSessionCommand(
             sessionId,
