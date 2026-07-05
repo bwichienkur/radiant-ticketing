@@ -71,7 +71,8 @@ public sealed class Horizon1PilotReadinessTests
 
         var accessService = new ApplicationAccessService(
             db,
-            new TestCurrentUser(memberUserId, UserRole.Developer));
+            new TestCurrentUser(memberUserId, UserRole.Developer),
+            new TestCurrentTenant());
 
         var visible = await accessService.ApplyVisibilityFilter(db.Applications).ToListAsync();
         visible.Should().ContainSingle(a => a.Name == "Visible App");
@@ -103,5 +104,11 @@ public sealed class Horizon1PilotReadinessTests
         public UserRole? Role { get; }
         public bool IsAuthenticated { get; }
         public string? IpAddress => "127.0.0.1";
+    }
+
+    private sealed class TestCurrentTenant : ICurrentTenantService
+    {
+        public Guid? TenantId => null;
+        public bool HasTenantContext => false;
     }
 }

@@ -11,6 +11,9 @@ public class User : BaseEntity
     public UserRole Role { get; set; }
     public bool IsActive { get; set; } = true;
     public string PasswordHash { get; set; } = string.Empty;
+    public Guid? TenantId { get; set; }
+
+    public Tenant? Tenant { get; set; }
 
     public ICollection<TeamMember> TeamMemberships { get; set; } = new List<TeamMember>();
     public ICollection<EnhancementRequest> SubmittedRequests { get; set; } = new List<EnhancementRequest>();

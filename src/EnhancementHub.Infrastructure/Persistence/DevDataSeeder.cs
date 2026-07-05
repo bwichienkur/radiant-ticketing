@@ -26,6 +26,22 @@ public static class DevDataSeeder
 
         logger.LogInformation("Seeding development admin user.");
 
+        var defaultTenantId = Guid.Parse("99999999-9999-9999-9999-999999999999");
+        if (!await db.Tenants.AnyAsync(cancellationToken))
+        {
+            db.Tenants.Add(new Tenant
+            {
+                Id = defaultTenantId,
+                Name = "Default Organization",
+                Slug = "default",
+                Plan = TenantPlan.Enterprise,
+                Region = TenantRegion.US,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            });
+        }
+
         var admin = new User
         {
             Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
@@ -33,6 +49,7 @@ public static class DevDataSeeder
             DisplayName = "System Administrator",
             Department = "IT",
             Role = UserRole.Admin,
+            TenantId = defaultTenantId,
             IsActive = true,
             PasswordHash = passwordHasher.Hash(AdminPassword),
             CreatedAt = DateTime.UtcNow,
@@ -98,6 +115,7 @@ public static class DevDataSeeder
             Id = teamId,
             Name = "Platform Engineering",
             Description = "Core platform and architecture team",
+            TenantId = Guid.Parse("99999999-9999-9999-9999-999999999999"),
             CreatedAt = now,
             UpdatedAt = now
         });

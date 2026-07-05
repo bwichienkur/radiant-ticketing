@@ -15,5 +15,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(x => x.Department).HasMaxLength(200);
         builder.Property(x => x.PasswordHash).HasMaxLength(512).IsRequired();
         builder.HasIndex(x => x.Email).IsUnique();
+        builder.HasOne(x => x.Tenant)
+            .WithMany(t => t.Users)
+            .HasForeignKey(x => x.TenantId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 }

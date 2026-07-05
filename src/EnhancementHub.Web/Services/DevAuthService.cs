@@ -16,12 +16,21 @@ public sealed class DevAuthService
         return await _mediator.Send(new LoginCommand(email, password), cancellationToken);
     }
 
-    public static ClaimsPrincipal CreatePrincipal(LoginResult login) =>
-        new(new ClaimsIdentity(new[]
+    public static ClaimsPrincipal CreatePrincipal(LoginResult login)
+    {
+        var claims = new List<Claim>
         {
-            new Claim(ClaimTypes.NameIdentifier, login.UserId.ToString()),
-            new Claim(ClaimTypes.Email, login.Email),
-            new Claim(ClaimTypes.Name, login.DisplayName),
-            new Claim(ClaimTypes.Role, login.Role.ToString())
-        }, "Cookies"));
+            new(ClaimTypes.NameIdentifier, login.UserId.ToString()),
+            new(ClaimTypes.Email, login.Email),
+            new(ClaimTypes.Name, login.DisplayName),
+            new(ClaimTypes.Role, login.Role.ToString())
+        };
+
+        if (login.TenantId.HasValue)
+        {
+            claims.Add(new Claim("tenant_id", login.TenantId.Value.ToString()));
+        }
+
+        return new ClaimsPrincipal(new ClaimsIdentity(claims, "Cookies"));
+    }
 }

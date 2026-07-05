@@ -54,6 +54,8 @@ public interface IEnhancementHubDbContext
     DbSet<OnPremAgent> OnPremAgents { get; }
     DbSet<OnboardingSession> OnboardingSessions { get; }
     DbSet<ServiceApiKey> ServiceApiKeys { get; }
+    DbSet<Tenant> Tenants { get; }
+    DbSet<TenantUsageSnapshot> TenantUsageSnapshots { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

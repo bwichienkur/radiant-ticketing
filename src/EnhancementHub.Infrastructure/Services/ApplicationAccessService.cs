@@ -11,17 +11,27 @@ public sealed class ApplicationAccessService : IApplicationAccessService
 {
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly ICurrentUserService _currentUser;
+    private readonly ICurrentTenantService _currentTenant;
 
     public ApplicationAccessService(
         IEnhancementHubDbContext dbContext,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        ICurrentTenantService currentTenant)
     {
         _dbContext = dbContext;
         _currentUser = currentUser;
+        _currentTenant = currentTenant;
     }
 
     public IQueryable<ApplicationEntity> ApplyVisibilityFilter(IQueryable<ApplicationEntity> query)
     {
+        if (_currentTenant.TenantId.HasValue)
+        {
+            var tenantId = _currentTenant.TenantId.Value;
+            query = query.Where(a => _dbContext.Teams
+                .Any(t => t.Id == a.OwnerTeamId && t.TenantId == tenantId));
+        }
+
         if (_currentUser.Role == UserRole.Admin)
         {
             return query;

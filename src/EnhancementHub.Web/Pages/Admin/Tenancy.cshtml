@@ -1,0 +1,64 @@
+@page
+@model EnhancementHub.Web.Pages.Admin.TenancyModel
+@{
+    ViewData["Title"] = "Tenancy & Billing";
+    var billing = Model.Billing;
+}
+
+<div class="page-header">
+    <h1>Tenancy &amp; billing</h1>
+    <p>Plan limits, usage metering, and regional deployment</p>
+</div>
+
+@if (billing is not null)
+{
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="label">Plan</div>
+                <div class="value fs-5">@billing.Plan</div>
+                <div class="small text-muted">@billing.Region region</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="label">Applications</div>
+                <div class="value fs-5">@billing.ApplicationCount / @billing.MaxApplications</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="label">Analyses (month)</div>
+                <div class="value fs-5">@billing.AnalysisCountThisMonth / @billing.MaxAnalysesPerMonth</div>
+            </div>
+        </div>
+    </div>
+
+    @if (billing.IsTrialActive && billing.TrialEndsAt.HasValue)
+    {
+        <div class="alert alert-info">Trial active until @billing.TrialEndsAt.Value.ToString("d").</div>
+    }
+
+    @if (billing.IsOverLimit)
+    {
+        <div class="alert alert-warning" role="alert">Usage exceeds plan limits. Upgrade to continue scaling.</div>
+    }
+}
+else
+{
+    <div class="card-panel p-4">
+        <p class="mb-2">Platform administrator view — no tenant context on this account.</p>
+        @if (Model.AllTenants.Count > 0)
+        {
+            <table class="table table-sm">
+                <thead><tr><th>Name</th><th>Slug</th><th>Plan</th><th>Region</th></tr></thead>
+                <tbody>
+                @foreach (var t in Model.AllTenants)
+                {
+                    <tr><td>@t.Name</td><td>@t.Slug</td><td>@t.Plan</td><td>@t.Region</td></tr>
+                }
+                </tbody>
+            </table>
+        }
+    </div>
+}

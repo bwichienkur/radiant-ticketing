@@ -294,6 +294,16 @@
 - WCAG 2.1 AA baseline: skip link, focus rings, live regions, reduced motion
 - Guides: `docs/UX_MODERNIZATION.md`, `docs/ACCESSIBILITY.md`
 
+## Phase 26 — Commercial platform (complete)
+
+- Row-level multi-tenant isolation via `TenantId` on users and teams
+- Usage metering and plan limits (`Trial`, `Team`, `Enterprise`)
+- Self-service trial signup (`/Account/Signup`, `POST /api/tenants/register`)
+- Regional tenant metadata (`US`, `EU`, `APAC`) for data residency routing
+- Admin tenancy dashboard (`/Admin/Tenancy`) and billing API
+- Guide: `docs/COMMERCIAL_PLATFORM.md`
+
 ## Future enhancements
 
-- Multi-tenant commercial platform (Phase 26)
+- Payment provider integration (Stripe) and invoice generation
+- Schema-per-tenant isolation for regulated workloads

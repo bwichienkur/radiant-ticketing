@@ -30,6 +30,10 @@ public class EntityConfigurations : IEntityTypeConfiguration<Team>,
     {
         builder.ToTable("Teams");
         builder.Property(x => x.Name).HasMaxLength(200).IsRequired();
+        builder.HasOne(x => x.Tenant)
+            .WithMany(t => t.Teams)
+            .HasForeignKey(x => x.TenantId)
+            .OnDelete(DeleteBehavior.SetNull);
     }
 
     public void Configure(EntityTypeBuilder<TeamMember> builder)

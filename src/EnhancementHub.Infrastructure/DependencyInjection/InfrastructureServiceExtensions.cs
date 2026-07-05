@@ -167,6 +167,11 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IChatIntakeService, ChatIntakeService>();
         services.AddScoped<IGitHubWebhookService, GitHubWebhookService>();
         services.AddScoped<IServiceNowSyncService, ServiceNowSyncService>();
+        services.Configure<Application.Options.CommercialOptions>(
+            configuration.GetSection(Application.Options.CommercialOptions.SectionName));
+        services.AddScoped<ICurrentTenantService, CurrentTenantService>();
+        services.AddScoped<ITenantMeteringService, TenantMeteringService>();
+        services.AddScoped<ITenantBillingService, TenantBillingService>();
         services.AddScoped<IApprovalPolicyEvaluator, ApprovalPolicyEvaluator>();
         services.AddSingleton<IRequestCollaborationNotifier, NoOpRequestCollaborationNotifier>();
         services.AddScoped<HangfireRepositoryIndexingDispatcher>();

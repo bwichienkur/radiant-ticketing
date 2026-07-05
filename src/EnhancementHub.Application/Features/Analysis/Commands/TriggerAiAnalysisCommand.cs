@@ -19,17 +19,23 @@ public sealed class TriggerAiAnalysisCommandHandler
     private readonly IAiAnalysisService _aiAnalysisService;
     private readonly IRiskScoringService _riskScoringService;
     private readonly IAuditService _auditService;
+    private readonly ITenantMeteringService _tenantMeteringService;
+    private readonly ITenantBillingService _tenantBillingService;
 
     public TriggerAiAnalysisCommandHandler(
         IEnhancementHubDbContext dbContext,
         IAiAnalysisService aiAnalysisService,
         IRiskScoringService riskScoringService,
-        IAuditService auditService)
+        IAuditService auditService,
+        ITenantMeteringService tenantMeteringService,
+        ITenantBillingService tenantBillingService)
     {
         _dbContext = dbContext;
         _aiAnalysisService = aiAnalysisService;
         _riskScoringService = riskScoringService;
         _auditService = auditService;
+        _tenantMeteringService = tenantMeteringService;
+        _tenantBillingService = tenantBillingService;
     }
 
     public async Task<EnhancementAnalysisDto> Handle(
@@ -41,6 +47,17 @@ public sealed class TriggerAiAnalysisCommandHandler
             .ThenInclude(a => a!.Profiles)
             .FirstOrDefaultAsync(r => r.Id == request.EnhancementRequestId, cancellationToken)
             ?? throw new NotFoundException(nameof(EnhancementRequest), request.EnhancementRequestId);
+
+        var submitterTenantId = await _dbContext.Users
+            .AsNoTracking()
+            .Where(u => u.Id == enhancementRequest.SubmittedByUserId)
+            .Select(u => u.TenantId)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (submitterTenantId.HasValue)
+        {
+            await _tenantBillingService.EnsureWithinLimitsAsync(submitterTenantId.Value, cancellationToken);
+        }
 
         enhancementRequest.Status = EnhancementRequestStatus.AiAnalyzing;
         enhancementRequest.UpdatedAt = DateTime.UtcNow;
@@ -89,6 +106,11 @@ public sealed class TriggerAiAnalysisCommandHandler
                 enhancementRequest.Id,
                 result.Summary,
                 cancellationToken);
+
+            if (submitterTenantId.HasValue)
+            {
+                await _tenantMeteringService.RecordAnalysisAsync(submitterTenantId.Value, cancellationToken);
+            }
         }
         catch (Exception ex)
         {
