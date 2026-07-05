@@ -247,7 +247,23 @@ async function waitForScene(page, scene) {
     return;
   }
 
-  await page.goto(`${BASE}${scene.path}`, { waitUntil: 'domcontentloaded', timeout: 45000 });
+  const response = await page.goto(`${BASE}${scene.path}`, {
+    waitUntil: 'domcontentloaded',
+    timeout: 45000,
+  });
+
+  if (response && response.status() >= 400) {
+    throw new Error(`Scene "${scene.id}" returned HTTP ${response.status()} for ${scene.path}`);
+  }
+
+  const bodyText = await page.textContent('body');
+  if (
+    bodyText?.includes('DeveloperExceptionPage') ||
+    bodyText?.includes('was not found') ||
+    bodyText?.includes('An error occurred')
+  ) {
+    throw new Error(`Scene "${scene.id}" shows an error page at ${scene.path}`);
+  }
 
   if (scene.wait) {
     const selectors = scene.wait.split(',').map((s) => s.trim());
@@ -301,9 +317,16 @@ async function main() {
   const context = await browser.newContext({
     viewport: { width: 1280, height: 720 },
     recordVideo: { dir: ARTIFACT_DIR, size: { width: 1280, height: 720 } },
+    colorScheme: 'dark',
   });
 
   const page = await context.newPage();
+
+  // Prefer dark theme for a polished demo look
+  await page.addInitScript(() => {
+    localStorage.setItem('eh-theme', 'dark');
+    document.documentElement.setAttribute('data-bs-theme', 'dark');
+  });
 
   // Scene 1: login form (before auth)
   const loginScene = SCENES[0];
