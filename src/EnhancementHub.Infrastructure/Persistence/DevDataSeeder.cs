@@ -144,5 +144,20 @@ public static class DevDataSeeder
 
         await db.SaveChangesAsync(cancellationToken);
         logger.LogInformation("Demo System Intelligence data created.");
+
+        var adminId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+        if (!await db.TeamMembers.AnyAsync(m => m.TeamId == teamId && m.UserId == adminId, cancellationToken))
+        {
+            db.TeamMembers.Add(new TeamMember
+            {
+                Id = Guid.NewGuid(),
+                TeamId = teamId,
+                UserId = adminId,
+                Role = "Owner",
+                CreatedAt = now,
+                UpdatedAt = now
+            });
+            await db.SaveChangesAsync(cancellationToken);
+        }
     }
 }

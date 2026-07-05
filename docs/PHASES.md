@@ -202,6 +202,14 @@
 - Admin compliance dashboard (`/Admin/Compliance`) with configuration-aware status
 - API: `GET /api/admin/compliance/soc2`
 
+## Horizon 2 continuation — Team membership management
+
+- Admin teams list and detail pages (`/Admin/Teams`, `/Admin/Teams/{id}`)
+- Invite users by email (creates account with temporary password or links existing user)
+- Update team roles (Owner, Lead, Member) and remove members
+- Audit logging for membership changes
+- API: `GET/POST /api/admin/teams`, `GET /api/admin/teams/{id}`, member CRUD endpoints
+
 ## Future enhancements
 
 - GitHub App webhook-driven automatic re-index on push

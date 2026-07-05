@@ -1,0 +1,90 @@
+@page
+@model EnhancementHub.Web.Pages.Admin.TeamsModel
+@{
+    ViewData["Title"] = "Teams";
+}
+
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+        <h1>Teams</h1>
+        <p>Manage team membership and application ownership</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-info">@Model.StatusMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card-panel p-4">
+            <h2 class="h6 mb-3">Create team</h2>
+            <form method="post" asp-page-handler="Create">
+                <div class="mb-3">
+                    <label asp-for="NewTeamName" class="form-label">Name</label>
+                    <input asp-for="NewTeamName" class="form-control" required maxlength="200" />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="NewTeamDescription" class="form-label">Description</label>
+                    <textarea asp-for="NewTeamDescription" class="form-control" rows="2" maxlength="1000"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Create team</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card-panel">
+            <div class="card-header px-3 pt-3">All teams</div>
+            @if (Model.Teams.Count == 0)
+            {
+                <div class="p-4 text-muted">No teams yet. Create one or complete onboarding to auto-create teams.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-enterprise mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Members</th>
+                                <th>Applications</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var team in Model.Teams)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@team.Name</strong>
+                                        @if (!string.IsNullOrWhiteSpace(team.Description))
+                                        {
+                                            <div class="small text-muted">@team.Description</div>
+                                        }
+                                    </td>
+                                    <td>@team.MemberCount</td>
+                                    <td>@team.ApplicationCount</td>
+                                    <td class="text-end">
+                                        <a class="btn btn-sm btn-outline-primary" asp-page="/Admin/TeamDetail" asp-route-id="@team.Id">Manage</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<p class="text-muted small mt-3 mb-0">
+    Team membership controls which applications and System Intelligence resources a user can access.
+    Users must belong to a team that owns an application to view its data.
+</p>
