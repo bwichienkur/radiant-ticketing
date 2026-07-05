@@ -1065,3 +1065,12 @@ body {
 #spa-content[aria-busy="true"] {
     opacity: 0.6;
 }
+
+/* System map Cytoscape graph */
+.system-map-graph-canvas {
+    min-height: 30rem;
+    height: min(70vh, 36rem);
+    border: 1px solid var(--eh-border);
+    border-radius: 0.5rem;
+    background: var(--eh-surface-muted, #f8fafc);
+}

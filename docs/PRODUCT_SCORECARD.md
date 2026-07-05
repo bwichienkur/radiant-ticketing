@@ -13,7 +13,7 @@ Living assessment of product maturity, marketability, and scalability. Updated w
 | 10 | Validated in production at scale with measured outcomes |
 
 **Baseline:** Phase 15 enterprise hardening (July 2026), before Horizons 1–3 work.  
-**Current snapshot:** Phase 31 complete (Horizon 4.3 — React approval & onboarding).
+**Current snapshot:** Phase 32 complete (Horizon 4.4 — Cytoscape system map graph).
 
 Related: [ROADMAP.md](ROADMAP.md) · [PHASES.md](PHASES.md) · [ICP_ONE_PAGER.md](ICP_ONE_PAGER.md)
 
@@ -38,12 +38,12 @@ Overall = average of the three dimensions (equal weight).
 |----------|----------|---------|----------|
 | Core intake → approval → export | 9 | 9 | Phases 1–4 complete |
 | System Intelligence (schema, graph, drift, docs) | 8 | 8.5 | Phase 21 incremental graph, pagination, doc cache |
-| Demo / operator UX | 5 | 9.5 | Phase 31 React approval queue + onboarding wizard |
+| Demo / operator UX | 5 | 9.5 | Phase 32 Cytoscape graph + Phase 31 React approval queue + onboarding wizard |
 | Identity & authorization | 6 | 8.5 | Phase 16, Entra ID, team membership, API keys |
 | AI operations | 6 | 8.5 | Phase 17: Azure OpenAI, budgets, PII redaction, usage report |
 | Background job reliability | 4 | 8 | Phase 18: Hangfire, admin jobs UI, shared executors |
 | Compliance & audit | 5 | 8.5 | Audit export, retention, SOC 2 map, security whitepaper |
-| Engineering quality | 7 | 7.5 | 208 automated tests |
+| Engineering quality | 7 | 7.5 | 214 automated tests |
 | Integrations & polyglot | 4 | 7.5 | Phase 23 — [INTEGRATIONS.md](INTEGRATIONS.md) |
 | ROI & policy differentiation | 2 | 7.5 | Phase 24 — [PRODUCT_DIFFERENTIATION.md](PRODUCT_DIFFERENTIATION.md) |
 | Multi-tenant commercial platform | 1 | 8.5 | Phase 26–29 — [COMMERCIAL_PLATFORM.md](COMMERCIAL_PLATFORM.md), [STRIPE_BILLING.md](STRIPE_BILLING.md), [TENANT_ISOLATION.md](TENANT_ISOLATION.md) |
@@ -149,6 +149,7 @@ When closing a phase or horizon:
 
 | Date | Phase / milestone | Overall | Notes |
 |------|-------------------|---------|-------|
+| 2026-07-05 | Phase 32 — Cytoscape system map graph | 8.7 → 8.7 | Interactive graph on React system map |
 | 2026-07-05 | Phase 31 — React approval & onboarding | 8.6 → 8.7 | Approval queue + wizard React SPAs |
 | 2026-07-05 | Phase 30 — React SPA migration | 8.5 → 8.6 | Vite ClientApp, request detail + system map hot paths |
 | 2026-07-05 | Phase 29 — Schema-per-tenant isolation | 8.4 → 8.5 | Dedicated PostgreSQL schemas, search_path routing, provision API |
@@ -163,4 +164,4 @@ When closing a phase or horizon:
 
 ---
 
-*Last updated: July 2026 — Phase 31 (React approval & onboarding).*
+*Last updated: July 2026 — Phase 32 (Cytoscape system map graph).*
