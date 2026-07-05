@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 using Polly;
 using Polly.Extensions.Http;
 
@@ -38,18 +39,21 @@ public static class InfrastructureServiceExtensions
         var connectionString = configuration.GetConnectionString("Default")
             ?? "Data Source=enhancementhub.db";
         var provider = ResolveDatabaseProvider(configuration, connectionString);
+        var scalingOptions = configuration
+            .GetSection(Application.Options.DatabaseScalingOptions.SectionName)
+            .Get<Application.Options.DatabaseScalingOptions>()
+            ?? new Application.Options.DatabaseScalingOptions();
+
+        services.Configure<Application.Options.DatabaseScalingOptions>(
+            configuration.GetSection(Application.Options.DatabaseScalingOptions.SectionName));
 
         services.AddDbContext<EnhancementHubDbContext>(options =>
-        {
-            if (provider == DatabaseProvider.PostgreSql)
-            {
-                options.UseNpgsql(connectionString);
-            }
-            else
-            {
-                options.UseSqlite(connectionString);
-            }
-        });
+            ConfigureDbContextOptions(options, connectionString, provider, scalingOptions));
+
+        var reportingConnection = configuration.GetConnectionString("Reporting") ?? connectionString;
+        services.AddDbContext<ReportingDbContext>(options =>
+            ConfigureDbContextOptions(options, reportingConnection, provider, scalingOptions));
+        services.AddScoped<IReportingDbContext>(sp => sp.GetRequiredService<ReportingDbContext>());
 
         services.AddScoped<IEnhancementHubDbContext>(sp => sp.GetRequiredService<EnhancementHubDbContext>());
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
@@ -157,6 +161,7 @@ public static class InfrastructureServiceExtensions
         services.Configure<Application.Options.IndexingOptions>(configuration.GetSection(Application.Options.IndexingOptions.SectionName));
         services.AddScoped<IGitRepositoryHistoryService, GitRepositoryHistoryService>();
         services.AddScoped<IIndexFreshnessService, IndexFreshnessService>();
+        services.AddScoped<IDataScalingStatusService, DataScalingStatusService>();
         services.AddScoped<HangfireRepositoryIndexingDispatcher>();
         services.PostConfigure<Options.AiOptions>(options =>
         {
@@ -354,6 +359,38 @@ public static class InfrastructureServiceExtensions
         }
 
         return DatabaseProvider.Sqlite;
+    }
+
+    private static void ConfigureDbContextOptions(
+        DbContextOptionsBuilder options,
+        string connectionString,
+        DatabaseProvider provider,
+        Application.Options.DatabaseScalingOptions scalingOptions)
+    {
+        if (provider == DatabaseProvider.PostgreSql)
+        {
+            var pooledConnectionString = ApplyPostgreSqlPoolSettings(connectionString, scalingOptions);
+            options.UseNpgsql(pooledConnectionString, npgsql =>
+            {
+                npgsql.CommandTimeout(Math.Clamp(scalingOptions.ConnectionTimeoutSeconds, 5, 300));
+            });
+        }
+        else
+        {
+            options.UseSqlite(connectionString);
+        }
+    }
+
+    private static string ApplyPostgreSqlPoolSettings(
+        string connectionString,
+        Application.Options.DatabaseScalingOptions scalingOptions)
+    {
+        var builder = new NpgsqlConnectionStringBuilder(connectionString)
+        {
+            MaxPoolSize = Math.Clamp(scalingOptions.MaxPoolSize, 1, 500),
+            MinPoolSize = Math.Max(0, scalingOptions.MinPoolSize)
+        };
+        return builder.ConnectionString;
     }
 
     private enum DatabaseProvider

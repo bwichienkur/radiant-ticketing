@@ -11,9 +11,9 @@ public sealed record GetDashboardReportQuery : IRequest<DashboardReportDto>;
 public sealed class GetDashboardReportQueryHandler
     : IRequestHandler<GetDashboardReportQuery, DashboardReportDto>
 {
-    private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IReportingDbContext _dbContext;
 
-    public GetDashboardReportQueryHandler(IEnhancementHubDbContext dbContext)
+    public GetDashboardReportQueryHandler(IReportingDbContext dbContext)
     {
         _dbContext = dbContext;
     }

@@ -1,0 +1,96 @@
+@page
+@model EnhancementHub.Web.Pages.Admin.DataScalingModel
+@{
+    ViewData["Title"] = "Data Scaling";
+    var status = Model.Status;
+}
+
+<div class="page-header">
+    <h1>Data Scaling</h1>
+    <p>Vector search offload, read replicas, connection pooling, and archival posture</p>
+</div>
+
+@if (status is null)
+{
+    <div class="card-panel p-4"><p class="text-muted mb-0">Unable to load data scaling status.</p></div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="label">Vector provider</div>
+                <div class="value fs-5">@status.VectorSearch.Provider</div>
+                <div class="small @(status.VectorSearch.IsProductionReady ? "text-success" : "text-warning")">
+                    @(status.VectorSearch.IsProductionReady ? "Production ready" : "Needs attention")
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="label">Read replica</div>
+                <div class="value fs-5">@(status.Database.ReadReplicaConfigured ? "Configured" : "Not configured")</div>
+                <div class="small text-muted">Reporting uses @status.Database.ReportingConnectionName</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="label">Connection pool</div>
+                <div class="value fs-5">@status.Database.MaxPoolSize</div>
+                <div class="small text-muted">Schema scan concurrency: @status.Database.SchemaScanMaxConcurrency</div>
+            </div>
+        </div>
+    </div>
+
+    @if (status.VectorSearch.Issues.Count > 0)
+    {
+        <div class="card-panel p-4 mb-4">
+            <h2 class="h6">Vector search</h2>
+            @if (!string.IsNullOrWhiteSpace(status.VectorSearch.RecommendedProvider))
+            {
+                <p class="small text-muted">Recommended for large deployments: <strong>@status.VectorSearch.RecommendedProvider</strong></p>
+            }
+            <ul class="mb-0">
+                @foreach (var issue in status.VectorSearch.Issues)
+                {
+                    <li class="@(issue.Severity == "Error" ? "text-danger" : issue.Severity == "Warning" ? "text-warning" : "text-muted")">
+                        <strong>@issue.Severity:</strong> @issue.Message
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="card-panel p-4 mb-4">
+        <h2 class="h6">Data archival</h2>
+        <dl class="row small mb-0">
+            <dt class="col-sm-4">Audit log records</dt>
+            <dd class="col-sm-8">@status.Archival.AuditLogCount.ToString("N0")</dd>
+            <dt class="col-sm-4">AI prompt runs</dt>
+            <dd class="col-sm-8">@status.Archival.AiPromptRunCount.ToString("N0")</dd>
+            <dt class="col-sm-4">Eligible for archive/purge</dt>
+            <dd class="col-sm-8">@status.Archival.EligibleAiPromptRunArchiveCount.ToString("N0") (@status.Archival.AiPromptRunsRetentionDays day retention)</dd>
+            <dt class="col-sm-4">Archive before delete</dt>
+            <dd class="col-sm-8">@(status.Archival.ArchiveBeforeDeleteEnabled ? "Enabled" : "Disabled") @(status.Archival.ArchivePath is not null ? $"→ {status.Archival.ArchivePath}" : "")</dd>
+        </dl>
+        @if (status.Archival.Recommendations.Count > 0)
+        {
+            <ul class="small mt-3 mb-0">
+                @foreach (var recommendation in status.Archival.Recommendations)
+                {
+                    <li>@recommendation</li>
+                }
+            </ul>
+        }
+    </div>
+
+    <pre class="small bg-dark text-light p-3 rounded">"ConnectionStrings": {
+  "Default": "Host=primary;...",
+  "Reporting": "Host=replica;..."
+},
+"VectorSearch": { "Provider": "Qdrant", "Qdrant": { "Url": "http://qdrant:6333" } },
+"DatabaseScaling": { "MaxPoolSize": 100, "SchemaScanMaxConcurrency": 2 },
+"Retention": { "ArchiveAiPromptRunsBeforeDelete": true, "ArchivePath": "/data/archives" }</pre>
+
+    <p class="text-muted small mt-3 mb-0">Last updated @status.GeneratedAtUtc.ToString("u") UTC. See docs/DATA_SCALING.md for deployment guidance.</p>
+}

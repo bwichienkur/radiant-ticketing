@@ -11,4 +11,8 @@ public sealed class RetentionOptions
     public int AttachmentsDays { get; set; } = 180;
 
     public int BatchSize { get; set; } = 500;
+
+    public bool ArchiveAiPromptRunsBeforeDelete { get; set; }
+
+    public string? ArchivePath { get; set; }
 }
