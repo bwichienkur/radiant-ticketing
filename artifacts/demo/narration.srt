@@ -1,0 +1,89 @@
+1
+00:00:00,000 --> 00:00:04,000
+Sign in
+Role-based access for submitters, approvers, and admins. SSO via Entra ID supported.
+
+2
+00:00:04,000 --> 00:00:09,000
+Dashboard control room
+Backlog health at a glance: pending analysis, high-risk approvals, sparklines, and the action queue for your role.
+
+3
+00:00:09,000 --> 00:00:14,000
+Submit enhancement request
+Capture business intent, priority, and target application — the foundation for grounded AI impact analysis.
+
+4
+00:00:14,000 --> 00:00:18,000
+Request triage
+Search, filter, and sort the enhancement backlog. Risk badges highlight what needs attention first.
+
+5
+00:00:18,000 --> 00:00:24,000
+Request detail & AI analysis
+Mission control shows risk, confidence, affected apps/repos, and DB recommendations from your indexed estate.
+
+6
+00:00:24,000 --> 00:00:30,000
+React detail + real-time collaboration
+SignalR powers live comments, viewer presence, and analysis refresh on the React SPA hot path.
+
+7
+00:00:30,000 --> 00:00:35,000
+System Map
+Graph links controllers, entities, services, and tables — architects see blast radius before approving.
+
+8
+00:00:35,000 --> 00:00:41,000
+Interactive Cytoscape graph
+Zoom, pan, and select nodes by type. Graph/list toggle with a 400-node performance cap.
+
+9
+00:00:41,000 --> 00:00:45,000
+Schema drift detection
+Scheduled scans compare live database schema against code mappings to catch mismatches early.
+
+10
+00:00:45,000 --> 00:00:50,000
+Approval queue
+Human gate: approve, reject, or request clarification. Audit log records every decision.
+
+11
+00:00:50,000 --> 00:00:55,000
+React approval queue
+Mobile-friendly queue with J/K keyboard navigation and quick decision actions.
+
+12
+00:00:55,000 --> 00:01:01,000
+Onboarding wizard
+Register apps via local path, ZIP, GitHub App, or Git — then connect DB and run discovery.
+
+13
+00:01:01,000 --> 00:01:05,000
+Application portfolio
+Team-scoped applications with linked repositories, DB connections, and intelligence profiles.
+
+14
+00:01:05,000 --> 00:01:09,000
+Database connections
+Register read-only connections for schema scan, ERD export, and drift detection.
+
+15
+00:01:09,000 --> 00:01:13,000
+Background jobs
+Hangfire orchestrates indexing, discovery, and AI analysis with retry and admin visibility.
+
+16
+00:01:13,000 --> 00:01:18,000
+Tenancy & billing
+Multi-tenant plans, Stripe checkout, trial enforcement, and schema-per-tenant isolation.
+
+17
+00:01:18,000 --> 00:01:22,000
+Compliance & governance
+SOC 2 readiness, retention policies, audit export, and security whitepaper for procurement.
+
+18
+00:01:22,000 --> 00:01:27,000
+Intake → analysis → approval → export
+EnhancementHub deploys in your environment. Business request to Jira-ready ticket — with full audit trail.
