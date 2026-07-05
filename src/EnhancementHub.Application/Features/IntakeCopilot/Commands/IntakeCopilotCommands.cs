@@ -193,7 +193,9 @@ public sealed class SendIntakeCopilotMessageCommandHandler
     }
 }
 
-public sealed record CreateRequestFromIntakeSessionCommand(Guid SessionId) : IRequest<Guid>;
+public sealed record CreateRequestFromIntakeSessionCommand(
+    Guid SessionId,
+    IntakeCopilotSubmitOverridesDto? Overrides = null) : IRequest<Guid>;
 
 public sealed class CreateRequestFromIntakeSessionCommandHandler
     : IRequestHandler<CreateRequestFromIntakeSessionCommand, Guid>
@@ -238,25 +240,43 @@ public sealed class CreateRequestFromIntakeSessionCommandHandler
         var draft = IntakeCopilotMapper.DeserializeDraft(session.DraftJson)
             ?? throw new ValidationException("No draft is available for this session. Continue the conversation first.");
 
-        if (string.IsNullOrWhiteSpace(draft.Title)
-            || string.IsNullOrWhiteSpace(draft.BusinessDescription)
-            || string.IsNullOrWhiteSpace(draft.DesiredOutcome))
+        var overrides = request.Overrides;
+        var title = overrides?.Title.Trim() ?? draft.Title.Trim();
+        var businessDescription = overrides?.BusinessDescription.Trim() ?? draft.BusinessDescription.Trim();
+        var desiredOutcome = overrides?.DesiredOutcome.Trim() ?? draft.DesiredOutcome.Trim();
+        var priority = overrides?.Priority.Trim() ?? draft.Priority;
+        var targetApplicationId = overrides?.TargetApplicationId ?? draft.TargetApplicationId;
+        var department = overrides?.Department ?? draft.Department;
+        var supportingNotes = overrides?.SupportingNotes ?? draft.SupportingNotes;
+        var templateId = overrides?.TemplateId ?? session.SuggestedTemplateId;
+
+        if (!string.IsNullOrWhiteSpace(session.PolicySourceLabel))
+        {
+            var provenance = $"Policy source: {session.PolicySourceLabel.Trim()}";
+            supportingNotes = string.IsNullOrWhiteSpace(supportingNotes)
+                ? provenance
+                : $"{supportingNotes.Trim()}\n\n{provenance}";
+        }
+
+        if (string.IsNullOrWhiteSpace(title)
+            || string.IsNullOrWhiteSpace(businessDescription)
+            || string.IsNullOrWhiteSpace(desiredOutcome))
         {
             throw new ValidationException("Draft is incomplete. Provide more detail in the intake conversation.");
         }
 
         var created = await _mediator.Send(
             new CreateEnhancementRequestCommand(
-                draft.Title.Trim(),
-                draft.BusinessDescription.Trim(),
-                draft.DesiredOutcome.Trim(),
-                draft.Priority,
-                draft.TargetApplicationId,
+                title,
+                businessDescription,
+                desiredOutcome,
+                priority,
+                targetApplicationId,
+                overrides?.RequestedDueDate,
+                department,
                 null,
-                draft.Department,
-                null,
-                draft.SupportingNotes,
-                session.SuggestedTemplateId),
+                supportingNotes,
+                templateId),
             cancellationToken);
 
         session.Status = IntakeCopilotSessionStatus.Completed;

@@ -317,8 +317,14 @@ export async function attachIntakePolicyUrl(
   return postJson(`/web-api/spa/intake/sessions/${sessionId}/policy-url`, { url });
 }
 
-export async function createRequestFromIntakeSession(sessionId: string): Promise<CreatedRequestSummary> {
-  return postJson(`/web-api/spa/intake/sessions/${sessionId}/create-request`);
+export async function createRequestFromIntakeSession(
+  sessionId: string,
+  overrides?: CreateRequestInput,
+): Promise<CreatedRequestSummary> {
+  return postJson(
+    `/web-api/spa/intake/sessions/${sessionId}/create-request`,
+    overrides ? { overrides } : {},
+  );
 }
 
 export async function listEnhancementRequests(params: {

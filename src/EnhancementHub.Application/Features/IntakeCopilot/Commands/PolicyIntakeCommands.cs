@@ -21,17 +21,20 @@ public sealed class AttachPolicyDocumentCommandHandler
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly ICurrentUserService _currentUser;
     private readonly IDocumentTextExtractor _extractor;
+    private readonly IPiiRedactionService _piiRedaction;
     private readonly IMediator _mediator;
 
     public AttachPolicyDocumentCommandHandler(
         IEnhancementHubDbContext dbContext,
         ICurrentUserService currentUser,
         IDocumentTextExtractor extractor,
+        IPiiRedactionService piiRedaction,
         IMediator mediator)
     {
         _dbContext = dbContext;
         _currentUser = currentUser;
         _extractor = extractor;
+        _piiRedaction = piiRedaction;
         _mediator = mediator;
     }
 
@@ -47,7 +50,7 @@ public sealed class AttachPolicyDocumentCommandHandler
         }
 
         session.PolicySourceLabel = request.FileName;
-        session.PolicySourceText = extraction.Text;
+        session.PolicySourceText = _piiRedaction.Redact(extraction.Text);
         session.UpdatedAt = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync(cancellationToken);
 
@@ -88,17 +91,20 @@ public sealed class AttachPolicyUrlCommandHandler
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly ICurrentUserService _currentUser;
     private readonly IPolicyUrlFetcher _urlFetcher;
+    private readonly IPiiRedactionService _piiRedaction;
     private readonly IMediator _mediator;
 
     public AttachPolicyUrlCommandHandler(
         IEnhancementHubDbContext dbContext,
         ICurrentUserService currentUser,
         IPolicyUrlFetcher urlFetcher,
+        IPiiRedactionService piiRedaction,
         IMediator mediator)
     {
         _dbContext = dbContext;
         _currentUser = currentUser;
         _urlFetcher = urlFetcher;
+        _piiRedaction = piiRedaction;
         _mediator = mediator;
     }
 
@@ -114,7 +120,7 @@ public sealed class AttachPolicyUrlCommandHandler
         }
 
         session.PolicySourceLabel = fetch.SourceTitle ?? request.Url.Trim();
-        session.PolicySourceText = fetch.Text;
+        session.PolicySourceText = _piiRedaction.Redact(fetch.Text);
         session.UpdatedAt = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync(cancellationToken);
 

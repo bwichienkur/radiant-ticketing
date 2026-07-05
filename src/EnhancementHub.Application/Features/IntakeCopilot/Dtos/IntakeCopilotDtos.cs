@@ -35,3 +35,14 @@ public sealed record IntakeCopilotTurnResponseDto(
     IReadOnlyList<string> FollowUpQuestions,
     bool IsComplete,
     bool UsedMockAi);
+
+public sealed record IntakeCopilotSubmitOverridesDto(
+    string Title,
+    string BusinessDescription,
+    string DesiredOutcome,
+    string Priority,
+    Guid? TargetApplicationId,
+    DateTime? RequestedDueDate,
+    string? Department,
+    string? SupportingNotes,
+    Guid? TemplateId);

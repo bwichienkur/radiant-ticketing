@@ -22,6 +22,7 @@ Describe intent → (optional multi-turn Q&A) → Draft request → User edits �
 | **2 — Interactive intake** | Multi-turn session (max 5 turns), repo-aware follow-up questions, draft stored until confirm | Done |
 | **3 — Deep grounding** | Knowledge search + application profiles in context; Slack/Teams intake uses same engine | Done |
 | **4 — Policy intake** | PDF/TXT/MD upload + HTTPS URL fetch → compliance-oriented draft | Done |
+| **5 — Provenance & submit** | Session-linked submit with form overrides; policy source on request; mock Compliance template | Done |
 
 ## Architecture
 
@@ -42,7 +43,7 @@ Describe intent → (optional multi-turn Q&A) → Draft request → User edits �
 | POST | `/web-api/spa/intake/sessions/{id}/messages` | Send user message (multi-turn) |
 | POST | `/web-api/spa/intake/sessions/{id}/policy-document` | Attach policy PDF/TXT/MD (multipart) |
 | POST | `/web-api/spa/intake/sessions/{id}/policy-url` | Fetch policy from HTTPS URL |
-| POST | `/web-api/spa/intake/sessions/{id}/create-request` | Finalize → `EnhancementRequest` |
+| POST | `/web-api/spa/intake/sessions/{id}/create-request` | Finalize → `EnhancementRequest` (optional form overrides in body) |
 
 ## Guardrails
 
@@ -59,6 +60,8 @@ Describe intent → (optional multi-turn Q&A) → Draft request → User edits �
 - General-purpose dashboard chat
 
 See `docs/POLICY_INTAKE.md` for policy document extraction details.
+
+Phase 5 links intake sessions to submitted requests: when the user started via Intake Copilot, submit calls `create-request` with edited form values and appends `Policy source: …` to supporting notes when a policy was attached.
 
 ## Success metrics
 
