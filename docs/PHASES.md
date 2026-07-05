@@ -210,6 +210,12 @@
 - Audit logging for membership changes
 - API: `GET/POST /api/admin/teams`, `GET /api/admin/teams/{id}`, member CRUD endpoints
 
+## Horizon 1 continuation — Positioning & packaging
+
+- ICP one-pager for sales and design partner qualification (`docs/ICP_ONE_PAGER.md`)
+- 10-minute live demo script with talk track and Q&A (`docs/DEMO_SCRIPT.md`)
+- Draft pricing: design partner pilot, Team, and Enterprise tiers (`docs/PRICING.md`)
+
 ## Horizon 2 continuation — Service API keys
 
 - Machine-to-machine authentication via `X-Api-Key` header (`eh_` prefix)
