@@ -1,69 +1,92 @@
-@page
+@page "{id?}"
 @model EnhancementHub.Web.Pages.EnhancementRequests.ApproveModel
 @{
     ViewData["Title"] = "Approval Queue";
 }
 
 <div class="page-header">
-    <h1>Approval Queue</h1>
+    <h1 id="approval-queue-heading">Approval Queue</h1>
     <p>Review and action pending enhancement requests</p>
 </div>
 
-<div class="row g-4">
-    <div class="col-md-4">
-        <div class="card-panel">
-            <div class="card-header">Pending (@Model.Pending.Count)</div>
-            <div class="list-group list-group-flush">
-                @foreach (var item in Model.Pending)
-                {
-                    <a asp-page="Approve" asp-route-id="@item.Id"
-                       class="list-group-item list-group-item-action @(Model.SelectedRequestId == item.Id ? "active" : "")">
-                        <strong>@item.Title</strong>
-                        <span class="d-block small">@(item.SubmittedByUserName ?? "—") · @item.Priority</span>
-                    </a>
-                }
+<div class="approval-queue-layout row g-3 g-lg-4">
+    <div class="col-lg-4">
+        <nav class="card-panel approval-queue-nav" aria-label="Pending requests">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Pending</span>
+                <span class="badge text-bg-primary" aria-label="@Model.Pending.Count pending">@Model.Pending.Count</span>
             </div>
-        </div>
+            @if (Model.Pending.Count == 0)
+            {
+                <p class="p-3 text-muted mb-0">No requests pending approval.</p>
+            }
+            else
+            {
+                <ul class="list-group list-group-flush approval-queue-list" role="list">
+                    @foreach (var item in Model.Pending)
+                    {
+                        <li class="list-group-item p-0" role="listitem">
+                            <a asp-page="Approve" asp-route-id="@item.Id"
+                               class="approval-queue-item list-group-item list-group-item-action @(Model.SelectedRequestId == item.Id ? "active" : "")"
+                               aria-current="@(Model.SelectedRequestId == item.Id ? "true" : "false")">
+                                <strong class="d-block">@item.Title</strong>
+                                <span class="d-block small approval-queue-meta">
+                                    @(item.SubmittedByUserName ?? "—") · @item.Priority
+                                </span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            }
+        </nav>
     </div>
-    <div class="col-md-8">
+
+    <div class="col-lg-8">
         @if (Model.Selected is not null)
         {
             var s = Model.Selected;
-            <div class="card-panel p-4">
-                <h2 class="h5">@s.Title</h2>
+            <article class="card-panel p-3 p-md-4 approval-queue-detail" aria-labelledby="selected-request-title">
+                <h2 class="h5" id="selected-request-title">@s.Title</h2>
                 <p class="text-muted">@s.BusinessDescription</p>
                 @if (s.Analyses.FirstOrDefault()?.FeatureSummary is not null)
                 {
-                    <div class="alert alert-info">
+                    <div class="alert alert-info" role="status">
                         <strong>AI Summary:</strong> @s.Analyses.First().FeatureSummary
                     </div>
                 }
-                <form method="post" asp-page-handler="Action" class="mb-4">
+
+                <form method="post" asp-page-handler="Action" class="approval-action-form mb-4">
                     <input type="hidden" asp-for="SelectedRequestId" />
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label">Action</label>
-                            <select class="form-select" asp-for="ActionType" asp-items="Html.GetEnumSelectList<ApprovalActionType>()"></select>
+                            <label class="form-label" for="ActionType">Action</label>
+                            <select class="form-select" asp-for="ActionType" id="ActionType"
+                                    asp-items="Html.GetEnumSelectList<ApprovalActionType>()"></select>
                         </div>
                         <div class="col-12">
-                            <label class="form-label">Comments</label>
-                            <textarea class="form-control" asp-for="Comments" rows="2"></textarea>
+                            <label class="form-label" for="Comments">Comments</label>
+                            <textarea class="form-control" asp-for="Comments" id="Comments" rows="2"
+                                      aria-describedby="comments-help"></textarea>
+                            <div id="comments-help" class="form-text">Optional notes recorded in the approval audit trail.</div>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary mt-3">Submit Action</button>
-                    <a asp-page="Details" asp-route-id="@s.Id" class="btn btn-outline-secondary mt-3">Full Details</a>
+                    <div class="approval-action-bar d-flex flex-wrap gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary approval-action-btn">Submit Action</button>
+                        <a asp-page="Details" asp-route-id="@s.Id" class="btn btn-outline-secondary approval-action-btn">Full Details</a>
+                    </div>
                 </form>
+
                 <form method="post" asp-page-handler="Comment">
                     <input type="hidden" asp-for="SelectedRequestId" />
-                    <label class="form-label">Add internal comment</label>
-                    <textarea class="form-control" asp-for="NewComment" rows="2"></textarea>
-                    <button type="submit" class="btn btn-outline-secondary btn-sm mt-2">Add Comment</button>
+                    <label class="form-label" for="NewComment">Add internal comment</label>
+                    <textarea class="form-control" asp-for="NewComment" id="NewComment" rows="2"></textarea>
+                    <button type="submit" class="btn btn-outline-secondary btn-sm mt-2 approval-action-btn">Add Comment</button>
                 </form>
-            </div>
+            </article>
         }
         else
         {
-            <div class="card-panel p-4 text-muted">No requests pending approval.</div>
+            <div class="card-panel p-4 text-muted" role="status">Select a request from the queue to review.</div>
         }
     </div>
 </div>

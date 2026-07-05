@@ -168,6 +168,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IGitHubWebhookService, GitHubWebhookService>();
         services.AddScoped<IServiceNowSyncService, ServiceNowSyncService>();
         services.AddScoped<IApprovalPolicyEvaluator, ApprovalPolicyEvaluator>();
+        services.AddSingleton<IRequestCollaborationNotifier, NoOpRequestCollaborationNotifier>();
         services.AddScoped<HangfireRepositoryIndexingDispatcher>();
         services.PostConfigure<Options.AiOptions>(options =>
         {

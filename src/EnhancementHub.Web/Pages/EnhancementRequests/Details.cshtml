@@ -15,16 +15,21 @@
     };
 }
 
-<div class="page-header d-flex justify-content-between align-items-start">
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
     <div>
-        <h1>@r.Title</h1>
+        <h1 id="request-detail-title">@r.Title</h1>
         <p>
-            <span class="badge text-bg-secondary badge-status">@r.Status</span>
+            <span class="badge text-bg-secondary badge-status" aria-label="Status @r.Status">@r.Status</span>
             <span class="text-muted ms-2">Submitted by @r.SubmittedByUserName on @r.CreatedAt.ToString("g")</span>
         </p>
     </div>
-    <a asp-page="Approve" class="btn btn-outline-primary">Approval Queue</a>
+    <div class="d-flex flex-wrap gap-2">
+        <a asp-page="/Spa/RequestDetail" asp-route-id="@r.Id" class="btn btn-outline-secondary btn-sm">Enhanced view (pilot)</a>
+        <a asp-page="Approve" class="btn btn-outline-primary btn-sm">Approval Queue</a>
+    </div>
 </div>
+
+<div id="analysis-update-banner" class="alert alert-info d-none mb-3" role="status" aria-live="polite"></div>
 
 @if (analysis is not null)
 {
@@ -251,8 +256,28 @@ else if (r.Status is EnhancementRequestStatus.Submitted or EnhancementRequestSta
             </div>
         </div>
 
+        <div class="card-panel p-3 mb-4" id="collaboration-panel" data-request-id="@r.Id">
+            <div class="card-header px-0 d-flex justify-content-between align-items-center">
+                <span>Live collaboration</span>
+                <span id="collaboration-presence" class="small text-muted" aria-live="polite">Connecting…</span>
+            </div>
+            <div class="card-body px-0">
+                <p class="small text-muted">Comments from other reviewers appear here in real time.</p>
+                <div id="collaboration-live-comments" aria-live="polite" aria-relevant="additions">
+                    @foreach (var c in r.Comments.TakeLast(5))
+                    {
+                        <div class="border-bottom py-2">
+                            <strong>@c.UserDisplayName</strong>
+                            @if (c.IsInternal) { <span class="badge text-bg-warning">Internal</span> }
+                            <p class="small mb-0">@c.Content</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
         <div class="card-panel p-3">
-            <div class="card-header px-0">Comments</div>
+            <div class="card-header px-0">All comments</div>
             <div class="card-body px-0">
                 @if (r.Comments.Count == 0)
                 {
@@ -273,3 +298,7 @@ else if (r.Status is EnhancementRequestStatus.Submitted or EnhancementRequestSta
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/collaboration/request-detail.js" asp-append-version="true"></script>
+}

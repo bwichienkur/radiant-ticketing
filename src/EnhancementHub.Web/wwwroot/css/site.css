@@ -428,3 +428,90 @@ body {
     background: var(--eh-success);
     color: #fff;
 }
+
+/* Accessibility — WCAG 2.1 AA helpers */
+.skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 2000;
+    padding: 0.75rem 1rem;
+    background: var(--eh-accent);
+    color: #fff;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 0 0 0.5rem 0;
+}
+
+.skip-link:focus {
+    left: 0;
+}
+
+:focus-visible {
+    outline: 3px solid var(--eh-accent);
+    outline-offset: 2px;
+}
+
+.btn:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible {
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Mobile approval queue */
+.approval-queue-list {
+    max-height: min(70vh, 32rem);
+    overflow-y: auto;
+}
+
+.approval-queue-item {
+    min-height: 3.25rem;
+    padding: 0.85rem 1rem;
+}
+
+.approval-queue-item.active {
+    border-left: 3px solid var(--eh-accent);
+}
+
+.approval-action-btn {
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+}
+
+@media (max-width: 991.98px) {
+    .approval-queue-nav {
+        position: sticky;
+        top: 0.5rem;
+        z-index: 10;
+    }
+
+    .approval-queue-list {
+        max-height: 14rem;
+    }
+
+    .approval-action-bar {
+        position: sticky;
+        bottom: 0;
+        background: var(--eh-surface);
+        padding: 0.75rem 0;
+        margin: 0 -0.25rem;
+        border-top: 1px solid var(--eh-border);
+    }
+
+    .approval-queue-detail {
+        margin-bottom: 5rem;
+    }
+}
+
+/* SPA pilot shell */
+#spa-content[aria-busy="true"] {
+    opacity: 0.6;
+}

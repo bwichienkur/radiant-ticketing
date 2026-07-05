@@ -286,6 +286,14 @@
 - Schema drift finding resolve endpoint
 - Guide: `docs/PRODUCT_DIFFERENTIATION.md`
 
+## Phase 25 — UX modernization (complete)
+
+- Blazor vs React SPA evaluation with vanilla JS pilot (`/Spa/RequestDetail/{id}`, `web-api/spa/*`)
+- Mobile-responsive approval queue with sticky actions and touch targets
+- Real-time collaboration hub (`/hubs/request-collaboration`) on request detail
+- WCAG 2.1 AA baseline: skip link, focus rings, live regions, reduced motion
+- Guides: `docs/UX_MODERNIZATION.md`, `docs/ACCESSIBILITY.md`
+
 ## Future enhancements
 
-- UX modernization — Blazor/React SPA evaluation (Phase 25)
+- Multi-tenant commercial platform (Phase 26)

@@ -158,10 +158,10 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 - [x] Comparison view: AI recommendation vs architect edits (learning signal)
 
 ### 4.3 UX modernization (Phase 25)
-- [ ] Evaluate Blazor/React SPA for high-traffic pages (detail, system map, wizard)
-- [ ] Mobile-responsive approval queue
-- [ ] Real-time collaboration on request detail (SignalR already present)
-- [ ] Accessibility (WCAG 2.1 AA) pass on core flows
+- [x] Evaluate Blazor/React SPA for high-traffic pages (detail, system map, wizard)
+- [x] Mobile-responsive approval queue
+- [x] Real-time collaboration on request detail (SignalR already present)
+- [x] Accessibility (WCAG 2.1 AA) pass on core flows
 
 ### 4.4 Commercial platform (Phase 26 — optional)
 - [ ] Multi-tenant data isolation (schema-per-tenant or row-level security)
@@ -243,4 +243,4 @@ Avoid distracting from pilot closure:
 
 ---
 
-*Last updated: July 2026 — Phase 24 (product-led differentiation).*
+*Last updated: July 2026 — Phase 25 (UX modernization).*

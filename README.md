@@ -178,7 +178,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-154 tests covering product differentiation, polyglot integrations, HA observability, System Intelligence performance, data layer scaling, indexing scale, incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
+160 tests covering UX modernization, product differentiation, polyglot integrations, HA observability, System Intelligence performance, data layer scaling, indexing scale, incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
 
 ---
 
@@ -195,7 +195,10 @@ dotnet test
 - `POST /api/integrations/polyglot/symbols` — ingest external language symbols
 - `POST /api/integrations/slack/intake`, `POST /api/integrations/teams/intake` — chat intake
 - `POST /api/webhooks/github` — GitHub push → auto re-index
+- `GET /api/reporting/roi` — ROI metrics (Admin)
+- `GET /api/templates` — enhancement domain templates
+- `GET /api/analysis/{requestId}/compare` — AI vs architect comparison
 
-See [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) for configuration.
+See [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) and [docs/PRODUCT_DIFFERENTIATION.md](docs/PRODUCT_DIFFERENTIATION.md).
 
 Full Swagger available at `/swagger` in Development.
