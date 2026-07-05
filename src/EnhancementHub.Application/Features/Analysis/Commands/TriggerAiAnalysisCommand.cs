@@ -21,6 +21,7 @@ public sealed class TriggerAiAnalysisCommandHandler
     private readonly IAuditService _auditService;
     private readonly ITenantMeteringService _tenantMeteringService;
     private readonly ITenantBillingService _tenantBillingService;
+    private readonly IRequestCollaborationNotifier _collaborationNotifier;
 
     public TriggerAiAnalysisCommandHandler(
         IEnhancementHubDbContext dbContext,
@@ -28,7 +29,8 @@ public sealed class TriggerAiAnalysisCommandHandler
         IRiskScoringService riskScoringService,
         IAuditService auditService,
         ITenantMeteringService tenantMeteringService,
-        ITenantBillingService tenantBillingService)
+        ITenantBillingService tenantBillingService,
+        IRequestCollaborationNotifier collaborationNotifier)
     {
         _dbContext = dbContext;
         _aiAnalysisService = aiAnalysisService;
@@ -36,6 +38,7 @@ public sealed class TriggerAiAnalysisCommandHandler
         _auditService = auditService;
         _tenantMeteringService = tenantMeteringService;
         _tenantBillingService = tenantBillingService;
+        _collaborationNotifier = collaborationNotifier;
     }
 
     public async Task<EnhancementAnalysisDto> Handle(
@@ -111,6 +114,11 @@ public sealed class TriggerAiAnalysisCommandHandler
             {
                 await _tenantMeteringService.RecordAnalysisAsync(submitterTenantId.Value, cancellationToken);
             }
+
+            await _collaborationNotifier.NotifyAnalysisUpdatedAsync(
+                enhancementRequest.Id,
+                analysis.Version,
+                cancellationToken);
         }
         catch (Exception ex)
         {

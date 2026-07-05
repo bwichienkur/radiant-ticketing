@@ -1,10 +1,13 @@
 import type {
   ApplicationSummary,
   ApprovalRequestDetail,
+  DatabaseConnectionStringResult,
   EnhancementAnalysis,
   EnhancementRequestDetail,
+  GitHubAppStatus,
   OnboardingReview,
   OnboardingSession,
+  OnPremAgentSetup,
   PendingApprovalItem,
   RepositoryPathValidation,
   SystemMap,
@@ -50,6 +53,14 @@ export async function getRequestAnalysis(requestId: string): Promise<Enhancement
   }
 
   return response.json() as Promise<EnhancementAnalysis>;
+}
+
+export async function postRequestComment(
+  requestId: string,
+  content: string,
+  isInternal = false,
+): Promise<void> {
+  await postJson(`/web-api/spa/requests/${requestId}/comments`, { content, isInternal });
 }
 
 export async function listApplications(): Promise<ApplicationSummary[]> {
@@ -138,4 +149,81 @@ export async function completeOnboarding(sessionId: string): Promise<OnboardingS
 
 export async function advanceOnboardingToReview(sessionId: string): Promise<OnboardingSession> {
   return postJson<OnboardingSession>(`/web-api/spa/onboarding/${sessionId}/advance-review`);
+}
+
+export async function getGitHubAppStatus(): Promise<GitHubAppStatus> {
+  return fetchJson<GitHubAppStatus>('/web-api/spa/onboarding/github-app/status');
+}
+
+export async function uploadOnboardingZip(
+  sessionId: string,
+  file: File,
+  repositoryName?: string,
+): Promise<OnboardingSession> {
+  const form = new FormData();
+  form.append('zipFile', file);
+  if (repositoryName) {
+    form.append('repositoryName', repositoryName);
+  }
+
+  const response = await fetch(`/web-api/spa/onboarding/${sessionId}/upload-zip`, {
+    method: 'POST',
+    credentials: 'include',
+    body: form,
+  });
+
+  if (!response.ok) {
+    const errorBody = (await response.json().catch(() => null)) as { message?: string } | null;
+    throw new Error(errorBody?.message ?? `Upload failed: ${response.status}`);
+  }
+
+  return response.json() as Promise<OnboardingSession>;
+}
+
+export async function cloneGitHubAppRepository(
+  sessionId: string,
+  payload: {
+    repositoryName: string;
+    owner: string;
+    repository: string;
+    defaultBranch: string;
+    installationId?: number;
+  },
+): Promise<OnboardingSession> {
+  return postJson<OnboardingSession>(`/web-api/spa/onboarding/${sessionId}/clone-github-app`, payload);
+}
+
+export async function cloneGitRepository(
+  sessionId: string,
+  payload: {
+    repositoryName: string;
+    repositoryUrl: string;
+    defaultBranch: string;
+    accessToken?: string;
+  },
+): Promise<OnboardingSession> {
+  return postJson<OnboardingSession>(`/web-api/spa/onboarding/${sessionId}/clone-git`, payload);
+}
+
+export async function buildDatabaseConnectionString(payload: {
+  provider: string;
+  host: string;
+  port: number;
+  database: string;
+  username?: string;
+  password?: string;
+  integratedSecurity?: boolean;
+}): Promise<DatabaseConnectionStringResult> {
+  return postJson<DatabaseConnectionStringResult>('/web-api/spa/onboarding/build-connection-string', payload);
+}
+
+export async function setupOnPremAgent(
+  sessionId: string,
+  payload: { applicationId: string; connectionName: string; provider: string },
+): Promise<OnPremAgentSetup> {
+  return postJson<OnPremAgentSetup>(`/web-api/spa/onboarding/${sessionId}/on-prem-agent`, payload);
+}
+
+export function getOnboardingExportDocsUrl(sessionId: string): string {
+  return `/web-api/spa/onboarding/${sessionId}/export-docs`;
 }

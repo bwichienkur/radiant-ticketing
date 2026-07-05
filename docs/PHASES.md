@@ -355,4 +355,35 @@
 - `SystemMapGraph` component and `systemMapGraph` helpers in React `ClientApp`
 - Guide: `docs/UX_MODERNIZATION.md` (Phase 32 section)
 
+## Phase 33 — React request detail collaboration (complete)
+
+- SignalR real-time comments and presence on `/Spa/RequestDetail`
+- BFF `POST /web-api/spa/requests/{id}/comments`; analysis auto-refresh via `AnalysisUpdated`
+- `useRequestCollaboration` hook with `@microsoft/signalr`
+- Guide: `docs/UX_MODERNIZATION.md` (Phase 33 section)
+
+## Phase 34 — Accessibility hardening (complete)
+
+- System map graph keyboard navigation (arrow keys, Enter, Escape)
+- React onboarding `aria-current="step"`; admin table `scope="col"`
+- CI: `.github/workflows/accessibility.yml` + `tests/a11y/static-check.mjs`
+- Guide: `docs/ACCESSIBILITY.md`
+
+## Phase 35 — Load-test harness (complete)
+
+- k6 scripts: `tests/load/k6-smoke.js`, `tests/load/k6-horizon3.js`
+- Horizon 3 targets documented in `docs/LOAD_TEST.md` (200 repos / 500 users / 50 AI/hr)
+
+## Phase 36 — Engineering debt (complete)
+
+- API versioning: duplicate routes under `/api/v1/*` via `ApiV1RouteConvention`
+- Discovery queue idempotency when already queued/running
+- Integration tests for v1 auth scoping
+
+## Phase 37 — React onboarding advanced flows (complete)
+
+- BFF endpoints for ZIP, GitHub App, Git clone, connection builder, on-prem agent, doc export
+- `OnboardingAdvancedSteps` tabs in React wizard (parity with classic wizard)
+- Guide: `docs/UX_MODERNIZATION.md` (Phase 37 section)
+
 ## Future enhancements

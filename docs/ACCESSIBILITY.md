@@ -39,9 +39,9 @@ Accessibility pass for core operator flows (Phase 25).
 
 ## Known gaps
 
-- System Map graph nodes lack full keyboard navigation (defer to SPA/React map)
-- Admin tables need row header scope audit
-- Automated axe-core CI not yet wired
+- ~~System Map graph nodes lack full keyboard navigation~~ — addressed in Phase 34 (React graph keyboard nav)
+- ~~Automated axe-core CI not yet wired~~ — Phase 34 static a11y CI via `tests/a11y/static-check.mjs`
+- Remaining admin tables may need `scope="col"` audit beyond Jobs page
 
 ---
 

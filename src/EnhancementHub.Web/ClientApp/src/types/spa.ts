@@ -1,3 +1,11 @@
+export interface CommentSummary {
+  id: string;
+  userDisplayName: string;
+  content: string;
+  isInternal: boolean;
+  createdAt: string;
+}
+
 export interface EnhancementRequestDetail {
   id: string;
   title: string;
@@ -5,6 +13,7 @@ export interface EnhancementRequestDetail {
   businessDescription: string;
   desiredOutcome: string;
   submittedByUserName?: string;
+  comments?: CommentSummary[];
 }
 
 export interface EnhancementAnalysis {
@@ -91,6 +100,24 @@ export interface OnboardingReview {
   driftFindingCount: number;
   profileCount: number;
   latestProfileSummary?: string;
+}
+
+export interface GitHubAppStatus {
+  isConfigured: boolean;
+  defaultInstallationId?: number;
+}
+
+export interface OnPremAgentSetup {
+  agentId: string;
+  connectionId: string;
+  connectionName: string;
+  apiBaseUrl: string;
+  agentConfigSnippet: string;
+  runCommand: string;
+}
+
+export interface DatabaseConnectionStringResult {
+  connectionString: string;
 }
 
 export interface RepositoryPathValidation {

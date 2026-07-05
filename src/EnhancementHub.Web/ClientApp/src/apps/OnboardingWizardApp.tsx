@@ -2,6 +2,8 @@ import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   advanceOnboardingToReview,
   completeOnboarding,
+  getGitHubAppStatus,
+  getOnboardingExportDocsUrl,
   getOnboardingReview,
   getOnboardingSession,
   queueOnboardingDiscovery,
@@ -9,11 +11,10 @@ import {
   startOnboardingSession,
   submitOnboardingBasics,
   submitOnboardingDatabase,
-  submitOnboardingRepository,
-  validateRepositoryPath,
 } from '../api/spaClient';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
-import type { OnboardingReview, OnboardingSession } from '../types/spa';
+import { OnboardingCodeStep, OnboardingDatabaseStep } from '../components/OnboardingAdvancedSteps';
+import type { GitHubAppStatus, OnboardingReview, OnboardingSession } from '../types/spa';
 
 const STEPS = [
   { number: 1, label: 'Basics', key: 'ApplicationBasics' },
@@ -43,18 +44,13 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
     riskSensitiveAreas: '',
     ownerTeamName: '',
   });
-  const [repository, setRepository] = useState({
-    repositoryName: '',
-    repositoryPath: '',
-    defaultBranch: 'main',
-  });
   const [database, setDatabase] = useState({
     connectionName: '',
     provider: 'Sqlite',
     connectionString: 'Data Source=enhancementhub.db',
     isReadOnly: true,
   });
-  const [pathValidation, setPathValidation] = useState<string | null>(null);
+  const [githubStatus, setGitHubStatus] = useState<GitHubAppStatus | null>(null);
 
   const currentStepNumber = useMemo(() => {
     const match = STEPS.find((step) => step.key === session?.currentStep);
@@ -99,6 +95,12 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
       cancelled = true;
     };
   }, [initialSessionId]);
+
+  useEffect(() => {
+    void getGitHubAppStatus()
+      .then(setGitHubStatus)
+      .catch(() => setGitHubStatus(null));
+  }, []);
 
   useEffect(() => {
     if (!session || session.currentStep !== 'ReviewExport' || !session.applicationId) {
@@ -182,18 +184,6 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
     );
   }
 
-  async function onSubmitRepository(event: FormEvent) {
-    event.preventDefault();
-    if (!session) {
-      return;
-    }
-
-    await runStep(
-      () => submitOnboardingRepository(session.id, repository),
-      (updated) => setSession(updated),
-    );
-  }
-
   async function onSubmitDatabase(event: FormEvent) {
     event.preventDefault();
     if (!session) {
@@ -204,6 +194,14 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
       () => submitOnboardingDatabase(session.id, database),
       (updated) => setSession(updated),
     );
+  }
+
+  function onSkipDatabase() {
+    if (!session) {
+      return;
+    }
+
+    void runStep(() => skipOnboardingDatabase(session.id), (updated) => setSession(updated));
   }
 
   if (loading || !session) {
@@ -219,16 +217,21 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
 
   return (
     <div aria-live="polite">
-      <div className="mb-4">
+      <div className="mb-4" role="list" aria-label="Onboarding steps">
         <div className="d-flex flex-wrap gap-2">
-          {STEPS.map((step) => (
-            <span
-              key={step.key}
-              className={`badge ${step.number <= currentStepNumber ? 'text-bg-primary' : 'text-bg-secondary'}`}
-            >
-              {step.number}. {step.label}
-            </span>
-          ))}
+          {STEPS.map((step) => {
+            const isCurrent = step.number === currentStepNumber;
+            return (
+              <span
+                key={step.key}
+                role="listitem"
+                aria-current={isCurrent ? 'step' : undefined}
+                className={`badge ${step.number <= currentStepNumber ? 'text-bg-primary' : 'text-bg-secondary'}`}
+              >
+                {step.number}. {step.label}
+              </span>
+            );
+          })}
         </div>
       </div>
 
@@ -274,6 +277,22 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
                   onChange={(event) => setBasics({ ...basics, purpose: event.target.value })}
                 />
               </div>
+              <div className="col-md-6">
+                <label className="form-label">Risk-sensitive areas</label>
+                <input
+                  className="form-control"
+                  value={basics.riskSensitiveAreas}
+                  onChange={(event) => setBasics({ ...basics, riskSensitiveAreas: event.target.value })}
+                />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label">Owner team</label>
+                <input
+                  className="form-control"
+                  value={basics.ownerTeamName}
+                  onChange={(event) => setBasics({ ...basics, ownerTeamName: event.target.value })}
+                />
+              </div>
             </div>
             <button type="submit" className="btn btn-primary mt-4" disabled={submitting}>
               Continue to code connection
@@ -282,118 +301,27 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
         ) : null}
 
         {session.currentStep === 'ConnectCode' ? (
-          <form onSubmit={(event) => void onSubmitRepository(event)}>
-            <h2 className="h4 mb-3">Step 2 — Connect code (local path)</h2>
-            <p className="text-muted">
-              For ZIP upload or GitHub App clone, use the{' '}
-              <a href={`/Onboarding/Wizard/${session.id}`}>classic wizard</a>.
-            </p>
-            <div className="row g-3">
-              <div className="col-md-6">
-                <label className="form-label">Repository name</label>
-                <input
-                  className="form-control"
-                  required
-                  value={repository.repositoryName}
-                  onChange={(event) => setRepository({ ...repository, repositoryName: event.target.value })}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Default branch</label>
-                <input
-                  className="form-control"
-                  value={repository.defaultBranch}
-                  onChange={(event) => setRepository({ ...repository, defaultBranch: event.target.value })}
-                />
-              </div>
-              <div className="col-12">
-                <label className="form-label">Local repository path</label>
-                <input
-                  className="form-control"
-                  required
-                  value={repository.repositoryPath}
-                  onChange={(event) => setRepository({ ...repository, repositoryPath: event.target.value })}
-                />
-              </div>
-            </div>
-            <div className="d-flex flex-wrap gap-2 mt-3">
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                disabled={submitting || !repository.repositoryPath}
-                onClick={() =>
-                  void runStep(() => validateRepositoryPath(repository.repositoryPath), (result) =>
-                    setPathValidation(
-                      result.isValid
-                        ? `Valid — ${result.csharpFileCount} C# files, ${result.controllerCount} controllers`
-                        : result.errorMessage ?? 'Path is not valid',
-                    ),
-                  )
-                }
-              >
-                Validate path
-              </button>
-              <button type="submit" className="btn btn-primary" disabled={submitting}>
-                Continue to database
-              </button>
-            </div>
-            {pathValidation ? <p className="small text-muted mt-2 mb-0">{pathValidation}</p> : null}
-          </form>
+          <OnboardingCodeStep
+            session={session}
+            submitting={submitting}
+            githubStatus={githubStatus}
+            onSessionUpdated={setSession}
+            onError={setError}
+            runStep={runStep}
+          />
         ) : null}
 
         {session.currentStep === 'ConnectDatabase' ? (
-          <div>
-            <h2 className="h4 mb-3">Step 3 — Connect database</h2>
-            <form onSubmit={(event) => void onSubmitDatabase(event)}>
-              <div className="row g-3">
-                <div className="col-md-6">
-                  <label className="form-label">Connection name</label>
-                  <input
-                    className="form-control"
-                    required
-                    value={database.connectionName}
-                    onChange={(event) => setDatabase({ ...database, connectionName: event.target.value })}
-                  />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label">Provider</label>
-                  <select
-                    className="form-select"
-                    value={database.provider}
-                    onChange={(event) => setDatabase({ ...database, provider: event.target.value })}
-                  >
-                    <option value="Sqlite">SQLite</option>
-                    <option value="PostgreSql">PostgreSQL</option>
-                    <option value="SqlServer">SQL Server</option>
-                  </select>
-                </div>
-                <div className="col-12">
-                  <label className="form-label">Connection string</label>
-                  <input
-                    className="form-control"
-                    required
-                    value={database.connectionString}
-                    onChange={(event) => setDatabase({ ...database, connectionString: event.target.value })}
-                  />
-                </div>
-              </div>
-              <div className="d-flex flex-wrap gap-2 mt-4">
-                <button type="submit" className="btn btn-primary" disabled={submitting}>
-                  Save and continue
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary"
-                  disabled={submitting}
-                  onClick={() =>
-                    void runStep(() => skipOnboardingDatabase(session.id), (updated) => setSession(updated))
-                  }
-                >
-                  Skip database
-                </button>
-              </div>
-            </form>
-          </div>
+          <OnboardingDatabaseStep
+            session={session}
+            submitting={submitting}
+            database={database}
+            setDatabase={setDatabase}
+            onSessionUpdated={setSession}
+            onSkip={onSkipDatabase}
+            onSubmitDirect={(event) => void onSubmitDatabase(event)}
+            runStep={runStep}
+          />
         ) : null}
 
         {session.currentStep === 'RunDiscovery' ? (
@@ -454,19 +382,24 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
             ) : (
               <LoadingSkeleton />
             )}
-            <button
-              type="button"
-              className="btn btn-primary mt-3"
-              disabled={submitting}
-              onClick={() =>
-                void runStep(() => completeOnboarding(session.id), (updated) => {
-                  setSession(updated);
-                  setSuccess('Onboarding complete!');
-                })
-              }
-            >
-              Mark complete
-            </button>
+            <div className="d-flex flex-wrap gap-2 mt-3">
+              <a className="btn btn-outline-secondary" href={getOnboardingExportDocsUrl(session.id)}>
+                Export documentation
+              </a>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={submitting}
+                onClick={() =>
+                  void runStep(() => completeOnboarding(session.id), (updated) => {
+                    setSession(updated);
+                    setSuccess('Onboarding complete!');
+                  })
+                }
+              >
+                Mark complete
+              </button>
+            </div>
           </div>
         ) : null}
 

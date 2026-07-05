@@ -1074,3 +1074,8 @@ body {
     border-radius: 0.5rem;
     background: var(--eh-surface-muted, #f8fafc);
 }
+
+.system-map-graph-canvas:focus-visible {
+    outline: 3px solid var(--eh-accent);
+    outline-offset: 2px;
+}
