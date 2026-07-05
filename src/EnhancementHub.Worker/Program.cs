@@ -19,10 +19,12 @@ try
 
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration, registerBackgroundJobs: true);
+    builder.Services.AddEnhancementHubOpenTelemetry(builder.Configuration, "EnhancementHub.Worker");
     builder.Services.AddEnhancementHubHealthChecks();
 
     var app = builder.Build();
     app.MapEnhancementHubHealthChecks();
+    app.MapEnhancementHubObservabilityEndpoints(builder.Configuration);
 
     if (app.Environment.IsDevelopment())
     {

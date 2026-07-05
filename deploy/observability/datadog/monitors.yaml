@@ -1,0 +1,17 @@
+# Sample Datadog monitor definitions for EnhancementHub (OTLP → Datadog Agent)
+
+monitors:
+  - name: "EnhancementHub — High background job failure rate"
+    type: metric alert
+    query: "sum(last_5m):sum:enhancementhub.job.failed.total{*}.as_rate() > 0.1"
+    message: "Background job failures elevated. Check Worker logs and Hangfire dashboard."
+
+  - name: "EnhancementHub — API readiness failing"
+    type: service check
+    query: "http.can_connect('enhancementhub-api', 'http://api:8080/health/ready')"
+    message: "API readiness check failed."
+
+  - name: "EnhancementHub — Slow background jobs (p95)"
+    type: metric alert
+    query: "avg(last_10m):p95:enhancementhub.job.duration.seconds{*} > 300"
+    message: "p95 job duration exceeds 5 minutes."

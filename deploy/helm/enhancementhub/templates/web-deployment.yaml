@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "enhancementhub.fullname" . }}-web
+spec:
+  replicas: {{ .Values.replicaCount.web }}
+  selector:
+    matchLabels:
+      app: {{ include "enhancementhub.fullname" . }}-web
+  template:
+    metadata:
+      labels:
+        app: {{ include "enhancementhub.fullname" . }}-web
+    spec:
+      containers:
+        - name: web
+          image: "{{ .Values.image.repository }}-web:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: {{ include "enhancementhub.fullname" . }}-config
+          env:
+            - name: ConnectionStrings__Default
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.externalDatabase.existingSecret }}
+                  key: connectionString
+          livenessProbe:
+            httpGet: { path: /health, port: 8080 }
+          readinessProbe:
+            httpGet: { path: /health/ready, port: 8080 }
+          resources:
+            {{- toYaml .Values.resources.web | nindent 12 }}

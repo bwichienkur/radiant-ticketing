@@ -71,6 +71,10 @@ public sealed class AdminController : ControllerBase
     public async Task<IActionResult> GetDataScalingStatus(CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new GetDataScalingStatusQuery(), cancellationToken));
 
+    [HttpGet("observability/status")]
+    public async Task<IActionResult> GetObservabilityStatus(CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetObservabilityStatusQuery(), cancellationToken));
+
     [HttpGet("indexing/freshness")]
     public async Task<IActionResult> GetIndexFreshnessReport(CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new GetIndexFreshnessReportQuery(), cancellationToken));

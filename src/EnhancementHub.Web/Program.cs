@@ -14,6 +14,7 @@ ProductionConfigurationValidator.Validate(builder.Configuration, builder.Environ
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddEnhancementHubOpenTelemetry(builder.Configuration, "EnhancementHub.Web");
 builder.Services.AddEnhancementHubHealthChecks();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<SignalRNotificationPublisher>();
@@ -61,6 +62,7 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapEnhancementHubHealthChecks();
+app.MapEnhancementHubObservabilityEndpoints(builder.Configuration);
 app.MapRazorPages();
 app.MapHub<PlatformNotificationHub>("/hubs/notifications");
 

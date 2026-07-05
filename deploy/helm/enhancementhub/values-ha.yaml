@@ -1,0 +1,18 @@
+replicaCount:
+  api: 2
+  web: 2
+  worker: 2
+
+config:
+  observabilityEnabled: true
+  otlpEndpoint: http://otel-collector.monitoring:4317
+
+dataProtection:
+  storageProvider: AzureBlob
+
+externalDatabase:
+  host: postgres-ha.internal
+  port: 5432
+
+qdrant:
+  enabled: true
