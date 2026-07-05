@@ -3,6 +3,8 @@
 Strategic roadmap derived from product, marketability, and scalability evaluation (July 2026).
 Organized into four horizons: **Now**, **Next**, **Scale**, and **Grow**.
 
+Track scores over time in [PRODUCT_SCORECARD.md](PRODUCT_SCORECARD.md).
+
 ---
 
 ## Vision
