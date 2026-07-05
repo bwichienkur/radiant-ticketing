@@ -349,8 +349,8 @@
             },
             {
                 target: '[data-tour="copilot"]',
-                title: 'Ask EnhancementHub',
-                body: 'Search requests in plain language — try “show high risk pending approval”.'
+                title: 'Pipeline search',
+                body: 'Find requests and pages with keywords — try “high risk pending approval”.'
             },
             {
                 target: '[data-command-trigger]',

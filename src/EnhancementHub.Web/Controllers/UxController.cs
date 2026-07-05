@@ -63,7 +63,7 @@ public sealed class UxController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(q))
         {
-            return Ok(new { answer = "Ask about requests, approvals, or high-risk items.", items = Array.Empty<object>() });
+            return Ok(new { answer = "Try keywords like high risk, pending approval, or system map.", items = Array.Empty<object>() });
         }
 
         var lower = q.ToLowerInvariant();

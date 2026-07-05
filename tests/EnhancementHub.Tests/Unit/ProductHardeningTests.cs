@@ -176,6 +176,23 @@ public sealed class ProductHardeningTests
     }
 
     [Fact]
+    public void Dashboard_UsesPipelineSearchNotGenerativeCopilot()
+    {
+        var dashboard = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Index.cshtml"));
+        dashboard.Should().Contain("Pipeline search");
+        dashboard.Should().Contain("not a generative AI chat");
+        dashboard.Should().NotContain("Ask EnhancementHub");
+    }
+
+    [Fact]
+    public void PlaywrightSmokeHarness_Exists()
+    {
+        File.Exists(Path.Combine(GetRepoRoot(), "tests/e2e/smoke.spec.ts")).Should().BeTrue();
+        File.Exists(Path.Combine(GetRepoRoot(), "scripts/run-e2e-smoke.mjs")).Should().BeTrue();
+        File.Exists(Path.Combine(GetRepoRoot(), ".github/workflows/e2e-smoke.yml")).Should().BeTrue();
+    }
+
+    [Fact]
     public void ProductTour_HasMobileLayout()
     {
         var css = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/wwwroot/css/site.css"));

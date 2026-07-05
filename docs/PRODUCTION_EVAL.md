@@ -37,6 +37,17 @@ docker compose -f docker-compose.yml -f docker-compose.eval.yml --profile scale 
 
 Set `VectorSearch__Provider=Qdrant` on api/web/worker if switching from PgVector.
 
+## Smoke tests (CI)
+
+Playwright smoke tests cover login, dashboard, and the four React SPAs:
+
+```bash
+cd tests/e2e && npm install && npx playwright install chromium
+node ../../scripts/run-e2e-smoke.mjs
+```
+
+Runs automatically on pull requests via `.github/workflows/e2e-smoke.yml`.
+
 ## Stopping and reset
 
 ```bash

@@ -43,6 +43,7 @@ public class IndexModel : PageModel
         }
 
         IsLoading = false;
+        return Page();
     }
 
     public async Task<IActionResult> OnPostBuildAsync(Guid applicationId, CancellationToken cancellationToken)

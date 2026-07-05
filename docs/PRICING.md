@@ -1,7 +1,7 @@
 # EnhancementHub — Pricing & Packaging (Draft)
 
 **Status:** Internal draft for design partner conversations — not a public price list.  
-**Model:** Single-tenant, customer-hosted deployment (not multi-tenant SaaS).
+**Models:** **Multi-tenant SaaS** (trial / Team / Enterprise) and **single-tenant customer-hosted** deployments. See [COMMERCIAL_PLATFORM.md](COMMERCIAL_PLATFORM.md).
 
 ---
 
