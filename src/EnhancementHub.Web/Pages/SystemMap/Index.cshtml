@@ -15,7 +15,10 @@
     </div>
     @if (Model.SelectedApplicationId.HasValue)
     {
-        <form method="post" asp-page-handler="Build">
+        <a asp-page="/Spa/SystemMap" asp-route-applicationId="@Model.SelectedApplicationId" class="btn btn-outline-secondary btn-sm">
+            React map view
+        </a>
+        <form method="post" asp-page-handler="Build" class="d-inline">
             <input type="hidden" name="applicationId" value="@Model.SelectedApplicationId" />
             <button class="btn btn-primary" @(Model.IsBuilding ? "disabled" : null)>
                 @(Model.IsBuilding ? "Rebuilding…" : "Rebuild graph")

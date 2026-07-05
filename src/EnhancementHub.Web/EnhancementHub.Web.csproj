@@ -13,6 +13,14 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <SpaClientAppPath>ClientApp</SpaClientAppPath>
   </PropertyGroup>
+
+  <Target Name="BuildClientApp" BeforeTargets="Build" Condition="Exists('$(SpaClientAppPath)/package.json')">
+    <Message Importance="high" Text="Building React ClientApp..." />
+    <Exec WorkingDirectory="$(SpaClientAppPath)" Command="npm ci" Condition="Exists('$(SpaClientAppPath)/package-lock.json')" />
+    <Exec WorkingDirectory="$(SpaClientAppPath)" Command="npm install" Condition="!Exists('$(SpaClientAppPath)/package-lock.json')" />
+    <Exec WorkingDirectory="$(SpaClientAppPath)" Command="npm run build" />
+  </Target>
 
 </Project>

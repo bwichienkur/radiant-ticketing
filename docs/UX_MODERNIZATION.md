@@ -78,7 +78,22 @@ Future: extract to React + Vite under `src/EnhancementHub.Web/ClientApp/` with s
 
 ---
 
-*Phase 25 — Horizon 4.3 UX modernization.*
+## Phase 30 — React SPA migration (complete)
+
+- **ClientApp**: React 18 + Vite 5 + TypeScript under `src/EnhancementHub.Web/ClientApp/`
+- **Build**: `npm run build` outputs to `wwwroot/spa/react/`; MSBuild `BuildClientApp` target on Web compile
+- **Hot paths migrated**:
+  - Request detail — `/Spa/RequestDetail/{id}` (`RequestDetailApp`, mission control)
+  - System map — `/Spa/SystemMap` (`SystemMapApp`, node/edge explorer)
+- **BFF endpoints** (`SpaDataController`):
+  - `GET /web-api/spa/requests/{id}`
+  - `GET /web-api/spa/analysis/{requestId}`
+  - `GET /web-api/spa/applications`
+  - `GET /web-api/spa/system-map/{applicationId}`
+- Cookie auth preserved; classic Razor views remain as fallback links
+- Command palette includes React system map route
+
+*Phase 30 — React SPA migration.*
 
 ---
 
