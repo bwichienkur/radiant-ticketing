@@ -44,6 +44,11 @@ public sealed class HangfireRecurringJobInitializer : IHostedService
             executor => executor.ExecuteAsync(CancellationToken.None),
             Cron.Daily);
 
+        RecurringJob.AddOrUpdate<SchemaDriftScanJobExecutor>(
+            "schema-drift-scan",
+            executor => executor.ExecuteAsync(CancellationToken.None),
+            "0 */6 * * *");
+
         _logger.LogInformation("Hangfire recurring jobs registered.");
         return Task.CompletedTask;
     }

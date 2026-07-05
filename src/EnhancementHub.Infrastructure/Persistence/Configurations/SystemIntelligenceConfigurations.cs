@@ -169,6 +169,21 @@ public class SystemGraphSnapshotConfiguration : IEntityTypeConfiguration<SystemG
     }
 }
 
+public class DocumentationExportCacheConfiguration : IEntityTypeConfiguration<DocumentationExportCache>
+{
+    public void Configure(EntityTypeBuilder<DocumentationExportCache> builder)
+    {
+        builder.ToTable("DocumentationExportCaches");
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.SourceFingerprint).HasMaxLength(128).IsRequired();
+        builder.HasIndex(x => x.ApplicationId).IsUnique();
+        builder.HasOne(x => x.Application)
+            .WithMany(a => a.DocumentationExportCaches)
+            .HasForeignKey(x => x.ApplicationId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}
+
 public class CodeEntityMappingConfiguration : IEntityTypeConfiguration<CodeEntityMapping>
 {
     public void Configure(EntityTypeBuilder<CodeEntityMapping> builder)

@@ -19,6 +19,18 @@ public sealed class SystemMapController : ControllerBase
     public async Task<IActionResult> Get(Guid applicationId, CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new GetSystemMapQuery(applicationId), cancellationToken));
 
+    [HttpGet("{applicationId:guid}/paged")]
+    public async Task<IActionResult> GetPaged(
+        Guid applicationId,
+        [FromQuery] int? depth,
+        [FromQuery] int page = 1,
+        [FromQuery] int? pageSize = null,
+        [FromQuery] string? root = null,
+        CancellationToken cancellationToken = default) =>
+        Ok(await _mediator.Send(
+            new GetSystemMapPagedQuery(applicationId, depth, page, pageSize, root),
+            cancellationToken));
+
     [HttpPost("{applicationId:guid}/build")]
     public async Task<IActionResult> Build(Guid applicationId, CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new BuildSystemGraphCommand(applicationId), cancellationToken));

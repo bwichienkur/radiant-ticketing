@@ -124,10 +124,10 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 - [x] Connection pool tuning and scan concurrency limits
 
 ### 3.3 System Intelligence performance (Phase 21)
-- [ ] Incremental system graph updates (not full rebuild)
-- [ ] Graph query pagination and depth limits
-- [ ] Cached documentation exports with TTL invalidation
-- [ ] Schema drift: scheduled diff-only scans
+- [x] Incremental system graph updates (not full rebuild)
+- [x] Graph query pagination and depth limits
+- [x] Cached documentation exports with TTL invalidation
+- [x] Schema drift: scheduled diff-only scans
 
 ### 3.4 High availability & observability (Phase 22)
 - [ ] Shared Data Protection key ring (Azure Blob / NFS) documented and tested

@@ -28,7 +28,13 @@ public sealed class SchemaDriftDetectorTests : IDisposable
                 .UseSqlite(_connection)
                 .Options);
         _dbContext.Database.EnsureCreated();
-        _sut = new SchemaDriftDetectorService(_dbContext, new NoOpNotificationPublisher(), NullLogger<SchemaDriftDetectorService>.Instance);
+        var fingerprintService = new SystemIntelligenceFingerprintService(_dbContext);
+        _sut = new SchemaDriftDetectorService(
+            _dbContext,
+            new NoOpNotificationPublisher(),
+            fingerprintService,
+            Microsoft.Extensions.Options.Options.Create(new Application.Options.SystemIntelligenceOptions()),
+            NullLogger<SchemaDriftDetectorService>.Instance);
     }
 
     [Fact]

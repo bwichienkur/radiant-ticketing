@@ -245,6 +245,15 @@
 - AI prompt run JSON archival before retention purge (`Retention:ArchiveAiPromptRunsBeforeDelete`)
 - Deployment guide: `docs/DATA_SCALING.md`
 
+## Phase 21 — System Intelligence performance (complete)
+
+- Incremental graph rebuild when `SystemIntelligence:IncrementalGraphEnabled=true`
+- Graph snapshots persisted after each build for fast map reads
+- Paginated system map API: `GET /api/system-map/{id}/paged` with depth and page limits
+- Documentation export cache with fingerprint-based TTL invalidation
+- Diff-only schema drift via `DetectDriftIfStaleAsync` and Hangfire `schema-drift-scan` job
+- Guide: `docs/SYSTEM_INTELLIGENCE_PERFORMANCE.md`
+
 ## Future enhancements
 
 - GitHub App webhook-driven automatic re-index on push

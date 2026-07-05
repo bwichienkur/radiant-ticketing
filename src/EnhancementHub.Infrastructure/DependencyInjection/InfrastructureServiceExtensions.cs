@@ -146,6 +146,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<DatabaseSchemaIngestionService>();
         services.AddScoped<ISystemGraphBuilder, SystemGraphBuilderService>();
         services.AddScoped<ISchemaDriftDetector, SchemaDriftDetectorService>();
+        services.AddScoped<ISystemIntelligenceFingerprintService, SystemIntelligenceFingerprintService>();
         services.AddScoped<IDocumentationExportService, DocumentationExportService>();
         services.AddScoped<IRefactorBlastRadiusService, RefactorBlastRadiusService>();
         services.AddScoped<IRefactorPlanGenerator, RefactorPlanGeneratorService>();
@@ -159,6 +160,8 @@ public static class InfrastructureServiceExtensions
         services.Configure<Options.AiOptions>(configuration.GetSection(Options.AiOptions.SectionName));
         services.Configure<Options.RetentionOptions>(configuration.GetSection(Options.RetentionOptions.SectionName));
         services.Configure<Application.Options.IndexingOptions>(configuration.GetSection(Application.Options.IndexingOptions.SectionName));
+        services.Configure<Application.Options.SystemIntelligenceOptions>(
+            configuration.GetSection(Application.Options.SystemIntelligenceOptions.SectionName));
         services.AddScoped<IGitRepositoryHistoryService, GitRepositoryHistoryService>();
         services.AddScoped<IIndexFreshnessService, IndexFreshnessService>();
         services.AddScoped<IDataScalingStatusService, DataScalingStatusService>();

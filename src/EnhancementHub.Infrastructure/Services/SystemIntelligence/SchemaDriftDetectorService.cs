@@ -1,9 +1,11 @@
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Abstractions.Models;
+using EnhancementHub.Application.Options;
 using EnhancementHub.Domain.Entities;
 using EnhancementHub.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace EnhancementHub.Infrastructure.Services.SystemIntelligence;
 
@@ -11,19 +13,50 @@ public sealed class SchemaDriftDetectorService : ISchemaDriftDetector
 {
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly INotificationPublisher _notifications;
+    private readonly ISystemIntelligenceFingerprintService _fingerprintService;
+    private readonly SystemIntelligenceOptions _options;
     private readonly ILogger<SchemaDriftDetectorService> _logger;
 
     public SchemaDriftDetectorService(
         IEnhancementHubDbContext dbContext,
         INotificationPublisher notifications,
+        ISystemIntelligenceFingerprintService fingerprintService,
+        IOptions<SystemIntelligenceOptions> options,
         ILogger<SchemaDriftDetectorService> logger)
     {
         _dbContext = dbContext;
         _notifications = notifications;
+        _fingerprintService = fingerprintService;
+        _options = options.Value;
         _logger = logger;
     }
 
-    public async Task<DriftReport> DetectDriftAsync(Guid databaseConnectionId, CancellationToken cancellationToken = default)
+    public Task<DriftReport> DetectDriftAsync(Guid databaseConnectionId, CancellationToken cancellationToken = default) =>
+        DetectDriftInternalAsync(databaseConnectionId, cancellationToken);
+
+    public async Task<DriftReport> DetectDriftIfStaleAsync(
+        Guid databaseConnectionId,
+        bool forceFullScan = false,
+        CancellationToken cancellationToken = default)
+    {
+        if (!forceFullScan && _options.DiffOnlyDriftEnabled)
+        {
+            var isStale = await _fingerprintService.IsDriftScanStaleAsync(databaseConnectionId, cancellationToken);
+            if (!isStale)
+            {
+                _logger.LogInformation(
+                    "Skipping drift scan for connection {ConnectionId}; source data unchanged since last scan",
+                    databaseConnectionId);
+                return await LoadExistingReportAsync(databaseConnectionId, cancellationToken);
+            }
+        }
+
+        return await DetectDriftInternalAsync(databaseConnectionId, cancellationToken);
+    }
+
+    private async Task<DriftReport> DetectDriftInternalAsync(
+        Guid databaseConnectionId,
+        CancellationToken cancellationToken)
     {
         var connection = await _dbContext.DatabaseConnections
             .Include(c => c.Tables)
@@ -117,6 +150,10 @@ public sealed class SchemaDriftDetectorService : ISchemaDriftDetector
 
         await PersistFindingsAsync(connection, findings, cancellationToken);
 
+        connection.LastDriftScanAt = DateTime.UtcNow;
+        connection.UpdatedAt = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
         _logger.LogInformation("Drift detection for connection {ConnectionId} found {Count} issues",
             databaseConnectionId, findings.Count);
 
@@ -131,6 +168,40 @@ public sealed class SchemaDriftDetectorService : ISchemaDriftDetector
         {
             DatabaseConnectionId = databaseConnectionId,
             GeneratedAt = DateTime.UtcNow,
+            Findings = findings
+        };
+    }
+
+    private async Task<DriftReport> LoadExistingReportAsync(
+        Guid databaseConnectionId,
+        CancellationToken cancellationToken)
+    {
+        var findings = await _dbContext.SchemaDriftFindings
+            .AsNoTracking()
+            .Where(f => f.DatabaseConnectionId == databaseConnectionId && !f.IsResolved)
+            .OrderByDescending(f => f.DetectedAt)
+            .Select(f => new DriftFindingDto
+            {
+                DriftType = f.DriftType,
+                Severity = f.Severity,
+                Title = f.Title,
+                Description = f.Description,
+                CodeReference = f.CodeReference,
+                DatabaseReference = f.DatabaseReference,
+                RepositoryId = f.RepositoryId
+            })
+            .ToListAsync(cancellationToken);
+
+        var lastScan = await _dbContext.DatabaseConnections
+            .AsNoTracking()
+            .Where(c => c.Id == databaseConnectionId)
+            .Select(c => c.LastDriftScanAt)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return new DriftReport
+        {
+            DatabaseConnectionId = databaseConnectionId,
+            GeneratedAt = lastScan ?? DateTime.UtcNow,
             Findings = findings
         };
     }
