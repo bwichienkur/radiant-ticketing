@@ -1,5 +1,7 @@
+using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Common.Exceptions;
 using EnhancementHub.Application.Features.Billing.Commands;
+using EnhancementHub.Application.Features.Tenants.Commands;
 using EnhancementHub.Application.Features.Tenants.Dtos;
 using EnhancementHub.Application.Features.Tenants.Queries;
 using EnhancementHub.Domain.Enums;
@@ -18,6 +20,7 @@ public class TenancyModel : PageModel
     public TenancyModel(IMediator mediator) => _mediator = mediator;
 
     public TenantBillingDto? Billing { get; private set; }
+    public TenantIsolationStatus? Isolation { get; private set; }
     public IReadOnlyList<TenantSummaryDto> AllTenants { get; private set; } = [];
     public string? StatusMessage { get; private set; }
     public string? ErrorMessage { get; private set; }
@@ -72,11 +75,36 @@ public class TenancyModel : PageModel
         }
     }
 
+    public async Task<IActionResult> OnPostProvisionSchemaAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            Isolation = await _mediator.Send(new ProvisionTenantSchemaCommand(), cancellationToken);
+            await LoadAsync(cancellationToken);
+            StatusMessage = "Dedicated schema provisioned successfully.";
+            return Page();
+        }
+        catch (ForbiddenException ex)
+        {
+            await LoadAsync(cancellationToken);
+            ErrorMessage = ex.Message;
+            return Page();
+        }
+    }
+
     private async Task LoadAsync(CancellationToken cancellationToken)
     {
         try
         {
             Billing = await _mediator.Send(new GetCurrentTenantBillingQuery(), cancellationToken);
+            try
+            {
+                Isolation = await _mediator.Send(new GetCurrentTenantIsolationQuery(), cancellationToken);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Isolation = null;
+            }
         }
         catch (UnauthorizedAccessException)
         {

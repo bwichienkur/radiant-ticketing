@@ -36,6 +36,16 @@ public sealed class TenantsController : ControllerBase
         Ok(await _mediator.Send(new GetCurrentTenantBillingQuery(), cancellationToken));
 
     [Authorize(Roles = "Admin")]
+    [HttpGet("current/isolation")]
+    public async Task<IActionResult> CurrentIsolation(CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetCurrentTenantIsolationQuery(), cancellationToken));
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("current/isolation/provision")]
+    public async Task<IActionResult> ProvisionIsolation(CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new ProvisionTenantSchemaCommand(), cancellationToken));
+
+    [Authorize(Roles = "Admin")]
     [HttpGet]
     public async Task<IActionResult> List(CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new ListTenantsQuery(), cancellationToken));

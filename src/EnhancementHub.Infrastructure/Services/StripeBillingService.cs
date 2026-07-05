@@ -19,15 +19,18 @@ public sealed class StripeBillingService : IStripeBillingService
 {
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly StripeOptions _options;
+    private readonly ITenantIsolationService _tenantIsolationService;
     private readonly ILogger<StripeBillingService> _logger;
 
     public StripeBillingService(
         IEnhancementHubDbContext dbContext,
         IOptions<StripeOptions> options,
+        ITenantIsolationService tenantIsolationService,
         ILogger<StripeBillingService> logger)
     {
         _dbContext = dbContext;
         _options = options.Value;
+        _tenantIsolationService = tenantIsolationService;
         _logger = logger;
     }
 
@@ -224,6 +227,11 @@ public sealed class StripeBillingService : IStripeBillingService
         tenant.Plan = ResolvePlan(session.Metadata) ?? tenant.Plan;
         tenant.UpdatedAt = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        if (tenant.Plan == Domain.Enums.TenantPlan.Enterprise)
+        {
+            await _tenantIsolationService.TryAutoProvisionAsync(tenant.Id, cancellationToken);
+        }
     }
 
     internal async Task ApplySubscriptionChangedAsync(
@@ -262,6 +270,11 @@ public sealed class StripeBillingService : IStripeBillingService
         tenant.Plan = ResolvePlan(subscription.Metadata) ?? MapPlanFromSubscriptionStatus(tenant, subscription.Status);
         tenant.UpdatedAt = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync(cancellationToken);
+
+        if (tenant.Plan == Domain.Enums.TenantPlan.Enterprise)
+        {
+            await _tenantIsolationService.TryAutoProvisionAsync(tenant.Id, cancellationToken);
+        }
     }
 
     internal static TenantSubscriptionStatus MapSubscriptionStatus(string? status, string eventType)

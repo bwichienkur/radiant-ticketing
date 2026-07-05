@@ -322,7 +322,15 @@
 - Admin upgrade CTAs on `/Admin/Tenancy`
 - Guide: `docs/STRIPE_BILLING.md`
 
+## Phase 29 — Schema-per-tenant isolation (complete)
+
+- `TenantIsolationMode` (`SharedRowLevel`, `DedicatedSchema`) on tenant records
+- PostgreSQL schema provisioner clones tenant tables into `tenant_{slug}` schemas
+- `TenantSearchPathConnectionInterceptor` + `TenantIsolationMiddleware` for per-request routing
+- APIs: `GET/POST /api/tenants/current/isolation` (+ provision)
+- Auto-provision on Enterprise upgrade; admin provision CTA on `/Admin/Tenancy`
+- Guide: `docs/TENANT_ISOLATION.md`
+
 ## Future enhancements
 
-- Schema-per-tenant isolation for regulated workloads
 - React migration for SPA hot paths

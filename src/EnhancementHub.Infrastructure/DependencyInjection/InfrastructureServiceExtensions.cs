@@ -49,8 +49,11 @@ public static class InfrastructureServiceExtensions
         services.Configure<Application.Options.DatabaseScalingOptions>(
             configuration.GetSection(Application.Options.DatabaseScalingOptions.SectionName));
 
-        services.AddDbContext<EnhancementHubDbContext>(options =>
-            ConfigureDbContextOptions(options, connectionString, provider, scalingOptions));
+        services.AddDbContext<EnhancementHubDbContext>((sp, options) =>
+        {
+            ConfigureDbContextOptions(options, connectionString, provider, scalingOptions);
+            options.AddInterceptors(sp.GetRequiredService<TenantSearchPathConnectionInterceptor>());
+        });
 
         var reportingConnection = configuration.GetConnectionString("Reporting") ?? connectionString;
         services.AddDbContext<ReportingDbContext>(options =>
@@ -171,6 +174,11 @@ public static class InfrastructureServiceExtensions
             configuration.GetSection(Application.Options.CommercialOptions.SectionName));
         services.Configure<Application.Options.StripeOptions>(
             configuration.GetSection(Application.Options.StripeOptions.SectionName));
+        services.Configure<Application.Options.TenantIsolationOptions>(
+            configuration.GetSection(Application.Options.TenantIsolationOptions.SectionName));
+        services.AddScoped<Application.Abstractions.ITenantSchemaAccessor, TenantSchemaAccessor>();
+        services.AddScoped<Application.Abstractions.ITenantIsolationService, TenantIsolationService>();
+        services.AddSingleton<TenantSearchPathConnectionInterceptor>();
         services.AddScoped<ICurrentTenantService, CurrentTenantService>();
         services.AddScoped<ITenantMeteringService, TenantMeteringService>();
         services.AddScoped<ITenantBillingService, TenantBillingService>();

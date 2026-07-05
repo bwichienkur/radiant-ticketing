@@ -23,3 +23,9 @@ public enum TenantSubscriptionStatus
     Canceled = 4,
     Unpaid = 5
 }
+
+public enum TenantIsolationMode
+{
+    SharedRowLevel = 0,
+    DedicatedSchema = 1
+}

@@ -4,6 +4,7 @@ using EnhancementHub.Api.Middleware;
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.DependencyInjection;
 using EnhancementHub.Infrastructure.DependencyInjection;
+using EnhancementHub.Infrastructure.Middleware;
 using EnhancementHub.Infrastructure.Persistence;
 using EnhancementHub.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
@@ -68,6 +69,7 @@ try
     app.UseCors("Web");
     app.UseRateLimiter();
     app.UseAuthentication();
+    app.UseTenantIsolation();
     app.UseAuthorization();
     app.MapEnhancementHubHealthChecks();
     app.MapEnhancementHubObservabilityEndpoints(builder.Configuration);
