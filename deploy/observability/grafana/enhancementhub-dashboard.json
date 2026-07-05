@@ -1,0 +1,51 @@
+{
+  "title": "EnhancementHub Overview",
+  "uid": "enhancementhub-overview",
+  "timezone": "utc",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "HTTP request duration (p95)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Background job duration",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(enhancementhub_job_duration_seconds_bucket[5m])) by (le, job))",
+          "legendFormat": "{{job}}"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Job failures (5m rate)",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(enhancementhub_job_failed_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Jobs completed (5m rate)",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(enhancementhub_job_completed_total[5m]))"
+        }
+      ]
+    }
+  ]
+}

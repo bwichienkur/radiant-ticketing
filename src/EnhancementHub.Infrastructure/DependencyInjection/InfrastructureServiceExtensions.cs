@@ -2,6 +2,7 @@ using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Abstractions.Persistence;
 using EnhancementHub.Infrastructure.Background;
 using EnhancementHub.Infrastructure.Background.Executors;
+using EnhancementHub.Infrastructure.Observability;
 using EnhancementHub.Infrastructure.Persistence;
 using EnhancementHub.Infrastructure.Persistence.Repositories;
 using EnhancementHub.Infrastructure.Security;
@@ -58,15 +59,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IEnhancementHubDbContext>(sp => sp.GetRequiredService<EnhancementHubDbContext>());
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
 
-        var dataProtectionBuilder = services.AddDataProtection()
-            .SetApplicationName(configuration["DataProtection:ApplicationName"] ?? "EnhancementHub");
-
-        var keysPath = configuration["DataProtection:KeysPath"];
-        if (!string.IsNullOrWhiteSpace(keysPath))
-        {
-            Directory.CreateDirectory(keysPath);
-            dataProtectionBuilder.PersistKeysToFileSystem(new DirectoryInfo(keysPath));
-        }
+        services.ConfigureEnhancementHubDataProtection(configuration);
 
         services.AddSingleton<ISecretProtector, SecretProtector>();
         services.AddSingleton<IConnectionStringProtector>(sp => sp.GetRequiredService<ISecretProtector>());
@@ -165,6 +158,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IGitRepositoryHistoryService, GitRepositoryHistoryService>();
         services.AddScoped<IIndexFreshnessService, IndexFreshnessService>();
         services.AddScoped<IDataScalingStatusService, DataScalingStatusService>();
+        services.AddScoped<IObservabilityStatusService, ObservabilityStatusService>();
         services.AddScoped<HangfireRepositoryIndexingDispatcher>();
         services.PostConfigure<Options.AiOptions>(options =>
         {
@@ -322,6 +316,7 @@ public static class InfrastructureServiceExtensions
                         SchemaName = configuration["BackgroundJobs:HangfireSchema"] ?? "hangfire"
                     }));
 
+            RegisterHangfireTelemetry(configuration);
             services.AddHangfireServer(options =>
             {
                 options.Queues = ["default", "indexing"];
@@ -336,6 +331,16 @@ public static class InfrastructureServiceExtensions
         services.AddHostedService<DatabaseSchemaScanJob>();
         services.AddHostedService<ApplicationDiscoveryJob>();
         services.AddHostedService<DataRetentionJob>();
+    }
+
+    private static void RegisterHangfireTelemetry(IConfiguration configuration)
+    {
+        var options = configuration
+            .GetSection(Application.Options.ObservabilityOptions.SectionName)
+            .Get<Application.Options.ObservabilityOptions>()
+            ?? new Application.Options.ObservabilityOptions();
+
+        OpenTelemetryServiceExtensions.RegisterHangfireTelemetryFilters(options);
     }
 
     private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy() =>

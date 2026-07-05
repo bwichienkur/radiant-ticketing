@@ -40,7 +40,7 @@ tests/
 
 **Deploy API + Web + Worker** for production. Background jobs run in Worker only.
 
-See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for production checklist, [docs/DATA_SCALING.md](docs/DATA_SCALING.md) for vector offload and read replicas, [docs/SYSTEM_INTELLIGENCE_PERFORMANCE.md](docs/SYSTEM_INTELLIGENCE_PERFORMANCE.md) for graph and drift optimizations, [docs/SECURITY.md](docs/SECURITY.md) for the security whitepaper, [docs/ROADMAP.md](docs/ROADMAP.md) for the product roadmap, [docs/PRODUCT_SCORECARD.md](docs/PRODUCT_SCORECARD.md) for maturity scores, and [docs/ICP_ONE_PAGER.md](docs/ICP_ONE_PAGER.md) / [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) for sales and pilot enablement.
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for production checklist, [docs/HA_ARCHITECTURE.md](docs/HA_ARCHITECTURE.md) for multi-instance HA, [docs/OBSERVABILITY.md](docs/OBSERVABILITY.md) for OpenTelemetry, [docs/DATA_SCALING.md](docs/DATA_SCALING.md) for vector offload and read replicas, [docs/SYSTEM_INTELLIGENCE_PERFORMANCE.md](docs/SYSTEM_INTELLIGENCE_PERFORMANCE.md) for graph and drift optimizations, [docs/SECURITY.md](docs/SECURITY.md) for the security whitepaper, [docs/ROADMAP.md](docs/ROADMAP.md) for the product roadmap, [docs/PRODUCT_SCORECARD.md](docs/PRODUCT_SCORECARD.md) for maturity scores, and [docs/ICP_ONE_PAGER.md](docs/ICP_ONE_PAGER.md) / [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) for sales and pilot enablement.
 
 ---
 
@@ -178,7 +178,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-134+ tests covering System Intelligence performance, data layer scaling, indexing scale, incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
+139+ tests covering HA observability, System Intelligence performance, data layer scaling, indexing scale, incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
 
 ---
 

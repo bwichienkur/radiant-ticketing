@@ -1,0 +1,70 @@
+replicaCount:
+  api: 2
+  web: 2
+  worker: 2
+
+image:
+  repository: enhancementhub
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  api:
+    type: ClusterIP
+    port: 8080
+  web:
+    type: ClusterIP
+    port: 8080
+  worker:
+    type: ClusterIP
+    port: 8080
+
+ingress:
+  enabled: false
+  className: nginx
+  hosts:
+    - host: enhancementhub.example.com
+      paths:
+        - path: /api
+          pathType: Prefix
+          service: api
+        - path: /
+          pathType: Prefix
+          service: web
+
+config:
+  databaseProvider: PostgreSQL
+  backgroundJobsProvider: Hangfire
+  vectorSearchProvider: Qdrant
+  observabilityEnabled: true
+  otlpEndpoint: http://otel-collector:4317
+
+externalDatabase:
+  host: postgres-primary
+  port: 5432
+  database: enhancementhub
+  username: enhancementhub
+  existingSecret: enhancementhub-db
+
+dataProtection:
+  storageProvider: AzureBlob
+  azureBlob:
+    existingSecret: enhancementhub-dataprotection
+
+resources:
+  api:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits: { cpu: "1", memory: 1Gi }
+  web:
+    requests: { cpu: 250m, memory: 512Mi }
+    limits: { cpu: "1", memory: 1Gi }
+  worker:
+    requests: { cpu: 500m, memory: 1Gi }
+    limits: { cpu: "2", memory: 2Gi }
+
+postgresql:
+  enabled: false
+
+qdrant:
+  enabled: true
+  url: http://qdrant:6333

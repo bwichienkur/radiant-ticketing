@@ -254,6 +254,17 @@
 - Diff-only schema drift via `DetectDriftIfStaleAsync` and Hangfire `schema-drift-scan` job
 - Guide: `docs/SYSTEM_INTELLIGENCE_PERFORMANCE.md`
 
+## Phase 22 — HA & observability (complete)
+
+- Azure Blob or NFS shared Data Protection key ring (`DataProtection:StorageProvider`)
+- OpenTelemetry traces and metrics via `Observability` config (OTLP + Prometheus `/metrics`)
+- Hangfire job duration metrics and trace spans
+- Admin observability dashboard (`/Admin/Observability`, `GET /api/admin/observability/status`)
+- Grafana dashboard and Datadog monitor templates under `deploy/observability/`
+- Reference HA architecture: `docs/HA_ARCHITECTURE.md`
+- Kubernetes Helm chart: `deploy/helm/enhancementhub/`
+- Local observability stack: `docker-compose.observability.yml`
+
 ## Future enhancements
 
 - GitHub App webhook-driven automatic re-index on push

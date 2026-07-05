@@ -1,0 +1,85 @@
+@page
+@model EnhancementHub.Web.Pages.Admin.ObservabilityModel
+@{
+    ViewData["Title"] = "Observability & HA";
+    var status = Model.Status;
+}
+
+<div class="page-header">
+    <h1>Observability &amp; HA</h1>
+    <p>OpenTelemetry, shared data protection, and high-availability readiness</p>
+</div>
+
+@if (status is null)
+{
+    <div class="card-panel p-4"><p class="text-muted mb-0">Unable to load observability status.</p></div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="label">OpenTelemetry</div>
+                <div class="value fs-5">@(status.OpenTelemetry.Enabled ? "Enabled" : "Disabled")</div>
+                <div class="small text-muted">@status.OpenTelemetry.ServiceName</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="label">Data Protection</div>
+                <div class="value fs-5">@status.DataProtection.StorageProvider</div>
+                <div class="small @(status.DataProtection.SharedKeyRingConfigured ? "text-success" : "text-warning")">
+                    @(status.DataProtection.SharedKeyRingConfigured ? "Shared key ring" : "Not shared")
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="label">Prometheus</div>
+                <div class="value fs-5">@(status.OpenTelemetry.PrometheusMetricsEnabled ? "On" : "Off")</div>
+                <div class="small text-muted">OTLP: @(status.OpenTelemetry.OtlpEndpoint ?? "not set")</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-panel p-4 mb-4">
+        <h2 class="h6">HA readiness</h2>
+        <ul class="mb-0">
+            <li>PostgreSQL: @(status.HighAvailability.PostgresConfigured ? "Yes" : "No")</li>
+            <li>Hangfire jobs: @(status.HighAvailability.HangfireConfigured ? "Yes" : "No")</li>
+            <li>Read replica: @(status.HighAvailability.ReadReplicaConfigured ? "Yes" : "No")</li>
+            <li>Vector offload: @(status.HighAvailability.VectorOffloadConfigured ? "Yes" : "No")</li>
+        </ul>
+        @if (status.HighAvailability.Recommendations.Count > 0)
+        {
+            <hr />
+            <p class="small text-muted mb-2">Recommendations</p>
+            <ul class="small mb-0">
+                @foreach (var item in status.HighAvailability.Recommendations)
+                {
+                    <li>@item</li>
+                }
+            </ul>
+        }
+    </div>
+
+    @if (status.DataProtection.Issues.Count > 0)
+    {
+        <div class="card-panel p-4 mb-4">
+            <h2 class="h6">Data protection notes</h2>
+            <ul class="mb-0">
+                @foreach (var issue in status.DataProtection.Issues)
+                {
+                    <li><strong>@issue.Severity:</strong> @issue.Message</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="card-panel p-4">
+        <h2 class="h6">Configuration</h2>
+        <pre class="small mb-0">"Observability": { "Enabled": true, "OtlpEndpoint": "http://otel-collector:4317" },
+"DataProtection": { "StorageProvider": "AzureBlob", "AzureBlob": { "ConnectionString": "..." } }</pre>
+        <p class="small text-muted mt-2 mb-0">See <code>docs/OBSERVABILITY.md</code> and <code>docs/HA_ARCHITECTURE.md</code>.</p>
+    </div>
+}

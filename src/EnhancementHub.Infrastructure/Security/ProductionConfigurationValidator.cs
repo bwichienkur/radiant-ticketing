@@ -27,11 +27,22 @@ public static class ProductionConfigurationValidator
                 "Jwt:Secret must be at least 32 characters in Production.");
         }
 
+        var storageProvider = configuration["DataProtection:StorageProvider"] ?? "FileSystem";
         var keysPath = configuration["DataProtection:KeysPath"];
-        if (string.IsNullOrWhiteSpace(keysPath))
+        var azureBlobConnection = configuration["DataProtection:AzureBlob:ConnectionString"];
+
+        if (string.Equals(storageProvider, "AzureBlob", StringComparison.OrdinalIgnoreCase))
+        {
+            if (string.IsNullOrWhiteSpace(azureBlobConnection))
+            {
+                throw new InvalidOperationException(
+                    "DataProtection:AzureBlob:ConnectionString is required when StorageProvider=AzureBlob in Production.");
+            }
+        }
+        else if (string.IsNullOrWhiteSpace(keysPath))
         {
             throw new InvalidOperationException(
-                "DataProtection:KeysPath is required in Production so encrypted secrets survive restarts.");
+                "DataProtection:KeysPath is required in Production (use shared NFS/Azure Files) or set StorageProvider=AzureBlob.");
         }
 
         if (configuration.GetValue<bool>("Authentication:OpenIdConnect:Enabled"))

@@ -28,6 +28,7 @@ try
 
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration, registerHangfireMonitoring: true);
+    builder.Services.AddEnhancementHubOpenTelemetry(builder.Configuration, "EnhancementHub.Api");
     builder.Services.AddEnhancementHubHealthChecks();
 
     builder.Services.AddEnhancementHubJwtAuthentication(builder.Configuration);
@@ -69,6 +70,7 @@ try
     app.UseAuthentication();
     app.UseAuthorization();
     app.MapEnhancementHubHealthChecks();
+    app.MapEnhancementHubObservabilityEndpoints(builder.Configuration);
     app.MapControllers();
 
     if (app.Environment.IsDevelopment())
