@@ -280,6 +280,8 @@ export interface IntakeCopilotSession {
   suggestedTemplateId?: string;
   createdRequestId?: string;
   lastAssistantMessage?: string;
+  policySourceLabel?: string;
+  hasPolicySource: boolean;
 }
 
 export interface IntakeCopilotTurnResponse {

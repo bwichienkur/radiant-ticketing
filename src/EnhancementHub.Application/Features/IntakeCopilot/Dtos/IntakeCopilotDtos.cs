@@ -10,7 +10,9 @@ public sealed record IntakeCopilotSessionDto(
     IntakeCopilotDraftDto? Draft,
     Guid? SuggestedTemplateId,
     Guid? CreatedRequestId,
-    string? LastAssistantMessage);
+    string? LastAssistantMessage,
+    string? PolicySourceLabel,
+    bool HasPolicySource);
 
 public sealed record IntakeCopilotMessageDto(
     string Role,

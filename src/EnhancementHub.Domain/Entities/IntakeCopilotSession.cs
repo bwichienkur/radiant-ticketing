@@ -14,6 +14,8 @@ public class IntakeCopilotSession : BaseEntity
     public Guid? SuggestedTemplateId { get; set; }
     public Guid? CreatedRequestId { get; set; }
     public string? LastAssistantMessage { get; set; }
+    public string? PolicySourceLabel { get; set; }
+    public string? PolicySourceText { get; set; }
 
     public User? User { get; set; }
     public EnhancementTemplate? SuggestedTemplate { get; set; }

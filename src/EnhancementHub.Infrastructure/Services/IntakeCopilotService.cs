@@ -47,6 +47,8 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
         IntakeCopilotDraft? currentDraft,
         int turnCount,
         IntakeCopilotSource source,
+        string? policySourceText = null,
+        string? policySourceLabel = null,
         CancellationToken cancellationToken = default)
     {
         var lastUserMessage = conversation.LastOrDefault(m => m.Role == "user")?.Content ?? string.Empty;
@@ -54,7 +56,13 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
 
         if (!_chatCompletion.IsConfigured)
         {
-            return BuildMockTurn(lastUserMessage, currentDraft, context, turnCount);
+            return BuildMockTurn(
+                lastUserMessage,
+                currentDraft,
+                context,
+                turnCount,
+                policySourceText,
+                policySourceLabel);
         }
 
         try
@@ -62,6 +70,8 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
             var systemPrompt = """
                 You are EnhancementHub Intake Copilot. Help users describe software enhancement needs.
                 Use the provided application and knowledge context to ask specific follow-up questions.
+                When a compliance or policy document is attached, extract key obligations and map them to
+                concrete software changes — prefer suggestedTemplateDomainCategory Compliance when appropriate.
                 Return ONLY valid JSON with:
                 assistantMessage (string),
                 followUpQuestions (string array, max 3, empty when enough info),
@@ -73,7 +83,14 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
                 This is intake assistance, not legal or compliance advice.
                 """;
 
-            var userPrompt = BuildUserPrompt(conversation, currentDraft, context, turnCount, source);
+            var userPrompt = BuildUserPrompt(
+                conversation,
+                currentDraft,
+                context,
+                turnCount,
+                source,
+                policySourceText,
+                policySourceLabel);
 
             var completion = await _chatCompletion.CompleteAsync(
                 new ChatCompletionRequest
@@ -86,13 +103,25 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
 
             if (string.IsNullOrWhiteSpace(completion.Content))
             {
-                return BuildMockTurn(lastUserMessage, currentDraft, context, turnCount);
+                return BuildMockTurn(
+                lastUserMessage,
+                currentDraft,
+                context,
+                turnCount,
+                policySourceText,
+                policySourceLabel);
             }
 
             var parsed = JsonSerializer.Deserialize<IntakeCopilotAiResponse>(completion.Content, JsonOptions);
             if (parsed is null)
             {
-                return BuildMockTurn(lastUserMessage, currentDraft, context, turnCount);
+                return BuildMockTurn(
+                lastUserMessage,
+                currentDraft,
+                context,
+                turnCount,
+                policySourceText,
+                policySourceLabel);
             }
 
             var draft = MergeDraft(currentDraft, parsed.Draft);
@@ -115,7 +144,13 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Intake copilot AI call failed; using mock intake.");
-            return BuildMockTurn(lastUserMessage, currentDraft, context, turnCount);
+            return BuildMockTurn(
+                lastUserMessage,
+                currentDraft,
+                context,
+                turnCount,
+                policySourceText,
+                policySourceLabel);
         }
     }
 
@@ -163,7 +198,9 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
         IntakeCopilotDraft? currentDraft,
         IntakeContextBundle context,
         int turnCount,
-        IntakeCopilotSource source)
+        IntakeCopilotSource source,
+        string? policySourceText,
+        string? policySourceLabel)
     {
         var sb = new StringBuilder();
         sb.AppendLine($"Turn: {turnCount}/5");
@@ -200,6 +237,18 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
             }
         }
 
+        if (!string.IsNullOrWhiteSpace(policySourceText))
+        {
+            sb.AppendLine();
+            sb.AppendLine("## Attached policy / compliance document");
+            if (!string.IsNullOrWhiteSpace(policySourceLabel))
+            {
+                sb.AppendLine($"Source: {policySourceLabel}");
+            }
+
+            sb.AppendLine(Truncate(policySourceText, 12_000));
+        }
+
         if (currentDraft is not null)
         {
             sb.AppendLine();
@@ -221,10 +270,28 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
         string userMessage,
         IntakeCopilotDraft? currentDraft,
         IntakeContextBundle context,
-        int turnCount)
+        int turnCount,
+        string? policySourceText,
+        string? policySourceLabel)
     {
+        var hasPolicy = !string.IsNullOrWhiteSpace(policySourceText);
         var draft = currentDraft ?? new IntakeCopilotDraft();
-        if (string.IsNullOrWhiteSpace(draft.Title))
+        if (hasPolicy && string.IsNullOrWhiteSpace(draft.Title))
+        {
+            var label = string.IsNullOrWhiteSpace(policySourceLabel) ? "policy document" : policySourceLabel;
+            draft.Title = TruncateTitle($"Compliance enhancements from {label}");
+            draft.BusinessDescription =
+                "Address obligations identified in the attached policy document through targeted system changes.";
+            draft.DesiredOutcome =
+                "Close compliance gaps with auditable controls and measurable evidence of adherence.";
+            draft.SuggestedTemplateDomainCategory = "Compliance";
+            draft.Priority = "High";
+            if (!string.IsNullOrWhiteSpace(userMessage))
+            {
+                draft.SupportingNotes = userMessage.Trim();
+            }
+        }
+        else if (string.IsNullOrWhiteSpace(draft.Title))
         {
             var lines = userMessage.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             draft.Title = TruncateTitle(lines.Length > 0 ? lines[0] : userMessage);
@@ -239,7 +306,14 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
 
         if (string.IsNullOrWhiteSpace(draft.DesiredOutcome))
         {
-            draft.DesiredOutcome = "Deliver the described capability with measurable business value.";
+            draft.DesiredOutcome = hasPolicy
+                ? "Implement controls that satisfy the policy requirements with traceable audit evidence."
+                : "Deliver the described capability with measurable business value.";
+        }
+
+        if (hasPolicy && string.IsNullOrWhiteSpace(draft.SuggestedTemplateDomainCategory))
+        {
+            draft.SuggestedTemplateDomainCategory = "Compliance";
         }
 
         if (!draft.TargetApplicationId.HasValue && context.Applications.Count == 1)
@@ -254,15 +328,25 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
             questions.Add($"Which application should this target? Options include: {names}.");
         }
 
-        if (draft.BusinessDescription.Length < 40)
+        if (draft.BusinessDescription.Length < 40 && !hasPolicy)
         {
             questions.Add("What business problem or regulation is driving this change?");
         }
 
-        var isComplete = turnCount >= 2
-            && !string.IsNullOrWhiteSpace(draft.Title)
-            && draft.BusinessDescription.Length >= 20
-            && (draft.TargetApplicationId.HasValue || context.Applications.Count <= 1);
+        if (hasPolicy && turnCount < 2)
+        {
+            questions.Add("Which policy sections are highest priority for the first implementation wave?");
+        }
+
+        var isComplete = hasPolicy
+            ? turnCount >= 1
+              && !string.IsNullOrWhiteSpace(draft.Title)
+              && draft.BusinessDescription.Length >= 20
+              && (draft.TargetApplicationId.HasValue || context.Applications.Count <= 1)
+            : turnCount >= 2
+              && !string.IsNullOrWhiteSpace(draft.Title)
+              && draft.BusinessDescription.Length >= 20
+              && (draft.TargetApplicationId.HasValue || context.Applications.Count <= 1);
 
         if (isComplete)
         {
@@ -272,8 +356,12 @@ public sealed class IntakeCopilotService : IIntakeCopilotService
         return new IntakeCopilotTurnResult
         {
             AssistantMessage = isComplete
-                ? "I've drafted a request from your description. Review the form below and submit when ready."
-                : "Thanks — I need a bit more detail to draft a complete request.",
+                ? hasPolicy
+                    ? "I've drafted a compliance-oriented request from the policy document. Review the form below and submit when ready."
+                    : "I've drafted a request from your description. Review the form below and submit when ready."
+                : hasPolicy
+                    ? "I've started a compliance draft from the policy document. A few more details will help finalize it."
+                    : "Thanks — I need a bit more detail to draft a complete request.",
             FollowUpQuestions = questions.Take(MaxFollowUpQuestions).ToList(),
             IsComplete = isComplete,
             Draft = draft,
