@@ -1,5 +1,6 @@
 using EnhancementHub.Infrastructure.Security;
 using FluentAssertions;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 
 namespace EnhancementHub.Tests.Unit;
@@ -93,7 +94,9 @@ public sealed class Phase47ProductionTrustTests
 
         var service = new Infrastructure.Services.PlatformRuntimeStatusService(
             configuration,
-            new Infrastructure.Services.ConfigurationFeatureService(configuration));
+            new Infrastructure.Services.ConfigurationFeatureService(
+                configuration,
+                new MemoryCache(new MemoryCacheOptions())));
         var status = service.GetStatus();
 
         status.AiConfigured.Should().BeFalse();

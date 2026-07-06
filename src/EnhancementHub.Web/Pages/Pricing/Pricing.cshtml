@@ -1,0 +1,63 @@
+@page
+@model EnhancementHub.Web.Pages.Pricing.PricingModel
+@{
+    ViewData["Title"] = "Pricing";
+    Layout = "_LoginLayout";
+}
+
+<div class="login-shell">
+    <section class="login-hero" aria-hidden="true">
+        <div class="login-hero-content">
+            <div class="login-brand-mark">EH</div>
+            <h1 class="login-hero-title">Pricing</h1>
+            <p class="login-hero-tagline">
+                Portfolio governance priced on applications, repositories, and audit breadth—not per-seat IDE fees.
+            </p>
+            <ul class="login-feature-list">
+                <li>14-day self-serve trial with full workflow</li>
+                <li>Customer-hosted deployment; you own your data and AI keys</li>
+                <li>Pilot fee credits toward year-one license</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="login-panel">
+        <div class="login-panel-inner">
+            <div class="login-panel-header">
+                <h2 class="h4 mb-1">Plans</h2>
+                <p class="text-muted mb-0">Contact sales for exact quotes. Figures below are representative ranges.</p>
+            </div>
+
+            <div class="mt-4 d-flex flex-column gap-3">
+                <article class="card-panel p-3">
+                    <h3 class="h5 mb-1">Design Partner Pilot</h3>
+                    <p class="text-muted small mb-2">6–8 weeks · up to 5 applications · up to 25 users</p>
+                    <p class="mb-0 fw-semibold">$15,000 – $25,000 fixed</p>
+                    <p class="small text-muted mb-0">100% pilot fee credit toward year-one Team or Enterprise license.</p>
+                </article>
+
+                <article class="card-panel p-3">
+                    <h3 class="h5 mb-1">Team</h3>
+                    <p class="text-muted small mb-2">Annual · up to 25 applications · up to 75 users · Entra ID SSO</p>
+                    <p class="mb-0 fw-semibold">$60,000 – $90,000 / year</p>
+                </article>
+
+                <article class="card-panel p-3">
+                    <h3 class="h5 mb-1">Enterprise</h3>
+                    <p class="text-muted small mb-2">Portfolio-wide · SSO + SCIM · HA review · security workshop</p>
+                    <p class="mb-0 fw-semibold">$180,000 – $280,000 / year</p>
+                </article>
+            </div>
+
+            <p class="small text-muted mt-4 mb-3">
+                AI provider costs (OpenAI, Azure OpenAI) are passed through—you bring your own keys.
+                Contact sales for professional services, extended AI budget, and premium support add-ons.
+            </p>
+
+            <a asp-page="/Account/Signup" class="btn btn-primary w-100 login-submit-btn">Start your free trial</a>
+            <p class="small text-muted mt-3 mb-0 text-center">
+                Already evaluating? <a asp-page="/Account/Login">Sign in</a>
+            </p>
+        </div>
+    </section>
+</div>

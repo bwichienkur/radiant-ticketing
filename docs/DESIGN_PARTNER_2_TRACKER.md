@@ -25,7 +25,7 @@ Related: [DESIGN_PARTNER_PLAYBOOK.md](DESIGN_PARTNER_PLAYBOOK.md) · [CASE_STUDY
 | Stage | Partner | Notes |
 |-------|---------|-------|
 | **Identified** | Regional healthcare ISV (codename: *Helix*) | Warm intro via pilot #1 sponsor |
-| **Qualified** | — | Awaiting security questionnaire |
+| **Qualified** | Helix | Security questionnaire draft in [SECURITY_QUESTIONNAIRE_TEMPLATE.md](SECURITY_QUESTIONNAIRE_TEMPLATE.md) |
 | **Kickoff scheduled** | — | |
 | **In pilot (week 1–6)** | — | |
 | **Closed / case study** | — | |
