@@ -9,15 +9,19 @@ public sealed class Phase31ReactSpaExtendedTests
     public void ClientApp_IncludesApprovalAndOnboardingEntries()
     {
         var viteConfig = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/vite.config.ts"));
-        viteConfig.Should().Contain("approval-queue");
-        viteConfig.Should().Contain("onboarding-wizard");
+        viteConfig.Should().Contain("spa-shell");
+        var shell = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/components/SpaShell.tsx"));
+        shell.Should().Contain("ApprovalQueueApp");
+        shell.Should().Contain("OnboardingWizardApp");
     }
 
     [Fact]
     public void ReactBundles_IncludeApprovalAndOnboarding()
     {
-        File.Exists(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/approval-queue.js")).Should().BeTrue();
-        File.Exists(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/onboarding-wizard.js")).Should().BeTrue();
+        File.Exists(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/spa-shell.js")).Should().BeTrue();
+        var shell = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/components/SpaShell.tsx"));
+        shell.Should().Contain("ApprovalQueueApp");
+        shell.Should().Contain("OnboardingWizardApp");
     }
 
     [Fact]
@@ -37,16 +41,16 @@ public sealed class Phase31ReactSpaExtendedTests
     public void ApprovalQueueSpaPage_MountsReactBundle()
     {
         var page = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Spa/ApprovalQueue.cshtml"));
-        page.Should().Contain("spa-approval-queue-root");
-        page.Should().Contain("spa/react/approval-queue.js");
+        page.Should().Contain("_SpaRoot");
+        page.Should().Contain("spa/react/spa-shell.js");
     }
 
     [Fact]
     public void OnboardingWizardSpaPage_MountsReactBundle()
     {
         var page = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Spa/OnboardingWizard.cshtml"));
-        page.Should().Contain("spa-onboarding-wizard-root");
-        page.Should().Contain("spa/react/onboarding-wizard.js");
+        page.Should().Contain("_SpaRoot");
+        page.Should().Contain("spa/react/spa-shell.js");
     }
 
     [Fact]

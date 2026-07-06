@@ -17,12 +17,16 @@ public sealed class SpaApprovalsController : ControllerBase
     public SpaApprovalsController(IMediator mediator) => _mediator = mediator;
 
     [HttpGet("pending")]
-    public async Task<IActionResult> ListPendingApprovals(CancellationToken cancellationToken) =>
-        Ok(await _mediator.Send(
+    public async Task<IActionResult> ListPendingApprovals(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
             new ListEnhancementRequestsQuery(
                 EnhancementRequestStatus.PendingApproval,
                 Sort: EnhancementRequestSort.HighestRisk),
-            cancellationToken));
+            cancellationToken);
+
+        return Ok(result.Items);
+    }
 
     [HttpPost("{id:guid}/action")]
     public async Task<IActionResult> SubmitApprovalAction(
@@ -32,4 +36,31 @@ public sealed class SpaApprovalsController : ControllerBase
         Ok(await _mediator.Send(
             new SubmitApprovalActionCommand(id, request.ActionType, request.Comments),
             cancellationToken));
+
+    [HttpPost("bulk-action")]
+    public async Task<IActionResult> BulkSubmitApprovalActions(
+        [FromBody] SpaBulkApprovalActionRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (request.RequestIds is not { Count: > 0 })
+        {
+            return BadRequest(new { message = "Select at least one request." });
+        }
+
+        if (request.ActionType is not (ApprovalActionType.Approve or ApprovalActionType.Reject))
+        {
+            return BadRequest(new { message = "Bulk actions support Approve and Reject only." });
+        }
+
+        if (!User.IsInRole("Admin") && !User.IsInRole("Approver"))
+        {
+            return Forbid();
+        }
+
+        var result = await _mediator.Send(
+            new BulkSubmitApprovalActionsCommand(request.RequestIds, request.ActionType, request.Comments),
+            cancellationToken);
+
+        return Ok(result);
+    }
 }

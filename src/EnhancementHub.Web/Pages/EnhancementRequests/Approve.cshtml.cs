@@ -39,11 +39,11 @@ public class ApproveModel : PageModel
             return RedirectToPage("/Spa/ApprovalQueue", id.HasValue ? new { id } : null);
         }
 
-        Pending = await _mediator.Send(
+        Pending = (await _mediator.Send(
             new ListEnhancementRequestsQuery(
                 EnhancementRequestStatus.PendingApproval,
                 Sort: EnhancementRequestSort.HighestRisk),
-            cancellationToken);
+            cancellationToken)).Items;
         if (id.HasValue)
         {
             SelectedRequestId = id;

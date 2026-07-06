@@ -107,6 +107,14 @@ export interface EnhancementRequestListItem {
   daysInStatus?: number;
 }
 
+export interface PagedEnhancementRequests {
+  items: EnhancementRequestListItem[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export interface AnalysisSummary {
   id: string;
   version: number;

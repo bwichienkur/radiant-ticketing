@@ -187,7 +187,8 @@ public sealed class ProductHardeningTests
             "src/EnhancementHub.Web/ClientApp/src/apps/DashboardApp.tsx"));
         var page = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Index.cshtml"));
 
-        page.Should().Contain("spa-dashboard-root");
+        page.Should().Contain("_SpaRoot");
+        page.Should().Contain("spa-shell.js");
         app.Should().Contain("Pipeline search");
         app.Should().Contain("not a generative AI chat");
         app.Should().NotContain("Ask EnhancementHub");

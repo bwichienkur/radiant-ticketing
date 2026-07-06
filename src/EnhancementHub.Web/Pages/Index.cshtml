@@ -5,8 +5,8 @@
     ViewData["Breadcrumb"] = "Dashboard";
 }
 
-<div id="spa-dashboard-root"></div>
+<partial name="_SpaRoot" />
 
 @section Scripts {
-    <script type="module" src="~/spa/react/dashboard.js" asp-append-version="true"></script>
+    <script type="module" src="~/spa/react/spa-shell.js" asp-append-version="true"></script>
 }

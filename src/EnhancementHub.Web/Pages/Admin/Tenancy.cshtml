@@ -3,24 +3,26 @@
 @{
     ViewData["AdminSection"] = "tenancy";
     ViewData["Title"] = "Tenancy & Billing";
+    ViewData["PageHeaderTitle"] = "Tenancy & billing";
+    ViewData["PageHeaderDescription"] = "Plan limits, usage metering, and Stripe subscription management";
     var billing = Model.Billing;
     var isolation = Model.Isolation;
 }
 
 <partial name="_AdminNav" />
-<div class="page-header">
-    <h1>Tenancy &amp; billing</h1>
-    <p>Plan limits, usage metering, and Stripe subscription management</p>
-</div>
+
+<header class="page-header">
+    <partial name="_PageHeader" />
+</header>
 
 @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
 {
-    <div class="alert alert-success">@Model.StatusMessage</div>
+    <div class="alert alert-success" role="status">@Model.StatusMessage</div>
 }
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {
-    <div class="alert alert-danger">@Model.ErrorMessage</div>
+    <div class="alert alert-danger" role="alert">@Model.ErrorMessage</div>
 }
 
 @if (billing is not null)
@@ -48,7 +50,7 @@
     </div>
 
     <div class="card-panel p-4 mb-4">
-        <h2 class="h5 mb-3">Subscription</h2>
+        <h2 class="eh-section-title mb-3">Subscription</h2>
         <dl class="row mb-0">
             <dt class="col-sm-3">Status</dt>
             <dd class="col-sm-9">@billing.SubscriptionStatus</dd>
@@ -62,7 +64,7 @@
 
     @if (billing.IsTrialActive && billing.TrialEndsAt.HasValue)
     {
-        <div class="alert alert-info">Trial active until @billing.TrialEndsAt.Value.ToString("d").</div>
+        <div class="alert alert-info" role="status">Trial active until @billing.TrialEndsAt.Value.ToString("d").</div>
     }
 
     @if (billing.IsTrialExpired)
@@ -78,7 +80,7 @@
     @if (isolation is not null && isolation.IsolationEnabled)
     {
         <div class="card-panel p-4 mb-4">
-            <h2 class="h5 mb-3">Data isolation</h2>
+            <h2 class="eh-section-title mb-3">Data isolation</h2>
             <dl class="row mb-3">
                 <dt class="col-sm-3">Mode</dt>
                 <dd class="col-sm-9">@isolation.IsolationMode</dd>
@@ -95,7 +97,7 @@
                 <form method="post" asp-page-handler="ProvisionSchema">
                     <button type="submit" class="btn btn-outline-primary">Provision dedicated schema</button>
                 </form>
-                <p class="small text-muted mt-2 mb-0">Recommended for regulated workloads and EU data residency.</p>
+                <p class="form-text mt-2 mb-0">Recommended for regulated workloads and EU data residency.</p>
             }
         </div>
     }
@@ -103,7 +105,7 @@
     @if (billing.StripeEnabled)
     {
         <div class="card-panel p-4">
-            <h2 class="h5 mb-3">Upgrade plan</h2>
+            <h2 class="eh-section-title mb-3">Upgrade plan</h2>
             <p class="text-muted mb-3">Checkout is powered by Stripe. You will be redirected to complete payment.</p>
             <div class="d-flex flex-wrap gap-2">
                 @if (billing.Plan != "Team" && billing.Plan != "Enterprise")
@@ -126,24 +128,47 @@
     }
     else
     {
-        <div class="alert alert-secondary">Stripe billing is not configured in this environment.</div>
+        <div class="alert alert-secondary" role="status">Stripe billing is not configured in this environment.</div>
     }
 }
 else
 {
     <div class="card-panel p-4">
-        <p class="mb-2">Platform administrator view — no tenant context on this account.</p>
+        <p class="mb-3">Platform administrator view — no tenant context on this account.</p>
         @if (Model.AllTenants.Count > 0)
         {
-            <table class="table table-sm">
-                <thead><tr><th>Name</th><th>Slug</th><th>Plan</th><th>Region</th></tr></thead>
-                <tbody>
-                @foreach (var t in Model.AllTenants)
-                {
-                    <tr><td>@t.Name</td><td>@t.Slug</td><td>@t.Plan</td><td>@t.Region</td></tr>
-                }
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table class="table table-hover table-enterprise table-sm mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Name</th>
+                            <th scope="col">Slug</th>
+                            <th scope="col">Plan</th>
+                            <th scope="col">Region</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var t in Model.AllTenants)
+                    {
+                        <tr>
+                            <td><strong>@t.Name</strong></td>
+                            <td><code class="small">@t.Slug</code></td>
+                            <td>@t.Plan</td>
+                            <td>@t.Region</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            ViewData["EmptyStateTitle"] = "No tenants";
+            ViewData["EmptyStateDescription"] = "Tenant records will appear here for platform administrators.";
+            ViewData["EmptyStateIcon"] = "inbox";
+            ViewData["EmptyStateActionUrl"] = null;
+            ViewData["EmptyStateActionText"] = null;
+            <partial name="_EmptyState" />
         }
     </div>
 }

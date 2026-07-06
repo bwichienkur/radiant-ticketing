@@ -1,0 +1,12 @@
+@{
+    var title = ViewData["PageHeaderTitle"]?.ToString() ?? ViewData["Title"]?.ToString() ?? "";
+    var description = ViewData["PageHeaderDescription"]?.ToString();
+}
+
+<div class="page-header-body">
+    <h1 class="page-header-title">@title</h1>
+    @if (!string.IsNullOrWhiteSpace(description))
+    {
+        <p class="page-header-description">@description</p>
+    }
+</div>

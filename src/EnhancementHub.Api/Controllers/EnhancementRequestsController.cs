@@ -19,8 +19,11 @@ public sealed class EnhancementRequestsController : ControllerBase
     public EnhancementRequestsController(IMediator mediator) => _mediator = mediator;
 
     [HttpGet]
-    public async Task<IActionResult> List([FromQuery] EnhancementRequestStatus? status, CancellationToken cancellationToken) =>
-        Ok(await _mediator.Send(new ListEnhancementRequestsQuery(status), cancellationToken));
+    public async Task<IActionResult> List([FromQuery] EnhancementRequestStatus? status, CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(new ListEnhancementRequestsQuery(status), cancellationToken);
+        return Ok(result.Items);
+    }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken) =>

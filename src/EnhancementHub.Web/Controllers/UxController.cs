@@ -25,9 +25,9 @@ public sealed class UxController : ControllerBase
         }
 
         var term = q.Trim();
-        var requests = await _mediator.Send(
+        var requests = (await _mediator.Send(
             new ListEnhancementRequestsQuery(Search: term),
-            cancellationToken);
+            cancellationToken)).Items;
 
         var apps = await _mediator.Send(new ListApplicationsQuery(), cancellationToken);
         var appMatches = apps
@@ -93,7 +93,7 @@ public sealed class UxController : ControllerBase
             return await Search(q, cancellationToken);
         }
 
-        var items = await _mediator.Send(query, cancellationToken);
+        var items = (await _mediator.Send(query, cancellationToken)).Items;
         var results = items.Take(8).Select(r => new
         {
             type = "request",

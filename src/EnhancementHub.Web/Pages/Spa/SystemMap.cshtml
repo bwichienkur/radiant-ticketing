@@ -5,10 +5,8 @@
     ViewData["Breadcrumb"] = "System map";
 }
 
-<div
-    id="spa-system-map-root"
-    data-application-id="@(Model.ApplicationId?.ToString() ?? string.Empty)"></div>
+<partial name="_SpaRoot" />
 
 @section Scripts {
-    <script type="module" src="~/spa/react/system-map.js" asp-append-version="true"></script>
+    <script type="module" src="~/spa/react/spa-shell.js" asp-append-version="true"></script>
 }

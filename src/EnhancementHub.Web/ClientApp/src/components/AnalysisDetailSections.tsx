@@ -1,23 +1,10 @@
 import { useState } from 'react';
-import { riskBadgeClass } from './MissionControl';
 import { formatConfidenceLabel } from '../utils/requestLabels';
+import { riskBadgeClass, riskPlainLabel } from '../utils/riskLabels';
 import type { EnhancementAnalysis } from '../types/spa';
 
 interface AnalysisDetailSectionsProps {
   analysis: EnhancementAnalysis;
-}
-
-function riskPlainLabel(risk: string): string {
-  switch (risk) {
-    case 'Critical':
-      return 'Very high impact';
-    case 'High':
-      return 'High impact';
-    case 'Medium':
-      return 'Moderate impact';
-    default:
-      return 'Low impact';
-  }
 }
 
 export function AnalysisSummaryBanner({ analysis }: AnalysisDetailSectionsProps) {

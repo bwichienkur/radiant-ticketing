@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { getSystemMap, listApplications, rebuildSystemMap } from '../api/spaClient';
-import { LoadingSkeleton } from '../components/LoadingSkeleton';
+import {
+  AlertBanner,
+  EmptyState,
+  ErrorState,
+  FormField,
+  LoadingState,
+  PageHeader,
+  SectionCard,
+} from '../components/ui';
 import { SystemMapGraph } from '../components/SystemMapGraph';
+import { SpaLink } from '../components/SpaLink';
 import { nodeColor } from '../components/systemMapGraph';
 import type { ApplicationSummary, SystemMap } from '../types/spa';
 
@@ -128,48 +137,49 @@ export function SystemMapApp({ initialApplicationId }: SystemMapAppProps) {
   }
 
   if (loadingApps) {
-    return (
-      <div aria-busy="true">
-        <p className="text-muted" role="status">
-          Loading applications…
-        </p>
-        <LoadingSkeleton />
-      </div>
-    );
+    return <LoadingState label="Loading applications…" />;
   }
 
   if (applications.length === 0) {
     return (
-      <div className="card-panel p-4 text-center">
-        <h2 className="h5">No applications yet</h2>
-        <p className="text-muted mb-3">Register an application before viewing the system map.</p>
-        <a href="/Spa/OnboardingWizard" className="btn btn-primary">
-          Start onboarding wizard
-        </a>
-      </div>
+      <EmptyState
+        title="No applications yet"
+        description="Register an application before viewing the system map."
+        icon="document"
+        action={
+          <SpaLink href="/Spa/OnboardingWizard" className="btn btn-primary">
+            Start onboarding wizard
+          </SpaLink>
+        }
+      />
     );
   }
 
   return (
     <div aria-live="polite">
-      <div className="row g-3 mb-4">
-        <div className="col-md-6">
-          <label className="form-label" htmlFor="spa-app-select">
-            Application
-          </label>
-          <select
-            id="spa-app-select"
-            className="form-select"
-            value={selectedId}
-            onChange={(event) => setSelectedId(event.target.value)}
-          >
-            {applications.map((app) => (
-              <option key={app.id} value={app.id}>
-                {app.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <PageHeader
+        title="System map"
+        description="Explore dependencies and relationships across your application landscape."
+      />
+
+      <div className="card-panel p-3 mb-4">
+        <div className="row g-3 align-items-end">
+          <div className="col-md-6">
+            <FormField id="spa-app-select" label="Application">
+              <select
+                id="spa-app-select"
+                className="form-select"
+                value={selectedId}
+                onChange={(event) => setSelectedId(event.target.value)}
+              >
+                {applications.map((app) => (
+                  <option key={app.id} value={app.id}>
+                    {app.name}
+                  </option>
+                ))}
+              </select>
+            </FormField>
+          </div>
         <div className="col-md-6 d-flex align-items-end justify-content-md-end gap-2 flex-wrap">
           <button
             type="button"
@@ -196,22 +206,19 @@ export function SystemMapApp({ initialApplicationId }: SystemMapAppProps) {
             </button>
           </div>
         </div>
+        </div>
       </div>
 
       {statusMessage ? (
-        <div className="alert alert-success" role="status">
+        <AlertBanner variant="success" className="mb-3">
           {statusMessage}
-        </div>
+        </AlertBanner>
       ) : null}
 
-      {error ? (
-        <div className="alert alert-danger" role="alert">
-          {error}
-        </div>
-      ) : null}
+      {error ? <ErrorState message={error} className="mb-3" /> : null}
 
       {loadingMap ? (
-        <LoadingSkeleton />
+        <LoadingState label="Loading system map…" />
       ) : map ? (
         <>
           <div className="row g-3 mb-4">
@@ -264,8 +271,7 @@ export function SystemMapApp({ initialApplicationId }: SystemMapAppProps) {
           ) : (
             <>
               {nodesByType.map(([type, nodes]) => (
-                <section key={type} className="card-panel p-4 mb-3">
-                  <h2 className="h6 text-uppercase text-muted mb-3">{type}</h2>
+                <SectionCard key={type} title={type}>
                   <div className="row g-2">
                     {nodes.map((node) => (
                       <div key={node.id} className="col-md-6 col-lg-4">
@@ -276,12 +282,11 @@ export function SystemMapApp({ initialApplicationId }: SystemMapAppProps) {
                       </div>
                     ))}
                   </div>
-                </section>
+                </SectionCard>
               ))}
 
               {map.edges.length > 0 ? (
-                <section className="card-panel p-4">
-                  <h2 className="h6 text-uppercase text-muted mb-3">Relationships</h2>
+                <SectionCard title="Relationships">
                   <ul className="list-unstyled mb-0">
                     {map.edges.slice(0, 50).map((edge) => (
                       <li key={`${edge.fromId}-${edge.toId}-${edge.label}`} className="small mb-1">
@@ -293,7 +298,7 @@ export function SystemMapApp({ initialApplicationId }: SystemMapAppProps) {
                   {map.edges.length > 50 ? (
                     <p className="small text-muted mt-2 mb-0">Showing first 50 of {map.edges.length} edges.</p>
                   ) : null}
-                </section>
+                </SectionCard>
               ) : null}
             </>
           )}

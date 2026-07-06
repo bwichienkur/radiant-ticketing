@@ -1,27 +1,36 @@
 @page
 @model EnhancementHub.Web.Pages.Documentation.ExportModel
-@{ ViewData["Title"] = "Export Documentation"; }
+@{
+    ViewData["Title"] = "Export Documentation";
+    ViewData["PageHeaderTitle"] = "Export system documentation";
+    ViewData["PageHeaderDescription"] = "Generate architecture documentation from indexed application intelligence";
+}
 
-<h1 class="h3 mb-4">Export system documentation</h1>
+<partial name="_PageHeader" />
 
-<form method="post" class="col-lg-6">
-    <div class="mb-3">
-        <label class="form-label">Application</label>
-        <select asp-for="ApplicationId" class="form-select">
-            @foreach (var app in Model.Applications)
-            {
-                <option value="@app.Id">@app.Name</option>
-            }
-        </select>
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Format</label>
-        <select asp-for="Format" class="form-select" asp-items="Html.GetEnumSelectList<EnhancementHub.Domain.Enums.DocumentationExportFormat>()"></select>
-    </div>
-    <button class="btn btn-primary">Export</button>
-</form>
+<div class="card-panel p-4 col-lg-7">
+    <form method="post" aria-label="Export documentation">
+        <div class="mb-3">
+            <label class="form-label" for="ApplicationId">Application</label>
+            <select asp-for="ApplicationId" class="form-select" id="ApplicationId">
+                @foreach (var app in Model.Applications)
+                {
+                    <option value="@app.Id">@app.Name</option>
+                }
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="Format">Format</label>
+            <select asp-for="Format" class="form-select" id="Format" asp-items="Html.GetEnumSelectList<EnhancementHub.Domain.Enums.DocumentationExportFormat>()"></select>
+        </div>
+        <button class="btn btn-primary">Export</button>
+    </form>
+</div>
 
 @if (!string.IsNullOrWhiteSpace(Model.Preview))
 {
-    <div class="card mt-4"><div class="card-header">Preview</div><pre class="card-body">@Model.Preview</pre></div>
+    <div class="card-panel mt-4">
+        <div class="card-header eh-section-title">Preview</div>
+        <pre class="card-body mb-0 small">@Model.Preview</pre>
+    </div>
 }

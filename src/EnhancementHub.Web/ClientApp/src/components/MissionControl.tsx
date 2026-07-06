@@ -1,31 +1,6 @@
 import type { EnhancementAnalysis } from '../types/spa';
 import { formatConfidenceLabel } from '../utils/requestLabels';
-
-function riskBadgeClass(risk: string): string {
-  switch (risk) {
-    case 'Critical':
-      return 'text-bg-danger';
-    case 'High':
-      return 'text-bg-warning';
-    case 'Medium':
-      return 'text-bg-info';
-    default:
-      return 'text-bg-success';
-  }
-}
-
-function riskPlainLabel(risk: string): string {
-  switch (risk) {
-    case 'Critical':
-      return 'Very high impact';
-    case 'High':
-      return 'High impact';
-    case 'Medium':
-      return 'Moderate impact';
-    default:
-      return 'Low impact';
-  }
-}
+import { riskBadgeClass, riskPlainLabel } from '../utils/riskLabels';
 
 interface MissionControlProps {
   analysis: EnhancementAnalysis;
@@ -38,7 +13,7 @@ export function MissionControl({ analysis }: MissionControlProps) {
 
   return (
     <section className="card-panel p-4 mb-3">
-      <h2 className="h6 mb-3">Impact at a glance</h2>
+      <h2 className="eh-section-title mb-3">Impact at a glance</h2>
       <div className="mission-control-grid">
         <div className="stat-card" title="How much this change could affect your systems">
           <div className="label">Impact level</div>
@@ -72,5 +47,3 @@ export function MissionControl({ analysis }: MissionControlProps) {
     </section>
   );
 }
-
-export { riskBadgeClass };

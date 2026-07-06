@@ -12,8 +12,17 @@ import {
   submitOnboardingBasics,
   submitOnboardingDatabase,
 } from '../api/spaClient';
-import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { OnboardingCodeStep, OnboardingDatabaseStep } from '../components/OnboardingAdvancedSteps';
+import { SpaLink } from '../components/SpaLink';
+import {
+  AlertBanner,
+  EmptyState,
+  ErrorState,
+  FormField,
+  LoadingState,
+  PageHeader,
+} from '../components/ui';
+import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import type { GitHubAppStatus, OnboardingReview, OnboardingSession } from '../types/spa';
 
 const STEPS = [
@@ -207,114 +216,115 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
   }
 
   if (loading || !session) {
-    return (
-      <div aria-busy="true">
-        <p className="text-muted" role="status">
-          Starting wizard…
-        </p>
-        <LoadingSkeleton />
-      </div>
-    );
+    return <LoadingState label="Starting wizard…" />;
   }
 
   return (
     <div aria-live="polite">
-      <div className="page-header mb-4">
-        <h1>Set up a system for change requests</h1>
-        <p className="mb-0 text-muted">
-          Register an application so we can understand its code and dependencies. Technical steps
-          can be completed by your IT team.
-        </p>
-      </div>
+      <PageHeader
+        title="Set up a system for change requests"
+        description="Register an application so we can understand its code and dependencies. Technical steps can be completed by your IT team."
+      />
 
-      <div className="mb-4" role="list" aria-label="Onboarding steps">
-        <div className="d-flex flex-wrap gap-2">
-          {STEPS.map((step) => {
-            const isCurrent = step.number === currentStepNumber;
-            return (
-              <span
-                key={step.key}
-                role="listitem"
-                aria-current={isCurrent ? 'step' : undefined}
-                className={`badge ${step.number <= currentStepNumber ? 'text-bg-primary' : 'text-bg-secondary'}`}
-              >
-                {step.number}. {step.label}
-              </span>
-            );
-          })}
-        </div>
+      <div className="onboarding-progress" role="list" aria-label="Onboarding steps">
+        {STEPS.map((step) => {
+          const isCurrent = step.number === currentStepNumber;
+          const isComplete = step.number < currentStepNumber;
+          return (
+            <div
+              key={step.key}
+              role="listitem"
+              aria-current={isCurrent ? 'step' : undefined}
+              className={`onboarding-step ${isCurrent ? 'active' : ''} ${isComplete ? 'complete' : ''}`}
+            >
+              <div className="step-number">{isComplete ? '✓' : step.number}</div>
+              <div className="step-label">{step.label}</div>
+            </div>
+          );
+        })}
       </div>
 
       {session.wizardError || error ? (
-        <div className="alert alert-danger" role="alert">
-          {error ?? session.wizardError}
-        </div>
+        <ErrorState message={error ?? session.wizardError ?? 'Something went wrong.'} className="mb-3" />
       ) : null}
       {success ? (
-        <div className="alert alert-success" role="status">
+        <AlertBanner variant="success" className="mb-3">
           {success}
-        </div>
+        </AlertBanner>
       ) : null}
 
       <div className="card-panel p-4">
         {session.currentStep === 'ApplicationBasics' ? (
           <form onSubmit={(event) => void onSubmitBasics(event)}>
-            <h2 className="h4 mb-3">Step 1 — Tell us about the system</h2>
+            <h2 className="eh-section-title mb-3">Step 1 — Tell us about the system</h2>
             <div className="row g-3">
               <div className="col-md-6">
-                <label className="form-label">Application name</label>
-                <input
-                  className="form-control"
-                  required
-                  value={basics.name}
-                  onChange={(event) => setBasics({ ...basics, name: event.target.value })}
-                />
+                <FormField id="onboarding-name" label="Application name" required>
+                  <input
+                    id="onboarding-name"
+                    className="form-control"
+                    required
+                    value={basics.name}
+                    onChange={(event) => setBasics({ ...basics, name: event.target.value })}
+                  />
+                </FormField>
               </div>
               <div className="col-md-6">
-                <label className="form-label">Business domain</label>
-                <input
-                  className="form-control"
-                  value={basics.businessDomain}
-                  onChange={(event) => setBasics({ ...basics, businessDomain: event.target.value })}
-                />
+                <FormField id="onboarding-domain" label="Business domain">
+                  <input
+                    id="onboarding-domain"
+                    className="form-control"
+                    value={basics.businessDomain}
+                    onChange={(event) => setBasics({ ...basics, businessDomain: event.target.value })}
+                  />
+                </FormField>
               </div>
               <div className="col-12">
-                <label className="form-label">Purpose</label>
-                <textarea
-                  className="form-control"
-                  rows={2}
-                  value={basics.purpose}
-                  onChange={(event) => setBasics({ ...basics, purpose: event.target.value })}
-                />
+                <FormField id="onboarding-purpose" label="Purpose">
+                  <textarea
+                    id="onboarding-purpose"
+                    className="form-control"
+                    rows={2}
+                    value={basics.purpose}
+                    onChange={(event) => setBasics({ ...basics, purpose: event.target.value })}
+                  />
+                </FormField>
               </div>
               <div className="col-md-6">
-                <label className="form-label">Risk-sensitive areas</label>
-                <input
-                  className="form-control"
-                  value={basics.riskSensitiveAreas}
-                  onChange={(event) => setBasics({ ...basics, riskSensitiveAreas: event.target.value })}
-                />
+                <FormField id="onboarding-risk" label="Risk-sensitive areas">
+                  <input
+                    id="onboarding-risk"
+                    className="form-control"
+                    value={basics.riskSensitiveAreas}
+                    onChange={(event) => setBasics({ ...basics, riskSensitiveAreas: event.target.value })}
+                  />
+                </FormField>
               </div>
               <div className="col-md-6">
-                <label className="form-label">Owner team</label>
-                <input
-                  className="form-control"
-                  value={basics.ownerTeamName}
-                  onChange={(event) => setBasics({ ...basics, ownerTeamName: event.target.value })}
-                />
+                <FormField id="onboarding-team" label="Owner team">
+                  <input
+                    id="onboarding-team"
+                    className="form-control"
+                    value={basics.ownerTeamName}
+                    onChange={(event) => setBasics({ ...basics, ownerTeamName: event.target.value })}
+                  />
+                </FormField>
               </div>
               <div className="col-12">
-                <label className="form-label">Deployment &amp; infrastructure notes</label>
-                <textarea
-                  className="form-control"
-                  rows={3}
-                  placeholder="e.g. Azure App Service (P1v3), prefer existing Worker over new Azure Functions; avoid new paid SaaS"
-                  value={basics.deploymentNotes}
-                  onChange={(event) => setBasics({ ...basics, deploymentNotes: event.target.value })}
-                />
-                <div className="form-text">
-                  Used by AI analysis to respect hosting and cost constraints when recommending changes.
-                </div>
+                <FormField
+                  id="onboarding-deployment"
+                  label="Deployment & infrastructure notes"
+                  hint="Used by AI analysis to respect hosting and cost constraints when recommending changes."
+                >
+                  <textarea
+                    id="onboarding-deployment"
+                    className="form-control"
+                    rows={3}
+                    placeholder="e.g. Azure App Service (P1v3), prefer existing Worker over new Azure Functions; avoid new paid SaaS"
+                    value={basics.deploymentNotes}
+                    onChange={(event) => setBasics({ ...basics, deploymentNotes: event.target.value })}
+                  />
+                </FormField>
               </div>
             </div>
             <button type="submit" className="btn btn-primary mt-4" disabled={submitting}>
@@ -430,22 +440,26 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
         ) : null}
 
         {session.currentStep === 'Complete' ? (
-          <div className="text-center py-3">
-            <h2 className="h4">Setup complete</h2>
-            <p className="text-muted">
-              Your system is ready. You can now submit change requests and track them on the dashboard.
-            </p>
-            <div className="d-flex justify-content-center gap-2">
-              <a href="/" className="btn btn-primary">
-                Go to dashboard
-              </a>
-              {session.applicationId ? (
-                <a href={`/Spa/SystemMap?applicationId=${session.applicationId}`} className="btn btn-outline-secondary">
-                  View system map
-                </a>
-              ) : null}
-            </div>
-          </div>
+          <EmptyState
+            title="Setup complete"
+            description="Your system is ready. You can now submit change requests and track them on the dashboard."
+            icon="document"
+            action={
+              <div className="d-flex justify-content-center gap-2 flex-wrap">
+                <SpaLink href="/" className="btn btn-primary">
+                  Go to dashboard
+                </SpaLink>
+                {session.applicationId ? (
+                  <SpaLink
+                    href={`/Spa/SystemMap?applicationId=${session.applicationId}`}
+                    className="btn btn-outline-secondary"
+                  >
+                    View system map
+                  </SpaLink>
+                ) : null}
+              </div>
+            }
+          />
         ) : null}
       </div>
     </div>

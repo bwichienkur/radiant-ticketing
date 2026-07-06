@@ -221,7 +221,8 @@ public sealed class Phase26CommercialPlatformTests
             GetRepoRoot(),
             "src/EnhancementHub.Web/Pages/Admin/Tenancy.cshtml"));
 
-        page.Should().Contain("Tenancy &amp; billing");
+        page.Should().Contain("PageHeaderTitle");
+        page.Should().Contain("Tenancy & billing");
         page.Should().Contain("Platform administrator view");
     }
 

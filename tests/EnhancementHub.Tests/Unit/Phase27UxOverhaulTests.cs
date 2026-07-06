@@ -29,7 +29,8 @@ public sealed class Phase27UxOverhaulTests
         var app = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/apps/DashboardApp.tsx"));
         var page = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Index.cshtml"));
 
-        page.Should().Contain("spa-dashboard-root");
+        page.Should().Contain("_SpaRoot");
+        page.Should().Contain("spa-shell.js");
         app.Should().Contain("copilot-bar");
         app.Should().Contain("Recent activity");
         app.Should().Contain("sparkline");
@@ -83,6 +84,125 @@ public sealed class Phase27UxOverhaulTests
     {
         var nav = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Shared/_AdminNav.cshtml"));
         nav.Should().Contain("/Admin/Tenancy");
+    }
+
+    [Fact]
+    public void Sidebar_UsesSvgIconPartial()
+    {
+        var sidebar = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Shared/_SidebarNav.cshtml"));
+        sidebar.Should().Contain("_SidebarIcon");
+        sidebar.Should().NotContain("aria-hidden=\"true\">☰");
+    }
+
+    [Fact]
+    public void UiKit_IncludesConfirmDialogAndPagination()
+    {
+        var index = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/components/ui/index.ts"));
+        index.Should().Contain("ConfirmDialog");
+        index.Should().Contain("Pagination");
+    }
+
+    [Fact]
+    public void RazorPages_UseSharedPageHeaderPartial()
+    {
+        var applications = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Applications/Index.cshtml"));
+        applications.Should().Contain("_PageHeader");
+        applications.Should().Contain("_EmptyState");
+    }
+
+    [Fact]
+    public void SpaEntries_UseSharedSpUiRoot()
+    {
+        var shell = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/entries/spa-shell.tsx"));
+        shell.Should().Contain("SpUiRoot");
+        shell.Should().Contain("SpaShell");
+    }
+
+    [Fact]
+    public void SpaShell_UsesReactRouter()
+    {
+        var shell = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/components/SpaShell.tsx"));
+        shell.Should().Contain("BrowserRouter");
+        shell.Should().Contain("/Spa/RequestList");
+    }
+
+    [Fact]
+    public void Storybook_ConfigExists()
+    {
+        var main = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/.storybook/main.ts"));
+        var stories = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/components/ui/UIKit.stories.tsx"));
+        main.Should().Contain(".stories");
+        stories.Should().Contain("PageHeader");
+        stories.Should().Contain("StatusBadge");
+    }
+
+    [Fact]
+    public void RequestListApp_SupportsBulkDecline()
+    {
+        var app = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/apps/RequestListApp.tsx"));
+        app.Should().Contain("bulkSubmitApprovalActions(pendingIds, 'Reject')");
+        app.Should().Contain("Decline selected");
+    }
+
+    [Fact]
+    public void SpaPages_UseUnifiedShellScript()
+    {
+        var index = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Index.cshtml"));
+        var requestList = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Spa/RequestList.cshtml"));
+        index.Should().Contain("spa-shell.js");
+        index.Should().Contain("_SpaRoot");
+        requestList.Should().Contain("spa-shell.js");
+    }
+
+    [Fact]
+    public void SpaRequestsController_SupportsPagedListAndExport()
+    {
+        var controller = File.ReadAllText(GetPath("src/EnhancementHub.Web/Controllers/Spa/SpaRequestsController.cs"));
+        controller.Should().Contain("pageSize");
+        controller.Should().Contain("requests/export");
+        controller.Should().Contain("totalCount");
+    }
+
+    [Fact]
+    public void ListEnhancementRequestsQuery_SupportsPaginationAndIdFilter()
+    {
+        var query = File.ReadAllText(GetPath(
+            "src/EnhancementHub.Application/Features/EnhancementRequests/Queries/ListEnhancementRequestsQuery.cs"));
+        query.Should().Contain("PagedResult<EnhancementRequestDto>");
+        query.Should().Contain("int Page = 1");
+        query.Should().Contain("int PageSize = 0");
+        query.Should().Contain("IReadOnlyList<Guid>? Ids");
+        query.Should().Contain("Skip((page - 1) * pageSize)");
+    }
+
+    [Fact]
+    public void AdminPages_UseSharedPageHeaderPartial()
+    {
+        var settings = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Admin/Settings.cshtml"));
+        var tenancy = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Admin/Tenancy.cshtml"));
+        var delivery = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Admin/Delivery.cshtml"));
+
+        settings.Should().Contain("_PageHeader");
+        tenancy.Should().Contain("_PageHeader");
+        delivery.Should().Contain("_PageHeader");
+        delivery.Should().Contain("eh-section-title");
+    }
+
+    [Fact]
+    public void SpaApprovalsController_SupportsBulkAction()
+    {
+        var controller = File.ReadAllText(GetPath("src/EnhancementHub.Web/Controllers/Spa/SpaApprovalsController.cs"));
+        controller.Should().Contain("bulk-action");
+        controller.Should().Contain("BulkSubmitApprovalActionsCommand");
+    }
+
+    [Fact]
+    public void RequestListApp_SupportsBulkApprove()
+    {
+        var app = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/apps/RequestListApp.tsx"));
+        app.Should().Contain("bulkSubmitApprovalActions");
+        app.Should().Contain("isApprover");
+        app.Should().Contain("Approve selected");
     }
 
     private static string GetPath(string relative) =>

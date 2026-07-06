@@ -6,7 +6,14 @@ import {
   getEnhancementTemplate,
 } from '../api/spaClient';
 import { IntakeCopilotPanel, type IntakeCopilotFormDraft } from '../components/IntakeCopilotPanel';
-import { LoadingSkeleton } from '../components/LoadingSkeleton';
+import { SpaLink } from '../components/SpaLink';
+import {
+  AlertBanner,
+  ErrorState,
+  FormField,
+  LoadingState,
+  PageHeader,
+} from '../components/ui';
 import type { EnhancementTemplateSummary } from '../types/spa';
 
 interface CreateRequestAppProps {
@@ -137,24 +144,15 @@ export function CreateRequestApp({ initialTemplateId }: CreateRequestAppProps) {
   }
 
   if (loading) {
-    return (
-      <div aria-busy="true">
-        <p className="text-muted" role="status">
-          Loading form…
-        </p>
-        <LoadingSkeleton />
-      </div>
-    );
+    return <LoadingState label="Loading form…" />;
   }
 
   return (
     <div aria-live="polite">
-      <div className="page-header">
-        <h1>Tell us what you need changed</h1>
-        <p className="mb-0">
-          Describe your need in everyday language. We will help shape it into a change request for review.
-        </p>
-      </div>
+      <PageHeader
+        title="Tell us what you need changed"
+        description="Describe your need in everyday language. We will help shape it into a change request for review."
+      />
 
       <IntakeCopilotPanel onApplyDraft={applyCopilotDraft} onSessionChange={setIntakeSessionId} />
 
@@ -179,16 +177,12 @@ export function CreateRequestApp({ initialTemplateId }: CreateRequestAppProps) {
         </section>
       ) : null}
 
-      <div className="alert alert-light border mb-4">
-        <strong>What happens next:</strong> After you submit, we review the impact and route the request to
-        your approver. You can track status on your dashboard.
-      </div>
+      <AlertBanner variant="neutral" title="What happens next:" className="mb-4">
+        After you submit, we review the impact and route the request to your approver. You can track status on
+        your dashboard.
+      </AlertBanner>
 
-      {error ? (
-        <div className="alert alert-danger" role="alert">
-          {error}
-        </div>
-      ) : null}
+      {error ? <ErrorState message={error} /> : null}
 
       {!showManualForm ? (
         <div className="card-panel p-4 mb-4">
@@ -202,141 +196,140 @@ export function CreateRequestApp({ initialTemplateId }: CreateRequestAppProps) {
         </div>
       ) : (
         <div className="card-panel p-4">
-          <h2 className="h5 mb-3">Request details</h2>
-          <form onSubmit={(e) => void handleSubmit(e)}>
+          <h2 className="eh-section-title mb-4">Request details</h2>
+          <form onSubmit={(e) => void handleSubmit(e)} noValidate>
             <div className="row g-3">
               <div className="col-md-8">
-                <label className="form-label" htmlFor="request-title">
-                  Title
-                </label>
-                <input
-                  id="request-title"
-                  className="form-control"
-                  required
-                  placeholder="e.g. Track why orders are cancelled"
-                  value={form.title}
-                  onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
-                />
+                <FormField id="request-title" label="Title" required>
+                  <input
+                    id="request-title"
+                    className="form-control"
+                    required
+                    placeholder="e.g. Track why orders are cancelled"
+                    value={form.title}
+                    onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+                  />
+                </FormField>
               </div>
               <div className="col-md-4">
-                <label className="form-label" htmlFor="request-priority">
-                  Priority
-                </label>
-                <select
-                  id="request-priority"
-                  className="form-select"
-                  value={form.priority}
-                  onChange={(event) => setForm((prev) => ({ ...prev, priority: event.target.value }))}
-                >
-                  {PRIORITIES.map((priority) => (
-                    <option key={priority} value={priority}>
-                      {priority}
-                    </option>
-                  ))}
-                </select>
+                <FormField id="request-priority" label="Priority">
+                  <select
+                    id="request-priority"
+                    className="form-select"
+                    value={form.priority}
+                    onChange={(event) => setForm((prev) => ({ ...prev, priority: event.target.value }))}
+                  >
+                    {PRIORITIES.map((priority) => (
+                      <option key={priority} value={priority}>
+                        {priority}
+                      </option>
+                    ))}
+                  </select>
+                </FormField>
               </div>
               <div className="col-md-6">
-                <label className="form-label" htmlFor="request-application">
-                  Which system is affected?
-                </label>
-                <select
+                <FormField
                   id="request-application"
-                  className="form-select"
-                  value={form.targetApplicationId}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, targetApplicationId: event.target.value }))
-                  }
+                  label="Which system is affected?"
+                  hint="Ask IT if you are not sure which application to pick."
                 >
-                  <option value="">— Select —</option>
-                  {applications.map((app) => (
-                    <option key={app.id} value={app.id}>
-                      {app.name}
-                    </option>
-                  ))}
-                </select>
-                <div className="form-text">Ask IT if you are not sure which application to pick.</div>
+                  <select
+                    id="request-application"
+                    className="form-select"
+                    value={form.targetApplicationId}
+                    onChange={(event) =>
+                      setForm((prev) => ({ ...prev, targetApplicationId: event.target.value }))
+                    }
+                  >
+                    <option value="">— Select —</option>
+                    {applications.map((app) => (
+                      <option key={app.id} value={app.id}>
+                        {app.name}
+                      </option>
+                    ))}
+                  </select>
+                </FormField>
               </div>
               <div className="col-md-3">
-                <label className="form-label" htmlFor="request-department">
-                  Department
-                </label>
-                <input
-                  id="request-department"
-                  className="form-control"
-                  value={form.department}
-                  onChange={(event) => setForm((prev) => ({ ...prev, department: event.target.value }))}
-                />
+                <FormField id="request-department" label="Department">
+                  <input
+                    id="request-department"
+                    className="form-control"
+                    value={form.department}
+                    onChange={(event) => setForm((prev) => ({ ...prev, department: event.target.value }))}
+                  />
+                </FormField>
               </div>
               <div className="col-md-3">
-                <label className="form-label" htmlFor="request-due-date">
-                  Requested due date
-                </label>
-                <input
-                  id="request-due-date"
-                  type="date"
-                  className="form-control"
-                  value={form.requestedDueDate}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, requestedDueDate: event.target.value }))
-                  }
-                />
+                <FormField id="request-due-date" label="Requested due date">
+                  <input
+                    id="request-due-date"
+                    type="date"
+                    className="form-control"
+                    value={form.requestedDueDate}
+                    onChange={(event) =>
+                      setForm((prev) => ({ ...prev, requestedDueDate: event.target.value }))
+                    }
+                  />
+                </FormField>
               </div>
               <div className="col-12">
-                <label className="form-label" htmlFor="request-business-description">
-                  What problem are you trying to solve?
-                </label>
-                <textarea
-                  id="request-business-description"
-                  className="form-control"
-                  rows={4}
-                  required
-                  maxLength={4000}
-                  placeholder="Describe the business problem and why it matters today."
-                  value={form.businessDescription}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, businessDescription: event.target.value }))
-                  }
-                />
+                <FormField id="request-business-description" label="What problem are you trying to solve?" required>
+                  <textarea
+                    id="request-business-description"
+                    className="form-control"
+                    rows={4}
+                    required
+                    maxLength={4000}
+                    placeholder="Describe the business problem and why it matters today."
+                    value={form.businessDescription}
+                    onChange={(event) =>
+                      setForm((prev) => ({ ...prev, businessDescription: event.target.value }))
+                    }
+                  />
+                </FormField>
               </div>
               <div className="col-12">
-                <label className="form-label" htmlFor="request-desired-outcome">
-                  What does success look like?
-                </label>
-                <textarea
-                  id="request-desired-outcome"
-                  className="form-control"
-                  rows={3}
-                  required
-                  placeholder="e.g. Managers can run a monthly report on cancellation reasons."
-                  value={form.desiredOutcome}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, desiredOutcome: event.target.value }))
-                  }
-                />
+                <FormField id="request-desired-outcome" label="What does success look like?" required>
+                  <textarea
+                    id="request-desired-outcome"
+                    className="form-control"
+                    rows={3}
+                    required
+                    placeholder="e.g. Managers can run a monthly report on cancellation reasons."
+                    value={form.desiredOutcome}
+                    onChange={(event) =>
+                      setForm((prev) => ({ ...prev, desiredOutcome: event.target.value }))
+                    }
+                  />
+                </FormField>
               </div>
               <div className="col-12">
-                <label className="form-label" htmlFor="request-supporting-notes">
-                  Anything else we should know?
-                </label>
-                <textarea
+                <FormField
                   id="request-supporting-notes"
-                  className="form-control"
-                  rows={2}
-                  placeholder="Optional context, links, or deadlines."
-                  value={form.supportingNotes}
-                  onChange={(event) =>
-                    setForm((prev) => ({ ...prev, supportingNotes: event.target.value }))
-                  }
-                />
+                  label="Anything else we should know?"
+                  hint="Optional context, links, or deadlines."
+                >
+                  <textarea
+                    id="request-supporting-notes"
+                    className="form-control"
+                    rows={2}
+                    placeholder="Optional context, links, or deadlines."
+                    value={form.supportingNotes}
+                    onChange={(event) =>
+                      setForm((prev) => ({ ...prev, supportingNotes: event.target.value }))
+                    }
+                  />
+                </FormField>
               </div>
             </div>
             <div className="mt-4 d-flex gap-2">
               <button type="submit" className="btn btn-primary" disabled={submitting}>
                 {submitting ? 'Submitting…' : 'Submit request'}
               </button>
-              <a href="/" className="btn btn-outline-secondary">
+              <SpaLink href="/" className="btn btn-outline-secondary">
                 Cancel
-              </a>
+              </SpaLink>
             </div>
           </form>
         </div>

@@ -10,7 +10,7 @@ import type {
   EnhancementDeliveryRun,
   EnhancementAnalysis,
   EnhancementRequestDetail,
-  EnhancementRequestListItem,
+  PagedEnhancementRequests,
   EnhancementTemplate,
   IntakeCopilotSession,
   IntakeCopilotTurnResponse,
@@ -103,6 +103,30 @@ export async function submitApprovalAction(
   comments?: string,
 ): Promise<void> {
   await postJson(`/web-api/spa/approvals/${requestId}/action`, { actionType, comments });
+}
+
+export interface BulkApprovalItemResult {
+  requestId: string;
+  success: boolean;
+  errorMessage?: string;
+}
+
+export interface BulkApprovalActionResult {
+  succeededCount: number;
+  failedCount: number;
+  results: BulkApprovalItemResult[];
+}
+
+export async function bulkSubmitApprovalActions(
+  requestIds: string[],
+  actionType: 'Approve' | 'Reject',
+  comments?: string,
+): Promise<BulkApprovalActionResult> {
+  return postJson<BulkApprovalActionResult>('/web-api/spa/approvals/bulk-action', {
+    requestIds,
+    actionType,
+    comments,
+  });
 }
 
 export async function startOnboardingSession(): Promise<OnboardingSession> {
@@ -335,7 +359,9 @@ export async function listEnhancementRequests(params: {
   priority?: string;
   view?: string;
   sort?: string;
-}): Promise<EnhancementRequestListItem[]> {
+  page?: number;
+  pageSize?: number;
+}): Promise<PagedEnhancementRequests> {
   const search = new URLSearchParams();
   if (params.q) {
     search.set('q', params.q);
@@ -352,11 +378,41 @@ export async function listEnhancementRequests(params: {
   if (params.sort) {
     search.set('sort', params.sort);
   }
+  if (params.page) {
+    search.set('page', String(params.page));
+  }
+  if (params.pageSize) {
+    search.set('pageSize', String(params.pageSize));
+  }
 
   const query = search.toString();
-  return fetchJson<EnhancementRequestListItem[]>(
+  return fetchJson<PagedEnhancementRequests>(
     `/web-api/spa/requests${query ? `?${query}` : ''}`,
   );
+}
+
+export async function exportEnhancementRequests(ids: string[]): Promise<void> {
+  const response = await fetch('/web-api/spa/requests/export', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Export failed.');
+  }
+
+  const blob = await response.blob();
+  const disposition = response.headers.get('Content-Disposition');
+  const filename =
+    disposition?.match(/filename="?([^";]+)"?/)?.[1] ?? 'enhancement-requests.csv';
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 export async function getDeliveryRun(requestId: string): Promise<EnhancementDeliveryRun | null> {

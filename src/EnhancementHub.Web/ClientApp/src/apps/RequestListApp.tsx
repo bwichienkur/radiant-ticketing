@@ -1,7 +1,17 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { listEnhancementRequests } from '../api/spaClient';
-import { LoadingSkeleton } from '../components/LoadingSkeleton';
-import { riskBadgeClass } from '../components/MissionControl';
+import { bulkSubmitApprovalActions, exportEnhancementRequests, listEnhancementRequests } from '../api/spaClient';
+import { SpaLink } from '../components/SpaLink';
+import {
+  ConfirmDialog,
+  EmptyState,
+  ErrorState,
+  ListToolbar,
+  LoadingState,
+  PageHeader,
+  Pagination,
+  StatusBadge,
+  useToast,
+} from '../components/ui';
 import type { EnhancementRequestListItem } from '../types/spa';
 import { formatRequestStatus, normalizeRequestStatus } from '../utils/requestLabels';
 
@@ -64,62 +74,226 @@ function filtersToSearchParams(filters: ListFilters): URLSearchParams {
   return params;
 }
 
-const RISK_BY_VALUE: Record<number, string> = {
-  0: 'Low',
-  1: 'Medium',
-  2: 'High',
-  3: 'Critical',
-};
 
-function normalizeStatus(status: string | number): string {
-  return normalizeRequestStatus(status);
+function buildFilterSummary(filters: ListFilters): string | undefined {
+  const parts: string[] = [];
+  if (filters.q.trim()) {
+    parts.push(`search “${filters.q.trim()}”`);
+  }
+  if (filters.status) {
+    parts.push(formatRequestStatus(filters.status));
+  }
+  if (filters.priority) {
+    parts.push(filters.priority);
+  }
+  if (filters.view === 'highrisk') {
+    parts.push('high risk');
+  }
+  return parts.length > 0 ? parts.join(', ') : undefined;
 }
 
-function normalizeRisk(risk: string | number | undefined): string | undefined {
-  if (risk === undefined || risk === null) {
-    return undefined;
-  }
+const DEFAULT_PAGE_SIZE = 25;
 
-  if (typeof risk === 'number') {
-    return RISK_BY_VALUE[risk] ?? String(risk);
-  }
-
-  if (/^\d+$/.test(risk)) {
-    return RISK_BY_VALUE[Number(risk)] ?? risk;
-  }
-
-  return risk;
+interface RequestListAppProps {
+  isApprover?: boolean;
 }
 
-export function RequestListApp() {
+export function RequestListApp({ isApprover = false }: RequestListAppProps) {
+  const toast = useToast();
   const [filters, setFilters] = useState<ListFilters>(readFiltersFromUrl);
   const [draftFilters, setDraftFilters] = useState<ListFilters>(readFiltersFromUrl);
   const [requests, setRequests] = useState<EnhancementRequestListItem[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const [bulkApproving, setBulkApproving] = useState(false);
+  const [bulkDeclining, setBulkDeclining] = useState(false);
+  const [showBulkApproveConfirm, setShowBulkApproveConfirm] = useState(false);
+  const [showBulkDeclineConfirm, setShowBulkDeclineConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [selectedMeta, setSelectedMeta] = useState<Map<string, string>>(() => new Map());
 
-  const loadRequests = useCallback(async (activeFilters: ListFilters) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const items = await listEnhancementRequests({
-        q: activeFilters.q || undefined,
-        status: activeFilters.status || undefined,
-        priority: activeFilters.priority || undefined,
-        view: activeFilters.view || undefined,
-        sort: activeFilters.sort || 'Newest',
-      });
-      setRequests(items);
-    } catch {
-      setError('Failed to load enhancement requests.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const loadRequests = useCallback(
+    async (activeFilters: ListFilters, activePage: number, activePageSize: number) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await listEnhancementRequests({
+          q: activeFilters.q || undefined,
+          status: activeFilters.status || undefined,
+          priority: activeFilters.priority || undefined,
+          view: activeFilters.view || undefined,
+          sort: activeFilters.sort || 'Newest',
+          page: activePage,
+          pageSize: activePageSize,
+        });
+        setRequests(result.items);
+        setTotalCount(result.totalCount);
+        setSelectedMeta((prev) => {
+          const next = new Map(prev);
+          result.items.forEach((item) => {
+            if (next.has(item.id)) {
+              next.set(item.id, String(item.status));
+            }
+          });
+          return next;
+        });
+      } catch {
+        setError('Failed to load enhancement requests.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
-    void loadRequests(filters);
-  }, [filters, loadRequests]);
+    void loadRequests(filters, page, pageSize);
+  }, [filters, page, pageSize, loadRequests]);
+
+  useEffect(() => {
+    setPage(1);
+    setSelectedIds(new Set());
+    setSelectedMeta(new Map());
+  }, [filters]);
+
+  const allPageSelected =
+    requests.length > 0 && requests.every((item) => selectedIds.has(item.id));
+
+  function toggleSelectAllOnPage() {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allPageSelected) {
+        requests.forEach((item) => next.delete(item.id));
+      } else {
+        requests.forEach((item) => next.add(item.id));
+      }
+      return next;
+    });
+    setSelectedMeta((prev) => {
+      const next = new Map(prev);
+      if (allPageSelected) {
+        requests.forEach((item) => next.delete(item.id));
+      } else {
+        requests.forEach((item) => next.set(item.id, String(item.status)));
+      }
+      return next;
+    });
+  }
+
+  function toggleSelect(id: string, status: string | number) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+    setSelectedMeta((prev) => {
+      const next = new Map(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.set(id, String(status));
+      }
+      return next;
+    });
+  }
+
+  const selectedPendingCount = useMemo(
+    () =>
+      [...selectedIds].filter(
+        (id) => normalizeRequestStatus(selectedMeta.get(id) ?? '') === 'PendingApproval',
+      ).length,
+    [selectedIds, selectedMeta],
+  );
+
+  async function handleExportSelected() {
+    if (selectedIds.size === 0) {
+      return;
+    }
+
+    setExporting(true);
+    try {
+      await exportEnhancementRequests([...selectedIds]);
+      toast.success('Export ready', 'Your CSV download should begin shortly.');
+    } catch {
+      toast.danger('Export failed', 'Could not export the selected requests.');
+    } finally {
+      setExporting(false);
+    }
+  }
+
+  async function handleBulkApprove() {
+    const pendingIds = [...selectedIds].filter(
+      (id) => normalizeRequestStatus(selectedMeta.get(id) ?? '') === 'PendingApproval',
+    );
+    if (pendingIds.length === 0) {
+      return;
+    }
+
+    setBulkApproving(true);
+    try {
+      const result = await bulkSubmitApprovalActions(pendingIds, 'Approve');
+      if (result.succeededCount > 0) {
+        toast.success(
+          `${result.succeededCount} request${result.succeededCount === 1 ? '' : 's'} approved`,
+          result.failedCount > 0
+            ? `${result.failedCount} could not be approved (policy or status).`
+            : 'Your decisions were recorded.',
+        );
+      } else {
+        toast.danger('No requests approved', 'Selected items may not be pending or are blocked by policy.');
+      }
+
+      setShowBulkApproveConfirm(false);
+      setSelectedIds(new Set());
+      setSelectedMeta(new Map());
+      await loadRequests(filters, page, pageSize);
+    } catch {
+      toast.danger('Bulk approve failed', 'Could not submit approval actions.');
+    } finally {
+      setBulkApproving(false);
+    }
+  }
+
+  async function handleBulkDecline() {
+    const pendingIds = [...selectedIds].filter(
+      (id) => normalizeRequestStatus(selectedMeta.get(id) ?? '') === 'PendingApproval',
+    );
+    if (pendingIds.length === 0) {
+      return;
+    }
+
+    setBulkDeclining(true);
+    try {
+      const result = await bulkSubmitApprovalActions(pendingIds, 'Reject');
+      if (result.succeededCount > 0) {
+        toast.success(
+          `${result.succeededCount} request${result.succeededCount === 1 ? '' : 's'} declined`,
+          result.failedCount > 0
+            ? `${result.failedCount} could not be declined (policy or status).`
+            : 'Your decisions were recorded.',
+        );
+      } else {
+        toast.danger('No requests declined', 'Selected items may not be pending or are blocked by policy.');
+      }
+
+      setShowBulkDeclineConfirm(false);
+      setSelectedIds(new Set());
+      setSelectedMeta(new Map());
+      await loadRequests(filters, page, pageSize);
+    } catch {
+      toast.danger('Bulk decline failed', 'Could not submit decline actions.');
+    } finally {
+      setBulkDeclining(false);
+    }
+  }
 
   const chipHref = useMemo(() => {
     return (chip: Partial<ListFilters>) => {
@@ -155,17 +329,17 @@ export function RequestListApp() {
 
   return (
     <>
-      <div className="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div>
-          <h1>Enhancement Requests</h1>
-          <p>Triage, search, and open request details</p>
-        </div>
-        <a href="/Spa/CreateRequest" className="btn btn-primary">
-          New Request
-        </a>
-      </div>
+      <PageHeader
+        title="Enhancement Requests"
+        description="Triage, search, and open request details"
+        actions={
+          <SpaLink href="/Spa/CreateRequest" className="btn btn-primary">
+            New request
+          </SpaLink>
+        }
+      />
 
-      <form className="card-panel p-3 mb-3" onSubmit={applyFilters}>
+      <form className="card-panel p-3 mb-3 eh-filter-panel" onSubmit={applyFilters} aria-label="Filter requests">
         <div className="row g-2 align-items-end">
           <div className="col-md-4">
             <label className="form-label small" htmlFor="search-q">
@@ -240,55 +414,122 @@ export function RequestListApp() {
           </div>
         </div>
         <div className="filter-chips mt-3">
-          <a
+          <SpaLink
             className={`filter-chip ${isChipActive({}) ? 'active' : ''}`}
             href={chipHref({ q: '', status: '', priority: '', view: '' })}
           >
             All
-          </a>
-          <a
+          </SpaLink>
+          <SpaLink
             className={`filter-chip ${isChipActive({ status: 'PendingApproval' }) ? 'active' : ''}`}
             href={chipHref({ q: '', status: 'PendingApproval', priority: '', view: '' })}
           >
             Pending approval
-          </a>
-          <a
+          </SpaLink>
+          <SpaLink
             className={`filter-chip ${isChipActive({ status: 'Submitted' }) ? 'active' : ''}`}
             href={chipHref({ q: '', status: 'Submitted', priority: '', view: '' })}
           >
             Awaiting analysis
-          </a>
-          <a
+          </SpaLink>
+          <SpaLink
             className={`filter-chip ${isChipActive({ view: 'highrisk' }) ? 'active' : ''}`}
             href={chipHref({ q: '', status: '', priority: '', view: 'highrisk' })}
           >
             High risk
-          </a>
+          </SpaLink>
         </div>
       </form>
 
       {loading ? (
-        <LoadingSkeleton />
+        <LoadingState label="Loading requests…" />
       ) : error ? (
-        <div className="alert alert-danger" role="alert">
-          {error}
-        </div>
-      ) : requests.length === 0 ? (
-        <div className="card-panel empty-state">
-          <div className="empty-state-icon">☰</div>
-          <h2 className="h5">No requests match your filters</h2>
-          <p className="mb-3">Try clearing filters or create a new enhancement request.</p>
-          <a href="/Spa/CreateRequest" className="btn btn-primary">
-            New Request
-          </a>
-        </div>
+        <ErrorState message={error} onRetry={() => void loadRequests(filters, page, pageSize)} />
+      ) : totalCount === 0 ? (
+        <EmptyState
+          title="No requests match your filters"
+          description="Try clearing filters or create a new enhancement request."
+          icon="search"
+          action={
+            <>
+              <SpaLink href="/Spa/CreateRequest" className="btn btn-primary me-2">
+                New request
+              </SpaLink>
+              <SpaLink href="/Spa/RequestList" className="btn btn-outline-secondary">
+                Clear filters
+              </SpaLink>
+            </>
+          }
+        />
       ) : (
         <>
+          <ListToolbar
+            count={totalCount}
+            noun="request"
+            filterSummary={buildFilterSummary(filters)}
+          />
           <div className="card-panel table-desktop-only">
+            {selectedIds.size > 0 ? (
+              <div className="eh-bulk-toolbar" role="toolbar" aria-label="Bulk actions">
+                <span className="small fw-semibold">{selectedIds.size} selected</span>
+                {isApprover && selectedPendingCount > 0 ? (
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-success"
+                      disabled={bulkApproving || bulkDeclining}
+                      onClick={() => setShowBulkApproveConfirm(true)}
+                    >
+                      {bulkApproving ? 'Approving…' : `Approve ${selectedPendingCount}`}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-danger"
+                      disabled={bulkApproving || bulkDeclining}
+                      onClick={() => setShowBulkDeclineConfirm(true)}
+                    >
+                      {bulkDeclining ? 'Declining…' : `Decline ${selectedPendingCount}`}
+                    </button>
+                  </>
+                ) : null}
+                {selectedPendingCount > 0 ? (
+                  <SpaLink href="/Spa/ApprovalQueue" className="btn btn-sm btn-outline-primary">
+                    Review in queue
+                  </SpaLink>
+                ) : null}
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-primary"
+                  disabled={exporting}
+                  onClick={() => void handleExportSelected()}
+                >
+                  {exporting ? 'Exporting…' : 'Export CSV'}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  onClick={() => {
+                    setSelectedIds(new Set());
+                    setSelectedMeta(new Map());
+                  }}
+                >
+                  Clear selection
+                </button>
+              </div>
+            ) : null}
             <div className="table-responsive">
               <table className="table table-hover table-enterprise mb-0">
                 <thead>
                   <tr>
+                    <th scope="col" className="eh-table-checkbox-col">
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        checked={allPageSelected}
+                        onChange={toggleSelectAllOnPage}
+                        aria-label="Select all on this page"
+                      />
+                    </th>
                     <th scope="col">Title</th>
                     <th scope="col">Application</th>
                     <th scope="col">Risk</th>
@@ -303,65 +544,102 @@ export function RequestListApp() {
                   {requests.map((item) => (
                     <tr key={item.id}>
                       <td>
+                        <input
+                          type="checkbox"
+                          className="form-check-input"
+                          checked={selectedIds.has(item.id)}
+                          onChange={() => toggleSelect(item.id, item.status)}
+                          aria-label={`Select ${item.title}`}
+                        />
+                      </td>
+                      <td>
                         <strong>{item.title}</strong>
                       </td>
                       <td>{item.targetApplicationName ?? '—'}</td>
                       <td>
-                        {item.latestRiskLevel != null ? (
-                          <span
-                            className={`badge ${riskBadgeClass(normalizeRisk(item.latestRiskLevel)!)} badge-status`}
-                          >
-                            {normalizeRisk(item.latestRiskLevel)}
-                          </span>
-                        ) : (
-                          <span className="text-muted">—</span>
-                        )}
+                        <StatusBadge risk={item.latestRiskLevel} />
                       </td>
                       <td>{item.priority}</td>
                       <td>
-                        <span className="badge text-bg-secondary badge-status">{formatRequestStatus(item.status)}</span>
+                        <StatusBadge status={item.status} />
                       </td>
                       <td>{item.submittedByUserName ?? '—'}</td>
                       <td>{item.daysInStatus ?? 0}d</td>
                       <td>
-                        <a href={`/Spa/RequestDetail/${item.id}`} className="btn btn-sm btn-outline-primary">
+                        <SpaLink href={`/Spa/RequestDetail/${item.id}`} className="btn btn-sm btn-outline-primary">
                           View
-                        </a>
+                        </SpaLink>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
+            <Pagination
+              page={page}
+              pageSize={pageSize}
+              totalCount={totalCount}
+              onPageChange={setPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setPage(1);
+              }}
+            />
           </div>
 
           <div className="cards-mobile-only">
             {requests.map((item) => (
-              <a
+              <SpaLink
                 key={item.id}
                 href={`/Spa/RequestDetail/${item.id}`}
                 className={`request-card-mobile ${
-                  normalizeStatus(item.status) === 'PendingApproval' ? 'status-pending' : ''
+                  normalizeRequestStatus(item.status) === 'PendingApproval' ? 'status-pending' : ''
                 } d-block text-decoration-none text-reset`}
               >
                 <div className="d-flex justify-content-between align-items-start gap-2 mb-1">
                   <strong>{item.title}</strong>
-                  {item.latestRiskLevel != null ? (
-                    <span
-                      className={`badge ${riskBadgeClass(normalizeRisk(item.latestRiskLevel)!)} badge-status`}
-                    >
-                      {normalizeRisk(item.latestRiskLevel)}
-                    </span>
-                  ) : null}
+                  <StatusBadge risk={item.latestRiskLevel} />
                 </div>
                 <div className="small text-muted">
                   {formatRequestStatus(item.status)} · {item.priority} · {item.daysInStatus ?? 0}d
                 </div>
-              </a>
+              </SpaLink>
             ))}
+            <Pagination
+              page={page}
+              pageSize={pageSize}
+              totalCount={totalCount}
+              onPageChange={setPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setPage(1);
+              }}
+            />
           </div>
         </>
       )}
+
+      <ConfirmDialog
+        open={showBulkApproveConfirm}
+        title={`Approve ${selectedPendingCount} request${selectedPendingCount === 1 ? '' : 's'}?`}
+        message="Pending requests will be approved in bulk. Items blocked by policy or not awaiting approval will be skipped."
+        confirmLabel="Approve selected"
+        variant="primary"
+        loading={bulkApproving}
+        onConfirm={() => void handleBulkApprove()}
+        onCancel={() => setShowBulkApproveConfirm(false)}
+      />
+
+      <ConfirmDialog
+        open={showBulkDeclineConfirm}
+        title={`Decline ${selectedPendingCount} request${selectedPendingCount === 1 ? '' : 's'}?`}
+        message="Pending requests will be declined in bulk. Requesters will be notified. Items not awaiting approval will be skipped."
+        confirmLabel="Decline selected"
+        variant="danger"
+        loading={bulkDeclining}
+        onConfirm={() => void handleBulkDecline()}
+        onCancel={() => setShowBulkDeclineConfirm(false)}
+      />
     </>
   );
 }

@@ -18,8 +18,13 @@ public sealed class ApprovalsController : ControllerBase
     public ApprovalsController(IMediator mediator) => _mediator = mediator;
 
     [HttpGet("pending")]
-    public async Task<IActionResult> Pending(CancellationToken cancellationToken) =>
-        Ok(await _mediator.Send(new ListEnhancementRequestsQuery(EnhancementRequestStatus.PendingApproval), cancellationToken));
+    public async Task<IActionResult> Pending(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
+            new ListEnhancementRequestsQuery(EnhancementRequestStatus.PendingApproval),
+            cancellationToken);
+        return Ok(result.Items);
+    }
 
     [HttpGet("{requestId:guid}/history")]
     public async Task<IActionResult> History(Guid requestId, CancellationToken cancellationToken) =>

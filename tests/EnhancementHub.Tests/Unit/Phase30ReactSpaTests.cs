@@ -12,15 +12,14 @@ public sealed class Phase30ReactSpaTests
         var viteConfig = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/vite.config.ts"));
         packageJson.Should().Contain("\"react\"");
         packageJson.Should().Contain("\"vite\"");
-        viteConfig.Should().Contain("request-detail");
-        viteConfig.Should().Contain("system-map");
+        viteConfig.Should().Contain("spa-shell");
     }
 
     [Fact]
     public void ReactBundles_ArePublishedToWwwroot()
     {
-        File.Exists(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/request-detail.js")).Should().BeTrue();
-        File.Exists(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/system-map.js")).Should().BeTrue();
+        File.Exists(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/spa-shell.js")).Should().BeTrue();
+        new FileInfo(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/spa-shell.js")).Length.Should().BeGreaterThan(100_000);
     }
 
     [Fact]
@@ -36,17 +35,16 @@ public sealed class Phase30ReactSpaTests
     public void RequestDetailSpaPage_MountsReactBundle()
     {
         var page = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Spa/RequestDetail.cshtml"));
-        page.Should().Contain("spa-request-detail-root");
-        page.Should().Contain("spa/react/request-detail.js");
-        page.Should().NotContain("~/js/spa/request-detail.js");
+        page.Should().Contain("_SpaRoot");
+        page.Should().Contain("spa/react/spa-shell.js");
     }
 
     [Fact]
     public void SystemMapSpaPage_MountsReactBundle()
     {
         var page = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Spa/SystemMap.cshtml"));
-        page.Should().Contain("spa-system-map-root");
-        page.Should().Contain("spa/react/system-map.js");
+        page.Should().Contain("_SpaRoot");
+        page.Should().Contain("spa/react/spa-shell.js");
     }
 
     [Fact]

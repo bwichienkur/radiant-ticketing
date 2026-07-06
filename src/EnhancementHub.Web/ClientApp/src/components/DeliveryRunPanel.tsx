@@ -7,6 +7,13 @@ import {
   signUat,
   startDeliveryRun,
 } from '../api/spaClient';
+import {
+  AlertBanner,
+  ConfirmDialog,
+  LoadingState,
+  SectionCard,
+  useToast,
+} from '../components/ui';
 import type { EnhancementDeliveryRun } from '../types/spa';
 
 interface DeliveryRunPanelProps {
@@ -15,13 +22,16 @@ interface DeliveryRunPanelProps {
   desiredOutcome: string;
 }
 
+type ConfirmKind = 'deploy' | 'rollback' | null;
+
 export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: DeliveryRunPanelProps) {
+  const toast = useToast();
   const [run, setRun] = useState<EnhancementDeliveryRun | null>(null);
   const [loading, setLoading] = useState(true);
-  const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [uatNotes, setUatNotes] = useState('');
   const [rollbackReason, setRollbackReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [confirmKind, setConfirmKind] = useState<ConfirmKind>(null);
 
   const reload = useCallback(async () => {
     try {
@@ -52,12 +62,11 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
 
   async function handleStart() {
     setSubmitting(true);
-    setActionMessage(null);
     try {
       setRun(await startDeliveryRun(requestId));
-      setActionMessage('Delivery started.');
+      toast.success('Delivery started', 'Automated implementation is in progress.');
     } catch {
-      setActionMessage('Could not start delivery.');
+      toast.danger('Could not start delivery', 'Check delivery configuration and try again.');
     } finally {
       setSubmitting(false);
     }
@@ -67,7 +76,7 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
     setSubmitting(true);
     try {
       setRun(await advanceDeliveryPastPr(requestId));
-      setActionMessage('Continuing to test deployment.');
+      toast.info('Continuing', 'Deploying to the test environment.');
     } finally {
       setSubmitting(false);
     }
@@ -78,7 +87,10 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
     setSubmitting(true);
     try {
       setRun(await signUat(requestId, approved, uatNotes || undefined));
-      setActionMessage(approved ? 'UAT approved — production scheduling started.' : 'UAT rejected.');
+      toast.success(
+        approved ? 'UAT approved' : 'UAT rejected',
+        approved ? 'Production scheduling started.' : 'The delivery run will need changes.',
+      );
     } finally {
       setSubmitting(false);
     }
@@ -86,12 +98,12 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
 
   async function handleDeployProduction() {
     setSubmitting(true);
-    setActionMessage(null);
     try {
       setRun(await deployProduction(requestId));
-      setActionMessage('Production deploy started.');
+      toast.success('Production deploy started', 'Monitor the timeline for completion.');
+      setConfirmKind(null);
     } catch {
-      setActionMessage('Could not deploy to production.');
+      toast.danger('Deploy failed', 'Could not deploy to production.');
     } finally {
       setSubmitting(false);
     }
@@ -99,41 +111,39 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
 
   async function handleRollbackProduction() {
     setSubmitting(true);
-    setActionMessage(null);
     try {
       setRun(await rollbackProduction(requestId, rollbackReason || undefined));
-      setActionMessage('Production rollback triggered.');
+      toast.warning('Rollback triggered', 'Restoring the previous production version.');
+      setConfirmKind(null);
     } catch {
-      setActionMessage('Could not roll back production.');
+      toast.danger('Rollback failed', 'Could not roll back production.');
     } finally {
       setSubmitting(false);
     }
   }
 
   if (loading) {
-    return null;
+    return <LoadingState label="Loading delivery status…" />;
   }
 
   const canStart =
     !run && (requestStatus === 'Approved' || requestStatus === 'ReadyForDevelopment');
 
   return (
-    <section className="card-panel p-4 mb-3" aria-label="Delivery progress">
-      <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
-        <div>
-          <h2 className="h6 mb-1">Delivery progress</h2>
-          <p className="small text-muted mb-0">
-            Automated implementation, test deploy, QA evidence, and UAT.
-          </p>
-        </div>
-        {run?.isSimulation ? <span className="badge text-bg-secondary">Simulation mode</span> : null}
-      </div>
-
-      {actionMessage ? (
-        <div className="alert alert-info py-2 small" role="status">
-          {actionMessage}
-        </div>
-      ) : null}
+    <SectionCard
+      title="Delivery progress"
+      ariaLabel="Delivery progress"
+      actions={run?.isSimulation ? <span className="badge text-bg-secondary">Simulation mode</span> : undefined}
+    >
+      <p className="small text-muted mb-3">
+        Automated implementation, test deploy, QA evidence, and UAT.
+        {run ? (
+          <>
+            {' '}
+            Current phase: <strong>{formatPhase(run.phase)}</strong>
+          </>
+        ) : null}
+      </p>
 
       {canStart ? (
         <button type="button" className="btn btn-primary btn-sm" disabled={submitting} onClick={() => void handleStart()}>
@@ -254,7 +264,7 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
               type="button"
               className="btn btn-success btn-sm mb-3"
               disabled={submitting}
-              onClick={() => void handleDeployProduction()}
+              onClick={() => setConfirmKind('deploy')}
             >
               Deploy to production
             </button>
@@ -280,7 +290,7 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
                 type="button"
                 className="btn btn-outline-danger btn-sm"
                 disabled={submitting}
-                onClick={() => void handleRollbackProduction()}
+                onClick={() => setConfirmKind('rollback')}
               >
                 Roll back production
               </button>
@@ -288,9 +298,9 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
           ) : null}
 
           {run.postDeploySmokePassed === false ? (
-            <div className="alert alert-warning py-2 small mb-3" role="alert">
+            <AlertBanner variant="warning" className="py-2 small mb-3">
               Post-deploy smoke tests failed. Consider rolling back production.
-            </div>
+            </AlertBanner>
           ) : null}
 
           {run.phase === 'AwaitingUat' ? (
@@ -340,13 +350,34 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
           ) : null}
 
           {run.lastError ? (
-            <div className="alert alert-warning py-2 small mt-3 mb-0" role="alert">
+            <AlertBanner variant="warning" className="py-2 small mt-3 mb-0">
               {run.lastError}
-            </div>
+            </AlertBanner>
           ) : null}
         </>
       )}
-    </section>
+
+      <ConfirmDialog
+        open={confirmKind === 'deploy'}
+        title="Deploy to production?"
+        message="This will promote the tested build to your production environment. Ensure UAT sign-off is complete."
+        confirmLabel="Deploy now"
+        variant="primary"
+        loading={submitting}
+        onConfirm={() => void handleDeployProduction()}
+        onCancel={() => setConfirmKind(null)}
+      />
+      <ConfirmDialog
+        open={confirmKind === 'rollback'}
+        title="Roll back production?"
+        message="This restores the previous production version. Use only when the current release is causing issues."
+        confirmLabel="Roll back"
+        variant="danger"
+        loading={submitting}
+        onConfirm={() => void handleRollbackProduction()}
+        onCancel={() => setConfirmKind(null)}
+      />
+    </SectionCard>
   );
 }
 

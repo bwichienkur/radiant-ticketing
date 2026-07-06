@@ -1,0 +1,22 @@
+@{
+    var title = ViewData["EmptyStateTitle"]?.ToString() ?? "Nothing here yet";
+    var description = ViewData["EmptyStateDescription"]?.ToString();
+    var icon = ViewData["EmptyStateIcon"]?.ToString() ?? "inbox";
+    var actionUrl = ViewData["EmptyStateActionUrl"]?.ToString();
+    var actionText = ViewData["EmptyStateActionText"]?.ToString();
+}
+
+<div class="card-panel empty-state" role="status">
+    <div class="empty-state-graphic empty-state-graphic-@icon" aria-hidden="true"></div>
+    <h2 class="empty-state-title">@title</h2>
+    @if (!string.IsNullOrWhiteSpace(description))
+    {
+        <p class="empty-state-description">@description</p>
+    }
+    @if (!string.IsNullOrWhiteSpace(actionUrl) && !string.IsNullOrWhiteSpace(actionText))
+    {
+        <div class="empty-state-action">
+            <a href="@actionUrl" class="btn btn-primary">@actionText</a>
+        </div>
+    }
+</div>

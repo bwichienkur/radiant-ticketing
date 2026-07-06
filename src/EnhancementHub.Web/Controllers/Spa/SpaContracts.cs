@@ -6,6 +6,11 @@ namespace EnhancementHub.Web.Controllers.Spa;
 
 public sealed record SpaApprovalActionRequest(ApprovalActionType ActionType, string? Comments);
 
+public sealed record SpaBulkApprovalActionRequest(
+    IReadOnlyList<Guid> RequestIds,
+    ApprovalActionType ActionType,
+    string? Comments);
+
 public sealed record SpaAddCommentRequest(string Content, bool IsInternal = false);
 
 public sealed record SpaCreateRequestInput(

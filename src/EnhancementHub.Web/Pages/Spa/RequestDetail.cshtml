@@ -5,8 +5,8 @@
     ViewData["Breadcrumb"] = "Request";
 }
 
-<div id="spa-request-detail-root" data-request-id="@Model.RequestId"></div>
+<partial name="_SpaRoot" />
 
 @section Scripts {
-    <script type="module" src="~/spa/react/request-detail.js" asp-append-version="true"></script>
+    <script type="module" src="~/spa/react/spa-shell.js" asp-append-version="true"></script>
 }
