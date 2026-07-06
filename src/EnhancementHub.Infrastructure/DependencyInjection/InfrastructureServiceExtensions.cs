@@ -117,6 +117,14 @@ public static class InfrastructureServiceExtensions
                 ? sp.GetRequiredService<S3FileStorageService>()
                 : sp.GetRequiredService<LocalFileStorageService>();
         });
+        services.AddScoped<SmtpEmailSender>();
+        services.AddScoped<NoOpEmailSender>();
+        services.AddScoped<IEmailSender>(sp =>
+            configuration.GetValue("Notifications:Email:Enabled", false)
+                ? sp.GetRequiredService<SmtpEmailSender>()
+                : sp.GetRequiredService<NoOpEmailSender>());
+        services.AddSingleton<IUserNotificationNotifier, NoOpUserNotificationNotifier>();
+        services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<EmailNotificationPublisher>();
         services.AddScoped<TeamsWebhookNotificationPublisher>();
         services.AddScoped<INotificationPublisher>(sp => new CompositeNotificationPublisher(

@@ -23,6 +23,7 @@ public sealed class TriggerAiAnalysisCommandHandler
     private readonly ITenantMeteringService _tenantMeteringService;
     private readonly ITenantBillingService _tenantBillingService;
     private readonly IRequestCollaborationNotifier _collaborationNotifier;
+    private readonly INotificationService _notificationService;
 
     public TriggerAiAnalysisCommandHandler(
         IEnhancementHubDbContext dbContext,
@@ -31,7 +32,8 @@ public sealed class TriggerAiAnalysisCommandHandler
         IAuditService auditService,
         ITenantMeteringService tenantMeteringService,
         ITenantBillingService tenantBillingService,
-        IRequestCollaborationNotifier collaborationNotifier)
+        IRequestCollaborationNotifier collaborationNotifier,
+        INotificationService notificationService)
     {
         _dbContext = dbContext;
         _aiAnalysisService = aiAnalysisService;
@@ -40,6 +42,7 @@ public sealed class TriggerAiAnalysisCommandHandler
         _tenantMeteringService = tenantMeteringService;
         _tenantBillingService = tenantBillingService;
         _collaborationNotifier = collaborationNotifier;
+        _notificationService = notificationService;
     }
 
     public async Task<EnhancementAnalysisDto> Handle(
@@ -123,6 +126,19 @@ public sealed class TriggerAiAnalysisCommandHandler
             await _collaborationNotifier.NotifyAnalysisUpdatedAsync(
                 enhancementRequest.Id,
                 analysis.Version,
+                cancellationToken);
+
+            await _notificationService.NotifyApproversOfPendingApprovalAsync(
+                enhancementRequest.Id,
+                enhancementRequest.Title,
+                submitterTenantId,
+                cancellationToken);
+
+            await _notificationService.NotifySubmitterOfAnalysisCompleteAsync(
+                enhancementRequest.SubmittedByUserId,
+                enhancementRequest.Id,
+                enhancementRequest.Title,
+                submitterTenantId,
                 cancellationToken);
         }
         catch (Exception ex)

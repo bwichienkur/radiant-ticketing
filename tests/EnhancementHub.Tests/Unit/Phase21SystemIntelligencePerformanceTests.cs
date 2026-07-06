@@ -79,6 +79,7 @@ public sealed class Phase21SystemIntelligencePerformanceTests
         var sut = new SchemaDriftDetectorService(
             dbContext,
             notifications.Object,
+            new EnhancementHub.Infrastructure.Services.Notifications.NoOpNotificationService(),
             new SystemIntelligenceFingerprintService(dbContext),
             Microsoft.Extensions.Options.Options.Create(new SystemIntelligenceOptions { DiffOnlyDriftEnabled = true }),
             NullLogger<SchemaDriftDetectorService>.Instance);

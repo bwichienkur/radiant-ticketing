@@ -417,6 +417,16 @@ Guide: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md)
 - Vite `manualChunks` for React, Cytoscape, SignalR vendor bundles
 - `data-is-admin` on SPA root for audit export actions
 
+## Phase 50 — Notification system (complete)
+
+- `Notification` + `NotificationPreference` entities with EF migration
+- `INotificationService` — create, list, mark read, user preferences
+- `IEmailSender` abstraction (`SmtpEmailSender`; disabled in dev)
+- SignalR user-group push via `UserNotification` hub event
+- `SpaNotificationsController` BFF; top bar wired to persisted notifications
+- `/Account/NotificationPreferences` for per-category email/in-app opt-out
+- Hooks: `PendingApproval` (approvers + submitter), critical schema drift
+
 ## Phases 46–57 — Due diligence execution (planned)
 
 Post-audit roadmap to reach world-class enterprise readiness. Full task breakdown: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md).

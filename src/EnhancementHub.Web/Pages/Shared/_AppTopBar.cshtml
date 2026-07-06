@@ -39,6 +39,9 @@
                     <button type="button" class="btn btn-link btn-sm p-0" id="notification-mark-read">Mark all read</button>
                 </div>
                 <div id="notification-list" class="notification-list"></div>
+                <div class="border-top px-3 py-2">
+                    <a asp-page="/Account/NotificationPreferences" class="small">Notification preferences</a>
+                </div>
             </div>
         </div>
         <span class="topbar-user d-none d-md-inline">@User.Identity?.Name</span>

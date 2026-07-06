@@ -3,7 +3,145 @@
  */
 (function () {
     const STORAGE_THEME = 'eh-theme';
-    const STORAGE_NOTIFICATIONS = 'eh-notifications';
+    let notificationItems = [];
+
+    function mapServerNotification(notification) {
+        return {
+            id: notification.id,
+            title: notification.title ?? 'EnhancementHub',
+            message: notification.message ?? '',
+            read: notification.isRead ?? false,
+            actionUrl: notification.actionUrl ?? null,
+            at: notification.createdAt ?? new Date().toISOString(),
+            persisted: true
+        };
+    }
+
+    async function fetchServerNotifications() {
+        try {
+            const response = await fetch('/web-api/spa/notifications?limit=50', { credentials: 'include' });
+            if (!response.ok) {
+                return null;
+            }
+
+            const data = await response.json();
+            return data.map(mapServerNotification);
+        } catch {
+            return null;
+        }
+    }
+
+    function updateNotificationBadge(items) {
+        const badge = document.getElementById('notification-badge');
+        if (!badge) return;
+        const unread = items.filter(n => !n.read).length;
+        badge.textContent = unread > 0 ? String(unread) : '';
+        badge.classList.toggle('d-none', unread === 0);
+    }
+
+    function addBroadcastNotification(payload) {
+        notificationItems.unshift({
+            id: crypto.randomUUID(),
+            title: payload.title ?? 'EnhancementHub',
+            message: payload.message ?? '',
+            read: false,
+            actionUrl: null,
+            at: new Date().toISOString(),
+            persisted: false
+        });
+        notificationItems = notificationItems.slice(0, 50);
+        renderNotificationPanel();
+    }
+
+    function addUserNotification(payload) {
+        const item = {
+            id: payload.id,
+            title: payload.title ?? 'EnhancementHub',
+            message: payload.message ?? '',
+            read: payload.isRead ?? false,
+            actionUrl: payload.actionUrl ?? null,
+            at: payload.createdAt ?? new Date().toISOString(),
+            persisted: true
+        };
+        notificationItems = [item, ...notificationItems.filter(n => n.id !== item.id)].slice(0, 50);
+        renderNotificationPanel();
+        showToast({ title: item.title, message: item.message, variant: 'info' });
+    }
+
+    function addNotification(payload) {
+        addBroadcastNotification(payload);
+    }
+
+    function renderNotificationPanel() {
+        const list = document.getElementById('notification-list');
+        if (!list) return;
+        list.innerHTML = notificationItems.length === 0
+            ? '<p class="text-muted small p-3 mb-0">No notifications yet.</p>'
+            : notificationItems.map(n => `
+                <div class="notification-item ${n.read ? '' : 'unread'}" data-id="${n.id}" data-persisted="${n.persisted ? '1' : '0'}"${n.actionUrl ? ` data-href="${n.actionUrl}"` : ''}>
+                    <strong class="d-block">${escapeHtml(n.title)}</strong>
+                    <span class="small text-muted">${escapeHtml(n.message)}</span>
+                </div>`).join('');
+        updateNotificationBadge(notificationItems);
+    }
+
+    async function markNotificationRead(id, persisted) {
+        if (persisted) {
+            await fetch(`/web-api/spa/notifications/${id}/read`, {
+                method: 'POST',
+                credentials: 'include'
+            }).catch(() => undefined);
+        }
+
+        notificationItems = notificationItems.map(n => n.id === id ? { ...n, read: true } : n);
+        renderNotificationPanel();
+    }
+
+    async function markAllNotificationsRead() {
+        await fetch('/web-api/spa/notifications/mark-all-read', {
+            method: 'POST',
+            credentials: 'include'
+        }).catch(() => undefined);
+        notificationItems = notificationItems.map(n => ({ ...n, read: true }));
+        renderNotificationPanel();
+    }
+
+    async function initNotifications() {
+        const serverItems = await fetchServerNotifications();
+        if (serverItems) {
+            notificationItems = serverItems;
+        }
+
+        renderNotificationPanel();
+        document.getElementById('notification-mark-read')?.addEventListener('click', () => {
+            void markAllNotificationsRead();
+        });
+        document.getElementById('notification-list')?.addEventListener('click', e => {
+            const item = e.target.closest('.notification-item');
+            if (!item) return;
+            const href = item.dataset.href;
+            void markNotificationRead(item.dataset.id, item.dataset.persisted === '1').then(() => {
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
+
+        if (typeof signalR !== 'undefined') {
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl('/hubs/notifications')
+                .withAutomaticReconnect()
+                .build();
+            connection.on('PlatformNotification', payload => {
+                addBroadcastNotification(payload);
+                showToast(payload);
+            });
+            connection.on('UserNotification', payload => {
+                addUserNotification(payload);
+            });
+            connection.start().catch(() => undefined);
+        }
+    }
 
     function initCommandPaletteKbd() {
         const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
@@ -65,81 +203,6 @@
                 }
             });
         });
-    }
-
-    function loadNotifications() {
-        try {
-            return JSON.parse(localStorage.getItem(STORAGE_NOTIFICATIONS) || '[]');
-        } catch {
-            return [];
-        }
-    }
-
-    function saveNotifications(items) {
-        localStorage.setItem(STORAGE_NOTIFICATIONS, JSON.stringify(items.slice(0, 50)));
-        updateNotificationBadge(items);
-    }
-
-    function updateNotificationBadge(items) {
-        const badge = document.getElementById('notification-badge');
-        if (!badge) return;
-        const unread = items.filter(n => !n.read).length;
-        badge.textContent = unread > 0 ? String(unread) : '';
-        badge.classList.toggle('d-none', unread === 0);
-    }
-
-    function addNotification(payload) {
-        const items = loadNotifications();
-        items.unshift({
-            id: crypto.randomUUID(),
-            title: payload.title ?? 'EnhancementHub',
-            message: payload.message ?? '',
-            read: false,
-            at: new Date().toISOString()
-        });
-        saveNotifications(items);
-        renderNotificationPanel();
-    }
-
-    function renderNotificationPanel() {
-        const list = document.getElementById('notification-list');
-        if (!list) return;
-        const items = loadNotifications();
-        list.innerHTML = items.length === 0
-            ? '<p class="text-muted small p-3 mb-0">No notifications yet.</p>'
-            : items.map(n => `
-                <div class="notification-item ${n.read ? '' : 'unread'}" data-id="${n.id}">
-                    <strong class="d-block">${escapeHtml(n.title)}</strong>
-                    <span class="small text-muted">${escapeHtml(n.message)}</span>
-                </div>`).join('');
-        updateNotificationBadge(items);
-    }
-
-    function initNotifications() {
-        renderNotificationPanel();
-        document.getElementById('notification-mark-read')?.addEventListener('click', () => {
-            saveNotifications(loadNotifications().map(n => ({ ...n, read: true })));
-            renderNotificationPanel();
-        });
-        document.getElementById('notification-list')?.addEventListener('click', e => {
-            const item = e.target.closest('.notification-item');
-            if (!item) return;
-            const id = item.dataset.id;
-            saveNotifications(loadNotifications().map(n => n.id === id ? { ...n, read: true } : n));
-            renderNotificationPanel();
-        });
-
-        if (typeof signalR !== 'undefined') {
-            const connection = new signalR.HubConnectionBuilder()
-                .withUrl('/hubs/notifications')
-                .withAutomaticReconnect()
-                .build();
-            connection.on('PlatformNotification', payload => {
-                addNotification(payload);
-                showToast(payload);
-            });
-            connection.start().catch(() => undefined);
-        }
     }
 
     function showToast(payload) {

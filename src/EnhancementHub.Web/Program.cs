@@ -35,6 +35,8 @@ try
     builder.Services.AddSignalR();
     builder.Services.RemoveAll<IRequestCollaborationNotifier>();
     builder.Services.AddScoped<IRequestCollaborationNotifier, RequestCollaborationNotifier>();
+    builder.Services.RemoveAll<IUserNotificationNotifier>();
+    builder.Services.AddScoped<IUserNotificationNotifier, SignalRUserNotificationNotifier>();
     builder.Services.AddScoped<SignalRNotificationPublisher>();
     builder.Services.AddScoped<INotificationPublisher>(sp => new CompositeNotificationPublisher(
         [

@@ -167,16 +167,16 @@ Migrate high-traffic Intelligence pages into `SpaShell.tsx` routes. Order by tra
 **Theme:** Close gaps vs HubSpot, Linear, Stripe Dashboard  
 **Complexity:** Medium–high · **User impact:** High · **Risk:** Low–medium
 
-### Phase 50 — Notification system
+### Phase 50 — Notification system (complete)
 
-| # | Task | Files / location | Acceptance criteria |
-|---|------|------------------|---------------------|
-| 50.1 | `Notification` domain entity + migration | `Domain/`, EF migration | Types: approval assigned, analysis complete, drift critical |
-| 50.2 | `INotificationService` + persistence | `Application/`, `Infrastructure/` | Create, mark read, list unread |
-| 50.3 | SignalR push to connected clients | Extend existing hub | Bell icon updates in real time |
-| 50.4 | Email provider abstraction | `IEmailSender` — SendGrid/Azure Communication | Configurable; disabled in dev |
-| 50.5 | Notification center UI | Top bar in `_AppTopBar.cshtml` or React `NotificationCenter.tsx` | List, mark read, link to entity |
-| 50.6 | User preferences | `/Admin/Settings` or account prefs | Opt out of email per category |
+| # | Task | Status |
+|---|------|--------|
+| 50.1 | `Notification` domain entity + migration | Done |
+| 50.2 | `INotificationService` + persistence | Done |
+| 50.3 | SignalR push to connected clients | Done |
+| 50.4 | Email provider abstraction (`IEmailSender`) | Done |
+| 50.5 | Notification center UI (top bar + BFF) | Done |
+| 50.6 | User preferences (`/Account/NotificationPreferences`) | Done |
 
 **Exit criteria:** Approver receives in-app + email when request enters `PendingApproval`.
 

@@ -13,6 +13,7 @@ public sealed class SchemaDriftDetectorService : ISchemaDriftDetector
 {
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly INotificationPublisher _notifications;
+    private readonly INotificationService _notificationService;
     private readonly ISystemIntelligenceFingerprintService _fingerprintService;
     private readonly SystemIntelligenceOptions _options;
     private readonly ILogger<SchemaDriftDetectorService> _logger;
@@ -20,12 +21,14 @@ public sealed class SchemaDriftDetectorService : ISchemaDriftDetector
     public SchemaDriftDetectorService(
         IEnhancementHubDbContext dbContext,
         INotificationPublisher notifications,
+        INotificationService notificationService,
         ISystemIntelligenceFingerprintService fingerprintService,
         IOptions<SystemIntelligenceOptions> options,
         ILogger<SchemaDriftDetectorService> logger)
     {
         _dbContext = dbContext;
         _notifications = notifications;
+        _notificationService = notificationService;
         _fingerprintService = fingerprintService;
         _options = options.Value;
         _logger = logger;
@@ -163,6 +166,17 @@ public sealed class SchemaDriftDetectorService : ISchemaDriftDetector
             $"Detected {findings.Count} drift finding(s).",
             new { databaseConnectionId, findingCount = findings.Count },
             cancellationToken);
+
+        var criticalCount = findings.Count(f => f.Severity == DriftSeverity.Critical);
+        if (criticalCount > 0)
+        {
+            await _notificationService.NotifyAdminsOfCriticalDriftAsync(
+                databaseConnectionId,
+                connection.Name,
+                criticalCount,
+                null,
+                cancellationToken);
+        }
 
         return new DriftReport
         {

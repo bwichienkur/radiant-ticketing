@@ -1,0 +1,53 @@
+@page
+@model EnhancementHub.Web.Pages.Account.NotificationPreferencesModel
+@using EnhancementHub.Domain.Enums
+@{
+    ViewData["Title"] = "Notification preferences";
+    ViewData["PageHeaderTitle"] = "Notification preferences";
+    ViewData["PageHeaderDescription"] = "Choose how you receive alerts for approvals, analysis, and schema drift.";
+}
+
+<header class="page-header">
+    <partial name="_PageHeader" />
+</header>
+
+@if (TempData["StatusMessage"] is string statusMessage)
+{
+    <div class="alert alert-success" role="status">@statusMessage</div>
+}
+
+<form method="post" class="card-panel">
+    <div class="table-responsive">
+        <table class="table table-hover table-enterprise mb-0">
+            <thead>
+                <tr>
+                    <th scope="col">Notification</th>
+                    <th scope="col" class="text-center">In-app</th>
+                    <th scope="col" class="text-center">Email</th>
+                </tr>
+            </thead>
+            <tbody>
+            @for (var i = 0; i < Model.PreferenceInputs.Count; i++)
+            {
+                var preference = Model.Preferences[i];
+                <tr>
+                    <td>
+                        <input type="hidden" asp-for="PreferenceInputs[i].Type" />
+                        <strong>@preference.Label</strong>
+                    </td>
+                    <td class="text-center">
+                        <input class="form-check-input" type="checkbox" asp-for="PreferenceInputs[i].InAppEnabled" />
+                    </td>
+                    <td class="text-center">
+                        <input class="form-check-input" type="checkbox" asp-for="PreferenceInputs[i].EmailEnabled" />
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+    <div class="card-panel-footer border-top px-3 py-3">
+        <button type="submit" class="btn btn-primary">Save preferences</button>
+        <a asp-page="/Index" class="btn btn-outline-secondary ms-2">Back to dashboard</a>
+    </div>
+</form>

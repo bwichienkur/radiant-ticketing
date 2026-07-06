@@ -29,6 +29,7 @@ public sealed class AiAnalysisJobExecutor
         var aiService = scope.ServiceProvider.GetRequiredService<IAiAnalysisService>();
         var riskScoring = scope.ServiceProvider.GetRequiredService<IRiskScoringService>();
         var audit = scope.ServiceProvider.GetRequiredService<IAuditService>();
+        var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
 
         var pending = await dbContext.EnhancementRequests
             .Include(r => r.TargetApplication)
@@ -40,7 +41,7 @@ public sealed class AiAnalysisJobExecutor
 
         foreach (var request in pending)
         {
-            await ProcessRequestAsync(dbContext, aiService, riskScoring, audit, request, cancellationToken);
+            await ProcessRequestAsync(dbContext, aiService, riskScoring, audit, notificationService, request, cancellationToken);
         }
     }
 
@@ -49,6 +50,7 @@ public sealed class AiAnalysisJobExecutor
         IAiAnalysisService aiService,
         IRiskScoringService riskScoring,
         IAuditService audit,
+        INotificationService notificationService,
         EnhancementRequest request,
         CancellationToken cancellationToken)
     {
@@ -155,6 +157,25 @@ public sealed class AiAnalysisJobExecutor
                 nameof(EnhancementRequest),
                 request.Id,
                 result.Summary,
+                cancellationToken);
+
+            var submitterTenantId = await dbContext.Users
+                .AsNoTracking()
+                .Where(u => u.Id == request.SubmittedByUserId)
+                .Select(u => u.TenantId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            await notificationService.NotifyApproversOfPendingApprovalAsync(
+                request.Id,
+                request.Title,
+                submitterTenantId,
+                cancellationToken);
+
+            await notificationService.NotifySubmitterOfAnalysisCompleteAsync(
+                request.SubmittedByUserId,
+                request.Id,
+                request.Title,
+                submitterTenantId,
                 cancellationToken);
         }
         catch (Exception ex)

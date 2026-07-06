@@ -22,4 +22,6 @@ public class User : BaseEntity
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     public ICollection<ExternalTicket> CreatedExternalTickets { get; set; } = new List<ExternalTicket>();
     public ICollection<AuditLog> AuditLogs { get; set; } = new List<AuditLog>();
+    public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+    public ICollection<NotificationPreference> NotificationPreferences { get; set; } = new List<NotificationPreference>();
 }
