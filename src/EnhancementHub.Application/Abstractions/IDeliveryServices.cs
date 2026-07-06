@@ -12,6 +12,8 @@ public sealed record GitHubPullRequestResult(
     bool IsSimulation,
     string? ErrorMessage);
 
+public sealed record GitHubFileUpsertResult(bool Succeeded, string? CommitSha, bool IsSimulation, string? ErrorMessage);
+
 public interface IGitHubAppRepositoryService
 {
     bool IsConfigured { get; }
@@ -24,6 +26,16 @@ public interface IGitHubAppRepositoryService
         string title,
         string body,
         string implementationMarkdown,
+        long? installationId = null,
+        CancellationToken cancellationToken = default);
+
+    Task<GitHubFileUpsertResult> UpsertBranchFileAsync(
+        string owner,
+        string repository,
+        string branch,
+        string path,
+        string content,
+        string commitMessage,
         long? installationId = null,
         CancellationToken cancellationToken = default);
 }
@@ -122,14 +134,46 @@ public sealed record QaEvidenceResult(
 
 public interface ITestCaseCatalogService
 {
+    Task EnsureDraftCasesForRequestAsync(Guid enhancementRequestId, CancellationToken cancellationToken = default);
+
     Task<QaRunManifest> PrepareQaRunAsync(
         EnhancementDeliveryRun run,
+        CancellationToken cancellationToken = default);
+
+    Task<QaRunManifest> PrepareRegressionManifestAsync(
+        Guid applicationId,
+        string testUrl,
         CancellationToken cancellationToken = default);
 
     Task PromotePassedCasesToRegressionAsync(
         Guid enhancementRequestId,
         Guid deliveryRunId,
         CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<TestCaseExportItem>> GetExportableCasesForRequestAsync(
+        Guid enhancementRequestId,
+        CancellationToken cancellationToken = default);
+}
+
+public sealed record TestCaseExportItem(
+    Guid TestCaseId,
+    string Title,
+    string StepsJson,
+    string SuggestedRepositoryPath);
+
+public interface ITestCaseRepoExporter
+{
+    Task ExportRequestCasesToBranchAsync(
+        Guid enhancementRequestId,
+        string owner,
+        string repository,
+        string branch,
+        CancellationToken cancellationToken = default);
+}
+
+public interface INightlyRegressionService
+{
+    Task RunScheduledRegressionAsync(CancellationToken cancellationToken = default);
 }
 
 public interface IQaRunner

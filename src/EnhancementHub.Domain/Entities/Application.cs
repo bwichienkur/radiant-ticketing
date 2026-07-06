@@ -27,4 +27,5 @@ public class Application : BaseEntity
     public ICollection<OnPremAgent> OnPremAgents { get; set; } = new List<OnPremAgent>();
     public ApplicationDeliveryProfile? DeliveryProfile { get; set; }
     public ICollection<ApplicationTestSuite> TestSuites { get; set; } = new List<ApplicationTestSuite>();
+    public ICollection<ApplicationRegressionRun> RegressionRuns { get; set; } = new List<ApplicationRegressionRun>();
 }

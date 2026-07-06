@@ -76,6 +76,7 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<TestCase> TestCases => Set<TestCase>();
     public DbSet<TestCaseVersion> TestCaseVersions => Set<TestCaseVersion>();
     public DbSet<DeliveryRunTestResult> DeliveryRunTestResults => Set<DeliveryRunTestResult>();
+    public DbSet<ApplicationRegressionRun> ApplicationRegressionRuns => Set<ApplicationRegressionRun>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

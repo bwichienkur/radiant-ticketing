@@ -12,6 +12,97 @@ public sealed class TestCaseCatalogService : ITestCaseCatalogService
 
     public TestCaseCatalogService(IEnhancementHubDbContext dbContext) => _dbContext = dbContext;
 
+    public async Task EnsureDraftCasesForRequestAsync(
+        Guid enhancementRequestId,
+        CancellationToken cancellationToken = default)
+    {
+        var request = await _dbContext.EnhancementRequests
+            .Include(r => r.Analyses)
+            .FirstOrDefaultAsync(r => r.Id == enhancementRequestId, cancellationToken)
+            ?? throw new InvalidOperationException("Request not found.");
+
+        if (!request.TargetApplicationId.HasValue)
+        {
+            return;
+        }
+
+        var suite = await EnsureRegressionSuiteAsync(request.TargetApplicationId.Value, cancellationToken);
+        var analysis = request.Analyses.OrderByDescending(a => a.Version).FirstOrDefault();
+        await SyncDraftCasesFromAnalysisAsync(suite, request, analysis, cancellationToken);
+    }
+
+    public async Task<QaRunManifest> PrepareRegressionManifestAsync(
+        Guid applicationId,
+        string testUrl,
+        CancellationToken cancellationToken = default)
+    {
+        var suite = await EnsureRegressionSuiteAsync(applicationId, cancellationToken);
+        var casesToRun = await _dbContext.TestCases
+            .Where(c => c.TestSuiteId == suite.Id && c.Status == TestCaseStatus.Active)
+            .OrderBy(c => c.SortOrder)
+            .ThenBy(c => c.Title)
+            .ToListAsync(cancellationToken);
+
+        var manifestCases = new List<QaManifestCase>();
+        foreach (var testCase in casesToRun)
+        {
+            var version = await SnapshotVersionAsync(testCase, cancellationToken);
+            manifestCases.Add(new QaManifestCase(
+                testCase.Id,
+                version.Id,
+                version.Title,
+                true,
+                TestCasePlanParser.DeserializeSteps(version.StepsJson)));
+        }
+
+        return new QaRunManifest(
+            Guid.Empty,
+            Guid.Empty,
+            applicationId,
+            testUrl,
+            "Nightly regression",
+            manifestCases);
+    }
+
+    public async Task<IReadOnlyList<TestCaseExportItem>> GetExportableCasesForRequestAsync(
+        Guid enhancementRequestId,
+        CancellationToken cancellationToken = default)
+    {
+        var request = await _dbContext.EnhancementRequests
+            .AsNoTracking()
+            .FirstOrDefaultAsync(r => r.Id == enhancementRequestId, cancellationToken);
+
+        if (request?.TargetApplicationId is null)
+        {
+            return [];
+        }
+
+        var suite = await _dbContext.ApplicationTestSuites
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                s => s.ApplicationId == request.TargetApplicationId && s.IsDefaultRegression,
+                cancellationToken);
+
+        if (suite is null)
+        {
+            return [];
+        }
+
+        var cases = await _dbContext.TestCases
+            .AsNoTracking()
+            .Where(c => c.TestSuiteId == suite.Id && c.SourceEnhancementRequestId == enhancementRequestId)
+            .OrderBy(c => c.SortOrder)
+            .ToListAsync(cancellationToken);
+
+        return cases
+            .Select(c => new TestCaseExportItem(
+                c.Id,
+                c.Title,
+                c.StepsJson,
+                PlaywrightSpecGenerator.SuggestRepositoryPath(enhancementRequestId, c.Title)))
+            .ToList();
+    }
+
     public async Task<QaRunManifest> PrepareQaRunAsync(
         EnhancementDeliveryRun run,
         CancellationToken cancellationToken = default)

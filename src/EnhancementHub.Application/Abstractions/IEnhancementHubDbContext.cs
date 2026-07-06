@@ -65,6 +65,7 @@ public interface IEnhancementHubDbContext
     DbSet<TestCase> TestCases { get; }
     DbSet<TestCaseVersion> TestCaseVersions { get; }
     DbSet<DeliveryRunTestResult> DeliveryRunTestResults { get; }
+    DbSet<ApplicationRegressionRun> ApplicationRegressionRuns { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

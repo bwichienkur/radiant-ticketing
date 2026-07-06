@@ -219,6 +219,18 @@ Regression test cases are stored per application and executed as part of each de
 | Method | Route |
 |--------|-------|
 | GET | `/web-api/spa/delivery/applications/{applicationId}/test-suite` |
+| GET | `/web-api/spa/delivery/applications/{applicationId}/regression-runs` |
+
+### QA runners
+
+| Runner | Config | Behavior |
+|--------|--------|----------|
+| `PlaywrightQaRunner` (default) | `Delivery:Qa:Runner=Playwright` | HTTP validation against `testUrl`; optional browser when `Delivery:Qa:PlaywrightBrowserEnabled=true` |
+| `SimulatedQaRunner` | `Delivery:Qa:Runner=Simulated` | Always simulated artifacts |
+
+On PR creation, draft test cases export to `tests/e2e/eh-{requestId}.spec.ts` on the feature branch.
+
+Nightly Hangfire job `nightly-regression` (03:00 UTC) runs active regression cases per application against the tenant Test environment URL.
 
 ## Related docs
 

@@ -115,6 +115,12 @@ public sealed class SpaDeliveryController : ControllerBase
         CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new GetApplicationTestSuiteQuery(applicationId), cancellationToken));
 
+    [HttpGet("applications/{applicationId:guid}/regression-runs")]
+    public async Task<IActionResult> GetApplicationRegressionRuns(
+        Guid applicationId,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetApplicationRegressionRunsQuery(applicationId), cancellationToken));
+
     [HttpGet("requests/{requestId:guid}/run")]
     public async Task<IActionResult> GetDeliveryRun(Guid requestId, CancellationToken cancellationToken)
     {

@@ -16,6 +16,7 @@ public sealed class DeliveryOrchestrationService : IDeliveryOrchestrationService
     private readonly IDeploymentConfigBundleBuilder _configBundleBuilder;
     private readonly IDeploymentAdapterFactory _adapterFactory;
     private readonly ITestCaseCatalogService _testCaseCatalog;
+    private readonly ITestCaseRepoExporter _testCaseRepoExporter;
     private readonly IQaRunner _qaRunner;
     private readonly IChangeWindowEvaluator _changeWindowEvaluator;
     private readonly IAuditService _auditService;
@@ -28,6 +29,7 @@ public sealed class DeliveryOrchestrationService : IDeliveryOrchestrationService
         IDeploymentConfigBundleBuilder configBundleBuilder,
         IDeploymentAdapterFactory adapterFactory,
         ITestCaseCatalogService testCaseCatalog,
+        ITestCaseRepoExporter testCaseRepoExporter,
         IQaRunner qaRunner,
         IChangeWindowEvaluator changeWindowEvaluator,
         IAuditService auditService,
@@ -39,6 +41,7 @@ public sealed class DeliveryOrchestrationService : IDeliveryOrchestrationService
         _configBundleBuilder = configBundleBuilder;
         _adapterFactory = adapterFactory;
         _testCaseCatalog = testCaseCatalog;
+        _testCaseRepoExporter = testCaseRepoExporter;
         _qaRunner = qaRunner;
         _changeWindowEvaluator = changeWindowEvaluator;
         _auditService = auditService;
@@ -230,6 +233,8 @@ public sealed class DeliveryOrchestrationService : IDeliveryOrchestrationService
         var analysis = run.EnhancementRequest.Analyses.OrderByDescending(a => a.Version).FirstOrDefault();
         var implementationBody = BuildImplementationMarkdown(run.EnhancementRequest, analysis);
 
+        await _testCaseCatalog.EnsureDraftCasesForRequestAsync(run.EnhancementRequestId, cancellationToken);
+
         var (owner, repo) = RepositoryCoordinates.Resolve(
             context.Repository.Url,
             context.Repository.Name,
@@ -248,6 +253,26 @@ public sealed class DeliveryOrchestrationService : IDeliveryOrchestrationService
         if (!pr.Succeeded)
         {
             throw new InvalidOperationException(pr.ErrorMessage ?? "Failed to create pull request.");
+        }
+
+        if (!string.IsNullOrWhiteSpace(pr.BranchName))
+        {
+            try
+            {
+                await _testCaseRepoExporter.ExportRequestCasesToBranchAsync(
+                    run.EnhancementRequestId,
+                    owner,
+                    repo,
+                    pr.BranchName,
+                    cancellationToken);
+                run.TimelineJson = DeliveryTimeline.AppendEvent(
+                    run.TimelineJson,
+                    "Playwright test specs exported to branch.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to export Playwright specs for request {RequestId}", run.EnhancementRequestId);
+            }
         }
 
         run.BranchName = pr.BranchName;

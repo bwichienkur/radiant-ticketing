@@ -83,3 +83,20 @@ public class DeliveryRunTestResultConfiguration : IEntityTypeConfiguration<Deliv
             .OnDelete(DeleteBehavior.Restrict);
     }
 }
+
+public class ApplicationRegressionRunConfiguration : IEntityTypeConfiguration<ApplicationRegressionRun>
+{
+    public void Configure(EntityTypeBuilder<ApplicationRegressionRun> builder)
+    {
+        builder.ToTable("ApplicationRegressionRuns");
+        builder.HasKey(x => x.Id);
+        builder.HasIndex(x => new { x.ApplicationId, x.CreatedAt });
+        builder.Property(x => x.TestUrl).HasMaxLength(1000).IsRequired();
+        builder.Property(x => x.ReportStoragePath).HasMaxLength(1000);
+        builder.Property(x => x.ResultsJson).HasColumnType("TEXT");
+        builder.HasOne(x => x.Application)
+            .WithMany(a => a.RegressionRuns)
+            .HasForeignKey(x => x.ApplicationId)
+            .OnDelete(DeleteBehavior.Cascade);
+    }
+}

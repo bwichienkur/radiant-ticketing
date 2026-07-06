@@ -150,6 +150,10 @@ public sealed class DeliveryOrchestrationTests : IDisposable
             }).Build());
 
         var testCaseCatalog = new TestCaseCatalogService(_dbContext);
+        var testCaseRepoExporter = new TestCaseRepoExporter(
+            testCaseCatalog,
+            gitHubRepo.Object,
+            NullLogger<TestCaseRepoExporter>.Instance);
         var qaRunner = new SimulatedQaRunner(fileStorage);
         var changeWindow = new ChangeWindowEvaluator();
         var audit = new AuditService(_dbContext, Mock.Of<ICurrentUserService>());
@@ -161,6 +165,7 @@ public sealed class DeliveryOrchestrationTests : IDisposable
             configBuilder,
             adapterFactory,
             testCaseCatalog,
+            testCaseRepoExporter,
             qaRunner,
             changeWindow,
             audit,

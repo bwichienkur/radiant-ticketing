@@ -93,6 +93,44 @@ public sealed class GitHubAppRepositoryService : IGitHubAppRepositoryService
         }
     }
 
+    public async Task<GitHubFileUpsertResult> UpsertBranchFileAsync(
+        string owner,
+        string repository,
+        string branch,
+        string path,
+        string content,
+        string commitMessage,
+        long? installationId = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (!IsConfigured || !_defaultInstallationId.HasValue)
+        {
+            return new GitHubFileUpsertResult(true, Guid.NewGuid().ToString("N")[..12], true, null);
+        }
+
+        try
+        {
+            var token = await _gitHubApp.GetInstallationAccessTokenAsync(
+                installationId ?? _defaultInstallationId.Value,
+                cancellationToken);
+            var commitSha = await UpsertFileAsync(
+                owner,
+                repository,
+                branch,
+                path,
+                content,
+                commitMessage,
+                token,
+                cancellationToken);
+            return new GitHubFileUpsertResult(true, commitSha, false, null);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "GitHub file upsert failed for {Owner}/{Repo}/{Path}", owner, repository, path);
+            return new GitHubFileUpsertResult(false, null, true, ex.Message);
+        }
+    }
+
     private GitHubPullRequestResult Simulate(string owner, string repository, string branchName, string title)
     {
         var number = Random.Shared.Next(100, 999);
