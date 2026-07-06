@@ -83,6 +83,51 @@ export interface ApplicationListItem {
   repositoryCount: number;
 }
 
+export interface ApplicationDetailItem {
+  id: string;
+  name: string;
+  businessDomain?: string;
+  purpose?: string;
+  description?: string;
+  ownerTeamId: string;
+  riskSensitiveAreas?: string;
+  repositoryCount: number;
+}
+
+export interface ApplicationProfile {
+  id: string;
+  applicationId: string;
+  repositoryId: string;
+  purpose?: string;
+  businessDomain?: string;
+  keyComponents?: string;
+  databaseUsage?: string;
+  externalIntegrations?: string;
+  internalDependencies?: string;
+  deploymentNotes?: string;
+  riskSensitiveAreas?: string;
+  ownershipMetadata?: string;
+  generatedAt: string;
+}
+
+export interface ApplicationDetailResponse {
+  application: ApplicationDetailItem;
+  profiles: ApplicationProfile[];
+}
+
+export interface NotificationPreference {
+  type: number;
+  label: string;
+  emailEnabled: boolean;
+  inAppEnabled: boolean;
+}
+
+export interface UpdateNotificationPreferenceInput {
+  type: number;
+  emailEnabled: boolean;
+  inAppEnabled: boolean;
+}
+
 export interface DatabaseConnectionSummary {
   id: string;
   applicationId: string;

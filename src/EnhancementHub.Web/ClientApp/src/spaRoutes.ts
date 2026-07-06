@@ -20,6 +20,7 @@ export const SPA_PREFIXES = [
   '/Spa/Settings',
   '/Spa/Insights',
   '/Spa/PortfolioHealth',
+  '/Spa/Account/Notifications',
 ];
 
 export function isSpaPath(pathname: string): boolean {

@@ -55,7 +55,11 @@ export function ApplicationsApp() {
             {
               id: 'name',
               header: 'Name',
-              cell: (app) => <strong>{app.name}</strong>,
+              cell: (app) => (
+                <SpaLink href={`/Spa/Applications/${app.id}`} className="text-decoration-none">
+                  <strong>{app.name}</strong>
+                </SpaLink>
+              ),
             },
             {
               id: 'domain',
@@ -71,16 +75,25 @@ export function ApplicationsApp() {
               id: 'actions',
               header: '',
               cell: (app) => (
-                <SpaLink href={`/Spa/SystemMap?ApplicationId=${app.id}`} className="btn btn-sm btn-outline-primary">
-                  System map
-                </SpaLink>
+                <div className="d-flex flex-wrap gap-2 justify-content-end">
+                  <SpaLink href={`/Spa/Applications/${app.id}`} className="btn btn-sm btn-outline-secondary">
+                    Details
+                  </SpaLink>
+                  <SpaLink href={`/Spa/SystemMap?ApplicationId=${app.id}`} className="btn btn-sm btn-outline-primary">
+                    System map
+                  </SpaLink>
+                </div>
               ),
               cellClassName: 'text-end',
             },
           ]}
           renderMobileCard={(app) => (
             <>
-              <div className="mobile-data-card-title">{app.name}</div>
+              <div className="mobile-data-card-title">
+                <SpaLink href={`/Spa/Applications/${app.id}`} className="text-decoration-none">
+                  {app.name}
+                </SpaLink>
+              </div>
               <div className="mobile-data-card-row">
                 <span className="mobile-data-card-label">Domain</span>
                 <span>{app.businessDomain ?? '—'}</span>
@@ -90,6 +103,9 @@ export function ApplicationsApp() {
                 <span>{app.repositoryCount}</span>
               </div>
               <div className="mobile-data-card-actions">
+                <SpaLink href={`/Spa/Applications/${app.id}`} className="btn btn-sm btn-outline-secondary">
+                  Details
+                </SpaLink>
                 <SpaLink href={`/Spa/SystemMap?ApplicationId=${app.id}`} className="btn btn-sm btn-outline-primary">
                   System map
                 </SpaLink>

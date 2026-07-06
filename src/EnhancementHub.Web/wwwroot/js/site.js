@@ -655,7 +655,7 @@
         /*
          * SPA vs full-page navigation (Phase 48):
          * - Client-side (no reload): /, /Index, /Spa/*
-         * - Full Razor page load: /Applications/Details, /Admin/*
+         * - Full Razor page load: /Admin/*
          * Intelligence list pages (Applications, Drift, Repositories, Audit, Databases, Docs, Refactor) are in the SPA shell.
          */
         const spaExact = new Set(['/', '/Index']);
@@ -678,6 +678,7 @@
             '/Spa/Settings',
             '/Spa/Insights',
             '/Spa/PortfolioHealth',
+            '/Spa/Account/Notifications',
         ];
 
         function isSpaPath(pathname) {

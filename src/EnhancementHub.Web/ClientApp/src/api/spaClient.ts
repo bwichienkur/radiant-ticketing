@@ -1,7 +1,10 @@
 import type {
   AiBudgetStatus,
   AnalysisComparison,
+  ApplicationDetailResponse,
   ApplicationListItem,
+  NotificationPreference,
+  UpdateNotificationPreferenceInput,
   ApprovalRecommendation,
   IntakeQualityScore,
   AuditLogEntry,
@@ -127,6 +130,20 @@ export async function postRequestComment(
 
 export async function listApplications(): Promise<ApplicationListItem[]> {
   return fetchJson<ApplicationListItem[]>('/web-api/spa/applications');
+}
+
+export async function getApplicationDetail(applicationId: string): Promise<ApplicationDetailResponse> {
+  return fetchJson<ApplicationDetailResponse>(`/web-api/spa/applications/${applicationId}`);
+}
+
+export async function getNotificationPreferences(): Promise<NotificationPreference[]> {
+  return fetchJson<NotificationPreference[]>('/web-api/spa/notifications/preferences');
+}
+
+export async function updateNotificationPreferences(
+  preferences: UpdateNotificationPreferenceInput[],
+): Promise<NotificationPreference[]> {
+  return putJson<NotificationPreference[]>('/web-api/spa/notifications/preferences', preferences);
 }
 
 export async function listDatabaseConnections(): Promise<DatabaseConnectionSummary[]> {

@@ -17,6 +17,8 @@ import { ApprovalQueueApp } from '../apps/ApprovalQueueApp';
 import { OnboardingWizardApp } from '../apps/OnboardingWizardApp';
 import { SystemMapApp } from '../apps/SystemMapApp';
 import { ApplicationsApp } from '../apps/ApplicationsApp';
+import { ApplicationDetailApp } from '../apps/ApplicationDetailApp';
+import { NotificationPreferencesApp } from '../apps/NotificationPreferencesApp';
 import { SchemaDriftApp } from '../apps/SchemaDriftApp';
 import { RepositoriesApp } from '../apps/RepositoriesApp';
 import { AuditApp } from '../apps/AuditApp';
@@ -81,6 +83,15 @@ function SystemMapRoute() {
   const [search] = useSearchParams();
   const applicationId = search.get('ApplicationId') ?? search.get('applicationId') ?? undefined;
   return <SystemMapApp initialApplicationId={applicationId ?? undefined} />;
+}
+
+function ApplicationDetailRoute() {
+  const { id } = useParams<{ id: string }>();
+  if (!id) {
+    return <Navigate to="/Spa/Applications" replace />;
+  }
+
+  return <ApplicationDetailApp applicationId={id} />;
 }
 
 function DatabaseConnectionDetailRoute() {
@@ -177,6 +188,8 @@ export function SpaShell() {
         <Route path="/Spa/OnboardingWizard/:sessionId" element={<OnboardingWizardRoute />} />
         <Route path="/Spa/SystemMap" element={<SystemMapRoute />} />
         <Route path="/Spa/Applications" element={<ApplicationsApp />} />
+        <Route path="/Spa/Applications/:id" element={<ApplicationDetailRoute />} />
+        <Route path="/Spa/Account/Notifications" element={<NotificationPreferencesApp />} />
         <Route path="/Spa/SchemaDrift" element={<SchemaDriftApp />} />
         <Route path="/Spa/Repositories" element={<RepositoriesApp />} />
         <Route path="/Spa/Audit" element={<AuditApp />} />

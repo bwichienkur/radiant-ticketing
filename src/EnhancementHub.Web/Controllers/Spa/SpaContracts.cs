@@ -5,6 +5,10 @@ using EnhancementHub.Domain.Enums;
 
 namespace EnhancementHub.Web.Controllers.Spa;
 
+public sealed record SpaApplicationDetailResponse(
+    ApplicationDto Application,
+    IReadOnlyList<ApplicationProfileDto> Profiles);
+
 public sealed record SpaApprovalActionRequest(ApprovalActionType ActionType, string? Comments);
 
 public sealed record SpaBulkApprovalActionRequest(
