@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnhancementHub.Tests", "tes
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnhancementHub.Agent", "src\EnhancementHub.Agent\EnhancementHub.Agent.csproj", "{FCF22719-B897-4CF2-9AD2-C127F93E1D6A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EnhancementHub.LoadTestSeeder", "tests\EnhancementHub.LoadTestSeeder\EnhancementHub.LoadTestSeeder.csproj", "{A3C5CF88-E68E-4A07-8D98-483482CE58BA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -64,6 +66,10 @@ Global
 		{FCF22719-B897-4CF2-9AD2-C127F93E1D6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FCF22719-B897-4CF2-9AD2-C127F93E1D6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FCF22719-B897-4CF2-9AD2-C127F93E1D6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3C5CF88-E68E-4A07-8D98-483482CE58BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3C5CF88-E68E-4A07-8D98-483482CE58BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3C5CF88-E68E-4A07-8D98-483482CE58BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3C5CF88-E68E-4A07-8D98-483482CE58BA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{809BF151-C499-429A-9FD6-621602FAC391} = {395CBED9-A14D-4D8A-9C29-B5FF1146868F}
@@ -74,5 +80,6 @@ Global
 		{AAC67910-29CD-4785-9B33-FCAA9FC99D23} = {395CBED9-A14D-4D8A-9C29-B5FF1146868F}
 		{57F6588D-97EB-4EEB-BAA3-DC59420AD9CA} = {3247F3FD-AB06-40CE-99DE-2E5070C8F522}
 		{FCF22719-B897-4CF2-9AD2-C127F93E1D6A} = {395CBED9-A14D-4D8A-9C29-B5FF1146868F}
+		{A3C5CF88-E68E-4A07-8D98-483482CE58BA} = {3247F3FD-AB06-40CE-99DE-2E5070C8F522}
 	EndGlobalSection
 EndGlobal

@@ -41,7 +41,7 @@ export default function (data) {
   const health = http.get(`${baseUrl}/health/ready`);
   check(health, { 'health ok': (r) => r.status === 200 });
 
-  const requests = http.get(`${baseUrl}/api/v1/EnhancementRequests`, { headers });
+  const requests = http.get(`${baseUrl}/api/v1/EnhancementRequests?page=1&pageSize=25`, { headers });
   check(requests, {
     'v1 requests reachable': (r) => r.status === 200,
   });

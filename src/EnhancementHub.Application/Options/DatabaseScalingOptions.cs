@@ -4,7 +4,7 @@ public sealed class DatabaseScalingOptions
 {
     public const string SectionName = "DatabaseScaling";
 
-    public int MaxPoolSize { get; set; } = 100;
+    public int MaxPoolSize { get; set; } = 150;
 
     public int MinPoolSize { get; set; } = 0;
 

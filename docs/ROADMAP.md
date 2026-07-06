@@ -138,7 +138,7 @@ Horizon 4 — Grow (6–12 months)   Market expansion & defensibility
 - [x] Reference HA architecture: 2+ API, 2+ Worker, Postgres HA, S3, Qdrant
 - [x] Kubernetes Helm chart or Terraform module
 
-**Exit criteria:** Load test: 200 repos, 500 concurrent users, 50 AI analyses/hour without job duplication or data loss.
+**Exit criteria:** Load test **proven** — see [LOAD_TEST_RESULTS.md](LOAD_TEST_RESULTS.md). Target: 200 repos, 500 concurrent users, 50 AI analyses/hour without job duplication or data loss.
 
 ---
 

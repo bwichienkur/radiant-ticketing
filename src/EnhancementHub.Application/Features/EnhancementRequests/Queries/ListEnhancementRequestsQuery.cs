@@ -120,18 +120,22 @@ public sealed class ListEnhancementRequestsQueryHandler
         var pageSize = request.PageSize;
 
         IQueryable<RequestProjection> pageQuery = projected;
-        if (pageSize > 0)
+        if (request.Ids is { Count: > 0 })
         {
-            pageSize = Math.Clamp(pageSize, 1, 200);
-            pageQuery = projected
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize);
+            pageSize = Math.Clamp(request.Ids.Count, 1, 500);
+        }
+        else if (pageSize <= 0)
+        {
+            pageSize = 25;
         }
         else
         {
-            page = 1;
-            pageSize = totalCount;
+            pageSize = Math.Clamp(pageSize, 1, 200);
         }
+
+        pageQuery = projected
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize);
 
         var rows = await pageQuery.ToListAsync(cancellationToken);
         if (rows.Count == 0)

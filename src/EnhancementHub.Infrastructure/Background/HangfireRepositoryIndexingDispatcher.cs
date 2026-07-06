@@ -13,7 +13,8 @@ public sealed class HangfireRepositoryIndexingDispatcher
 
     public Task DispatchAsync(IReadOnlyList<Guid> repositoryIds, CancellationToken cancellationToken = default)
     {
-        foreach (var repositoryId in repositoryIds)
+        var distinctIds = repositoryIds.Distinct().ToList();
+        foreach (var repositoryId in distinctIds)
         {
             cancellationToken.ThrowIfCancellationRequested();
             BackgroundJob.Enqueue<RepositoryIndexingJobExecutor>(

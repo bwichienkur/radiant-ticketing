@@ -23,7 +23,8 @@ public sealed class SpaApprovalsController : ControllerBase
         var result = await _mediator.Send(
             new ListEnhancementRequestsQuery(
                 EnhancementRequestStatus.PendingApproval,
-                Sort: EnhancementRequestSort.HighestRisk),
+                Sort: EnhancementRequestSort.HighestRisk,
+                PageSize: 200),
             cancellationToken);
 
         return Ok(result.Items);

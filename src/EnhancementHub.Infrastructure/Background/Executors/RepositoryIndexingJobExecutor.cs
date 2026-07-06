@@ -56,6 +56,7 @@ public sealed class RepositoryIndexingJobExecutor
     }
 
     [Queue("indexing")]
+    [DisableConcurrentExecution(timeoutInSeconds: 3600)]
     public async Task IndexSingleRepositoryAsync(Guid repositoryId, CancellationToken cancellationToken = default)
     {
         using var scope = _scopeFactory.CreateScope();

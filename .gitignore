@@ -30,3 +30,4 @@ coverage/
 
 # Node (legacy)
 node_modules/
+artifacts/
