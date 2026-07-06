@@ -23,4 +23,6 @@ public class Tenant : BaseEntity
     public ICollection<User> Users { get; set; } = new List<User>();
     public ICollection<Team> Teams { get; set; } = new List<Team>();
     public ICollection<TenantUsageSnapshot> UsageSnapshots { get; set; } = new List<TenantUsageSnapshot>();
+    public TenantDeliveryProfile? DeliveryProfile { get; set; }
+    public ICollection<TenantDeploymentEnvironment> DeploymentEnvironments { get; set; } = new List<TenantDeploymentEnvironment>();
 }
