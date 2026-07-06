@@ -4,9 +4,10 @@ import { SpUiRoot } from '../components/SpUiRoot';
 
 const mount = document.getElementById('spa-request-list-root');
 if (mount) {
+  const isApprover = mount.dataset.isApprover === 'true';
   createRoot(mount).render(
     <SpUiRoot>
-      <RequestListApp />
+      <RequestListApp isApprover={isApprover} />
     </SpUiRoot>,
   );
 }

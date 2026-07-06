@@ -105,6 +105,30 @@ export async function submitApprovalAction(
   await postJson(`/web-api/spa/approvals/${requestId}/action`, { actionType, comments });
 }
 
+export interface BulkApprovalItemResult {
+  requestId: string;
+  success: boolean;
+  errorMessage?: string;
+}
+
+export interface BulkApprovalActionResult {
+  succeededCount: number;
+  failedCount: number;
+  results: BulkApprovalItemResult[];
+}
+
+export async function bulkSubmitApprovalActions(
+  requestIds: string[],
+  actionType: 'Approve' | 'Reject',
+  comments?: string,
+): Promise<BulkApprovalActionResult> {
+  return postJson<BulkApprovalActionResult>('/web-api/spa/approvals/bulk-action', {
+    requestIds,
+    actionType,
+    comments,
+  });
+}
+
 export async function startOnboardingSession(): Promise<OnboardingSession> {
   return postJson<OnboardingSession>('/web-api/spa/onboarding/start');
 }

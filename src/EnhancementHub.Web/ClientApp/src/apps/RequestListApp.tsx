@@ -1,6 +1,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { exportEnhancementRequests, listEnhancementRequests } from '../api/spaClient';
+import { exportEnhancementRequests, bulkSubmitApprovalActions, listEnhancementRequests } from '../api/spaClient';
 import {
+  ConfirmDialog,
   EmptyState,
   ErrorState,
   ListToolbar,
@@ -92,7 +93,11 @@ function buildFilterSummary(filters: ListFilters): string | undefined {
 
 const DEFAULT_PAGE_SIZE = 25;
 
-export function RequestListApp() {
+interface RequestListAppProps {
+  isApprover?: boolean;
+}
+
+export function RequestListApp({ isApprover = false }: RequestListAppProps) {
   const toast = useToast();
   const [filters, setFilters] = useState<ListFilters>(readFiltersFromUrl);
   const [draftFilters, setDraftFilters] = useState<ListFilters>(readFiltersFromUrl);
@@ -100,10 +105,13 @@ export function RequestListApp() {
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
+  const [bulkApproving, setBulkApproving] = useState(false);
+  const [showBulkApproveConfirm, setShowBulkApproveConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [selectedMeta, setSelectedMeta] = useState<Map<string, string>>(() => new Map());
 
   const loadRequests = useCallback(
     async (activeFilters: ListFilters, activePage: number, activePageSize: number) => {
@@ -121,6 +129,15 @@ export function RequestListApp() {
         });
         setRequests(result.items);
         setTotalCount(result.totalCount);
+        setSelectedMeta((prev) => {
+          const next = new Map(prev);
+          result.items.forEach((item) => {
+            if (next.has(item.id)) {
+              next.set(item.id, String(item.status));
+            }
+          });
+          return next;
+        });
       } catch {
         setError('Failed to load enhancement requests.');
       } finally {
@@ -137,6 +154,7 @@ export function RequestListApp() {
   useEffect(() => {
     setPage(1);
     setSelectedIds(new Set());
+    setSelectedMeta(new Map());
   }, [filters]);
 
   const allPageSelected =
@@ -152,9 +170,18 @@ export function RequestListApp() {
       }
       return next;
     });
+    setSelectedMeta((prev) => {
+      const next = new Map(prev);
+      if (allPageSelected) {
+        requests.forEach((item) => next.delete(item.id));
+      } else {
+        requests.forEach((item) => next.set(item.id, String(item.status)));
+      }
+      return next;
+    });
   }
 
-  function toggleSelect(id: string) {
+  function toggleSelect(id: string, status: string | number) {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (next.has(id)) {
@@ -164,15 +191,23 @@ export function RequestListApp() {
       }
       return next;
     });
+    setSelectedMeta((prev) => {
+      const next = new Map(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.set(id, String(status));
+      }
+      return next;
+    });
   }
 
   const selectedPendingCount = useMemo(
     () =>
-      requests.filter(
-        (item) =>
-          selectedIds.has(item.id) && normalizeRequestStatus(item.status) === 'PendingApproval',
+      [...selectedIds].filter(
+        (id) => normalizeRequestStatus(selectedMeta.get(id) ?? '') === 'PendingApproval',
       ).length,
-    [requests, selectedIds],
+    [selectedIds, selectedMeta],
   );
 
   async function handleExportSelected() {
@@ -188,6 +223,39 @@ export function RequestListApp() {
       toast.danger('Export failed', 'Could not export the selected requests.');
     } finally {
       setExporting(false);
+    }
+  }
+
+  async function handleBulkApprove() {
+    const pendingIds = [...selectedIds].filter(
+      (id) => normalizeRequestStatus(selectedMeta.get(id) ?? '') === 'PendingApproval',
+    );
+    if (pendingIds.length === 0) {
+      return;
+    }
+
+    setBulkApproving(true);
+    try {
+      const result = await bulkSubmitApprovalActions(pendingIds, 'Approve');
+      if (result.succeededCount > 0) {
+        toast.success(
+          `${result.succeededCount} request${result.succeededCount === 1 ? '' : 's'} approved`,
+          result.failedCount > 0
+            ? `${result.failedCount} could not be approved (policy or status).`
+            : 'Your decisions were recorded.',
+        );
+      } else {
+        toast.danger('No requests approved', 'Selected items may not be pending or are blocked by policy.');
+      }
+
+      setShowBulkApproveConfirm(false);
+      setSelectedIds(new Set());
+      setSelectedMeta(new Map());
+      await loadRequests(filters, page, pageSize);
+    } catch {
+      toast.danger('Bulk approve failed', 'Could not submit approval actions.');
+    } finally {
+      setBulkApproving(false);
     }
   }
 
@@ -368,9 +436,19 @@ export function RequestListApp() {
             {selectedIds.size > 0 ? (
               <div className="eh-bulk-toolbar" role="toolbar" aria-label="Bulk actions">
                 <span className="small fw-semibold">{selectedIds.size} selected</span>
+                {isApprover && selectedPendingCount > 0 ? (
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-success"
+                    disabled={bulkApproving}
+                    onClick={() => setShowBulkApproveConfirm(true)}
+                  >
+                    {bulkApproving ? 'Approving…' : `Approve ${selectedPendingCount}`}
+                  </button>
+                ) : null}
                 {selectedPendingCount > 0 ? (
-                  <a href="/Spa/ApprovalQueue" className="btn btn-sm btn-primary">
-                    Review in approval queue
+                  <a href="/Spa/ApprovalQueue" className="btn btn-sm btn-outline-primary">
+                    Review in queue
                   </a>
                 ) : null}
                 <button
@@ -384,7 +462,10 @@ export function RequestListApp() {
                 <button
                   type="button"
                   className="btn btn-sm btn-outline-secondary"
-                  onClick={() => setSelectedIds(new Set())}
+                  onClick={() => {
+                    setSelectedIds(new Set());
+                    setSelectedMeta(new Map());
+                  }}
                 >
                   Clear selection
                 </button>
@@ -421,7 +502,7 @@ export function RequestListApp() {
                           type="checkbox"
                           className="form-check-input"
                           checked={selectedIds.has(item.id)}
-                          onChange={() => toggleSelect(item.id)}
+                          onChange={() => toggleSelect(item.id, item.status)}
                           aria-label={`Select ${item.title}`}
                         />
                       </td>
@@ -491,6 +572,17 @@ export function RequestListApp() {
           </div>
         </>
       )}
+
+      <ConfirmDialog
+        open={showBulkApproveConfirm}
+        title={`Approve ${selectedPendingCount} request${selectedPendingCount === 1 ? '' : 's'}?`}
+        message="Pending requests will be approved in bulk. Items blocked by policy or not awaiting approval will be skipped."
+        confirmLabel="Approve selected"
+        variant="primary"
+        loading={bulkApproving}
+        onConfirm={() => void handleBulkApprove()}
+        onCancel={() => setShowBulkApproveConfirm(false)}
+      />
     </>
   );
 }

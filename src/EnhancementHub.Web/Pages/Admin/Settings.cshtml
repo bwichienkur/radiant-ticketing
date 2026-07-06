@@ -3,34 +3,55 @@
 @{
     ViewData["AdminSection"] = "settings";
     ViewData["Title"] = "System Settings";
+    ViewData["PageHeaderTitle"] = "System settings";
+    ViewData["PageHeaderDescription"] = "Configure platform behavior and feature flags";
 }
 
 <partial name="_AdminNav" />
-<div class="page-header">
-    <h1>System Settings</h1>
-    <p>Configure platform behavior</p>
-</div>
 
-<div class="card-panel">
-    <table class="table table-enterprise mb-0">
-        <thead><tr><th>Category</th><th>Key</th><th>Value</th><th>Description</th><th></th></tr></thead>
-        <tbody>
-        @foreach (var setting in Model.Settings)
-        {
-            <tr>
-                <td>@setting.Category</td>
-                <td>@setting.Key</td>
-                <td>
-                    <form method="post" class="d-flex gap-2">
-                        <input type="hidden" asp-for="SettingId" value="@setting.Id" />
-                        <input class="form-control form-control-sm" name="Value" value="@setting.Value" />
-                        <button type="submit" class="btn btn-sm btn-primary">Save</button>
-                    </form>
-                </td>
-                <td class="small text-muted">@(setting.Description ?? "—")</td>
-                <td></td>
-            </tr>
-        }
-        </tbody>
-    </table>
-</div>
+<header class="page-header">
+    <partial name="_PageHeader" />
+</header>
+
+@if (!Model.Settings.Any())
+{
+    ViewData["EmptyStateTitle"] = "No settings configured";
+    ViewData["EmptyStateDescription"] = "System settings will appear here once the platform is provisioned.";
+    ViewData["EmptyStateIcon"] = "document";
+    <partial name="_EmptyState" />
+}
+else
+{
+    <div class="card-panel">
+        <div class="table-responsive">
+            <table class="table table-hover table-enterprise mb-0">
+                <thead>
+                    <tr>
+                        <th scope="col">Category</th>
+                        <th scope="col">Key</th>
+                        <th scope="col">Value</th>
+                        <th scope="col">Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var setting in Model.Settings)
+                {
+                    <tr>
+                        <td><span class="badge text-bg-light">@setting.Category</span></td>
+                        <td><code class="small">@setting.Key</code></td>
+                        <td>
+                            <form method="post" class="d-flex flex-wrap gap-2 align-items-center">
+                                <input type="hidden" asp-for="SettingId" value="@setting.Id" />
+                                <label class="visually-hidden" for="value-@setting.Id">Value for @setting.Key</label>
+                                <input id="value-@setting.Id" class="form-control form-control-sm" name="Value" value="@setting.Value" />
+                                <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                            </form>
+                        </td>
+                        <td class="small text-muted">@(setting.Description ?? "—")</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

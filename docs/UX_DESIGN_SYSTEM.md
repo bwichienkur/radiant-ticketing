@@ -88,6 +88,7 @@ Toasts: React apps call `window.EhUx.showToast()` (Bootstrap toast in `_Layout`)
 | 5 | Table pagination, bulk actions, confirmation modals | Done (this PR) |
 | 6 | SVG sidebar icons | Done (this PR) |
 | 7 | Server-side pagination, CSV export, SpUiRoot, remaining Razor + System map | Done (this PR) |
+| 8 | Admin Razor polish (Settings, Tenancy, Delivery), bulk approve, DB pagination | Done (this PR) |
 
 ---
 
@@ -106,5 +107,4 @@ Toasts: React apps call `window.EhUx.showToast()` (Bootstrap toast in `_Layout`)
 
 - Full React router shell (MPA → SPA migration) — `SpUiRoot` provides shared live region today
 - Storybook or visual regression for UI kit
-- Admin Razor form polish (Settings, Tenancy, Delivery config panels)
-- Bulk approve workflow (requires multi-action API)
+- Bulk decline workflow from request list (bulk approve is implemented)

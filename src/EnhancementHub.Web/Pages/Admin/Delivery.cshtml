@@ -4,40 +4,42 @@
 @{
     ViewData["AdminSection"] = "delivery";
     ViewData["Title"] = "Delivery automation";
+    ViewData["PageHeaderTitle"] = "Delivery automation";
+    ViewData["PageHeaderDescription"] = "Configure tenant-wide environments and policies for automated test deploys, QA, and UAT.";
     var profile = Model.Profile;
     var validation = Model.Validation;
 }
 
 <partial name="_AdminNav" />
 
-<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
-    <div>
-        <h1>Delivery automation</h1>
-        <p class="mb-0 text-muted">Configure tenant-wide environments and policies for automated test deploys, QA, and UAT (Phase A — config only).</p>
-    </div>
+<header class="page-header d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <partial name="_PageHeader" />
     @if (validation is not null)
     {
         <span class="badge @(validation.IsValid ? "text-bg-success" : "text-bg-warning") badge-status">
             @(validation.IsValid ? "Profile valid" : "Needs attention")
         </span>
     }
-</div>
+</header>
 
 @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
 {
-    <div class="alert alert-info">@Model.StatusMessage</div>
+    <div class="alert alert-success" role="status">@Model.StatusMessage</div>
 }
 
 @if (profile is null)
 {
-    <div class="card-panel p-4"><p class="text-muted mb-0">Unable to load delivery profile.</p></div>
+    ViewData["EmptyStateTitle"] = "Delivery profile unavailable";
+    ViewData["EmptyStateDescription"] = "Unable to load delivery configuration. Check tenant context and try again.";
+    ViewData["EmptyStateIcon"] = "inbox";
+    <partial name="_EmptyState" />
 }
 else
 {
     @if (validation is not null && (validation.Errors.Count > 0 || validation.Warnings.Count > 0))
     {
         <div class="card-panel p-4 mb-4">
-            <h2 class="h6">Validation</h2>
+            <h2 class="eh-section-title mb-3">Validation</h2>
             @foreach (var error in validation.Errors)
             {
                 <div class="text-danger small">@error</div>
@@ -50,7 +52,7 @@ else
     }
 
     <div class="card-panel p-4 mb-4">
-        <h2 class="h5 mb-3">Tenant policies</h2>
+        <h2 class="eh-section-title mb-3">Tenant policies</h2>
         <form method="post" asp-page-handler="SaveProfile">
             <div class="row g-3">
                 <div class="col-md-4">
@@ -71,26 +73,29 @@ else
                     <textarea class="form-control" asp-for="ChangeWindowNotes" rows="2" placeholder="e.g. Sundays 02:00–06:00 UTC"></textarea>
                 </div>
                 <div class="col-12">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" asp-for="AutoImplementOnApprove" />
-                        <label class="form-check-label" asp-for="AutoImplementOnApprove">Auto-start implementation when approved (Phase B)</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" asp-for="AutoDeployToTest" />
-                        <label class="form-check-label" asp-for="AutoDeployToTest">Auto-deploy to test after implementation (Phase C)</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" asp-for="RequirePullRequestReview" />
-                        <label class="form-check-label" asp-for="RequirePullRequestReview">Require pull request review before deploy</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" asp-for="RequireUatSignoff" />
-                        <label class="form-check-label" asp-for="RequireUatSignoff">Require requester UAT before production</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" asp-for="RequireProdChangeWindow" />
-                        <label class="form-check-label" asp-for="RequireProdChangeWindow">Respect production change windows</label>
-                    </div>
+                    <fieldset>
+                        <legend class="eh-section-title mb-2">Automation toggles</legend>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" asp-for="AutoImplementOnApprove" />
+                            <label class="form-check-label" asp-for="AutoImplementOnApprove">Auto-start implementation when approved</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" asp-for="AutoDeployToTest" />
+                            <label class="form-check-label" asp-for="AutoDeployToTest">Auto-deploy to test after implementation</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" asp-for="RequirePullRequestReview" />
+                            <label class="form-check-label" asp-for="RequirePullRequestReview">Require pull request review before deploy</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" asp-for="RequireUatSignoff" />
+                            <label class="form-check-label" asp-for="RequireUatSignoff">Require requester UAT before production</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" asp-for="RequireProdChangeWindow" />
+                            <label class="form-check-label" asp-for="RequireProdChangeWindow">Respect production change windows</label>
+                        </div>
+                    </fieldset>
                 </div>
             </div>
             <button type="submit" class="btn btn-primary mt-3">Save policies</button>
@@ -98,36 +103,36 @@ else
     </div>
 
     <div class="card-panel p-4 mb-4">
-        <h2 class="h5 mb-3">Deployment environments</h2>
+        <h2 class="eh-section-title mb-3">Deployment environments</h2>
         @if (profile.Environments.Count == 0)
         {
-            <p class="text-muted">No environments yet. Add a Test environment to support automated QA deploys.</p>
+            <p class="text-muted mb-4">No environments yet. Add a Test environment to support automated QA deploys.</p>
         }
         else
         {
             <div class="table-responsive mb-4">
-                <table class="table table-sm align-middle">
+                <table class="table table-hover table-enterprise table-sm align-middle mb-0">
                     <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Type</th>
-                            <th>Base URL template</th>
-                            <th>Active</th>
-                            <th></th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Base URL template</th>
+                            <th scope="col">Active</th>
+                            <th scope="col"></th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var env in profile.Environments)
                         {
                             <tr>
-                                <td>@env.Name</td>
+                                <td><strong>@env.Name</strong></td>
                                 <td>@env.EnvironmentType</td>
                                 <td class="small text-muted">@(env.BaseUrlTemplate ?? "—")</td>
                                 <td>@(env.IsActive ? "Yes" : "No")</td>
                                 <td class="text-end">
                                     <form method="post" asp-page-handler="DeleteEnvironment" class="d-inline">
                                         <input type="hidden" name="DeleteEnvironmentId" value="@env.Id" />
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this environment?');">Delete</button>
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete environment @env.Name? This cannot be undone.');">Delete</button>
                                     </form>
                                 </td>
                             </tr>
@@ -137,7 +142,7 @@ else
             </div>
         }
 
-        <h3 class="h6">Add or update environment</h3>
+        <h3 class="eh-section-title mb-3">Add or update environment</h3>
         <form method="post" asp-page-handler="SaveEnvironment">
             <input type="hidden" asp-for="EditEnvironmentId" />
             <div class="row g-3">
@@ -177,10 +182,10 @@ else
     </div>
 
     <div class="card-panel p-4">
-        <h2 class="h6">Per-application delivery</h2>
+        <h2 class="eh-section-title mb-3">Per-application delivery</h2>
         <p class="small text-muted mb-0">
             Configure deployment mechanism, pipeline reference, and environment-specific connection mappings on each
-            application via the API <code>GET/PUT /web-api/spa/delivery/applications/{id}/profile</code> or during onboarding (Phase B).
+            application via the API <code>GET/PUT /web-api/spa/delivery/applications/{id}/profile</code> or during onboarding.
         </p>
     </div>
 }

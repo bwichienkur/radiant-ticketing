@@ -134,6 +134,37 @@ public sealed class Phase27UxOverhaulTests
         query.Should().Contain("int Page = 1");
         query.Should().Contain("int PageSize = 0");
         query.Should().Contain("IReadOnlyList<Guid>? Ids");
+        query.Should().Contain("Skip((page - 1) * pageSize)");
+    }
+
+    [Fact]
+    public void AdminPages_UseSharedPageHeaderPartial()
+    {
+        var settings = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Admin/Settings.cshtml"));
+        var tenancy = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Admin/Tenancy.cshtml"));
+        var delivery = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Admin/Delivery.cshtml"));
+
+        settings.Should().Contain("_PageHeader");
+        tenancy.Should().Contain("_PageHeader");
+        delivery.Should().Contain("_PageHeader");
+        delivery.Should().Contain("eh-section-title");
+    }
+
+    [Fact]
+    public void SpaApprovalsController_SupportsBulkAction()
+    {
+        var controller = File.ReadAllText(GetPath("src/EnhancementHub.Web/Controllers/Spa/SpaApprovalsController.cs"));
+        controller.Should().Contain("bulk-action");
+        controller.Should().Contain("BulkSubmitApprovalActionsCommand");
+    }
+
+    [Fact]
+    public void RequestListApp_SupportsBulkApprove()
+    {
+        var app = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/apps/RequestListApp.tsx"));
+        app.Should().Contain("bulkSubmitApprovalActions");
+        app.Should().Contain("isApprover");
+        app.Should().Contain("Approve selected");
     }
 
     private static string GetPath(string relative) =>
