@@ -409,6 +409,14 @@ Guide: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md)
 - `_PageHeader` on Admin Compliance and Team Detail; Team Detail includes `_AdminNav`
 - Platform-aware command palette shortcut in product tour; SPA vs full-page routes documented in `site.js`
 
+## Phase 49 — Intelligence pages in React shell (complete)
+
+- BFF: `SpaIntelligenceController` — drift, repositories, audit endpoints
+- React apps: Applications, Schema Drift, Repositories, Audit at `/Spa/*`
+- Legacy Intelligence list pages redirect to SPA; sidebar updated
+- Vite `manualChunks` for React, Cytoscape, SignalR vendor bundles
+- `data-is-admin` on SPA root for audit export actions
+
 ## Phases 46–57 — Due diligence execution (planned)
 
 Post-audit roadmap to reach world-class enterprise readiness. Full task breakdown: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md).

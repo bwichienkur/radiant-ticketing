@@ -1,5 +1,9 @@
 import type {
-  ApplicationSummary,
+  ApplicationListItem,
+  AuditLogEntry,
+  AuditLogFilters,
+  DatabaseConnectionSummary,
+  DriftReport,
   ApprovalHistoryItem,
   ApprovalRequestDetail,
   CreateRequestFormData,
@@ -21,6 +25,7 @@ import type {
   PendingApprovalItem,
   PlatformRuntimeStatus,
   RepositoryPathValidation,
+  RepositoryListItem,
   SystemMap,
 } from '../types/spa';
 
@@ -78,8 +83,64 @@ export async function postRequestComment(
   await postJson(`/web-api/spa/requests/${requestId}/comments`, { content, isInternal });
 }
 
-export async function listApplications(): Promise<ApplicationSummary[]> {
-  return fetchJson<ApplicationSummary[]>('/web-api/spa/applications');
+export async function listApplications(): Promise<ApplicationListItem[]> {
+  return fetchJson<ApplicationListItem[]>('/web-api/spa/applications');
+}
+
+export async function listDriftConnections(): Promise<DatabaseConnectionSummary[]> {
+  return fetchJson<DatabaseConnectionSummary[]>('/web-api/spa/drift/connections');
+}
+
+export async function getDriftReport(connectionId: string): Promise<DriftReport> {
+  return fetchJson<DriftReport>(`/web-api/spa/drift/report?connectionId=${encodeURIComponent(connectionId)}`);
+}
+
+export async function detectSchemaDrift(connectionId: string): Promise<DriftReport> {
+  return postJson<DriftReport>('/web-api/spa/drift/detect', { connectionId });
+}
+
+export async function listRepositoriesCatalog(): Promise<RepositoryListItem[]> {
+  return fetchJson<RepositoryListItem[]>('/web-api/spa/repositories');
+}
+
+export async function triggerRepositoryReindex(repositoryId: string): Promise<void> {
+  await postJson(`/web-api/spa/repositories/${repositoryId}/reindex`);
+}
+
+export async function listAuditLogs(filters: AuditLogFilters = {}): Promise<AuditLogEntry[]> {
+  const params = new URLSearchParams();
+  if (filters.entityType?.trim()) {
+    params.set('entityType', filters.entityType.trim());
+  }
+  if (filters.action?.trim()) {
+    params.set('action', filters.action.trim());
+  }
+  if (filters.from) {
+    params.set('from', filters.from);
+  }
+  if (filters.to) {
+    params.set('to', filters.to);
+  }
+  const query = params.toString();
+  return fetchJson<AuditLogEntry[]>(`/web-api/spa/audit/logs${query ? `?${query}` : ''}`);
+}
+
+export function exportAuditLogs(format: 'csv' | 'json', filters: AuditLogFilters = {}): void {
+  const params = new URLSearchParams();
+  params.set('format', format);
+  if (filters.entityType?.trim()) {
+    params.set('entityType', filters.entityType.trim());
+  }
+  if (filters.action?.trim()) {
+    params.set('action', filters.action.trim());
+  }
+  if (filters.from) {
+    params.set('from', filters.from);
+  }
+  if (filters.to) {
+    params.set('to', filters.to);
+  }
+  window.location.assign(`/web-api/spa/audit/export?${params.toString()}`);
 }
 
 export async function getSystemMap(applicationId: string): Promise<SystemMap> {

@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.Repositories;
 
+/// <summary>Legacy Razor repositories list — redirects to <c>/Spa/Repositories</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/Repositories. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize]
 public class IndexModel : PageModel
 {
@@ -17,8 +19,16 @@ public class IndexModel : PageModel
 
     public IReadOnlyList<RepositoryDto> Repositories { get; private set; } = [];
 
-    public async Task OnGetAsync(CancellationToken cancellationToken) =>
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
+    {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToPagePermanent("/Spa/Repositories");
+        }
+
         Repositories = await _mediator.Send(new ListRepositoriesQuery(), cancellationToken);
+        return Page();
+    }
 
     public async Task<IActionResult> OnPostTriggerAsync(Guid id, CancellationToken cancellationToken)
     {

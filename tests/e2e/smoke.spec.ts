@@ -75,16 +75,24 @@ test.describe('EnhancementHub smoke', () => {
     await expect(page.getByLabel('Policy document URL')).toBeVisible();
   });
 
-  test('request list SPA loads backlog', async ({ page }) => {
-    await page.goto('/Spa/RequestList');
+  test('intelligence SPA pages load in unified shell', async ({ page }) => {
+    await page.goto('/Spa/Applications');
     await expectSpaShell(page);
-    await expect(page.getByRole('heading', { name: 'Enhancement Requests' })).toBeVisible({
+    await expect(page.getByRole('heading', { name: 'Applications' })).toBeVisible({ timeout: 15_000 });
+
+    await page.goto('/Spa/SchemaDrift');
+    await expectSpaShell(page);
+    await expect(page.getByRole('heading', { name: 'Schema drift detection' })).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByRole('link', { name: 'New Request' }).first()).toBeVisible();
-    await expect(page.getByText(/order cancellation|compliance/i).first()).toBeVisible({
-      timeout: 15_000,
-    });
+
+    await page.goto('/Spa/Repositories');
+    await expectSpaShell(page);
+    await expect(page.getByRole('heading', { name: 'Repositories' })).toBeVisible({ timeout: 15_000 });
+
+    await page.goto('/Spa/Audit');
+    await expectSpaShell(page);
+    await expect(page.getByRole('heading', { name: 'Audit log' })).toBeVisible({ timeout: 15_000 });
   });
 
   test('request list bulk approve toolbar appears for pending items', async ({ page }) => {

@@ -75,6 +75,62 @@ export interface ApplicationSummary {
   name: string;
 }
 
+export interface ApplicationListItem {
+  id: string;
+  name: string;
+  businessDomain?: string;
+  repositoryCount: number;
+}
+
+export interface DatabaseConnectionSummary {
+  id: string;
+  applicationId: string;
+  applicationName?: string;
+  name: string;
+  scanStatus: string;
+}
+
+export interface SchemaDriftFinding {
+  id: string;
+  severity: string;
+  title: string;
+  description: string;
+  isResolved: boolean;
+}
+
+export interface DriftReport {
+  connectionId: string;
+  detectedAt?: string;
+  findings: SchemaDriftFinding[];
+}
+
+export interface RepositoryListItem {
+  id: string;
+  applicationId: string;
+  applicationName?: string;
+  name: string;
+  url: string;
+  indexingStatus: string;
+  lastIndexedAt?: string;
+}
+
+export interface AuditLogEntry {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string;
+  userName?: string;
+  comments?: string;
+  createdAt: string;
+}
+
+export interface AuditLogFilters {
+  entityType?: string;
+  action?: string;
+  from?: string;
+  to?: string;
+}
+
 export interface SystemGraphNode {
   id: string;
   label: string;

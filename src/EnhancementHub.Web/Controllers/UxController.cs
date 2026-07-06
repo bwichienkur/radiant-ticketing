@@ -38,7 +38,7 @@ public sealed class UxController : ControllerBase
                 type = "application",
                 title = a.Name,
                 subtitle = a.BusinessDomain ?? "Application",
-                url = "/Applications/Index"
+                url = "/Spa/Applications"
             });
 
         var requestMatches = requests.Take(8).Select(r => new
@@ -113,7 +113,10 @@ public sealed class UxController : ControllerBase
         ("New Request", "/Spa/CreateRequest", ["create", "submit"]),
         ("System Map", "/Spa/SystemMap", ["graph", "architecture", "map"]),
         ("Onboarding Wizard", "/Spa/OnboardingWizard", ["setup", "onboard", "wizard"]),
-        ("Schema Drift", "/SchemaDrift/Index", ["drift", "schema"]),
+        ("Applications", "/Spa/Applications", ["applications", "systems"]),
+        ("Repositories", "/Spa/Repositories", ["repos", "git", "index"]),
+        ("Audit Log", "/Spa/Audit", ["audit", "compliance", "history"]),
+        ("Schema Drift", "/Spa/SchemaDrift", ["drift", "schema"]),
         ("ROI Dashboard", "/Admin/Roi", ["roi", "metrics", "admin"]),
         ("Tenancy & Billing", "/Admin/Tenancy", ["tenant", "billing", "commercial"])
     ];

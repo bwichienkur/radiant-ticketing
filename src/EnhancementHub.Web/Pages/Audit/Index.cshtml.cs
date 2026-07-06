@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.Audit;
 
+/// <summary>Legacy Razor audit log — redirects to <c>/Spa/Audit</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/Audit. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize]
 public class IndexModel : PageModel
 {
@@ -28,10 +30,25 @@ public class IndexModel : PageModel
 
     public IReadOnlyList<AuditLogDto> Logs { get; private set; } = [];
 
-    public async Task OnGetAsync(CancellationToken cancellationToken) =>
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
+    {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToPagePermanent("/Spa/Audit", new
+            {
+                EntityType,
+                Action,
+                From = From?.ToString("yyyy-MM-dd"),
+                To = To?.ToString("yyyy-MM-dd"),
+            });
+        }
+
         Logs = await _mediator.Send(
             new ListAuditLogsQuery(EntityType, Action, null, From, To),
             cancellationToken);
+
+        return Page();
+    }
 
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> OnGetExportAsync(string format, CancellationToken cancellationToken)

@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.SchemaDrift;
 
+/// <summary>Legacy Razor drift report — redirects to <c>/Spa/SchemaDrift</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/SchemaDrift. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize]
 public class IndexModel : PageModel
 {
@@ -18,14 +20,21 @@ public class IndexModel : PageModel
     public Guid? ConnectionId { get; private set; }
     public DriftReportDto? Report { get; private set; }
 
-    public async Task OnGetAsync(Guid? connectionId, CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(Guid? connectionId, string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToPagePermanent("/Spa/SchemaDrift", connectionId.HasValue ? new { connectionId } : null);
+        }
+
         Connections = await _mediator.Send(new ListDatabaseConnectionsQuery(), cancellationToken);
         ConnectionId = connectionId ?? Connections.FirstOrDefault()?.Id;
         if (ConnectionId.HasValue)
         {
             Report = await _mediator.Send(new GetDriftReportQuery(ConnectionId.Value), cancellationToken);
         }
+
+        return Page();
     }
 
     public async Task<IActionResult> OnGetDetectAsync(Guid connectionId, CancellationToken cancellationToken)

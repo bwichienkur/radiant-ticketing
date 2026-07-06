@@ -18,6 +18,29 @@ export default defineConfig({
         entryFileNames: '[name].js',
         chunkFileNames: 'chunks/[name]-[hash].js',
         assetFileNames: 'assets/[name]-[hash][extname]',
+        manualChunks(id) {
+          if (!id.includes('node_modules')) {
+            return undefined;
+          }
+
+          if (
+            id.includes('react-router') ||
+            id.includes('/react-dom/') ||
+            id.includes('/react/')
+          ) {
+            return 'vendor-react';
+          }
+
+          if (id.includes('cytoscape')) {
+            return 'vendor-cytoscape';
+          }
+
+          if (id.includes('@microsoft/signalr')) {
+            return 'vendor-signalr';
+          }
+
+          return undefined;
+        },
       },
     },
   },

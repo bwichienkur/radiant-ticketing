@@ -16,6 +16,10 @@ import { RequestDetailApp } from '../apps/RequestDetailApp';
 import { ApprovalQueueApp } from '../apps/ApprovalQueueApp';
 import { OnboardingWizardApp } from '../apps/OnboardingWizardApp';
 import { SystemMapApp } from '../apps/SystemMapApp';
+import { ApplicationsApp } from '../apps/ApplicationsApp';
+import { SchemaDriftApp } from '../apps/SchemaDriftApp';
+import { RepositoriesApp } from '../apps/RepositoriesApp';
+import { AuditApp } from '../apps/AuditApp';
 import { readSpaContext } from '../spaRoutes';
 
 function RequestListRoute() {
@@ -95,6 +99,10 @@ export function SpaShell() {
         <Route path="/Spa/OnboardingWizard" element={<OnboardingWizardRoute />} />
         <Route path="/Spa/OnboardingWizard/:sessionId" element={<OnboardingWizardRoute />} />
         <Route path="/Spa/SystemMap" element={<SystemMapRoute />} />
+        <Route path="/Spa/Applications" element={<ApplicationsApp />} />
+        <Route path="/Spa/SchemaDrift" element={<SchemaDriftApp />} />
+        <Route path="/Spa/Repositories" element={<RepositoriesApp />} />
+        <Route path="/Spa/Audit" element={<AuditApp />} />
         <Route path="*" element={<UnknownSpaRoute />} />
       </Routes>
     </BrowserRouter>

@@ -8,6 +8,10 @@ export const SPA_PREFIXES = [
   '/Spa/ApprovalQueue',
   '/Spa/OnboardingWizard',
   '/Spa/SystemMap',
+  '/Spa/Applications',
+  '/Spa/SchemaDrift',
+  '/Spa/Repositories',
+  '/Spa/Audit',
 ];
 
 export function isSpaPath(pathname: string): boolean {
@@ -19,9 +23,10 @@ export function isSpaPath(pathname: string): boolean {
   return SPA_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 }
 
-export function readSpaContext(): { isApprover: boolean } {
+export function readSpaContext(): { isApprover: boolean; isAdmin: boolean } {
   const root = document.getElementById('spa-root');
   return {
     isApprover: root?.dataset.isApprover === 'true',
+    isAdmin: root?.dataset.isAdmin === 'true',
   };
 }

@@ -528,9 +528,9 @@
         /*
          * SPA vs full-page navigation (Phase 48):
          * - Client-side (no reload): /, /Index, /Spa/*
-         * - Full Razor page load: /Applications, /DatabaseConnections, /SchemaDrift,
-         *   /Documentation, /Refactor, /Repositories, /Audit, /Admin/*
-         * Intelligence links from the React dashboard use full-page routes until Phase 49.
+         * - Full Razor page load: /DatabaseConnections, /Documentation, /Refactor,
+         *   /Applications/Details, /Admin/*
+         * Intelligence list pages (Applications, Drift, Repositories, Audit) are in the SPA shell.
          */
         const spaExact = new Set(['/', '/Index']);
         const spaPrefixes = [
@@ -540,6 +540,10 @@
             '/Spa/ApprovalQueue',
             '/Spa/OnboardingWizard',
             '/Spa/SystemMap',
+            '/Spa/Applications',
+            '/Spa/SchemaDrift',
+            '/Spa/Repositories',
+            '/Spa/Audit',
         ];
 
         function isSpaPath(pathname) {
@@ -567,6 +571,18 @@
             }
             if (linkPath === '/Spa/SystemMap') {
                 return currentPath.startsWith('/Spa/SystemMap');
+            }
+            if (linkPath === '/Spa/Applications') {
+                return currentPath.startsWith('/Spa/Applications');
+            }
+            if (linkPath === '/Spa/SchemaDrift') {
+                return currentPath.startsWith('/Spa/SchemaDrift');
+            }
+            if (linkPath === '/Spa/Repositories') {
+                return currentPath.startsWith('/Spa/Repositories');
+            }
+            if (linkPath === '/Spa/Audit') {
+                return currentPath.startsWith('/Spa/Audit');
             }
             return currentPath === linkPath || currentPath.startsWith(`${linkPath}/`);
         }

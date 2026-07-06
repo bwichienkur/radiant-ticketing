@@ -1,1 +1,3 @@
-<div id="spa-root" data-is-approver="@((User.IsInRole("Admin") || User.IsInRole("Approver")).ToString().ToLowerInvariant())"></div>
+<div id="spa-root"
+     data-is-approver="@((User.IsInRole("Admin") || User.IsInRole("Approver")).ToString().ToLowerInvariant())"
+     data-is-admin="@(User.IsInRole("Admin").ToString().ToLowerInvariant())"></div>

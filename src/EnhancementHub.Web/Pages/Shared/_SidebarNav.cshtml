@@ -38,7 +38,7 @@
         </div>
         <div class="sidebar-section">
             <div class="sidebar-section-label">Intelligence</div>
-            <a class="sidebar-link @(NavActive("/Applications") ? "active" : "")" asp-page="/Applications/Index">
+            <a class="sidebar-link @(NavActive("/Spa/Applications") ? "active" : "")" href="/Spa/Applications">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"applications"' /></span> Applications
             </a>
             <a class="sidebar-link @(NavActive("/Spa/SystemMap") ? "active" : "")" href="/Spa/SystemMap">
@@ -47,7 +47,7 @@
             <a class="sidebar-link @(NavActive("/DatabaseConnections") ? "active" : "")" asp-page="/DatabaseConnections/Index">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"database"' /></span> Databases
             </a>
-            <a class="sidebar-link @(NavActive("/SchemaDrift") ? "active" : "")" asp-page="/SchemaDrift/Index">
+            <a class="sidebar-link @(NavActive("/Spa/SchemaDrift") ? "active" : "")" href="/Spa/SchemaDrift">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"drift"' /></span> Drift
             </a>
             <a class="sidebar-link @(NavActive("/Documentation") ? "active" : "")" asp-page="/Documentation/Export">
@@ -56,13 +56,13 @@
             <a class="sidebar-link @(NavActive("/Refactor") ? "active" : "")" asp-page="/Refactor/Analyze">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"refactor"' /></span> Refactor
             </a>
-            <a class="sidebar-link @(NavActive("/Repositories") ? "active" : "")" asp-page="/Repositories/Index">
+            <a class="sidebar-link @(NavActive("/Spa/Repositories") ? "active" : "")" href="/Spa/Repositories">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"repositories"' /></span> Repositories
             </a>
         </div>
         <div class="sidebar-section">
             <div class="sidebar-section-label">Governance</div>
-            <a class="sidebar-link @(NavActive("/Audit") ? "active" : "")" asp-page="/Audit/Index">
+            <a class="sidebar-link @(NavActive("/Spa/Audit") ? "active" : "")" href="/Spa/Audit">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"audit"' /></span> Audit
             </a>
             @if (User.IsInRole("Admin"))

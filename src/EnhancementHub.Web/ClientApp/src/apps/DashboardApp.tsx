@@ -158,7 +158,7 @@ export function DashboardApp() {
         <div className="row g-3 mb-4" data-tour="intelligence-health">
           {insights.unresolvedDriftFindings > 0 ? (
             <div className="col-md-6 col-xl-4">
-              <SpaLink href="/SchemaDrift/Index" className="text-decoration-none">
+              <SpaLink href="/Spa/SchemaDrift" className="text-decoration-none">
                 <div className="stat-card queue-action-card stat-card-link">
                   <div className="label">Schema drift</div>
                   <div className="value text-warning">{insights.unresolvedDriftFindings}</div>
@@ -169,7 +169,7 @@ export function DashboardApp() {
           ) : null}
           {insights.staleRepositoryCount > 0 ? (
             <div className="col-md-6 col-xl-4">
-              <SpaLink href="/Repositories/Index" className="text-decoration-none">
+              <SpaLink href="/Spa/Repositories" className="text-decoration-none">
                 <div className="stat-card queue-action-card stat-card-link">
                   <div className="label">Stale repositories</div>
                   <div className="value text-danger">{insights.staleRepositoryCount}</div>
