@@ -59,7 +59,7 @@ public sealed class PolicyIntakeTests
         var panel = File.ReadAllText(Path.Combine(
             GetRepoRoot(),
             "src/EnhancementHub.Web/ClientApp/src/components/IntakeCopilotPanel.tsx"));
-        panel.Should().Contain("Compliance policy intake");
+        panel.Should().Contain("Have a compliance policy?");
         panel.Should().Contain("attachIntakePolicyDocument");
         panel.Should().Contain("attachIntakePolicyUrl");
     }

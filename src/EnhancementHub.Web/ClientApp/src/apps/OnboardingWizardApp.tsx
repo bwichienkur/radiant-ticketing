@@ -219,6 +219,14 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
 
   return (
     <div aria-live="polite">
+      <div className="page-header mb-4">
+        <h1>Set up a system for change requests</h1>
+        <p className="mb-0 text-muted">
+          Register an application so we can understand its code and dependencies. Technical steps
+          can be completed by your IT team.
+        </p>
+      </div>
+
       <div className="mb-4" role="list" aria-label="Onboarding steps">
         <div className="d-flex flex-wrap gap-2">
           {STEPS.map((step) => {
@@ -251,7 +259,7 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
       <div className="card-panel p-4">
         {session.currentStep === 'ApplicationBasics' ? (
           <form onSubmit={(event) => void onSubmitBasics(event)}>
-            <h2 className="h4 mb-3">Step 1 — Application basics</h2>
+            <h2 className="h4 mb-3">Step 1 — Tell us about the system</h2>
             <div className="row g-3">
               <div className="col-md-6">
                 <label className="form-label">Application name</label>
@@ -341,7 +349,10 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
 
         {session.currentStep === 'RunDiscovery' ? (
           <div>
-            <h2 className="h4 mb-3">Step 4 — Run discovery</h2>
+            <h2 className="h4 mb-3">Step 4 — Scan the code</h2>
+            <p className="text-muted mb-3">
+              We analyze connected code to understand dependencies. This step is usually run by IT.
+            </p>
             <p className="text-muted mb-3">
               Status: <strong>{session.discoveryJobState}</strong>
               {session.discoveryStatus ? ` — ${session.discoveryStatus}` : ''}
@@ -378,20 +389,20 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
 
         {session.currentStep === 'ReviewExport' ? (
           <div>
-            <h2 className="h4 mb-3">Step 5 — Review</h2>
+            <h2 className="h4 mb-3">Step 5 — Review setup</h2>
             {review ? (
               <dl className="row">
-                <dt className="col-sm-4">Application</dt>
+                <dt className="col-sm-4">System name</dt>
                 <dd className="col-sm-8">{review.applicationName}</dd>
-                <dt className="col-sm-4">Repositories</dt>
+                <dt className="col-sm-4">Code repositories</dt>
                 <dd className="col-sm-8">{review.repositoryCount}</dd>
                 <dt className="col-sm-4">Database connections</dt>
                 <dd className="col-sm-8">{review.databaseConnectionCount}</dd>
-                <dt className="col-sm-4">Graph nodes / edges</dt>
+                <dt className="col-sm-4">System map size</dt>
                 <dd className="col-sm-8">
-                  {review.graphNodeCount} / {review.graphEdgeCount}
+                  {review.graphNodeCount} components, {review.graphEdgeCount} connections
                 </dd>
-                <dt className="col-sm-4">Drift findings</dt>
+                <dt className="col-sm-4">Schema differences found</dt>
                 <dd className="col-sm-8">{review.driftFindingCount}</dd>
               </dl>
             ) : (
@@ -421,7 +432,9 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
         {session.currentStep === 'Complete' ? (
           <div className="text-center py-3">
             <h2 className="h4">Setup complete</h2>
-            <p className="text-muted">Your application is ready for enhancement requests and system intelligence.</p>
+            <p className="text-muted">
+              Your system is ready. You can now submit change requests and track them on the dashboard.
+            </p>
             <div className="d-flex justify-content-center gap-2">
               <a href="/" className="btn btn-primary">
                 Go to dashboard

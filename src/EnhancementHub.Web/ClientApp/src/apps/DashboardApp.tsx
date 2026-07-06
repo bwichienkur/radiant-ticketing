@@ -122,14 +122,14 @@ export function DashboardApp() {
       >
         <div>
           <h1>Dashboard</h1>
-          <p className="mb-0">Your enhancement pipeline control room</p>
+          <p className="mb-0">Track your change requests and see what needs attention</p>
         </div>
         <div className="d-flex gap-2">
           <a href="/Spa/OnboardingWizard" className="btn btn-outline-primary">
-            Document an application
+            Set up a system
           </a>
           <a href="/Spa/CreateRequest" className="btn btn-primary" data-tour="new-request">
-            New Request
+            New request
           </a>
         </div>
       </div>
@@ -173,7 +173,7 @@ export function DashboardApp() {
             <div className="col-md-6 col-xl-4">
               <a href="/Spa/ApprovalQueue" className="text-decoration-none">
                 <div className="stat-card queue-action-card urgent stat-card-link">
-                  <div className="label">Needs your approval</div>
+                  <div className="label">Needs your decision</div>
                   <div className="value text-danger">{insights.myPendingApprovals}</div>
                   <div className="small text-muted">Open approval queue →</div>
                 </div>
@@ -184,7 +184,7 @@ export function DashboardApp() {
             <div className="col-md-6 col-xl-4">
               <a href="/Spa/RequestList?status=Submitted" className="text-decoration-none">
                 <div className="stat-card queue-action-card stat-card-link">
-                  <div className="label">Awaiting AI analysis</div>
+                  <div className="label">Being reviewed</div>
                   <div className="value text-info">{insights.myAwaitingAnalysis}</div>
                   <div className="small text-muted">View submitted requests →</div>
                 </div>
@@ -199,7 +199,10 @@ export function DashboardApp() {
           <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
             <div>
               <h2 className="h5 mb-1">Getting started</h2>
-              <p className="text-muted mb-0">Complete these steps to document your first application.</p>
+              <p className="text-muted mb-0">
+                These setup steps help your IT team understand your systems. You can ask IT to
+                complete them if you prefer.
+              </p>
             </div>
             {onboardingStatus.activeSessionId ? (
               <a
@@ -216,23 +219,23 @@ export function DashboardApp() {
           </div>
           <div className="onboarding-checklist">
             <ChecklistLink done={onboardingStatus.applicationCount > 0} href="/Spa/OnboardingWizard" step="1">
-              Register an application
+              Register your first system
             </ChecklistLink>
             <ChecklistLink done={onboardingStatus.repositoryCount > 0} href="/Spa/OnboardingWizard" step="2">
-              Connect a repository
+              Connect source code (IT)
             </ChecklistLink>
             <ChecklistLink
               done={onboardingStatus.databaseConnectionCount > 0}
               href="/DatabaseConnections/Index"
               step="3"
             >
-              Connect a database
+              Connect a database (IT)
             </ChecklistLink>
             <ChecklistLink done={onboardingStatus.hasIndexedRepository} href="/Repositories/Index" step="4">
-              Run code discovery
+              Scan code for dependencies (IT)
             </ChecklistLink>
             <ChecklistLink done={onboardingStatus.hasSystemGraph} href="/Spa/SystemMap" step="5">
-              Build system map &amp; export docs
+              Build a system map
             </ChecklistLink>
           </div>
         </div>
@@ -242,28 +245,29 @@ export function DashboardApp() {
         <div className="row g-3 mb-4" data-tour="pipeline-stats">
           <div className="col-lg-8">
             <div className="row g-3">
-              <StatCard label="Total Requests" value={report.totalRequests} />
+              <StatCard label="All requests" value={report.totalRequests} />
               <LinkedStatCard
-                label="Awaiting Analysis"
+                label="Being reviewed"
                 value={report.awaitingAnalysisCount}
                 href="/Spa/RequestList?status=Submitted"
                 valueClass="text-info"
               />
               <LinkedStatCard
-                label="Pending Approval"
+                label="Waiting for approval"
                 value={report.pendingApprovalCount}
                 href="/Spa/ApprovalQueue"
                 valueClass="text-warning"
               />
               <StatCard
-                label="Ready for Dev"
+                label="Ready for IT"
                 value={report.readyForDevelopmentCount}
                 valueClass="text-success"
               />
             </div>
+            {isApprover ? (
             <div className="row g-3 mt-0">
               <LinkedStatCard
-                label="High-Risk Pending"
+                label="High-impact pending"
                 value={report.highRiskPendingApprovalCount}
                 href="/Spa/ApprovalQueue?view=highrisk"
                 valueClass="text-danger"
@@ -271,7 +275,7 @@ export function DashboardApp() {
               />
               <div className="col-md-4">
                 <div className="stat-card">
-                  <div className="label">Avg Approval Time</div>
+                  <div className="label">Avg. decision time</div>
                   <div className="value fs-4">
                     {report.averageApprovalTimeHours?.toFixed(1) ?? '—'}
                     <span className="fs-6"> hrs</span>
@@ -280,7 +284,7 @@ export function DashboardApp() {
               </div>
               <div className="col-md-4">
                 <div className="stat-card">
-                  <div className="label">7-day volume</div>
+                  <div className="label">Last 7 days</div>
                   <div className="sparkline mt-2" role="img" aria-label="Request volume last 7 days">
                     {insights.requestsLast7Days.map((day) => {
                       const height = Math.max(8, Math.round((day.count * 100) / maxTrend));
@@ -296,6 +300,7 @@ export function DashboardApp() {
                 </div>
               </div>
             </div>
+            ) : null}
           </div>
           <div className="col-lg-4">
             <ActivityFeed items={insights.recentActivity} />
@@ -305,9 +310,9 @@ export function DashboardApp() {
         <div className="card-panel empty-state">
           <div className="empty-state-icon">☰</div>
           <h2 className="h5">No requests yet</h2>
-          <p className="mb-3">Submit your first enhancement request to populate the dashboard.</p>
+          <p className="mb-3">Submit your first change request to see progress here.</p>
           <a href="/Spa/CreateRequest" className="btn btn-primary">
-            Create request
+            Submit a request
           </a>
         </div>
       )}

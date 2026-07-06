@@ -53,20 +53,21 @@ test.describe('EnhancementHub smoke', () => {
   test('create request SPA loads form', async ({ page }) => {
     await page.goto('/Spa/CreateRequest');
     await expect(page.locator('#spa-create-request-root')).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'New Enhancement Request' })).toBeVisible({
+    await expect(page.getByRole('heading', { name: 'Tell us what you need changed' })).toBeVisible({
       timeout: 15_000,
     });
+    await page.getByRole('button', { name: 'Fill in the form manually' }).click();
     await expect(page.getByLabel('Title')).toBeVisible();
   });
 
   test('intake copilot panel mounts on create request', async ({ page }) => {
     await page.goto('/Spa/CreateRequest');
-    await expect(page.getByRole('heading', { name: 'Intake copilot' })).toBeVisible({
+    await expect(page.getByRole('heading', { name: 'Describe your need' })).toBeVisible({
       timeout: 15_000,
     });
-    await expect(page.getByLabel('Describe your enhancement')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Draft request' })).toBeVisible();
-    await expect(page.getByText('Compliance policy intake')).toBeVisible();
+    await expect(page.getByLabel('What do you need changed?')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Start draft' })).toBeVisible();
+    await expect(page.getByText('Have a compliance policy?')).toBeVisible();
     await expect(page.getByLabel('Policy document URL')).toBeVisible();
   });
 

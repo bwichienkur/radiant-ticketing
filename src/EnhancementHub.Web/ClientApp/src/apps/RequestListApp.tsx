@@ -3,6 +3,7 @@ import { listEnhancementRequests } from '../api/spaClient';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { riskBadgeClass } from '../components/MissionControl';
 import type { EnhancementRequestListItem } from '../types/spa';
+import { formatRequestStatus, normalizeRequestStatus } from '../utils/requestLabels';
 
 const PRIORITIES = ['Critical', 'High', 'Medium', 'Low'];
 const STATUSES = [
@@ -63,19 +64,6 @@ function filtersToSearchParams(filters: ListFilters): URLSearchParams {
   return params;
 }
 
-const STATUS_BY_VALUE: Record<number, string> = {
-  0: 'Submitted',
-  1: 'AiAnalyzing',
-  2: 'NeedsClarification',
-  3: 'PendingApproval',
-  4: 'Approved',
-  5: 'Rejected',
-  6: 'ReadyForDevelopment',
-  7: 'InProgress',
-  8: 'Completed',
-  9: 'Cancelled',
-};
-
 const RISK_BY_VALUE: Record<number, string> = {
   0: 'Low',
   1: 'Medium',
@@ -84,15 +72,7 @@ const RISK_BY_VALUE: Record<number, string> = {
 };
 
 function normalizeStatus(status: string | number): string {
-  if (typeof status === 'number') {
-    return STATUS_BY_VALUE[status] ?? String(status);
-  }
-
-  if (/^\d+$/.test(status)) {
-    return STATUS_BY_VALUE[Number(status)] ?? status;
-  }
-
-  return status;
+  return normalizeRequestStatus(status);
 }
 
 function normalizeRisk(risk: string | number | undefined): string | undefined {
@@ -109,10 +89,6 @@ function normalizeRisk(risk: string | number | undefined): string | undefined {
   }
 
   return risk;
-}
-
-function formatStatus(status: string | number): string {
-  return normalizeStatus(status).replace(/([a-z])([A-Z])/g, '$1 $2');
 }
 
 export function RequestListApp() {
@@ -217,7 +193,7 @@ export function RequestListApp() {
               <option value="">All</option>
               {STATUSES.map((status) => (
                 <option key={status} value={status}>
-                  {formatStatus(status)}
+                  {formatRequestStatus(status)}
                 </option>
               ))}
             </select>
@@ -343,7 +319,7 @@ export function RequestListApp() {
                       </td>
                       <td>{item.priority}</td>
                       <td>
-                        <span className="badge text-bg-secondary badge-status">{formatStatus(item.status)}</span>
+                        <span className="badge text-bg-secondary badge-status">{formatRequestStatus(item.status)}</span>
                       </td>
                       <td>{item.submittedByUserName ?? '—'}</td>
                       <td>{item.daysInStatus ?? 0}d</td>
@@ -379,7 +355,7 @@ export function RequestListApp() {
                   ) : null}
                 </div>
                 <div className="small text-muted">
-                  {formatStatus(item.status)} · {item.priority} · {item.daysInStatus ?? 0}d
+                  {formatRequestStatus(item.status)} · {item.priority} · {item.daysInStatus ?? 0}d
                 </div>
               </a>
             ))}

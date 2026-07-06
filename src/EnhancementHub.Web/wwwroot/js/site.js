@@ -345,32 +345,42 @@
             {
                 target: '[data-tour="dashboard-header"]',
                 title: 'Welcome to EnhancementHub',
-                body: 'Your dashboard shows pipeline health, recent activity, and quick actions.'
+                body: 'Track your change requests here and see what needs attention.'
+            },
+            {
+                target: '[data-tour="onboarding-checklist"]',
+                title: 'Getting started',
+                body: 'Follow these steps to set up your first system. IT can help with technical steps.'
             },
             {
                 target: '[data-tour="copilot"]',
-                title: 'Pipeline search',
-                body: 'Find requests and pages with keywords — try “high risk pending approval”.'
+                title: 'Find anything quickly',
+                body: 'Search for requests and pages — try “pending approval”.'
             },
             {
-                target: '[data-command-trigger]',
-                title: 'Command palette',
-                body: 'Press Ctrl+K (or ⌘K) to jump to any page, request, or application.'
+                target: '[data-tour="new-request"]',
+                title: 'Submit a change request',
+                body: 'Describe what you need in everyday language — we will help shape the request.'
+            },
+            {
+                target: '[data-tour="intake-copilot"]',
+                title: 'Describe your need',
+                body: 'Start here on the New Request page. Answer a few questions and we draft the details for you.'
             },
             {
                 target: '[data-tour="pipeline-stats"]',
-                title: 'Pipeline metrics',
-                body: 'Track volume, approvals, and risk at a glance. Click a card to drill in.'
+                title: 'Your request pipeline',
+                body: 'See how many requests are being reviewed, waiting for approval, or ready for IT.'
             },
             {
                 target: '[data-tour="nav-approvals"]',
                 title: 'Approval queue',
-                body: 'Review AI-analyzed requests and approve or reject with one click.'
+                body: 'Approvers review requests here and can approve, decline, or ask for more information.'
             },
             {
-                target: '[data-tour="new-request"]',
-                title: 'Submit enhancements',
-                body: 'Create a new request to start AI analysis and governance workflow.'
+                target: '[data-command-trigger]',
+                title: 'Jump to any page',
+                body: 'Press Ctrl+K (or ⌘K) to open the command palette.'
             }
         ].filter(step => document.querySelector(step.target));
 
