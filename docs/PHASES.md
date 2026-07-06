@@ -633,4 +633,23 @@ Full plan: [ROADMAP_85.md](ROADMAP_85.md)
 | 71 | Per-tenant branding + dark mode | 4 | Complete |
 | 72 | 85+ gate verification | 4 | Complete |
 
+## Market readiness (active)
+
+Full plan: [MARKET_READINESS_PLAN.md](MARKET_READINESS_PLAN.md)
+
+| Phase | Name | Wave | Status |
+|-------|------|------|--------|
+| 73 | Command palette & theme unification | A | Planned |
+| 74 | Mobile data surface parity | A | Planned |
+| 75 | Demo path continuity | A | Planned |
+| 76 | Unified admin SPA (Jobs, Custom fields, Compliance) | B | Planned |
+| 77 | Remaining admin migration | B | Planned |
+| 78 | Design system hardening + Vitest | B | Planned |
+| 79 | Pilot #2 execution | C | Planned |
+| 80 | Published proof assets | C | Planned |
+| 81 | Conversion & packaging | C | Planned |
+| 82 | Security attestation | D | Planned |
+| 83 | Engineering scale defaults | D | Planned |
+| 84 | Market ready gate verification | D | Planned |
+
 ## Future enhancements
