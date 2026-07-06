@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json;
 using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Domain.Enums;
 
 namespace EnhancementHub.Infrastructure.Services.Delivery;
 
@@ -63,7 +64,7 @@ public sealed class QaEvidenceService : IQaEvidenceService
             "text/html",
             cancellationToken);
 
-        return new QaEvidenceResult(passed, steps, videoPath, reportPath, true);
+        return new QaEvidenceResult(passed, steps, [], videoPath, reportPath, QaRunnerKind.Simulated, true);
     }
 
     private static IReadOnlyList<QaTestStepResult> BuildSteps(string? testingPlan, string desiredOutcome, string testUrl)

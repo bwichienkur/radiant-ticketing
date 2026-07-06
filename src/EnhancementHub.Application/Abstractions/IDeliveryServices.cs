@@ -80,12 +80,64 @@ public interface IDeploymentAdapterFactory
 
 public sealed record QaTestStepResult(string Step, bool Passed, string Detail);
 
+public sealed record TestCaseStepDefinition(
+    int Order,
+    string Action,
+    string? ExpectedResult);
+
+public sealed record QaManifestCase(
+    Guid TestCaseId,
+    Guid TestCaseVersionId,
+    string Title,
+    bool IsRegressionCase,
+    IReadOnlyList<TestCaseStepDefinition> Steps);
+
+public sealed record QaRunManifest(
+    Guid EnhancementRequestId,
+    Guid DeliveryRunId,
+    Guid ApplicationId,
+    string TestUrl,
+    string DesiredOutcome,
+    IReadOnlyList<QaManifestCase> Cases);
+
+public sealed record QaCaseRunResult(
+    Guid TestCaseId,
+    Guid TestCaseVersionId,
+    string Title,
+    bool IsRegressionCase,
+    bool Passed,
+    int DurationMs,
+    string Detail,
+    IReadOnlyList<QaTestStepResult> Steps,
+    string? ScreenshotStoragePath);
+
 public sealed record QaEvidenceResult(
     bool Passed,
     IReadOnlyList<QaTestStepResult> Steps,
+    IReadOnlyList<QaCaseRunResult> CaseResults,
     string? VideoStoragePath,
     string? ReportStoragePath,
+    QaRunnerKind Runner,
     bool IsSimulation);
+
+public interface ITestCaseCatalogService
+{
+    Task<QaRunManifest> PrepareQaRunAsync(
+        EnhancementDeliveryRun run,
+        CancellationToken cancellationToken = default);
+
+    Task PromotePassedCasesToRegressionAsync(
+        Guid enhancementRequestId,
+        Guid deliveryRunId,
+        CancellationToken cancellationToken = default);
+}
+
+public interface IQaRunner
+{
+    QaRunnerKind RunnerKind { get; }
+
+    Task<QaEvidenceResult> RunAsync(QaRunManifest manifest, CancellationToken cancellationToken = default);
+}
 
 public interface IQaEvidenceService
 {

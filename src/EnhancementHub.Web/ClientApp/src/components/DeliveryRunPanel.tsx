@@ -164,6 +164,27 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
             </button>
           ) : null}
 
+          {run.testCaseResults.length > 0 ? (
+            <div className="mb-3">
+              <h3 className="h6">Test cases</h3>
+              <ul className="small list-unstyled mb-0">
+                {run.testCaseResults.map((testCase) => (
+                  <li key={testCase.testCaseId} className="mb-1">
+                    <span className={testCase.passed ? 'text-success' : 'text-danger'}>
+                      {testCase.passed ? '✓' : '✗'}
+                    </span>{' '}
+                    {testCase.title}
+                    {testCase.isRegressionCase ? (
+                      <span className="badge text-bg-light ms-1">Regression</span>
+                    ) : (
+                      <span className="badge text-bg-info ms-1">New</span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+
           {run.qaSteps.length > 0 ? (
             <div className="mb-3">
               <h3 className="h6">QA steps</h3>

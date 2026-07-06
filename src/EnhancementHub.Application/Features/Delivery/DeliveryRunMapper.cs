@@ -28,6 +28,16 @@ public static class DeliveryRunMapper
         var timeline = DeserializeTimeline(run.TimelineJson);
         var videoUrl = await PresignAsync(fileStorage, run.QaVideoStoragePath, cancellationToken);
         var reportUrl = await PresignAsync(fileStorage, run.QaReportStoragePath, cancellationToken);
+        var caseResults = run.TestResults
+            .OrderBy(r => r.TestCaseTitle)
+            .Select(r => new DeliveryRunTestResultDto(
+                r.TestCaseId,
+                r.TestCaseTitle,
+                r.IsRegressionCase,
+                r.Passed,
+                r.DurationMs,
+                r.Detail))
+            .ToList();
 
         return new EnhancementDeliveryRunDto(
             run.Id,
@@ -41,9 +51,13 @@ public static class DeliveryRunMapper
             run.TestUrl,
             run.TestDeployReference,
             qaSteps,
+            caseResults,
             run.QaPassed,
             videoUrl,
             reportUrl,
+            run.QaRunner.ToString(),
+            run.QaStartedAt,
+            run.QaFinishedAt,
             run.UatApproved,
             run.UatSignedOffAt,
             run.UatNotes,

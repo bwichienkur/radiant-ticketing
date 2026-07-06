@@ -26,4 +26,5 @@ public class Application : BaseEntity
     public ICollection<OpenApiRegistration> OpenApiRegistrations { get; set; } = new List<OpenApiRegistration>();
     public ICollection<OnPremAgent> OnPremAgents { get; set; } = new List<OnPremAgent>();
     public ApplicationDeliveryProfile? DeliveryProfile { get; set; }
+    public ICollection<ApplicationTestSuite> TestSuites { get; set; } = new List<ApplicationTestSuite>();
 }

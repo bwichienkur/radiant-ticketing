@@ -61,6 +61,10 @@ public interface IEnhancementHubDbContext
     DbSet<TenantDeploymentEnvironment> TenantDeploymentEnvironments { get; }
     DbSet<ApplicationDeliveryProfile> ApplicationDeliveryProfiles { get; }
     DbSet<EnhancementDeliveryRun> EnhancementDeliveryRuns { get; }
+    DbSet<ApplicationTestSuite> ApplicationTestSuites { get; }
+    DbSet<TestCase> TestCases { get; }
+    DbSet<TestCaseVersion> TestCaseVersions { get; }
+    DbSet<DeliveryRunTestResult> DeliveryRunTestResults { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

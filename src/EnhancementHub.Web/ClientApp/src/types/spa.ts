@@ -303,6 +303,15 @@ export interface QaTestStep {
   detail: string;
 }
 
+export interface DeliveryRunTestResult {
+  testCaseId: string;
+  title: string;
+  isRegressionCase: boolean;
+  passed: boolean;
+  durationMs: number;
+  detail?: string;
+}
+
 export interface EnhancementDeliveryRun {
   id: string;
   enhancementRequestId: string;
@@ -315,9 +324,13 @@ export interface EnhancementDeliveryRun {
   testUrl?: string;
   testDeployReference?: string;
   qaSteps: QaTestStep[];
+  testCaseResults: DeliveryRunTestResult[];
   qaPassed?: boolean;
   qaVideoUrl?: string;
   qaReportUrl?: string;
+  qaRunner: string;
+  qaStartedAt?: string;
+  qaFinishedAt?: string;
   uatApproved: boolean;
   uatSignedOffAt?: string;
   uatNotes?: string;

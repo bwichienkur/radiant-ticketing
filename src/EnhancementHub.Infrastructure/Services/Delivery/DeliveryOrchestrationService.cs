@@ -15,7 +15,8 @@ public sealed class DeliveryOrchestrationService : IDeliveryOrchestrationService
     private readonly IGitHubAppRepositoryService _gitHubRepository;
     private readonly IDeploymentConfigBundleBuilder _configBundleBuilder;
     private readonly IDeploymentAdapterFactory _adapterFactory;
-    private readonly IQaEvidenceService _qaEvidenceService;
+    private readonly ITestCaseCatalogService _testCaseCatalog;
+    private readonly IQaRunner _qaRunner;
     private readonly IChangeWindowEvaluator _changeWindowEvaluator;
     private readonly IAuditService _auditService;
     private readonly ILogger<DeliveryOrchestrationService> _logger;
@@ -26,7 +27,8 @@ public sealed class DeliveryOrchestrationService : IDeliveryOrchestrationService
         IGitHubAppRepositoryService gitHubRepository,
         IDeploymentConfigBundleBuilder configBundleBuilder,
         IDeploymentAdapterFactory adapterFactory,
-        IQaEvidenceService qaEvidenceService,
+        ITestCaseCatalogService testCaseCatalog,
+        IQaRunner qaRunner,
         IChangeWindowEvaluator changeWindowEvaluator,
         IAuditService auditService,
         IConfiguration configuration,
@@ -36,7 +38,8 @@ public sealed class DeliveryOrchestrationService : IDeliveryOrchestrationService
         _gitHubRepository = gitHubRepository;
         _configBundleBuilder = configBundleBuilder;
         _adapterFactory = adapterFactory;
-        _qaEvidenceService = qaEvidenceService;
+        _testCaseCatalog = testCaseCatalog;
+        _qaRunner = qaRunner;
         _changeWindowEvaluator = changeWindowEvaluator;
         _auditService = auditService;
         _logger = logger;
@@ -326,22 +329,43 @@ public sealed class DeliveryOrchestrationService : IDeliveryOrchestrationService
             throw new InvalidOperationException("Test URL is missing.");
         }
 
-        var analysis = run.EnhancementRequest.Analyses.OrderByDescending(a => a.Version).FirstOrDefault();
-        var qa = await _qaEvidenceService.RunQaAsync(
-            run.EnhancementRequestId,
-            run.Id,
-            run.TestUrl,
-            analysis?.TestingPlan,
-            run.EnhancementRequest.DesiredOutcome,
-            cancellationToken);
+        run.QaStartedAt = DateTime.UtcNow;
+        run.QaRunner = _qaRunner.RunnerKind;
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        var manifest = await _testCaseCatalog.PrepareQaRunAsync(run, cancellationToken);
+        var qa = await _qaRunner.RunAsync(manifest, cancellationToken);
+
+        var now = DateTime.UtcNow;
+        foreach (var caseResult in qa.CaseResults)
+        {
+            _dbContext.DeliveryRunTestResults.Add(new DeliveryRunTestResult
+            {
+                Id = Guid.NewGuid(),
+                EnhancementDeliveryRunId = run.Id,
+                TestCaseId = caseResult.TestCaseId,
+                TestCaseVersionId = caseResult.TestCaseVersionId,
+                TestCaseTitle = caseResult.Title,
+                IsRegressionCase = caseResult.IsRegressionCase,
+                Passed = caseResult.Passed,
+                DurationMs = caseResult.DurationMs,
+                Detail = caseResult.Detail,
+                ScreenshotStoragePath = caseResult.ScreenshotStoragePath,
+                CreatedAt = now,
+                UpdatedAt = now,
+            });
+        }
 
         run.QaPassed = qa.Passed;
         run.QaStepsJson = JsonSerializer.Serialize(qa.Steps);
         run.QaVideoStoragePath = qa.VideoStoragePath;
         run.QaReportStoragePath = qa.ReportStoragePath;
+        run.QaFinishedAt = now;
         run.TimelineJson = DeliveryTimeline.AppendEvent(
             run.TimelineJson,
-            qa.Passed ? "QA passed." : "QA failed.");
+            qa.Passed
+                ? $"QA passed ({qa.CaseResults.Count} cases, {qa.CaseResults.Count(c => c.IsRegressionCase)} regression)."
+                : "QA failed.");
 
         if (!qa.Passed)
         {
@@ -351,12 +375,16 @@ public sealed class DeliveryOrchestrationService : IDeliveryOrchestrationService
         }
         else
         {
+            await _testCaseCatalog.PromotePassedCasesToRegressionAsync(
+                run.EnhancementRequestId,
+                run.Id,
+                cancellationToken);
             run.Phase = DeliveryRunPhase.AwaitingUat;
             run.EnhancementRequest.Status = EnhancementRequestStatus.AwaitingUat;
         }
 
-        run.UpdatedAt = DateTime.UtcNow;
-        run.EnhancementRequest.UpdatedAt = DateTime.UtcNow;
+        run.UpdatedAt = now;
+        run.EnhancementRequest.UpdatedAt = now;
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 

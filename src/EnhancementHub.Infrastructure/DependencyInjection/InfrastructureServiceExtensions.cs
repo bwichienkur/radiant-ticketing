@@ -137,6 +137,8 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IDeploymentAdapter, Services.Delivery.GitHubActionsDeploymentAdapter>();
         services.AddScoped<IDeploymentAdapter, Services.Delivery.WebhookDeploymentAdapter>();
         services.AddScoped<IDeploymentAdapterFactory, Services.Delivery.DeploymentAdapterFactory>();
+        services.AddScoped<ITestCaseCatalogService, Services.Delivery.TestCaseCatalogService>();
+        services.AddScoped<IQaRunner, Services.Delivery.SimulatedQaRunner>();
         services.AddScoped<IQaEvidenceService, Services.Delivery.QaEvidenceService>();
         services.AddScoped<IChangeWindowEvaluator, Services.Delivery.ChangeWindowEvaluator>();
         services.AddScoped<IDeliveryOrchestrationService, Services.Delivery.DeliveryOrchestrationService>();
