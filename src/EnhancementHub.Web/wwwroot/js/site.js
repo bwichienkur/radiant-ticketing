@@ -390,7 +390,7 @@
             {
                 target: '[data-command-trigger]',
                 title: 'Jump to any page',
-                body: 'Press Ctrl+K (or ⌘K) to open the command palette.'
+                body: `Press ${/Mac|iPhone|iPad|iPod/.test(navigator.platform) ? '⌘K' : 'Ctrl+K'} to open the command palette.`
             }
         ].filter(step => document.querySelector(step.target));
 
@@ -525,6 +525,13 @@
         const root = document.getElementById('spa-root');
         if (!root) return null;
 
+        /*
+         * SPA vs full-page navigation (Phase 48):
+         * - Client-side (no reload): /, /Index, /Spa/*
+         * - Full Razor page load: /Applications, /DatabaseConnections, /SchemaDrift,
+         *   /Documentation, /Refactor, /Repositories, /Audit, /Admin/*
+         * Intelligence links from the React dashboard use full-page routes until Phase 49.
+         */
         const spaExact = new Set(['/', '/Index']);
         const spaPrefixes = [
             '/Spa/RequestList',

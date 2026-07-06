@@ -1,9 +1,12 @@
 @{
     var path = ViewContext.HttpContext.Request.Path.Value ?? "/";
-    bool NavActive(params string[] segments) =>
-        segments.Any(s => path.StartsWith(s, StringComparison.OrdinalIgnoreCase));
+    bool NavActive(string segment) => path.StartsWith(segment, StringComparison.OrdinalIgnoreCase);
     bool NavExact(string segment) => string.Equals(path, segment, StringComparison.OrdinalIgnoreCase);
     bool NavDashboard() => NavExact("/Index") || NavExact("/");
+    bool NavRequests() =>
+        NavActive("/Spa/RequestList")
+        && !NavActive("/Spa/CreateRequest")
+        && !NavActive("/Spa/ApprovalQueue");
     var isAdmin = path.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase);
 }
 
@@ -20,16 +23,16 @@
             <a class="sidebar-link @(NavDashboard() ? "active" : "")" asp-page="/Index">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"dashboard"' /></span> Dashboard
             </a>
-            <a class="sidebar-link @(NavActive("/Spa/RequestList", "/EnhancementRequests") && !NavActive("/EnhancementRequests/Approve", "/Spa/ApprovalQueue") && !NavActive("/EnhancementRequests/Create", "/Spa/CreateRequest") ? "active" : "")" href="/Spa/RequestList">
+            <a class="sidebar-link @(NavRequests() ? "active" : "")" href="/Spa/RequestList">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"requests"' /></span> Requests
             </a>
-            <a class="sidebar-link @(NavActive("/Spa/ApprovalQueue", "/EnhancementRequests/Approve") ? "active" : "")" href="/Spa/ApprovalQueue" data-tour="nav-approvals">
+            <a class="sidebar-link @(NavActive("/Spa/ApprovalQueue") ? "active" : "")" href="/Spa/ApprovalQueue" data-tour="nav-approvals">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"approvals"' /></span> Approvals
             </a>
-            <a class="sidebar-link @(NavActive("/EnhancementRequests/Create", "/Spa/CreateRequest") ? "active" : "")" href="/Spa/CreateRequest">
+            <a class="sidebar-link @(NavActive("/Spa/CreateRequest") ? "active" : "")" href="/Spa/CreateRequest">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"create"' /></span> New request
             </a>
-            <a class="sidebar-link @(NavActive("/Spa/OnboardingWizard", "/Onboarding") ? "active" : "")" href="/Spa/OnboardingWizard" data-tour="nav-setup">
+            <a class="sidebar-link @(NavActive("/Spa/OnboardingWizard") ? "active" : "")" href="/Spa/OnboardingWizard" data-tour="nav-setup">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"setup"' /></span> Setup
             </a>
         </div>
@@ -38,7 +41,7 @@
             <a class="sidebar-link @(NavActive("/Applications") ? "active" : "")" asp-page="/Applications/Index">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"applications"' /></span> Applications
             </a>
-            <a class="sidebar-link @(NavActive("/Spa/SystemMap", "/SystemMap") ? "active" : "")" href="/Spa/SystemMap">
+            <a class="sidebar-link @(NavActive("/Spa/SystemMap") ? "active" : "")" href="/Spa/SystemMap">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"map"' /></span> System map
             </a>
             <a class="sidebar-link @(NavActive("/DatabaseConnections") ? "active" : "")" asp-page="/DatabaseConnections/Index">

@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace EnhancementHub.Web.Pages.EnhancementRequests;
 
+/// <summary>Legacy Razor create flow — redirects to <c>/Spa/CreateRequest</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/CreateRequest. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize]
 public class CreateModel : PageModel
 {

@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.EnhancementRequests;
 
+/// <summary>Legacy Razor request list — redirects to <c>/Spa/RequestList</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/RequestList. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize]
 public class IndexModel : PageModel
 {

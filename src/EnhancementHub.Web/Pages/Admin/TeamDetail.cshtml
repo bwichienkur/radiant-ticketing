@@ -3,17 +3,19 @@
 @using EnhancementHub.Application.Features.Admin.Dtos
 @using EnhancementHub.Domain.Enums
 @{
+    ViewData["AdminSection"] = "teams";
     ViewData["Title"] = Model.Team?.Name ?? "Team";
+    ViewData["PageHeaderTitle"] = Model.Team?.Name ?? "Team";
+    ViewData["PageHeaderDescription"] = Model.Team?.Description ?? "Manage members and roles";
     var team = Model.Team;
 }
 
-<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
-    <div>
-        <h1>@(team?.Name ?? "Team")</h1>
-        <p>@(team?.Description ?? "Manage members and roles")</p>
-    </div>
+<partial name="_AdminNav" />
+
+<header class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <partial name="_PageHeader" />
     <a class="btn btn-outline-secondary btn-sm" asp-page="/Admin/Teams">← All teams</a>
-</div>
+</header>
 
 @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
 {

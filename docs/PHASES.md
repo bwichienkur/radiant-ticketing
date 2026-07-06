@@ -401,6 +401,14 @@
 
 Guide: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md)
 
+## Phase 48 — Route consolidation (complete)
+
+- Sidebar Work section uses SPA routes only; removed legacy `/EnhancementRequests` active logic
+- Dashboard intelligence widgets: unresolved drift + stale repositories with deep links
+- `[Obsolete]` on legacy EnhancementRequests page models; permanent SPA redirects
+- `_PageHeader` on Admin Compliance and Team Detail; Team Detail includes `_AdminNav`
+- Platform-aware command palette shortcut in product tour; SPA vs full-page routes documented in `site.js`
+
 ## Phases 46–57 — Due diligence execution (planned)
 
 Post-audit roadmap to reach world-class enterprise readiness. Full task breakdown: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md).

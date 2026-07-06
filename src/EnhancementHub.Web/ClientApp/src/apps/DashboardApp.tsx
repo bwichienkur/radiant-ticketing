@@ -154,6 +154,44 @@ export function DashboardApp() {
         </div>
       </div>
 
+      {(insights.unresolvedDriftFindings > 0 || insights.staleRepositoryCount > 0) ? (
+        <div className="row g-3 mb-4" data-tour="intelligence-health">
+          {insights.unresolvedDriftFindings > 0 ? (
+            <div className="col-md-6 col-xl-4">
+              <SpaLink href="/SchemaDrift/Index" className="text-decoration-none">
+                <div className="stat-card queue-action-card stat-card-link">
+                  <div className="label">Schema drift</div>
+                  <div className="value text-warning">{insights.unresolvedDriftFindings}</div>
+                  <div className="small text-muted">Unresolved findings → review drift</div>
+                </div>
+              </SpaLink>
+            </div>
+          ) : null}
+          {insights.staleRepositoryCount > 0 ? (
+            <div className="col-md-6 col-xl-4">
+              <SpaLink href="/Repositories/Index" className="text-decoration-none">
+                <div className="stat-card queue-action-card stat-card-link">
+                  <div className="label">Stale repositories</div>
+                  <div className="value text-danger">{insights.staleRepositoryCount}</div>
+                  <div className="small text-muted">Re-index or open system map →</div>
+                </div>
+              </SpaLink>
+            </div>
+          ) : null}
+          {insights.staleRepositoryCount > 0 ? (
+            <div className="col-md-6 col-xl-4">
+              <SpaLink href="/Spa/SystemMap" className="text-decoration-none">
+                <div className="stat-card queue-action-card stat-card-link">
+                  <div className="label">Portfolio map</div>
+                  <div className="value text-primary">→</div>
+                  <div className="small text-muted">Explore system map</div>
+                </div>
+              </SpaLink>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       {(isApprover && insights.myPendingApprovals > 0) || insights.myAwaitingAnalysis > 0 ? (
         <div className="row g-3 mb-4">
           {isApprover && insights.myPendingApprovals > 0 ? (

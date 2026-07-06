@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.EnhancementRequests;
 
+/// <summary>Legacy Razor request detail — redirects to <c>/Spa/RequestDetail/{id}</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/RequestDetail/{id}. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize]
 public class DetailsModel : PageModel
 {

@@ -12,6 +12,8 @@ public sealed record DashboardInsightsDto(
     IReadOnlyList<DashboardActivityItemDto> RecentActivity,
     IReadOnlyList<DailyRequestCountDto> RequestsLast7Days,
     int MyPendingApprovals,
-    int MyAwaitingAnalysis);
+    int MyAwaitingAnalysis,
+    int UnresolvedDriftFindings,
+    int StaleRepositoryCount);
 
 public sealed record DailyRequestCountDto(DateOnly Date, int Count);

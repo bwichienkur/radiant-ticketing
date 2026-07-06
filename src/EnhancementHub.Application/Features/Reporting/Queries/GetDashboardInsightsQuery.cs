@@ -13,13 +13,16 @@ public sealed class GetDashboardInsightsQueryHandler
 {
     private readonly IReportingDbContext _dbContext;
     private readonly ICurrentUserService _currentUser;
+    private readonly IIndexFreshnessService _indexFreshness;
 
     public GetDashboardInsightsQueryHandler(
         IReportingDbContext dbContext,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        IIndexFreshnessService indexFreshness)
     {
         _dbContext = dbContext;
         _currentUser = currentUser;
+        _indexFreshness = indexFreshness;
     }
 
     public async Task<DashboardInsightsDto> Handle(
@@ -94,6 +97,19 @@ public sealed class GetDashboardInsightsQueryHandler
                     cancellationToken);
         }
 
-        return new DashboardInsightsDto(activity, trend, myPendingApprovals, myAwaitingAnalysis);
+        var unresolvedDriftFindings = await _dbContext.SchemaDriftFindings
+            .AsNoTracking()
+            .CountAsync(f => !f.IsResolved, cancellationToken);
+
+        var freshness = await _indexFreshness.GetReportAsync(cancellationToken);
+        var staleRepositoryCount = freshness.StaleCount;
+
+        return new DashboardInsightsDto(
+            activity,
+            trend,
+            myPendingApprovals,
+            myAwaitingAnalysis,
+            unresolvedDriftFindings,
+            staleRepositoryCount);
     }
 }

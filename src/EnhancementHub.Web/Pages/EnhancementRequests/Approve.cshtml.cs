@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.EnhancementRequests;
 
+/// <summary>Legacy Razor approval queue — redirects to <c>/Spa/ApprovalQueue</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/ApprovalQueue. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize]
 public class ApproveModel : PageModel
 {

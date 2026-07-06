@@ -208,6 +208,8 @@ export interface DashboardInsights {
   requestsLast7Days: DailyRequestCount[];
   myPendingApprovals: number;
   myAwaitingAnalysis: number;
+  unresolvedDriftFindings: number;
+  staleRepositoryCount: number;
 }
 
 export interface DashboardReport {

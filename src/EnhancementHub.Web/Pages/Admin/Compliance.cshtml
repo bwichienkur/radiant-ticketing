@@ -3,19 +3,18 @@
 @{
     ViewData["AdminSection"] = "compliance";
     ViewData["Title"] = "SOC 2 Readiness";
+    ViewData["PageHeaderTitle"] = "SOC 2 Readiness";
+    ViewData["PageHeaderDescription"] = "Control-to-feature mapping for security questionnaire and audit preparation";
     var report = Model.Report;
 }
 
 <partial name="_AdminNav" />
 
-<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
-    <div>
-        <h1>SOC 2 Readiness</h1>
-        <p>Control-to-feature mapping for security questionnaire and audit preparation</p>
-    </div>
+<header class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <partial name="_PageHeader" />
     @if (report is not null)
     {
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 page-header-actions">
             <span class="badge text-bg-success badge-status">@report.ImplementedCount implemented</span>
             <span class="badge text-bg-warning badge-status">@report.PartialCount partial</span>
             @if (report.GapCount > 0)
@@ -24,7 +23,7 @@
             }
         </div>
     }
-</div>
+</header>
 
 <p class="text-muted small">
     This report reflects platform capabilities and current configuration — not a SOC 2 attestation.

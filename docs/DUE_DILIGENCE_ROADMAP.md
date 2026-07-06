@@ -397,7 +397,7 @@ From [ROADMAP.md](ROADMAP.md) — **fill measured column during Phase 56**.
 |-------|------|------|
 | 46 | CI quality gate & E2E repair | 0 |
 | 47 | Production trust guards | 1 |
-| 48 | Route consolidation & legacy deprecation | 2 |
+| 48 | Route consolidation & legacy deprecation | 2 | **Done** |
 | 49 | Intelligence pages in React shell | 2 |
 | 50 | Notification system | 3 |
 | 51 | Global entity search | 3 |
