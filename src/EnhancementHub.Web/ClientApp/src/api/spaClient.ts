@@ -7,6 +7,7 @@ import type {
   AuditLogEntry,
   AuditLogFilters,
   DatabaseConnectionSummary,
+  DatabaseSchema,
   DriftReport,
   DriftRequestDraft,
   ApprovalHistoryItem,
@@ -31,6 +32,12 @@ import type {
   PlatformRuntimeStatus,
   RepositoryPathValidation,
   RepositoryListItem,
+  ErdDiagram,
+  BlastRadiusResult,
+  RefactorPlanSummary,
+  RefactorPlanDetail,
+  RegisterDatabaseConnectionInput,
+  DocumentationExportFormat,
   GlobalSearchItem,
   GlobalSearchResult,
   SystemMap,
@@ -92,6 +99,57 @@ export async function postRequestComment(
 
 export async function listApplications(): Promise<ApplicationListItem[]> {
   return fetchJson<ApplicationListItem[]>('/web-api/spa/applications');
+}
+
+export async function listDatabaseConnections(): Promise<DatabaseConnectionSummary[]> {
+  return fetchJson<DatabaseConnectionSummary[]>('/web-api/spa/connections');
+}
+
+export async function registerDatabaseConnection(
+  input: RegisterDatabaseConnectionInput,
+): Promise<DatabaseConnectionSummary> {
+  return postJson<DatabaseConnectionSummary>('/web-api/spa/connections', input);
+}
+
+export async function triggerDatabaseScan(connectionId: string): Promise<DatabaseConnectionSummary> {
+  return postJson<DatabaseConnectionSummary>(`/web-api/spa/connections/${connectionId}/scan`);
+}
+
+export async function getDatabaseSchema(connectionId: string): Promise<DatabaseSchema> {
+  return fetchJson<DatabaseSchema>(`/web-api/spa/connections/${connectionId}/schema`);
+}
+
+export async function getConnectionErd(connectionId: string): Promise<ErdDiagram> {
+  return fetchJson<ErdDiagram>(`/web-api/spa/connections/${connectionId}/erd`);
+}
+
+export function exportDocumentation(applicationId: string, format: DocumentationExportFormat): void {
+  const params = new URLSearchParams();
+  params.set('applicationId', applicationId);
+  params.set('format', format);
+  window.location.assign(`/web-api/spa/documentation/export?${params.toString()}`);
+}
+
+export async function analyzeRefactorBlastRadius(
+  applicationId: string,
+  target: string,
+): Promise<BlastRadiusResult> {
+  return postJson<BlastRadiusResult>('/web-api/spa/refactor/analyze', { applicationId, target });
+}
+
+export async function generateRefactorPlan(
+  applicationId: string,
+  target: string,
+): Promise<RefactorPlanDetail> {
+  return postJson<RefactorPlanDetail>('/web-api/spa/refactor/plans', { applicationId, target });
+}
+
+export async function listRefactorPlans(): Promise<RefactorPlanSummary[]> {
+  return fetchJson<RefactorPlanSummary[]>('/web-api/spa/refactor/plans');
+}
+
+export async function getRefactorPlan(planId: string): Promise<RefactorPlanDetail> {
+  return fetchJson<RefactorPlanDetail>(`/web-api/spa/refactor/plans/${planId}`);
 }
 
 export async function listDriftConnections(): Promise<DatabaseConnectionSummary[]> {

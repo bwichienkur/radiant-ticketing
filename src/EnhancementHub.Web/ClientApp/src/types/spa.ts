@@ -88,7 +88,87 @@ export interface DatabaseConnectionSummary {
   applicationId: string;
   applicationName?: string;
   name: string;
+  provider?: string;
+  isReadOnly?: boolean;
   scanStatus: string;
+  lastScannedAt?: string;
+  scanError?: string;
+}
+
+export interface DatabaseColumn {
+  name: string;
+  dataType: string;
+  isNullable: boolean;
+  isPrimaryKey: boolean;
+  isForeignKey: boolean;
+  ordinalPosition: number;
+}
+
+export interface DatabaseTable {
+  id: string;
+  schemaName: string;
+  tableName: string;
+  columns: DatabaseColumn[];
+}
+
+export interface DatabaseSchema {
+  connectionId: string;
+  connectionName: string;
+  tables: DatabaseTable[];
+  relationships: Array<{
+    fromTable: string;
+    fromColumn: string;
+    toTable: string;
+    toColumn: string;
+    relationshipType: string;
+  }>;
+}
+
+export interface ErdDiagram {
+  applicationId: string;
+  mermaid: string;
+}
+
+export type DocumentationExportFormat = 'Markdown' | 'Mermaid' | 'Both';
+
+export interface BlastRadiusItem {
+  name: string;
+  type: string;
+  impact: string;
+  depth: number;
+}
+
+export interface BlastRadiusResult {
+  targetName: string;
+  affectedItems: BlastRadiusItem[];
+}
+
+export interface RefactorPlanSummary {
+  id: string;
+  title: string;
+  targetDescription: string;
+  status: string;
+  riskLevel: string;
+  confidenceScore: number;
+  createdAt: string;
+}
+
+export interface RefactorPlanDetail {
+  id: string;
+  title: string;
+  targetDescription: string;
+  planMarkdown?: string;
+  blastRadius?: BlastRadiusResult;
+  status: string;
+  createdAt: string;
+}
+
+export interface RegisterDatabaseConnectionInput {
+  applicationId: string;
+  name: string;
+  provider: string;
+  connectionString: string;
+  isReadOnly: boolean;
 }
 
 export interface SchemaDriftFinding {
@@ -381,6 +461,26 @@ export interface EnhancementTemplate extends EnhancementTemplateSummary {
 export interface CreateRequestFormData {
   applications: ApplicationSummary[];
   templates: EnhancementTemplateSummary[];
+  customFields: CustomFieldDefinition[];
+}
+
+export interface CustomFieldDefinition {
+  id: string;
+  key: string;
+  label: string;
+  fieldType: string;
+  isRequired: boolean;
+  isActive: boolean;
+  sortOrder: number;
+  options: string[];
+}
+
+export interface CustomFieldValueInput {
+  key: string;
+  textValue?: string;
+  numberValue?: number;
+  dateValue?: string;
+  userValueId?: string;
 }
 
 export interface CreateRequestInput {
@@ -393,6 +493,7 @@ export interface CreateRequestInput {
   department?: string;
   supportingNotes?: string;
   templateId?: string;
+  customFields?: CustomFieldValueInput[];
 }
 
 export interface CreatedRequestSummary {

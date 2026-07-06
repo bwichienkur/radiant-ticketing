@@ -531,4 +531,35 @@ Post-audit roadmap to reach world-class enterprise readiness. Full task breakdow
 | 59 | E2E accessibility & admin polish |
 | 60 | Feature flags |
 
+## Phase 61 — Shell unification (complete)
+
+- Migrated DatabaseConnections, Documentation Export, and Refactor to React SPA
+- BFF endpoints on `SpaIntelligenceController`
+- Legacy Razor redirects; `Phase61ShellUnificationTests`
+
+## Phase 62 — Enterprise intake + demo trust (complete)
+
+- Custom fields on `CreateRequestApp.tsx`
+- `MockAiTrustBanner` in `SpaShell.tsx`
+- `Phase62EnterpriseIntakeTests`
+
+## Roadmap to 85+ (active)
+
+Full plan: [ROADMAP_85.md](ROADMAP_85.md)
+
+| Phase | Name | Wave | Status |
+|-------|------|------|--------|
+| 61 | Shell unification (DB, Docs, Refactor → React) | 1 | Complete |
+| 62 | Enterprise intake + demo trust | 1 | Complete |
+| 63 | Unified Admin Settings SPA | 1 | Planned |
+| 64 | Design partner #2 + case study | 2 | Planned |
+| 65 | Executive ROI dashboard | 2 | Planned |
+| 66 | LLM approval copilot | 2 | Planned |
+| 67 | Command palette + semantic search | 3 | Planned |
+| 68 | EF decoupling wave 1 | 3 | Planned |
+| 69 | Postgres load CI + visual regression | 3 | Planned |
+| 70 | Drift autopilot + portfolio heatmap | 4 | Planned |
+| 71 | Per-tenant branding + dark mode | 4 | Planned |
+| 72 | 85+ gate verification | 4 | Planned |
+
 ## Future enhancements
