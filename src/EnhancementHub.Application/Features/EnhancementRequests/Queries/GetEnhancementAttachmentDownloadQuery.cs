@@ -1,8 +1,8 @@
 using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Abstractions.Persistence;
 using EnhancementHub.Application.Common.Exceptions;
 using EnhancementHub.Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace EnhancementHub.Application.Features.EnhancementRequests.Queries;
 
@@ -19,17 +19,17 @@ public sealed record EnhancementAttachmentDownloadResult(
 public sealed class GetEnhancementAttachmentDownloadQueryHandler
     : IRequestHandler<GetEnhancementAttachmentDownloadQuery, EnhancementAttachmentDownloadResult>
 {
-    private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IEnhancementRequestRepository _requests;
     private readonly IFileStorageService _fileStorage;
     private readonly IEnhancementRequestAccessService _accessService;
     private readonly TimeSpan _presignedUrlValidity = TimeSpan.FromMinutes(60);
 
     public GetEnhancementAttachmentDownloadQueryHandler(
-        IEnhancementHubDbContext dbContext,
+        IEnhancementRequestRepository requests,
         IFileStorageService fileStorage,
         IEnhancementRequestAccessService accessService)
     {
-        _dbContext = dbContext;
+        _requests = requests;
         _fileStorage = fileStorage;
         _accessService = accessService;
     }
@@ -40,12 +40,11 @@ public sealed class GetEnhancementAttachmentDownloadQueryHandler
     {
         await _accessService.GetAccessibleRequestAsync(request.EnhancementRequestId, cancellationToken);
 
-        var attachment = await _dbContext.EnhancementAttachments
-            .AsNoTracking()
-            .FirstOrDefaultAsync(
-                a => a.Id == request.AttachmentId && a.EnhancementRequestId == request.EnhancementRequestId,
-                cancellationToken)
-            ?? throw new NotFoundException(nameof(EnhancementAttachment), request.AttachmentId);
+        var attachment = await _requests.GetAttachmentAsync(request.AttachmentId, cancellationToken);
+        if (attachment is null || attachment.EnhancementRequestId != request.EnhancementRequestId)
+        {
+            throw new NotFoundException(nameof(EnhancementAttachment), request.AttachmentId);
+        }
 
         var presignedUrl = await _fileStorage.GetPresignedDownloadUrlAsync(
             attachment.StoragePath,

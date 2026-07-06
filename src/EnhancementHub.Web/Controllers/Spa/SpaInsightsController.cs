@@ -63,5 +63,5 @@ public sealed class SpaInsightsController : ControllerBase
         value.HasValue ? value.Value.ToString(CultureInfo.InvariantCulture) : string.Empty;
 
     private static string EscapeCsv(string value) =>
-        value.Replace(' ', '_', StringComparison.Ordinal);
+        value.Replace(" ", "_", StringComparison.Ordinal);
 }

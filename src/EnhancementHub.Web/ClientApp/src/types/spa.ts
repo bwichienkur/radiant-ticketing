@@ -633,6 +633,7 @@ export interface GlobalSearchResult {
   query: string;
   items: GlobalSearchItem[];
   groups: Record<string, GlobalSearchItem[]>;
+  semanticHint?: string | null;
 }
 
 export interface AuthenticationConfigurationStatus {

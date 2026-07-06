@@ -94,19 +94,19 @@ Execute [DESIGN_PARTNER_PLAYBOOK.md](DESIGN_PARTNER_PLAYBOOK.md); track progress
 
 ---
 
-## WAVE 3 — Engineering Credibility (67–69) → 83/100
+## WAVE 3 — Engineering Credibility (67–69) → 83/100 ✅
 
-### Phase 67 — Command palette + semantic portfolio search
+### Phase 67 — Command palette + semantic portfolio search ✅
 
-`CommandPalette.tsx` (⌘K); extend `GlobalEntitySearchQuery` with semantic mode.
+`CommandPalette.tsx` (⌘K) in React SPA shell; `GlobalEntitySearchQuery` semantic mode behind `Features:SemanticSearch`.
 
-### Phase 68 — EF decoupling wave 1
+### Phase 68 — EF decoupling wave 1 ✅
 
-Repository interfaces for top 5 aggregates; migrate top 20 handlers; global `TenantId` query filter; CI rule blocking new `IEnhancementHubDbContext` in handlers.
+Repository interfaces for top 5 aggregates; 20 handlers migrated; global `TenantId` query filter; CI allowlist blocks new `IEnhancementHubDbContext` in handlers.
 
-### Phase 69 — PostgreSQL load proof in CI + visual regression
+### Phase 69 — PostgreSQL load proof in CI + visual regression ✅
 
-Postgres k6 500 VU gate; Chromatic on `UIKit.stories.tsx`; axe blocks serious violations on PR.
+Postgres k6 gate job (PR profile on CI, 500 VU in `k6-postgres-gate.js`); Storybook build baseline; axe E2E blocks serious violations on PR.
 
 **Wave 3 gate:** Repository pattern for new code · Postgres load proof · Chromatic baseline
 
@@ -169,4 +169,4 @@ Re-run audit checklist; update `PRODUCT_SCORECARD.md`; 5-person heuristic UX rev
 
 ---
 
-*Last updated: July 2026 — Wave 2 complete (Phases 64–66).*
+*Last updated: July 2026 — Wave 3 complete (Phases 67–69).*

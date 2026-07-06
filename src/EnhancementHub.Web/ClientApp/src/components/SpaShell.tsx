@@ -32,6 +32,7 @@ import { SettingsApp } from '../apps/SettingsApp';
 import { InsightsApp } from '../apps/InsightsApp';
 import { FeedbackWidget } from './FeedbackWidget';
 import { MockAiTrustBanner } from './MockAiTrustBanner';
+import { CommandPalette } from './CommandPalette';
 import { readSpaContext } from '../spaRoutes';
 
 function RequestListRoute() {
@@ -128,6 +129,7 @@ export function SpaShell() {
     <BrowserRouter>
       <SpaNavigationBridge />
       <MockAiTrustBanner />
+      <CommandPalette />
       <FeedbackWidget />
       <Routes>
         <Route path="/" element={<DashboardApp />} />

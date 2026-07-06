@@ -70,6 +70,12 @@ public static class InfrastructureServiceExtensions
 
         services.AddScoped<IEnhancementHubDbContext>(sp => sp.GetRequiredService<EnhancementHubDbContext>());
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+        services.AddScoped<IEnhancementRequestRepository, EnhancementRequestRepository>();
+        services.AddScoped<IApplicationRepository, ApplicationRepository>();
+        services.AddScoped<ITeamRepository, TeamRepository>();
+        services.AddScoped<IGitRepositoryRepository, GitRepositoryRepository>();
+        services.AddScoped<IEnhancementAnalysisRepository, EnhancementAnalysisRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
 
         services.ConfigureEnhancementHubDataProtection(configuration);
 

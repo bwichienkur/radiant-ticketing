@@ -527,9 +527,13 @@ export async function searchGlobal(query: string, limit = 20): Promise<GlobalSea
   );
 }
 
-export async function searchGlobalGrouped(query: string, limit = 20): Promise<GlobalSearchResult> {
+export async function searchGlobalGrouped(
+  query: string,
+  limit = 20,
+  semantic = false,
+): Promise<GlobalSearchResult> {
   return fetchJson<GlobalSearchResult>(
-    `/web-api/spa/search?q=${encodeURIComponent(query)}&grouped=true&limit=${limit}`,
+    `/web-api/spa/search?q=${encodeURIComponent(query)}&grouped=true&limit=${limit}&semantic=${semantic}`,
   );
 }
 

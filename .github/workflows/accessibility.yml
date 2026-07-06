@@ -15,3 +15,28 @@ jobs:
           node-version: '20'
       - name: Run static accessibility checks
         run: node tests/a11y/static-check.mjs
+
+  axe-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: tests/e2e/package-lock.json
+
+      - name: Install Playwright dependencies
+        working-directory: tests/e2e
+        run: |
+          npm ci 2>/dev/null || npm install
+          npx playwright install chromium --with-deps
+
+      - name: Run axe accessibility E2E (blocks serious violations)
+        run: node scripts/run-e2e-accessibility.mjs

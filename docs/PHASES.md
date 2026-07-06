@@ -571,6 +571,27 @@ Post-audit roadmap to reach world-class enterprise readiness. Full task breakdow
 - Approval queue shows AI copilot vs rule-based badge
 - `Phase66ApprovalCopilotLlmTests`
 
+## Phase 67 — Command palette + semantic search (complete)
+
+- `CommandPalette.tsx` in SPA shell (⌘K / Ctrl+K)
+- `GlobalEntitySearchQuery` semantic mode + `Features:SemanticSearch`
+- `Phase67CommandPaletteTests`
+
+## Phase 68 — EF decoupling wave 1 (complete)
+
+- Aggregate repositories: EnhancementRequest, Application, Team, GitRepository, EnhancementAnalysis, User
+- 20 handlers migrated off `IEnhancementHubDbContext`
+- Global `TenantId` query filters on tenant-scoped entities
+- `docs/ef-handler-allowlist.txt` + CI enforcement
+- `Phase68EfDecouplingTests`
+
+## Phase 69 — Postgres load CI + visual/a11y gates (complete)
+
+- `k6-postgres-gate.js` + CI job with PostgreSQL service
+- Storybook build in CI (`UIKit.stories.tsx` baseline)
+- axe E2E suite blocks serious violations on PR
+- `Phase69CiProofTests`
+
 ## Roadmap to 85+ (active)
 
 Full plan: [ROADMAP_85.md](ROADMAP_85.md)
@@ -583,9 +604,9 @@ Full plan: [ROADMAP_85.md](ROADMAP_85.md)
 | 64 | Design partner #2 + case study | 2 | Complete |
 | 65 | Executive ROI dashboard | 2 | Complete |
 | 66 | LLM approval copilot | 2 | Complete |
-| 67 | Command palette + semantic search | 3 | Planned |
-| 68 | EF decoupling wave 1 | 3 | Planned |
-| 69 | Postgres load CI + visual regression | 3 | Planned |
+| 67 | Command palette + semantic search | 3 | Complete |
+| 68 | EF decoupling wave 1 | 3 | Complete |
+| 69 | Postgres load CI + visual regression | 3 | Complete |
 | 70 | Drift autopilot + portfolio heatmap | 4 | Planned |
 | 71 | Per-tenant branding + dark mode | 4 | Planned |
 | 72 | 85+ gate verification | 4 | Planned |
