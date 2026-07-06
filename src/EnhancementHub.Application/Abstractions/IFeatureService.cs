@@ -12,4 +12,5 @@ public static class FeatureFlags
     public const string SemanticSearch = "SemanticSearch";
     public const string FeedbackWidget = "FeedbackWidget";
     public const string ApprovalCopilot = "ApprovalCopilot";
+    public const string DriftAutopilot = "DriftAutopilot";
 }

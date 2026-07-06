@@ -16,6 +16,7 @@ const NAV_PAGES: PaletteItem[] = [
   { type: 'page', title: 'Approvals', subtitle: 'Navigate', url: '/Spa/ApprovalQueue' },
   { type: 'page', title: 'System map', subtitle: 'Navigate', url: '/Spa/SystemMap' },
   { type: 'page', title: 'Insights', subtitle: 'Navigate', url: '/Spa/Insights' },
+  { type: 'page', title: 'Portfolio health', subtitle: 'Navigate', url: '/Spa/PortfolioHealth' },
   { type: 'page', title: 'Settings', subtitle: 'Navigate', url: '/Spa/Settings' },
 ];
 

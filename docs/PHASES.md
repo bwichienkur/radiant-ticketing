@@ -592,7 +592,29 @@ Post-audit roadmap to reach world-class enterprise readiness. Full task breakdow
 - axe E2E suite blocks serious violations on PR
 - `Phase69CiProofTests`
 
-## Roadmap to 85+ (active)
+## Phase 70 — Drift autopilot + portfolio risk heatmap (complete)
+
+- `IDriftAutopilotService` + Hangfire `drift-autopilot` job behind `Features:DriftAutopilot`
+- `PortfolioHealthApp.tsx` at `/Spa/PortfolioHealth` — risk heatmap for Admin/Approver
+- `SpaPortfolioController` BFF: `GET health`
+- `Phase70DriftAutopilotTests`
+
+## Phase 71 — Per-tenant branding + dark mode (complete)
+
+- `TenantBranding` entity + `Users.ThemePreference` (System/Light/Dark)
+- `SpaBrandingController` BFF: appearance, theme, tenant branding
+- `SettingsBrandingSection` at `/Spa/Settings/Branding`
+- `ThemePreferenceSelector` + `theme.ts` applied across SPA shell
+- `Phase71BrandingThemeTests`
+
+## Phase 72 — 85+ gate verification (complete)
+
+- [GATE_85_VERIFICATION.md](GATE_85_VERIFICATION.md) — exit gate checklist
+- [UX_HEURISTIC_REVIEW.md](UX_HEURISTIC_REVIEW.md) — 5-reviewer heuristic review
+- `PRODUCT_SCORECARD.md` updated to **8.5** overall
+- `Phase72GateVerificationTests`
+
+## Roadmap to 85+ (complete)
 
 Full plan: [ROADMAP_85.md](ROADMAP_85.md)
 
@@ -607,8 +629,8 @@ Full plan: [ROADMAP_85.md](ROADMAP_85.md)
 | 67 | Command palette + semantic search | 3 | Complete |
 | 68 | EF decoupling wave 1 | 3 | Complete |
 | 69 | Postgres load CI + visual regression | 3 | Complete |
-| 70 | Drift autopilot + portfolio heatmap | 4 | Planned |
-| 71 | Per-tenant branding + dark mode | 4 | Planned |
-| 72 | 85+ gate verification | 4 | Planned |
+| 70 | Drift autopilot + portfolio heatmap | 4 | Complete |
+| 71 | Per-tenant branding + dark mode | 4 | Complete |
+| 72 | 85+ gate verification | 4 | Complete |
 
 ## Future enhancements

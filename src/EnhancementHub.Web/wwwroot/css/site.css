@@ -1589,3 +1589,81 @@ a.checklist-item-link:focus-visible {
 .eh-feedback-panel {
     box-shadow: 0 1rem 2.5rem rgba(15, 23, 42, 0.2);
 }
+
+.eh-theme-preference-bar {
+    position: fixed;
+    top: 4.75rem;
+    right: 1.25rem;
+    z-index: 1075;
+    background: var(--eh-surface);
+    border: 1px solid var(--eh-border);
+    border-radius: 0.5rem;
+    padding: 0.35rem 0.65rem;
+    box-shadow: var(--eh-shadow-sm);
+}
+
+.portfolio-heatmap {
+    display: grid;
+    gap: 0.35rem;
+}
+
+.portfolio-heatmap-header,
+.portfolio-heatmap-row {
+    display: grid;
+    grid-template-columns: minmax(10rem, 2fr) repeat(5, minmax(4rem, 1fr));
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+}
+
+.portfolio-heatmap-header {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--eh-muted);
+    background: var(--eh-surface-muted, rgba(148, 163, 184, 0.08));
+}
+
+.portfolio-heatmap-row {
+    border: 1px solid var(--eh-border);
+    background: var(--eh-surface);
+}
+
+.portfolio-heat-healthy {
+    border-left: 4px solid #22c55e;
+}
+
+.portfolio-heat-warning {
+    border-left: 4px solid #f59e0b;
+    background: rgba(245, 158, 11, 0.06);
+}
+
+.portfolio-heat-critical {
+    border-left: 4px solid #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.sidebar-brand-logo {
+    width: 1.75rem;
+    height: 1.75rem;
+    object-fit: contain;
+}
+
+@media (max-width: 991.98px) {
+    .eh-theme-preference-bar {
+        top: auto;
+        bottom: 5.5rem;
+        right: 1rem;
+    }
+
+    .portfolio-heatmap-header {
+        display: none;
+    }
+
+    .portfolio-heatmap-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.35rem 0.75rem;
+    }
+}

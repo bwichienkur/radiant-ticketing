@@ -70,6 +70,9 @@
                 <a class="sidebar-link @(NavActive("/Spa/Insights") ? "active" : "")" href="/Spa/Insights">
                     <span class="sidebar-icon"><partial name="_SidebarIcon" model='"dashboard"' /></span> Insights
                 </a>
+                <a class="sidebar-link @(NavActive("/Spa/PortfolioHealth") ? "active" : "")" href="/Spa/PortfolioHealth">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"dashboard"' /></span> Portfolio health
+                </a>
             }
             @if (User.IsInRole("Admin"))
             {

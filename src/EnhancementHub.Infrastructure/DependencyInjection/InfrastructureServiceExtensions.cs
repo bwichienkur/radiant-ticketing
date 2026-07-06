@@ -271,6 +271,7 @@ public static class InfrastructureServiceExtensions
 
         services.AddScoped<IIntakeCopilotService, IntakeCopilotService>();
         services.AddScoped<IApprovalCopilotService, ApprovalCopilotService>();
+        services.AddScoped<IDriftAutopilotService, Services.SystemIntelligence.DriftAutopilotService>();
         services.AddScoped<IDocumentTextExtractor, DocumentTextExtractor>();
         services.AddScoped<IPolicyUrlFetcher, PolicyUrlFetcher>();
 
@@ -388,6 +389,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<DataRetentionJobExecutor>();
         services.AddScoped<SchemaDriftScanJobExecutor>();
         services.AddScoped<DriftDigestJobExecutor>();
+        services.AddScoped<DriftAutopilotJobExecutor>();
         services.AddScoped<DeliveryOrchestrationJobExecutor>();
         services.AddScoped<WebhookDeliveryJobExecutor>();
 

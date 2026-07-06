@@ -30,10 +30,19 @@ import { RefactorAnalyzeApp } from '../apps/RefactorAnalyzeApp';
 import { RefactorPlansApp } from '../apps/RefactorPlansApp';
 import { SettingsApp } from '../apps/SettingsApp';
 import { InsightsApp } from '../apps/InsightsApp';
+import { PortfolioHealthApp } from '../apps/PortfolioHealthApp';
 import { FeedbackWidget } from './FeedbackWidget';
 import { MockAiTrustBanner } from './MockAiTrustBanner';
 import { CommandPalette } from './CommandPalette';
+import { ThemePreferenceSelector } from './ThemePreferenceSelector';
+import { getUserAppearance } from '../api/spaClient';
 import { readSpaContext } from '../spaRoutes';
+import {
+  applyTenantBranding,
+  applyThemePreference,
+  readStoredThemePreference,
+  type ThemePreference,
+} from '../theme';
 
 function RequestListRoute() {
   const { isApprover } = readSpaContext();
@@ -124,11 +133,38 @@ function SpaNavigationBridge() {
   return null;
 }
 
+function SpaAppearanceBootstrap() {
+  useEffect(() => {
+    void getUserAppearance()
+      .then((appearance) => {
+        const pref = appearance.themePreference as ThemePreference;
+        if (pref === 'System' || pref === 'Light' || pref === 'Dark') {
+          applyThemePreference(pref);
+        }
+
+        applyTenantBranding(
+          appearance.branding.accentColor,
+          appearance.branding.productName,
+          appearance.branding.logoUrl,
+        );
+      })
+      .catch(() => {
+        applyThemePreference(readStoredThemePreference());
+      });
+  }, []);
+
+  return null;
+}
+
 export function SpaShell() {
   return (
     <BrowserRouter>
       <SpaNavigationBridge />
+      <SpaAppearanceBootstrap />
       <MockAiTrustBanner />
+      <div className="eh-theme-preference-bar">
+        <ThemePreferenceSelector />
+      </div>
       <CommandPalette />
       <FeedbackWidget />
       <Routes>
@@ -156,6 +192,7 @@ export function SpaShell() {
         <Route path="/Spa/Refactor/Plans" element={<RefactorPlansApp />} />
         <Route path="/Spa/Settings/*" element={<SettingsApp />} />
         <Route path="/Spa/Insights" element={<InsightsApp />} />
+        <Route path="/Spa/PortfolioHealth" element={<PortfolioHealthApp />} />
         <Route path="*" element={<UnknownSpaRoute />} />
       </Routes>
     </BrowserRouter>

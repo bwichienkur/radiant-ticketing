@@ -150,21 +150,41 @@
         });
     }
 
+    function resolveThemePreference(preference) {
+        if (preference === 'Light') {
+            return 'light';
+        }
+
+        if (preference === 'Dark') {
+            return 'dark';
+        }
+
+        if (preference === 'light' || preference === 'dark') {
+            return preference;
+        }
+
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
     function initTheme() {
         const saved = localStorage.getItem(STORAGE_THEME);
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = saved || (prefersDark ? 'dark' : 'light');
+        const theme = resolveThemePreference(saved);
         document.documentElement.setAttribute('data-bs-theme', theme);
         document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
             btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
-            btn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+            const title = saved === 'System' || !saved
+                ? 'Theme: system'
+                : theme === 'dark'
+                    ? 'Switch to light mode'
+                    : 'Switch to dark mode';
+            btn.title = title;
         });
     }
 
     function toggleTheme() {
-        const html = document.documentElement;
-        const next = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
-        html.setAttribute('data-bs-theme', next);
+        const saved = localStorage.getItem(STORAGE_THEME);
+        const current = resolveThemePreference(saved);
+        const next = current === 'dark' ? 'Light' : 'Dark';
         localStorage.setItem(STORAGE_THEME, next);
         initTheme();
     }
@@ -657,6 +677,7 @@
             '/Spa/Refactor/Plans',
             '/Spa/Settings',
             '/Spa/Insights',
+            '/Spa/PortfolioHealth',
         ];
 
         function isSpaPath(pathname) {

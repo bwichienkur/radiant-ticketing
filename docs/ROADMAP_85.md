@@ -1,6 +1,6 @@
 # EnhancementHub — Roadmap to 85+ Product Quality
 
-**Status:** Active (Phases 61–72)  
+**Status:** Complete (Phases 61–72)  
 **Starting point:** ~72/100 independent audit · 8.4/10 internal maturity (Phase 60)  
 **Target:** **85+/100** overall product quality; **80+** investment readiness; **82+** launch readiness
 
@@ -112,17 +112,17 @@ Postgres k6 gate job (PR profile on CI, 500 VU in `k6-postgres-gate.js`); Storyb
 
 ---
 
-## WAVE 4 — Defensible Moat (70–72) → 85+/100
+## WAVE 4 — Defensible Moat (70–72) → 85+/100 ✅
 
-### Phase 70 — Drift autopilot + portfolio risk heatmap
+### Phase 70 — Drift autopilot + portfolio risk heatmap ✅
 
 Scheduled drift → auto-draft requests; `PortfolioHealthApp.tsx` heatmap; `Features:DriftAutopilot`.
 
-### Phase 71 — Per-tenant branding + dark mode completion
+### Phase 71 — Per-tenant branding + dark mode completion ✅
 
 `TenantBranding` entity; logo/accent; user light/dark/system preference on all SPA routes.
 
-### Phase 72 — 85+ gate verification
+### Phase 72 — 85+ gate verification ✅
 
 Re-run audit checklist; update `PRODUCT_SCORECARD.md`; 5-person heuristic UX review.
 
@@ -169,4 +169,4 @@ Re-run audit checklist; update `PRODUCT_SCORECARD.md`; 5-person heuristic UX rev
 
 ---
 
-*Last updated: July 2026 — Wave 3 complete (Phases 67–69).*
+*Last updated: July 2026 — Wave 4 complete (Phases 70–72). 85+ gate met.*

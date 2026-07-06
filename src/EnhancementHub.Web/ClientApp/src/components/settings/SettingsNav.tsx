@@ -6,6 +6,7 @@ const PRIMARY_SECTIONS = [
   { to: '/Spa/Settings/ApiKeys', label: 'API keys' },
   { to: '/Spa/Settings/Teams', label: 'Teams' },
   { to: '/Spa/Settings/Webhooks', label: 'Webhooks' },
+  { to: '/Spa/Settings/Branding', label: 'Branding' },
 ] as const;
 
 const ADVANCED_ADMIN_LINKS = [

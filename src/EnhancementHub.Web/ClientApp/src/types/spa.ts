@@ -636,6 +636,32 @@ export interface GlobalSearchResult {
   semanticHint?: string | null;
 }
 
+export interface PortfolioApplicationHealth {
+  applicationId: string;
+  applicationName: string;
+  unresolvedDriftCount: number;
+  pendingRequestCount: number;
+  highRiskPendingCount: number;
+  staleRepositoryCount: number;
+  riskScore: number;
+}
+
+export interface PortfolioHealthReport {
+  applications: PortfolioApplicationHealth[];
+  generatedAtUtc: string;
+}
+
+export interface TenantBranding {
+  logoUrl?: string | null;
+  accentColor: string;
+  productName?: string | null;
+}
+
+export interface UserAppearance {
+  themePreference: string;
+  branding: TenantBranding;
+}
+
 export interface AuthenticationConfigurationStatus {
   openIdConnectEnabled: boolean;
   isProductionReady: boolean;

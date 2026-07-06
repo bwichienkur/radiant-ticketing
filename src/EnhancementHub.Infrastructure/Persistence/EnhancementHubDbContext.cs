@@ -77,6 +77,7 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<OnboardingSession> OnboardingSessions => Set<OnboardingSession>();
     public DbSet<ServiceApiKey> ServiceApiKeys => Set<ServiceApiKey>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
+    public DbSet<TenantBranding> TenantBrandings => Set<TenantBranding>();
     public DbSet<TenantUsageSnapshot> TenantUsageSnapshots => Set<TenantUsageSnapshot>();
     public DbSet<IntakeCopilotSession> IntakeCopilotSessions => Set<IntakeCopilotSession>();
     public DbSet<TenantDeliveryProfile> TenantDeliveryProfiles => Set<TenantDeliveryProfile>();

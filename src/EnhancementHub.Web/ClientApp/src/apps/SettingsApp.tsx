@@ -7,6 +7,7 @@ import { SettingsAuthenticationSection } from './settings/SettingsAuthentication
 import { SettingsApiKeysSection } from './settings/SettingsApiKeysSection';
 import { SettingsTeamsSection } from './settings/SettingsTeamsSection';
 import { SettingsWebhooksSection } from './settings/SettingsWebhooksSection';
+import { SettingsBrandingSection } from './settings/SettingsBrandingSection';
 
 export function SettingsApp() {
   const { isAdmin } = readSpaContext();
@@ -33,6 +34,7 @@ export function SettingsApp() {
             <Route path="ApiKeys" element={<SettingsApiKeysSection />} />
             <Route path="Teams" element={<SettingsTeamsSection />} />
             <Route path="Webhooks" element={<SettingsWebhooksSection />} />
+            <Route path="Branding" element={<SettingsBrandingSection />} />
             <Route path="*" element={<Navigate to="General" replace />} />
           </Routes>
         </div>

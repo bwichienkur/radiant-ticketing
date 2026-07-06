@@ -37,6 +37,7 @@ import type {
   RefactorPlanSummary,
   RefactorPlanDetail,
   RoiReport,
+  SystemMap,
   RegisterDatabaseConnectionInput,
   DocumentationExportFormat,
   AuthenticationConfigurationStatus,
@@ -49,7 +50,9 @@ import type {
   WebhookDeliverySummary,
   GlobalSearchItem,
   GlobalSearchResult,
-  SystemMap,
+  PortfolioHealthReport,
+  TenantBranding,
+  UserAppearance,
 } from '../types/spa';
 
 async function fetchJson<T>(url: string): Promise<T> {
@@ -749,6 +752,26 @@ export async function rollbackProduction(
 
 export async function getPlatformRuntimeStatus(): Promise<PlatformRuntimeStatus> {
   return fetchJson<PlatformRuntimeStatus>('/web-api/spa/platform/runtime-status');
+}
+
+export async function getPortfolioHealth(): Promise<PortfolioHealthReport> {
+  return fetchJson<PortfolioHealthReport>('/web-api/spa/portfolio/health');
+}
+
+export async function getUserAppearance(): Promise<UserAppearance> {
+  return fetchJson<UserAppearance>('/web-api/spa/branding/appearance');
+}
+
+export async function updateThemePreference(themePreference: string): Promise<UserAppearance> {
+  return putJson<UserAppearance>('/web-api/spa/branding/theme', { themePreference });
+}
+
+export async function updateTenantBranding(input: {
+  logoUrl?: string;
+  accentColor: string;
+  productName?: string;
+}): Promise<TenantBranding> {
+  return putJson<TenantBranding>('/web-api/spa/branding/tenant', input);
 }
 
 export interface SubmitProductFeedbackInput {
