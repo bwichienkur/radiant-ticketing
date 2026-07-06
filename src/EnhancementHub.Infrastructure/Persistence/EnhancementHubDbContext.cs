@@ -82,6 +82,9 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<WebhookSubscription> WebhookSubscriptions => Set<WebhookSubscription>();
     public DbSet<WebhookDelivery> WebhookDeliveries => Set<WebhookDelivery>();
     public DbSet<ProductFeedback> ProductFeedbacks => Set<ProductFeedback>();
+    public DbSet<CustomFieldDefinition> CustomFieldDefinitions => Set<CustomFieldDefinition>();
+    public DbSet<EnhancementRequestCustomFieldValue> EnhancementRequestCustomFieldValues =>
+        Set<EnhancementRequestCustomFieldValue>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

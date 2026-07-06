@@ -25,6 +25,16 @@ jobs:
       - name: Test
         run: dotnet test --no-build -c Release --verbosity normal
 
+      - name: Check vulnerable NuGet packages
+        run: |
+          set -euo pipefail
+          dotnet list package --vulnerable --include-transitive 2>&1 | tee vulnerable-packages.txt
+          if grep -qi "critical" vulnerable-packages.txt; then
+            echo "::error::Critical NuGet vulnerabilities detected"
+            exit 1
+          fi
+          echo "No critical NuGet vulnerabilities found"
+
   clientapp:
     runs-on: ubuntu-latest
     timeout-minutes: 15

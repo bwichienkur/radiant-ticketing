@@ -58,6 +58,7 @@ try
 
     app.UseSerilogRequestLogging();
     app.UseCorrelationId();
+    app.UseSecurityHeaders(includeContentSecurityPolicy: false);
     app.UseMiddleware<ExceptionHandlingMiddleware>();
 
     if (app.Environment.IsDevelopment())

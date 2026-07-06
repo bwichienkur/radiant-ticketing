@@ -35,7 +35,10 @@ public sealed class PoliciesController : ControllerBase
                 request.ApplicationTier,
                 request.RequiredRole,
                 request.BlockApproval,
-                request.Message),
+                request.Message,
+                request.SlaTargetHours,
+                request.EscalateOnBreach,
+                request.EscalateToRole),
             cancellationToken));
 
     [HttpDelete("{id:guid}")]
@@ -55,5 +58,8 @@ public sealed class PoliciesController : ControllerBase
         ApplicationTier? ApplicationTier,
         UserRole RequiredRole,
         bool BlockApproval,
-        string Message);
+        string Message,
+        int? SlaTargetHours = null,
+        bool EscalateOnBreach = false,
+        UserRole? EscalateToRole = null);
 }

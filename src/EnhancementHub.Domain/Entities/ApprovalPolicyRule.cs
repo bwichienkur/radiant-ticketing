@@ -14,4 +14,7 @@ public class ApprovalPolicyRule : BaseEntity
     public UserRole RequiredRole { get; set; } = UserRole.Approver;
     public bool BlockApproval { get; set; } = true;
     public string Message { get; set; } = string.Empty;
+    public int? SlaTargetHours { get; set; }
+    public bool EscalateOnBreach { get; set; }
+    public UserRole? EscalateToRole { get; set; }
 }

@@ -215,17 +215,41 @@ See `docs/DEPLOYMENT.md`. Minimum production requirements:
 - `DataProtection:KeysPath` on durable shared storage
 - PostgreSQL with TLS
 - Entra ID SSO for workforce access
+- SCIM bearer token configured for automated user provisioning (`Scim:BearerToken`)
 - S3 (or equivalent) for attachments in multi-instance setups
 - Retention policies enabled per compliance policy
 - ClamAV if uploading untrusted attachments
+- Security headers middleware enabled (`UseSecurityHeaders`) including CSP on the Web app
+
+### Content Security Policy (CSP)
+
+The Web app applies a default CSP via `SecurityHeadersMiddleware`:
+
+- `default-src 'self'`
+- `script-src 'self' 'unsafe-inline' 'unsafe-eval'` (required for Bootstrap and Vite bundles)
+- `style-src 'self' 'unsafe-inline'`
+- `frame-ancestors 'none'`
+
+The API applies the same middleware without CSP (JSON-only responses). Tune CSP at the reverse proxy for stricter production policies.
+
+Additional headers: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy` restricting camera/microphone/geolocation.
 
 ---
 
 ## 13. Vulnerability & dependency management
 
 - Built on supported .NET 8 LTS runtime
-- Dependencies managed via NuGet; run `dotnet list package --vulnerable` in CI
+- Dependencies managed via NuGet; CI runs `dotnet list package --vulnerable --include-transitive` and **fails on Critical** severity
+- GitHub CodeQL analysis runs on push/PR and weekly schedule (`.github/workflows/codeql.yml`)
 - Customers should apply OS patches, container image updates, and database maintenance
+
+### SCIM provisioning
+
+Enterprise tenants may provision users from Entra ID via SCIM 2.0 (`POST /scim/v2/Users`). See [ENTRA_ID_SSO.md](ENTRA_ID_SSO.md#scim-provisioning-optional-tier).
+
+### Per-tenant audit export
+
+Admins can request signed audit export URLs via `GET /api/v1/audit/export` (date range filters). Downloads use time-limited HMAC tokens (`GET /api/v1/audit/download?token=...`).
 
 ---
 

@@ -73,6 +73,42 @@ PKCE is enabled for the authorization code flow.
 
 The REST API continues to use JWT bearer tokens issued by EnhancementHub (`POST /api/auth/login`) or your own identity integration. Entra SSO applies to the Web UI cookie session. For API-only clients, configure a separate Entra app registration with appropriate scopes if needed.
 
+## SCIM provisioning (optional tier)
+
+EnhancementHub exposes SCIM 2.0 user provisioning on the **API** host.
+
+### Configuration
+
+```json
+{
+  "Scim": {
+    "BearerToken": "{long-random-secret}"
+  }
+}
+```
+
+Send `Authorization: Bearer {token}` on all SCIM requests.
+
+### Endpoints
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| GET | `/scim/v2/Users` | List provisioned users |
+| GET | `/scim/v2/Users/{externalId}` | Get user by external ID |
+| POST | `/scim/v2/Users` | Create user |
+| PATCH | `/scim/v2/Users/{externalId}` | Update profile or deactivate |
+| DELETE | `/scim/v2/Users/{externalId}` | Deactivate user |
+
+### Entra automatic provisioning
+
+1. Entra ID → **Enterprise applications** → your app → **Provisioning** → Automatic.
+2. **Tenant URL:** `https://{api-host}/scim/v2/Users`
+3. **Secret Token:** `Scim:BearerToken` value.
+4. Map `userName` (email), `externalId`, `displayName`, `active`.
+5. Assign users/groups to control scope.
+
+Provisioned users are stored with `ExternalId` and `ProvisionedViaScim = true`. Deprovisioning sets `IsActive = false`.
+
 ## Troubleshooting
 
 | Symptom | Check |

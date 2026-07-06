@@ -1,0 +1,109 @@
+@page
+@model EnhancementHub.Web.Pages.Admin.CustomFieldsModel
+@using EnhancementHub.Domain.Enums
+@{
+    ViewData["AdminSection"] = "customfields";
+    ViewData["Title"] = "Custom fields";
+}
+
+<partial name="_AdminNav" />
+
+<div class="page-header">
+    <h1>Request custom fields</h1>
+    <p>Define additional intake fields (text, select, number, date, user) for enhancement requests</p>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-info">@Model.StatusMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card-panel p-4">
+            <h2 class="h6 mb-3">@(Model.EditId.HasValue ? "Edit field" : "Add field")</h2>
+            <form method="post" asp-page-handler="Save">
+                <input type="hidden" asp-for="EditId" />
+                <div class="mb-3">
+                    <label asp-for="Key" class="form-label">Key</label>
+                    <input asp-for="Key" class="form-control" required maxlength="100" placeholder="business_unit" />
+                    <div class="form-text">Lowercase letters, numbers, underscores</div>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Label" class="form-label">Label</label>
+                    <input asp-for="Label" class="form-control" required maxlength="200" />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="FieldType" class="form-label">Type</label>
+                    <select asp-for="FieldType" class="form-select" asp-items="Html.GetEnumSelectList<CustomFieldType>()"></select>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="OptionsCsv" class="form-label">Select options (comma-separated)</label>
+                    <input asp-for="OptionsCsv" class="form-control" placeholder="Option A, Option B" />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="SortOrder" class="form-label">Sort order</label>
+                    <input asp-for="SortOrder" class="form-control" type="number" />
+                </div>
+                <div class="form-check mb-2">
+                    <input asp-for="IsRequired" class="form-check-input" />
+                    <label asp-for="IsRequired" class="form-check-label">Required</label>
+                </div>
+                <div class="form-check mb-3">
+                    <input asp-for="IsActive" class="form-check-input" />
+                    <label asp-for="IsActive" class="form-check-label">Active</label>
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">Save field</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card-panel p-4">
+            <h2 class="h6 mb-3">Defined fields</h2>
+            @if (Model.Fields.Count == 0)
+            {
+                <p class="text-muted mb-0">No custom fields yet.</p>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Label</th>
+                                <th>Key</th>
+                                <th>Type</th>
+                                <th>Required</th>
+                                <th>Active</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var field in Model.Fields)
+                            {
+                                <tr>
+                                    <td>@field.Label</td>
+                                    <td><code>@field.Key</code></td>
+                                    <td>@field.FieldType</td>
+                                    <td>@(field.IsRequired ? "Yes" : "No")</td>
+                                    <td>@(field.IsActive ? "Yes" : "No")</td>
+                                    <td class="text-end">
+                                        <form method="post" asp-page-handler="Delete" class="d-inline">
+                                            <input type="hidden" name="deleteId" value="@field.Id" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this field?');">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

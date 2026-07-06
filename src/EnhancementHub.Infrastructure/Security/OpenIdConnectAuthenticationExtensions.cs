@@ -32,6 +32,11 @@ public static class OpenIdConnectAuthenticationExtensions
             {
                 options.ForwardDefaultSelector = context =>
                 {
+                    if (context.Request.Path.StartsWithSegments("/scim", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return ScimAuthenticationDefaults.Scheme;
+                    }
+
                     if (context.Request.Headers.ContainsKey(ApiKeyAuthenticationDefaults.HeaderName))
                     {
                         return ApiKeyAuthenticationDefaults.Scheme;
@@ -57,6 +62,9 @@ public static class OpenIdConnectAuthenticationExtensions
             })
             .AddScheme<AuthenticationSchemeOptions, ApiKeyAuthenticationHandler>(
                 ApiKeyAuthenticationDefaults.Scheme,
+                _ => { })
+            .AddScheme<AuthenticationSchemeOptions, ScimBearerAuthenticationHandler>(
+                ScimAuthenticationDefaults.Scheme,
                 _ => { });
 
         if (IsOpenIdConnectEnabled(configuration))

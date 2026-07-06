@@ -64,6 +64,11 @@ public sealed class HangfireRecurringJobInitializer : IHostedService
             executor => executor.ExecuteAsync(CancellationToken.None),
             Cron.Daily(3));
 
+        RecurringJob.AddOrUpdate<SlaEscalationJobExecutor>(
+            "sla-escalation",
+            executor => executor.ExecuteAsync(CancellationToken.None),
+            "0 * * * *");
+
         _logger.LogInformation("Hangfire recurring jobs registered.");
         return Task.CompletedTask;
     }

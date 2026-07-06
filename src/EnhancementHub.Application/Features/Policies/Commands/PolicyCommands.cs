@@ -18,7 +18,10 @@ public sealed record UpsertApprovalPolicyRuleCommand(
     ApplicationTier? ApplicationTier,
     UserRole RequiredRole,
     bool BlockApproval,
-    string Message) : IRequest<ApprovalPolicyRuleDto>;
+    string Message,
+    int? SlaTargetHours = null,
+    bool EscalateOnBreach = false,
+    UserRole? EscalateToRole = null) : IRequest<ApprovalPolicyRuleDto>;
 
 public sealed class UpsertApprovalPolicyRuleCommandValidator : AbstractValidator<UpsertApprovalPolicyRuleCommand>
 {
@@ -72,6 +75,9 @@ public sealed class UpsertApprovalPolicyRuleCommandHandler
         entity.RequiredRole = request.RequiredRole;
         entity.BlockApproval = request.BlockApproval;
         entity.Message = request.Message;
+        entity.SlaTargetHours = request.SlaTargetHours;
+        entity.EscalateOnBreach = request.EscalateOnBreach;
+        entity.EscalateToRole = request.EscalateToRole;
 
         await _dbContext.SaveChangesAsync(cancellationToken);
         return ToDto(entity);
@@ -88,7 +94,10 @@ public sealed class UpsertApprovalPolicyRuleCommandHandler
             entity.ApplicationTier,
             entity.RequiredRole,
             entity.BlockApproval,
-            entity.Message);
+            entity.Message,
+            entity.SlaTargetHours,
+            entity.EscalateOnBreach,
+            entity.EscalateToRole);
 }
 
 public sealed record DeleteApprovalPolicyRuleCommand(Guid Id) : IRequest;

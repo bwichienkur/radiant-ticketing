@@ -1,4 +1,6 @@
 using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Features.CustomFields.Commands;
+using EnhancementHub.Application.Features.CustomFields.Dtos;
 using EnhancementHub.Application.Features.EnhancementRequests.Dtos;
 using EnhancementHub.Domain.Entities;
 using EnhancementHub.Domain.Enums;
@@ -18,7 +20,8 @@ public sealed record CreateEnhancementRequestCommand(
     string? Department,
     Guid? TeamId,
     string? SupportingNotes,
-    Guid? TemplateId = null) : IRequest<EnhancementRequestDto>;
+    Guid? TemplateId = null,
+    IReadOnlyList<CustomFieldValueInput>? CustomFields = null) : IRequest<EnhancementRequestDto>;
 
 public sealed class CreateEnhancementRequestCommandValidator : AbstractValidator<CreateEnhancementRequestCommand>
 {
@@ -111,6 +114,7 @@ public sealed class CreateEnhancementRequestCommandHandler
         };
 
         _dbContext.EnhancementRequests.Add(entity);
+        await CustomFieldValueWriter.SaveValuesAsync(_dbContext, entity.Id, request.CustomFields, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         return new EnhancementRequestDto(

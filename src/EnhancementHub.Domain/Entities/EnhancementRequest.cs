@@ -16,6 +16,7 @@ public class EnhancementRequest : BaseEntity
     public Guid? TeamId { get; set; }
     public EnhancementRequestStatus Status { get; set; }
     public string? SupportingNotes { get; set; }
+    public DateTime? LastSlaEscalationAt { get; set; }
 
     public Application? TargetApplication { get; set; }
     public User SubmittedByUser { get; set; } = null!;
@@ -28,4 +29,6 @@ public class EnhancementRequest : BaseEntity
     public ICollection<AiPromptRun> AiPromptRuns { get; set; } = new List<AiPromptRun>();
     public ICollection<RefactorPlan> RefactorPlans { get; set; } = new List<RefactorPlan>();
     public ICollection<EnhancementDeliveryRun> DeliveryRuns { get; set; } = new List<EnhancementDeliveryRun>();
+    public ICollection<EnhancementRequestCustomFieldValue> CustomFieldValues { get; set; } =
+        new List<EnhancementRequestCustomFieldValue>();
 }

@@ -13,7 +13,8 @@ public sealed class NotificationService : INotificationService
         [NotificationType.ApprovalAssigned] = "Approval assigned",
         [NotificationType.AnalysisComplete] = "Analysis complete",
         [NotificationType.DriftCritical] = "Critical schema drift",
-        [NotificationType.DriftDigest] = "Weekly drift digest"
+        [NotificationType.DriftDigest] = "Weekly drift digest",
+        [NotificationType.SlaEscalation] = "SLA escalation"
     };
 
     private readonly IEnhancementHubDbContext _dbContext;

@@ -477,6 +477,15 @@ Guide: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md)
 - `/Admin/Roi` extended with time-to-analysis, time-to-approval, mock AI %, pilot NPS
 - `docs/PRODUCT_SCORECARD.md` measured column filled from pilot #1 baselines
 
+## Phase 57 — Enterprise hardening & procurement (complete)
+
+- SCIM 2.0 `/scim/v2/Users` + `Scim:BearerToken` auth; Entra sync docs in `ENTRA_ID_SSO.md`
+- Custom field definitions (text, select, number, date, user) + `/Admin/CustomFields` builder
+- SLA rules on `ApprovalPolicyRule` + hourly `SlaEscalationJobExecutor` with notifications
+- CodeQL workflow + CI `dotnet list package --vulnerable` gate on Critical CVEs
+- `SecurityHeadersMiddleware` (CSP, X-Frame-Options, etc.) documented in `SECURITY.md`
+- `GET /api/v1/audit/export` signed download URLs via `AuditController`
+
 ## Phases 46–57 — Due diligence execution (planned)
 
 Post-audit roadmap to reach world-class enterprise readiness. Full task breakdown: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md).
@@ -494,6 +503,6 @@ Post-audit roadmap to reach world-class enterprise readiness. Full task breakdow
 | 54 | Approval & intake copilot expansion | ✅ Complete |
 | 55 | Horizon 3 load test proof | ✅ Complete |
 | 56 | Design partner program | ✅ Complete |
-| 57 | Enterprise hardening & procurement |
+| 57 | Enterprise hardening & procurement | ✅ Complete |
 
 ## Future enhancements

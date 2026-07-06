@@ -34,13 +34,15 @@ public sealed class ExportAuditLogsQueryHandler : IRequestHandler<ExportAuditLog
             return new AuditLogExportResult(
                 Encoding.UTF8.GetBytes(json),
                 "application/json",
-                $"audit-log-{timestamp}.json");
+                $"audit-log-{timestamp}.json",
+                records.Count);
         }
 
         return new AuditLogExportResult(
             Encoding.UTF8.GetBytes(BuildCsv(records)),
             "text/csv",
-            $"audit-log-{timestamp}.csv");
+            $"audit-log-{timestamp}.csv",
+            records.Count);
     }
 
     private async Task<IReadOnlyList<AuditLogExportRecord>> QueryRecordsAsync(

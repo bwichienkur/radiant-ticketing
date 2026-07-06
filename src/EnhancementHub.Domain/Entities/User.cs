@@ -12,6 +12,8 @@ public class User : BaseEntity
     public bool IsActive { get; set; } = true;
     public string PasswordHash { get; set; } = string.Empty;
     public Guid? TenantId { get; set; }
+    public string? ExternalId { get; set; }
+    public bool ProvisionedViaScim { get; set; }
 
     public Tenant? Tenant { get; set; }
 

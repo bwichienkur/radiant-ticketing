@@ -218,6 +218,8 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<ITenantBillingService, TenantBillingService>();
         services.AddScoped<IStripeBillingService, StripeBillingService>();
         services.AddScoped<IApprovalPolicyEvaluator, ApprovalPolicyEvaluator>();
+        services.AddScoped<ISlaEscalationService, SlaEscalationService>();
+        services.AddSingleton<IAuditExportTokenService, AuditExportTokenService>();
         services.AddSingleton<IRequestCollaborationNotifier, NoOpRequestCollaborationNotifier>();
         services.AddScoped<HangfireRepositoryIndexingDispatcher>();
         services.PostConfigure<Options.AiOptions>(options =>

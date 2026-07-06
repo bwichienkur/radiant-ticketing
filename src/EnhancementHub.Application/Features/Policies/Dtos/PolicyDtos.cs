@@ -12,4 +12,7 @@ public sealed record ApprovalPolicyRuleDto(
     ApplicationTier? ApplicationTier,
     UserRole RequiredRole,
     bool BlockApproval,
-    string Message);
+    string Message,
+    int? SlaTargetHours,
+    bool EscalateOnBreach,
+    UserRole? EscalateToRole);

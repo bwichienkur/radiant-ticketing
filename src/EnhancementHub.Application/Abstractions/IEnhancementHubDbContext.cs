@@ -71,6 +71,8 @@ public interface IEnhancementHubDbContext
     DbSet<WebhookSubscription> WebhookSubscriptions { get; }
     DbSet<WebhookDelivery> WebhookDeliveries { get; }
     DbSet<ProductFeedback> ProductFeedbacks { get; }
+    DbSet<CustomFieldDefinition> CustomFieldDefinitions { get; }
+    DbSet<EnhancementRequestCustomFieldValue> EnhancementRequestCustomFieldValues { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

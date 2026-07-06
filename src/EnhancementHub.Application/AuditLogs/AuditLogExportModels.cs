@@ -16,4 +16,5 @@ public sealed record AuditLogExportRecord(
 public sealed record AuditLogExportResult(
     byte[] Content,
     string ContentType,
-    string FileName);
+    string FileName,
+    int RecordCount);

@@ -81,6 +81,7 @@ try
 
     app.UseSerilogRequestLogging();
     app.UseCorrelationId();
+    app.UseSecurityHeaders();
     app.UseHttpsRedirection();
     app.UseStaticFiles();
     app.UseRouting();
