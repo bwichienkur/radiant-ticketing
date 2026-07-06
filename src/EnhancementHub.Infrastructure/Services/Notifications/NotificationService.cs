@@ -12,7 +12,8 @@ public sealed class NotificationService : INotificationService
     {
         [NotificationType.ApprovalAssigned] = "Approval assigned",
         [NotificationType.AnalysisComplete] = "Analysis complete",
-        [NotificationType.DriftCritical] = "Critical schema drift"
+        [NotificationType.DriftCritical] = "Critical schema drift",
+        [NotificationType.DriftDigest] = "Weekly drift digest"
     };
 
     private readonly IEnhancementHubDbContext _dbContext;
@@ -189,6 +190,46 @@ public sealed class NotificationService : INotificationService
                 databaseConnectionId,
                 actionUrl,
                 tenantId,
+                cancellationToken);
+        }
+    }
+
+    public async Task NotifyArchitectsOfDriftDigestAsync(
+        int unresolvedCount,
+        IReadOnlyList<DriftDigestFindingSummary> topFindings,
+        CancellationToken cancellationToken = default)
+    {
+        if (unresolvedCount == 0)
+        {
+            return;
+        }
+
+        var recipients = await _dbContext.Users
+            .AsNoTracking()
+            .Where(u => u.IsActive && (u.Role == UserRole.Admin || u.Role == UserRole.Approver))
+            .ToListAsync(cancellationToken);
+
+        var findingLines = topFindings.Count == 0
+            ? "No outstanding findings."
+            : string.Join(
+                "\n",
+                topFindings.Select(f =>
+                    $"- [{f.Severity}] {f.Title} ({f.ConnectionName})"));
+
+        var message =
+            $"{unresolvedCount} unresolved schema drift finding(s) need attention.\n\nTop findings:\n{findingLines}";
+
+        foreach (var recipient in recipients)
+        {
+            await NotifyUserAsync(
+                recipient.Id,
+                NotificationType.DriftDigest,
+                "Weekly schema drift digest",
+                message,
+                nameof(SchemaDriftFinding),
+                null,
+                "/Spa/SchemaDrift",
+                recipient.TenantId,
                 cancellationToken);
         }
     }

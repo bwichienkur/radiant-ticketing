@@ -50,6 +50,12 @@ public sealed class NoOpNotificationService : INotificationService
         CancellationToken cancellationToken = default) =>
         Task.CompletedTask;
 
+    public Task NotifyArchitectsOfDriftDigestAsync(
+        int unresolvedCount,
+        IReadOnlyList<DriftDigestFindingSummary> topFindings,
+        CancellationToken cancellationToken = default) =>
+        Task.CompletedTask;
+
     public Task<IReadOnlyList<NotificationDto>> ListForUserAsync(
         Guid userId,
         bool unreadOnly,

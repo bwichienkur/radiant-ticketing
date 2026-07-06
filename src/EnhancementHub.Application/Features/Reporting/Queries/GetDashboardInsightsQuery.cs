@@ -101,6 +101,23 @@ public sealed class GetDashboardInsightsQueryHandler
             .AsNoTracking()
             .CountAsync(f => !f.IsResolved, cancellationToken);
 
+        var topDriftFindings = await _dbContext.SchemaDriftFindings
+            .AsNoTracking()
+            .Include(f => f.DatabaseConnection)
+            .Where(f => !f.IsResolved)
+            .OrderByDescending(f => f.Severity)
+            .ThenByDescending(f => f.DetectedAt)
+            .Take(5)
+            .Select(f => new DashboardDriftFindingSummaryDto(
+                f.Id,
+                f.Title,
+                f.Severity.ToString(),
+                f.DatabaseConnection.Name,
+                f.DatabaseConnectionId,
+                f.DetectedAt,
+                $"/Spa/SchemaDrift?connectionId={f.DatabaseConnectionId}"))
+            .ToListAsync(cancellationToken);
+
         var freshness = await _indexFreshness.GetReportAsync(cancellationToken);
         var staleRepositoryCount = freshness.StaleCount;
 
@@ -110,6 +127,7 @@ public sealed class GetDashboardInsightsQueryHandler
             myPendingApprovals,
             myAwaitingAnalysis,
             unresolvedDriftFindings,
-            staleRepositoryCount);
+            staleRepositoryCount,
+            topDriftFindings);
     }
 }

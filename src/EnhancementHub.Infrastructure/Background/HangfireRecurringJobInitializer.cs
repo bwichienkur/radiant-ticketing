@@ -49,6 +49,11 @@ public sealed class HangfireRecurringJobInitializer : IHostedService
             executor => executor.ExecuteAsync(CancellationToken.None),
             "0 */6 * * *");
 
+        RecurringJob.AddOrUpdate<DriftDigestJobExecutor>(
+            "drift-digest",
+            executor => executor.ExecuteAsync(CancellationToken.None),
+            Cron.Weekly);
+
         RecurringJob.AddOrUpdate<DeliveryOrchestrationJobExecutor>(
             "delivery-orchestration",
             executor => executor.ExecuteAsync(CancellationToken.None),

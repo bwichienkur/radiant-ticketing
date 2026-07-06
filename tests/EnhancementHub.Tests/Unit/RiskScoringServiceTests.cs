@@ -61,6 +61,20 @@ public sealed class RiskScoringServiceTests
         _sut.MapToRiskLevel(score).Should().Be(expected);
     }
 
+    [Theory]
+    [InlineData(RiskLevel.Low, DriftSeverity.Critical, RiskLevel.High)]
+    [InlineData(RiskLevel.Medium, DriftSeverity.Critical, RiskLevel.High)]
+    [InlineData(RiskLevel.High, DriftSeverity.Critical, RiskLevel.Critical)]
+    [InlineData(RiskLevel.Low, DriftSeverity.High, RiskLevel.Medium)]
+    [InlineData(RiskLevel.Medium, DriftSeverity.High, RiskLevel.Medium)]
+    public void ApplyDriftSeverityBoost_BumpsRiskForSevereDrift(
+        RiskLevel baseLevel,
+        DriftSeverity severity,
+        RiskLevel expected)
+    {
+        _sut.ApplyDriftSeverityBoost(baseLevel, severity).Should().Be(expected);
+    }
+
     [Fact]
     public void CalculateRiskScore_ClampsScoreToOne()
     {

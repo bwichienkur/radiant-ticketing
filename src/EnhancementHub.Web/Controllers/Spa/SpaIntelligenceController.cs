@@ -28,6 +28,12 @@ public sealed class SpaIntelligenceController : ControllerBase
         CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new GetDriftReportQuery(connectionId), cancellationToken));
 
+    [HttpGet("drift/request-draft")]
+    public async Task<IActionResult> GetDriftRequestDraft(
+        [FromQuery] Guid findingId,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetDriftRequestDraftQuery(findingId), cancellationToken));
+
     [HttpPost("drift/detect")]
     public async Task<IActionResult> DetectDrift(
         [FromBody] SpaDetectDriftRequest request,

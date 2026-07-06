@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Abstractions.Models;
+using EnhancementHub.Application.Common;
 using EnhancementHub.Application.Common.Exceptions;
 using EnhancementHub.Application.Features.SystemIntelligence.Dtos;
 using MediatR;
@@ -293,6 +294,83 @@ public sealed class GetErdDiagramQueryHandler : IRequestHandler<GetErdDiagramQue
 
     private static string Sanitize(string value) =>
         new(value.Where(char.IsLetterOrDigit).ToArray());
+}
+
+public sealed record GetDriftRequestDraftQuery(Guid FindingId) : IRequest<DriftRequestDraftDto>;
+
+public sealed class GetDriftRequestDraftQueryHandler
+    : IRequestHandler<GetDriftRequestDraftQuery, DriftRequestDraftDto>
+{
+    private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IApplicationAccessService _accessService;
+
+    public GetDriftRequestDraftQueryHandler(
+        IEnhancementHubDbContext dbContext,
+        IApplicationAccessService accessService)
+    {
+        _dbContext = dbContext;
+        _accessService = accessService;
+    }
+
+    public async Task<DriftRequestDraftDto> Handle(
+        GetDriftRequestDraftQuery request,
+        CancellationToken cancellationToken)
+    {
+        var finding = await _dbContext.SchemaDriftFindings
+            .AsNoTracking()
+            .Include(f => f.DatabaseConnection)
+            .ThenInclude(c => c.Application)
+            .FirstOrDefaultAsync(f => f.Id == request.FindingId, cancellationToken)
+            ?? throw new NotFoundException(nameof(Domain.Entities.SchemaDriftFinding), request.FindingId);
+
+        await _accessService.EnsureAccessibleConnectionAsync(
+            finding.DatabaseConnectionId,
+            cancellationToken);
+
+        if (finding.IsResolved)
+        {
+            throw new InvalidOperationException("Cannot create a request from a resolved drift finding.");
+        }
+
+        var connection = finding.DatabaseConnection;
+        var applicationId = connection.ApplicationId;
+        var priority = MapDriftSeverityToPriority(finding.Severity);
+        var businessDescription = string.IsNullOrWhiteSpace(finding.Description)
+            ? $"Schema drift detected: {finding.Title}"
+            : finding.Description;
+        var desiredOutcome = $"Align live database schema with indexed code expectations for {connection.Name}.";
+
+        if (!string.IsNullOrWhiteSpace(finding.CodeReference))
+        {
+            businessDescription = $"{businessDescription}\n\nCode reference: {finding.CodeReference}";
+        }
+
+        if (!string.IsNullOrWhiteSpace(finding.DatabaseReference))
+        {
+            businessDescription = $"{businessDescription}\n\nDatabase reference: {finding.DatabaseReference}";
+        }
+
+        return new DriftRequestDraftDto(
+            finding.Id,
+            $"Remediate schema drift: {finding.Title}",
+            businessDescription,
+            desiredOutcome,
+            priority,
+            applicationId,
+            DriftRequestProvenance.BuildSupportingNotes(finding.Id, connection.Name, finding.Severity),
+            connection.Id,
+            connection.Name,
+            finding.Severity.ToString());
+    }
+
+    private static string MapDriftSeverityToPriority(Domain.Enums.DriftSeverity severity) =>
+        severity switch
+        {
+            Domain.Enums.DriftSeverity.Critical => "Critical",
+            Domain.Enums.DriftSeverity.High => "High",
+            Domain.Enums.DriftSeverity.Medium => "Medium",
+            _ => "Low"
+        };
 }
 
 public sealed record GetDriftReportQuery(Guid ConnectionId, Guid? RepositoryId = null)

@@ -170,17 +170,21 @@ public sealed class TriggerAiAnalysisCommandHandler
         return await LoadAnalysisDtoAsync(analysis.Id, cancellationToken);
     }
 
-    private Task PopulateAnalysisFromResultAsync(
+    private async Task PopulateAnalysisFromResultAsync(
         EnhancementAnalysis analysis,
         EnhancementRequest request,
         Abstractions.Models.AiAnalysisResult result,
         CancellationToken cancellationToken)
     {
-        var riskScore = _riskScoringService.CalculateRiskScore(result, null);
         analysis.FeatureSummary = result.Summary;
         analysis.BusinessRequirement = request.BusinessDescription;
         analysis.TechnicalRequirements = string.Join(Environment.NewLine, result.Recommendations);
-        analysis.RiskLevel = _riskScoringService.MapToRiskLevel(riskScore);
+        analysis.RiskLevel = await DriftRiskScoringHelper.ResolveRiskLevelAsync(
+            _dbContext,
+            _riskScoringService,
+            request,
+            result,
+            cancellationToken);
         analysis.RiskExplanation = string.Join(Environment.NewLine, result.Risks);
         analysis.TestingPlan = "Validate impacted areas with automated regression and integration tests.";
         analysis.ConfidenceScore = result.IsMock ? 0.6 : 0.85;
@@ -266,7 +270,6 @@ public sealed class TriggerAiAnalysisCommandHandler
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         });
-        return Task.CompletedTask;
     }
 
     private async Task<EnhancementAnalysisDto> LoadAnalysisDtoAsync(

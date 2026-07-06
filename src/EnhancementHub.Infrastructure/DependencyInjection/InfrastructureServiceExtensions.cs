@@ -375,6 +375,8 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<DatabaseSchemaScanJobExecutor>();
         services.AddScoped<ScheduledRepositoryRefreshJobExecutor>();
         services.AddScoped<DataRetentionJobExecutor>();
+        services.AddScoped<SchemaDriftScanJobExecutor>();
+        services.AddScoped<DriftDigestJobExecutor>();
         services.AddScoped<DeliveryOrchestrationJobExecutor>();
         services.AddScoped<WebhookDeliveryJobExecutor>();
 

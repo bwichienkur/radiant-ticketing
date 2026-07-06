@@ -3,6 +3,7 @@ import {
   createEnhancementRequest,
   createRequestFromIntakeSession,
   getCreateRequestForm,
+  getDriftRequestDraft,
   getEnhancementTemplate,
 } from '../api/spaClient';
 import { IntakeCopilotPanel, type IntakeCopilotFormDraft } from '../components/IntakeCopilotPanel';
@@ -18,11 +19,12 @@ import type { EnhancementTemplateSummary } from '../types/spa';
 
 interface CreateRequestAppProps {
   initialTemplateId?: string;
+  initialDriftFindingId?: string;
 }
 
 const PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];
 
-export function CreateRequestApp({ initialTemplateId }: CreateRequestAppProps) {
+export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: CreateRequestAppProps) {
   const [templates, setTemplates] = useState<EnhancementTemplateSummary[]>([]);
   const [applications, setApplications] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
@@ -30,7 +32,9 @@ export function CreateRequestApp({ initialTemplateId }: CreateRequestAppProps) {
   const [error, setError] = useState<string | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState(initialTemplateId ?? '');
   const [intakeSessionId, setIntakeSessionId] = useState<string | null>(null);
-  const [showManualForm, setShowManualForm] = useState(Boolean(initialTemplateId));
+  const [showManualForm, setShowManualForm] = useState(
+    Boolean(initialTemplateId || initialDriftFindingId),
+  );
   const [form, setForm] = useState({
     title: '',
     businessDescription: '',
@@ -97,6 +101,46 @@ export function CreateRequestApp({ initialTemplateId }: CreateRequestAppProps) {
 
     void applyTemplate(initialTemplateId);
   }, [initialTemplateId, applyTemplate]);
+
+  useEffect(() => {
+    if (!initialDriftFindingId) {
+      return;
+    }
+
+    const driftFindingId = initialDriftFindingId;
+    let cancelled = false;
+
+    async function loadDriftDraft() {
+      try {
+        const draft = await getDriftRequestDraft(driftFindingId);
+        if (cancelled) {
+          return;
+        }
+
+        setShowManualForm(true);
+        setForm({
+          title: draft.title,
+          businessDescription: draft.businessDescription,
+          desiredOutcome: draft.desiredOutcome,
+          priority: draft.priority,
+          targetApplicationId: draft.targetApplicationId ?? '',
+          requestedDueDate: '',
+          department: '',
+          supportingNotes: draft.supportingNotes ?? '',
+        });
+        setError(null);
+      } catch {
+        if (!cancelled) {
+          setError('Failed to load drift finding draft.');
+        }
+      }
+    }
+
+    void loadDriftDraft();
+    return () => {
+      cancelled = true;
+    };
+  }, [initialDriftFindingId]);
 
   const applyCopilotDraft = useCallback((draft: IntakeCopilotFormDraft) => {
     setShowManualForm(true);

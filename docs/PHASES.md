@@ -443,6 +443,15 @@ Guide: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md)
 - Hangfire-backed retry with exponential backoff (up to 5 attempts)
 - `docs/INTEGRATIONS.md` — payload schemas and HMAC verification guide
 
+## Phase 53 — Drift-to-request AI workflow (complete)
+
+- `GET /web-api/spa/drift/request-draft?findingId=` — pre-fills create-request form from drift finding
+- "Create request from drift" action in `SchemaDriftApp` and dashboard top-findings widget
+- `DriftRequestProvenance` marker in supporting notes links requests to drift findings
+- `DriftRiskScoringHelper` bumps AI risk level for critical/high drift-sourced requests
+- Dashboard insights include top 5 unresolved drift findings
+- `DriftDigestJobExecutor` — weekly email digest to Admin/Approver users via Hangfire
+
 ## Phases 46–57 — Due diligence execution (planned)
 
 Post-audit roadmap to reach world-class enterprise readiness. Full task breakdown: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md).
@@ -456,7 +465,7 @@ Post-audit roadmap to reach world-class enterprise readiness. Full task breakdow
 | 50 | Notification system |
 | 51 | Global entity search |
 | 52 | Webhooks & automation MVP |
-| 53 | Drift-to-request AI workflow |
+| 53 | Drift-to-request AI workflow | ✅ Complete |
 | 54 | Approval & intake copilot expansion |
 | 55 | Horizon 3 load test proof |
 | 56 | Design partner program |

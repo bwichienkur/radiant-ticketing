@@ -35,6 +35,11 @@ public interface INotificationService
         Guid? tenantId = null,
         CancellationToken cancellationToken = default);
 
+    Task NotifyArchitectsOfDriftDigestAsync(
+        int unresolvedCount,
+        IReadOnlyList<DriftDigestFindingSummary> topFindings,
+        CancellationToken cancellationToken = default);
+
     Task<IReadOnlyList<NotificationDto>> ListForUserAsync(
         Guid userId,
         bool unreadOnly,
@@ -79,3 +84,9 @@ public sealed record UpdateNotificationPreferenceInput(
     NotificationType Type,
     bool EmailEnabled,
     bool InAppEnabled);
+
+public sealed record DriftDigestFindingSummary(
+    string Title,
+    string Severity,
+    string ConnectionName,
+    Guid DatabaseConnectionId);

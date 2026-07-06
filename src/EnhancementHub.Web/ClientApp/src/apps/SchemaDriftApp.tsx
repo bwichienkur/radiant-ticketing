@@ -215,7 +215,15 @@ export function SchemaDriftApp() {
                         {finding.severity}
                       </span>
                     </div>
-                    <p className="small text-muted mb-0 mt-1">{finding.description}</p>
+                    <p className="small text-muted mb-2 mt-1">{finding.description}</p>
+                    {!finding.isResolved ? (
+                      <SpaLink
+                        href={`/Spa/CreateRequest?driftFindingId=${finding.id}`}
+                        className="btn btn-sm btn-outline-primary"
+                      >
+                        Create request from drift
+                      </SpaLink>
+                    ) : null}
                   </div>
                 ))
               )}

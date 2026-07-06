@@ -1,7 +1,6 @@
 using System.Text.Json;
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Common;
-using EnhancementHub.Application.Common;
 using EnhancementHub.Domain.Entities;
 using EnhancementHub.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -91,11 +90,16 @@ public sealed class AiAnalysisJobExecutor
                 applicationContext,
                 cancellationToken);
 
-            var riskScore = riskScoring.CalculateRiskScore(result, null);
+            var riskLevel = await DriftRiskScoringHelper.ResolveRiskLevelAsync(
+                dbContext,
+                riskScoring,
+                request,
+                result,
+                cancellationToken);
             analysis.FeatureSummary = result.Summary;
             analysis.BusinessRequirement = request.BusinessDescription;
             analysis.TechnicalRequirements = string.Join(Environment.NewLine, result.Recommendations);
-            analysis.RiskLevel = riskScoring.MapToRiskLevel(riskScore);
+            analysis.RiskLevel = riskLevel;
             analysis.RiskExplanation = string.Join(Environment.NewLine, result.Risks);
             analysis.TestingPlan = "Validate impacted areas with automated regression and integration tests.";
             analysis.ConfidenceScore = result.IsMock ? 0.6 : 0.85;

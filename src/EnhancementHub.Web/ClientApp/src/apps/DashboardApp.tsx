@@ -167,6 +167,39 @@ export function DashboardApp() {
               </SpaLink>
             </div>
           ) : null}
+          {insights.topDriftFindings.length > 0 ? (
+            <div className="col-lg-8">
+              <div className="card-panel p-3 h-100">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <h2 className="h6 mb-0">Top drift findings</h2>
+                  <SpaLink href="/Spa/SchemaDrift" className="small">
+                    View all
+                  </SpaLink>
+                </div>
+                {insights.topDriftFindings.map((finding) => (
+                  <div
+                    key={finding.id}
+                    className="d-flex justify-content-between align-items-start gap-2 py-2 border-bottom"
+                  >
+                    <div className="min-w-0">
+                      <SpaLink href={finding.linkPath} className="small fw-semibold d-block text-truncate">
+                        {finding.title}
+                      </SpaLink>
+                      <div className="small text-muted">
+                        {finding.severity} · {finding.connectionName}
+                      </div>
+                    </div>
+                    <SpaLink
+                      href={`/Spa/CreateRequest?driftFindingId=${finding.id}`}
+                      className="btn btn-sm btn-outline-primary flex-shrink-0"
+                    >
+                      Create request
+                    </SpaLink>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
           {insights.staleRepositoryCount > 0 ? (
             <div className="col-md-6 col-xl-4">
               <SpaLink href="/Spa/Repositories" className="text-decoration-none">

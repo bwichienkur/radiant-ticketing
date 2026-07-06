@@ -48,4 +48,16 @@ public sealed class RiskScoringService : IRiskScoringService
         >= 0.25 => RiskLevel.Medium,
         _ => RiskLevel.Low
     };
+
+    public RiskLevel ApplyDriftSeverityBoost(RiskLevel baseLevel, DriftSeverity? driftSeverity) =>
+        driftSeverity switch
+        {
+            DriftSeverity.Critical => baseLevel switch
+            {
+                RiskLevel.Low or RiskLevel.Medium => RiskLevel.High,
+                _ => RiskLevel.Critical
+            },
+            DriftSeverity.High when baseLevel == RiskLevel.Low => RiskLevel.Medium,
+            _ => baseLevel
+        };
 }

@@ -4,6 +4,7 @@ import type {
   AuditLogFilters,
   DatabaseConnectionSummary,
   DriftReport,
+  DriftRequestDraft,
   ApprovalHistoryItem,
   ApprovalRequestDetail,
   CreateRequestFormData,
@@ -95,6 +96,12 @@ export async function listDriftConnections(): Promise<DatabaseConnectionSummary[
 
 export async function getDriftReport(connectionId: string): Promise<DriftReport> {
   return fetchJson<DriftReport>(`/web-api/spa/drift/report?connectionId=${encodeURIComponent(connectionId)}`);
+}
+
+export async function getDriftRequestDraft(findingId: string): Promise<DriftRequestDraft> {
+  return fetchJson<DriftRequestDraft>(
+    `/web-api/spa/drift/request-draft?findingId=${encodeURIComponent(findingId)}`,
+  );
 }
 
 export async function detectSchemaDrift(connectionId: string): Promise<DriftReport> {

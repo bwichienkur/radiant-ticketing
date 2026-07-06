@@ -7,4 +7,5 @@ public interface IRiskScoringService
 {
     double CalculateRiskScore(AiAnalysisResult analysis, RepositoryScanResult? repositoryContext);
     RiskLevel MapToRiskLevel(double score);
+    RiskLevel ApplyDriftSeverityBoost(RiskLevel baseLevel, DriftSeverity? driftSeverity);
 }

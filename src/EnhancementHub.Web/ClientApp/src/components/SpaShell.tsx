@@ -42,6 +42,15 @@ function ApprovalQueueRoute() {
   return <ApprovalQueueApp initialRequestId={id} />;
 }
 
+function CreateRequestRoute() {
+  const [search] = useSearchParams();
+  const templateId = search.get('templateId') ?? undefined;
+  const driftFindingId = search.get('driftFindingId') ?? undefined;
+  return (
+    <CreateRequestApp initialTemplateId={templateId} initialDriftFindingId={driftFindingId} />
+  );
+}
+
 function OnboardingWizardRoute() {
   const { sessionId } = useParams<{ sessionId: string }>();
   return <OnboardingWizardApp initialSessionId={sessionId} />;
@@ -93,7 +102,7 @@ export function SpaShell() {
         <Route path="/" element={<DashboardApp />} />
         <Route path="/Index" element={<DashboardApp />} />
         <Route path="/Spa/RequestList" element={<RequestListRoute />} />
-        <Route path="/Spa/CreateRequest" element={<CreateRequestApp />} />
+        <Route path="/Spa/CreateRequest" element={<CreateRequestRoute />} />
         <Route path="/Spa/RequestDetail/:id" element={<RequestDetailRoute />} />
         <Route path="/Spa/ApprovalQueue" element={<ApprovalQueueRoute />} />
         <Route path="/Spa/ApprovalQueue/:id" element={<ApprovalQueueRoute />} />

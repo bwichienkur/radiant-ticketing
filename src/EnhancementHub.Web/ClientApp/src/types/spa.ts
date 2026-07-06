@@ -104,6 +104,19 @@ export interface DriftReport {
   findings: SchemaDriftFinding[];
 }
 
+export interface DriftRequestDraft {
+  findingId: string;
+  title: string;
+  businessDescription: string;
+  desiredOutcome: string;
+  priority: string;
+  targetApplicationId?: string;
+  supportingNotes?: string;
+  databaseConnectionId: string;
+  connectionName?: string;
+  severity: string;
+}
+
 export interface RepositoryListItem {
   id: string;
   applicationId: string;
@@ -259,6 +272,16 @@ export interface DailyRequestCount {
   count: number;
 }
 
+export interface DashboardDriftFinding {
+  id: string;
+  title: string;
+  severity: string;
+  connectionName: string;
+  databaseConnectionId: string;
+  detectedAt: string;
+  linkPath: string;
+}
+
 export interface DashboardInsights {
   recentActivity: DashboardActivityItem[];
   requestsLast7Days: DailyRequestCount[];
@@ -266,6 +289,7 @@ export interface DashboardInsights {
   myAwaitingAnalysis: number;
   unresolvedDriftFindings: number;
   staleRepositoryCount: number;
+  topDriftFindings: DashboardDriftFinding[];
 }
 
 export interface DashboardReport {
