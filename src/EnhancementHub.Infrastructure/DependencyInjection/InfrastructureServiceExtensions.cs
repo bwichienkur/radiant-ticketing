@@ -9,6 +9,7 @@ using EnhancementHub.Infrastructure.Security;
 using EnhancementHub.Infrastructure.Services;
 using EnhancementHub.Infrastructure.Services.Integrations;
 using EnhancementHub.Infrastructure.Services.Notifications;
+using EnhancementHub.Infrastructure.Services.Webhooks;
 using EnhancementHub.Infrastructure.Services.SystemIntelligence;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -125,6 +126,10 @@ public static class InfrastructureServiceExtensions
                 : sp.GetRequiredService<NoOpEmailSender>());
         services.AddSingleton<IUserNotificationNotifier, NoOpUserNotificationNotifier>();
         services.AddScoped<INotificationService, NotificationService>();
+        services.AddScoped<WebhookDeliveryService>();
+        services.AddScoped<IWebhookEventPublisher, WebhookEventPublisher>();
+        services.AddScoped<IWebhookDeliveryDispatcher, WebhookDeliveryDispatcher>();
+        services.AddHttpClient(nameof(WebhookDeliveryService));
         services.AddScoped<EmailNotificationPublisher>();
         services.AddScoped<TeamsWebhookNotificationPublisher>();
         services.AddScoped<INotificationPublisher>(sp => new CompositeNotificationPublisher(
@@ -371,6 +376,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<ScheduledRepositoryRefreshJobExecutor>();
         services.AddScoped<DataRetentionJobExecutor>();
         services.AddScoped<DeliveryOrchestrationJobExecutor>();
+        services.AddScoped<WebhookDeliveryJobExecutor>();
 
         var jobProvider = configuration["BackgroundJobs:Provider"] ?? "Polling";
         var useHangfire = ShouldUseHangfire(configuration, provider);

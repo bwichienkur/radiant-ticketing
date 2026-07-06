@@ -191,14 +191,14 @@ Migrate high-traffic Intelligence pages into `SpaShell.tsx` routes. Order by tra
 
 **Exit criteria:** `Ctrl+K` → "order cancellation" finds request, app, and related repo symbols.
 
-### Phase 52 — Webhooks & workflow automation MVP
+### Phase 52 — Webhooks & workflow automation MVP (complete)
 
-| # | Task | Files / location | Acceptance criteria |
-|---|------|------------------|---------------------|
-| 52.1 | `WebhookSubscription` entity | Domain + admin UI `/Admin/Webhooks` | URL, secret, event types |
-| 52.2 | Event dispatch on state transitions | MediatR pipeline behavior | `request.approved`, `analysis.completed`, `drift.detected` |
-| 52.3 | Retry + delivery log | Hangfire job | Failed deliveries visible in admin |
-| 52.4 | Zapier-style outbound template | `docs/INTEGRATIONS.md` | Document payload schemas |
+| # | Task | Status |
+|---|------|--------|
+| 52.1 | `WebhookSubscription` entity + `/Admin/Webhooks` | Done |
+| 52.2 | Event dispatch on state transitions | Done |
+| 52.3 | Retry + delivery log (Hangfire) | Done |
+| 52.4 | Outbound payload docs in `INTEGRATIONS.md` | Done |
 
 **Exit criteria:** Customer can register webhook; receives signed POST on approval.
 

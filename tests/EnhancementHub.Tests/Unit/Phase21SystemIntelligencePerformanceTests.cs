@@ -80,6 +80,7 @@ public sealed class Phase21SystemIntelligencePerformanceTests
             dbContext,
             notifications.Object,
             new EnhancementHub.Infrastructure.Services.Notifications.NoOpNotificationService(),
+            new EnhancementHub.Infrastructure.Services.Webhooks.NoOpWebhookEventPublisher(),
             new SystemIntelligenceFingerprintService(dbContext),
             Microsoft.Extensions.Options.Options.Create(new SystemIntelligenceOptions { DiffOnlyDriftEnabled = true }),
             NullLogger<SchemaDriftDetectorService>.Instance);

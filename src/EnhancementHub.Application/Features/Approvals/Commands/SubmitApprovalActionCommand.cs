@@ -1,4 +1,5 @@
 using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Common;
 using EnhancementHub.Application.Common.Exceptions;
 using EnhancementHub.Application.Common.Mappings;
 using EnhancementHub.Application.Features.Approvals.Dtos;
@@ -24,19 +25,22 @@ public sealed class SubmitApprovalActionCommandHandler
     private readonly IAuditService _auditService;
     private readonly IApprovalPolicyEvaluator _policyEvaluator;
     private readonly IDeliveryApprovalHook _deliveryApprovalHook;
+    private readonly IWebhookEventPublisher _webhookPublisher;
 
     public SubmitApprovalActionCommandHandler(
         IEnhancementHubDbContext dbContext,
         ICurrentUserService currentUser,
         IAuditService auditService,
         IApprovalPolicyEvaluator policyEvaluator,
-        IDeliveryApprovalHook deliveryApprovalHook)
+        IDeliveryApprovalHook deliveryApprovalHook,
+        IWebhookEventPublisher webhookPublisher)
     {
         _dbContext = dbContext;
         _currentUser = currentUser;
         _auditService = auditService;
         _policyEvaluator = policyEvaluator;
         _deliveryApprovalHook = deliveryApprovalHook;
+        _webhookPublisher = webhookPublisher;
     }
 
     public async Task<ApprovalActionDto> Handle(
@@ -111,6 +115,25 @@ public sealed class SubmitApprovalActionCommandHandler
         if (request.ActionType == ApprovalActionType.Approve)
         {
             await _deliveryApprovalHook.TryStartAfterApprovalAsync(enhancementRequest.Id, cancellationToken);
+
+            var tenantId = await _dbContext.Users
+                .AsNoTracking()
+                .Where(u => u.Id == enhancementRequest.SubmittedByUserId)
+                .Select(u => u.TenantId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            await _webhookPublisher.PublishAsync(
+                WebhookEventTypes.RequestApproved,
+                new
+                {
+                    enhancementRequestId = enhancementRequest.Id,
+                    title = enhancementRequest.Title,
+                    approvedByUserId = _currentUser.UserId.Value,
+                    approvedAt = DateTime.UtcNow,
+                    status = enhancementRequest.Status.ToString()
+                },
+                tenantId,
+                cancellationToken);
         }
 
         var user = await _dbContext.Users

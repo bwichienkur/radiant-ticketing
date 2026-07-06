@@ -5,6 +5,7 @@ using EnhancementHub.Domain.Enums;
 using EnhancementHub.Infrastructure.Persistence;
 using EnhancementHub.Infrastructure.Services;
 using EnhancementHub.Infrastructure.Services.Notifications;
+using EnhancementHub.Infrastructure.Services.Webhooks;
 using EnhancementHub.Infrastructure.Services.SystemIntelligence;
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
@@ -34,6 +35,7 @@ public sealed class SchemaDriftDetectorTests : IDisposable
             _dbContext,
             new NoOpNotificationPublisher(),
             new NoOpNotificationService(),
+            new NoOpWebhookEventPublisher(),
             fingerprintService,
             Microsoft.Extensions.Options.Options.Create(new Application.Options.SystemIntelligenceOptions()),
             NullLogger<SchemaDriftDetectorService>.Instance);

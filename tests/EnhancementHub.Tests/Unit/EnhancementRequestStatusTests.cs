@@ -121,13 +121,15 @@ public sealed class EnhancementRequestStatusTests : IDisposable
             .ReturnsAsync(new ApprovalPolicyEvaluationResult(true, null, null));
 
         var deliveryHook = new Mock<IDeliveryApprovalHook>();
+        var webhookPublisher = new Mock<IWebhookEventPublisher>();
 
         var handler = new SubmitApprovalActionCommandHandler(
             _dbContext,
             currentUser.Object,
             new AuditService(_dbContext, currentUser.Object),
             policyEvaluator.Object,
-            deliveryHook.Object);
+            deliveryHook.Object,
+            webhookPublisher.Object);
 
         var result = await handler.Handle(
             new SubmitApprovalActionCommand(requestId, actionType, "Test comment"),

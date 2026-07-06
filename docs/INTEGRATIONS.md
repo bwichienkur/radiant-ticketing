@@ -191,4 +191,101 @@ Mapped states include `approved`, `rejected`, `implement`, `closed`, and `cancel
 
 ---
 
-*Phase 23 — Horizon 4.1 polyglot & integration expansion.*
+## Outbound customer webhooks (Phase 52)
+
+Register HTTPS endpoints in **Admin → Webhooks** to receive signed JSON POSTs when workflow events occur.
+
+### Supported events
+
+| Event type | Trigger |
+|------------|---------|
+| `request.approved` | Enhancement request is approved |
+| `analysis.completed` | AI analysis finishes and request moves to pending approval |
+| `drift.detected` | Schema drift scan completes |
+
+### Subscription setup
+
+1. Open `/Admin/Webhooks` as an Admin user.
+2. Enter endpoint URL and select event types.
+3. Copy the signing secret when shown — it is displayed only once.
+
+### Delivery format
+
+```http
+POST https://your-endpoint.example/hooks/enhancementhub
+Content-Type: application/json
+X-EnhancementHub-Signature: t=1710000000,v1=<hmac_sha256_hex>
+User-Agent: EnhancementHub/1.0
+```
+
+```json
+{
+  "eventType": "request.approved",
+  "timestamp": "2026-07-06T15:00:00Z",
+  "data": {
+    "enhancementRequestId": "279c38dc-8da4-400b-828f-711726210eb6",
+    "title": "Add order cancellation reason for compliance",
+    "approvedByUserId": "11111111-1111-1111-1111-111111111111",
+    "approvedAt": "2026-07-06T15:00:00Z",
+    "status": "Approved"
+  }
+}
+```
+
+### Signature verification (Zapier / custom receiver)
+
+1. Read the raw request body as a string (before JSON parsing).
+2. Parse `X-EnhancementHub-Signature` header: `t=<unix_seconds>,v1=<signature>`.
+3. Compute HMAC-SHA256 of `{timestamp}.{raw_body}` using your webhook signing secret.
+4. Compare the hex digest to `v1` using a constant-time comparison.
+
+Example pseudo-code:
+
+```text
+signed_payload = timestamp + "." + raw_body
+expected = HMAC_SHA256_HEX(secret, signed_payload)
+assert constant_time_equals(expected, signature_from_header)
+```
+
+### Retry policy
+
+Failed deliveries (non-2xx HTTP or network error) retry up to **5 attempts** with exponential backoff. Delivery status is visible in the **Recent deliveries** table on `/Admin/Webhooks`.
+
+### Analysis completed payload
+
+```json
+{
+  "eventType": "analysis.completed",
+  "timestamp": "2026-07-06T15:00:00Z",
+  "data": {
+    "enhancementRequestId": "279c38dc-8da4-400b-828f-711726210eb6",
+    "title": "Add order cancellation reason for compliance",
+    "analysisId": "66666666-6666-6666-6666-666666666666",
+    "analysisVersion": 1,
+    "status": "PendingApproval",
+    "completedAt": "2026-07-06T15:00:00Z"
+  }
+}
+```
+
+### Drift detected payload
+
+```json
+{
+  "eventType": "drift.detected",
+  "timestamp": "2026-07-06T15:00:00Z",
+  "data": {
+    "databaseConnectionId": "55555555-5555-5555-5555-555555555555",
+    "connectionName": "EnhancementHub SQLite",
+    "applicationId": "33333333-3333-3333-3333-333333333333",
+    "findingCount": 3,
+    "criticalCount": 1,
+    "detectedAt": "2026-07-06T15:00:00Z"
+  }
+}
+```
+
+---
+
+*Phase 52 — Outbound webhooks & workflow automation MVP.*
+

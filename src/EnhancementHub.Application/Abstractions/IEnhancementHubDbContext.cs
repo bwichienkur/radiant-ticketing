@@ -68,6 +68,8 @@ public interface IEnhancementHubDbContext
     DbSet<ApplicationRegressionRun> ApplicationRegressionRuns { get; }
     DbSet<Notification> Notifications { get; }
     DbSet<NotificationPreference> NotificationPreferences { get; }
+    DbSet<WebhookSubscription> WebhookSubscriptions { get; }
+    DbSet<WebhookDelivery> WebhookDeliveries { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

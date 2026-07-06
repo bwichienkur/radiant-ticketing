@@ -1,6 +1,7 @@
 using System.Text.Json;
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Common;
+using EnhancementHub.Application.Common;
 using EnhancementHub.Domain.Entities;
 using EnhancementHub.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,7 @@ public sealed class AiAnalysisJobExecutor
         var riskScoring = scope.ServiceProvider.GetRequiredService<IRiskScoringService>();
         var audit = scope.ServiceProvider.GetRequiredService<IAuditService>();
         var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
+        var webhookPublisher = scope.ServiceProvider.GetRequiredService<IWebhookEventPublisher>();
 
         var pending = await dbContext.EnhancementRequests
             .Include(r => r.TargetApplication)
@@ -41,7 +43,7 @@ public sealed class AiAnalysisJobExecutor
 
         foreach (var request in pending)
         {
-            await ProcessRequestAsync(dbContext, aiService, riskScoring, audit, notificationService, request, cancellationToken);
+            await ProcessRequestAsync(dbContext, aiService, riskScoring, audit, notificationService, webhookPublisher, request, cancellationToken);
         }
     }
 
@@ -51,6 +53,7 @@ public sealed class AiAnalysisJobExecutor
         IRiskScoringService riskScoring,
         IAuditService audit,
         INotificationService notificationService,
+        IWebhookEventPublisher webhookPublisher,
         EnhancementRequest request,
         CancellationToken cancellationToken)
     {
@@ -175,6 +178,20 @@ public sealed class AiAnalysisJobExecutor
                 request.SubmittedByUserId,
                 request.Id,
                 request.Title,
+                submitterTenantId,
+                cancellationToken);
+
+            await webhookPublisher.PublishAsync(
+                WebhookEventTypes.AnalysisCompleted,
+                new
+                {
+                    enhancementRequestId = request.Id,
+                    title = request.Title,
+                    analysisId = analysis.Id,
+                    analysisVersion = analysis.Version,
+                    status = request.Status.ToString(),
+                    completedAt = DateTime.UtcNow
+                },
                 submitterTenantId,
                 cancellationToken);
         }

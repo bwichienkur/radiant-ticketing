@@ -1,5 +1,6 @@
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Abstractions.Models;
+using EnhancementHub.Application.Common;
 using EnhancementHub.Application.Options;
 using EnhancementHub.Domain.Entities;
 using EnhancementHub.Domain.Enums;
@@ -14,6 +15,7 @@ public sealed class SchemaDriftDetectorService : ISchemaDriftDetector
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly INotificationPublisher _notifications;
     private readonly INotificationService _notificationService;
+    private readonly IWebhookEventPublisher _webhookPublisher;
     private readonly ISystemIntelligenceFingerprintService _fingerprintService;
     private readonly SystemIntelligenceOptions _options;
     private readonly ILogger<SchemaDriftDetectorService> _logger;
@@ -22,6 +24,7 @@ public sealed class SchemaDriftDetectorService : ISchemaDriftDetector
         IEnhancementHubDbContext dbContext,
         INotificationPublisher notifications,
         INotificationService notificationService,
+        IWebhookEventPublisher webhookPublisher,
         ISystemIntelligenceFingerprintService fingerprintService,
         IOptions<SystemIntelligenceOptions> options,
         ILogger<SchemaDriftDetectorService> logger)
@@ -29,6 +32,7 @@ public sealed class SchemaDriftDetectorService : ISchemaDriftDetector
         _dbContext = dbContext;
         _notifications = notifications;
         _notificationService = notificationService;
+        _webhookPublisher = webhookPublisher;
         _fingerprintService = fingerprintService;
         _options = options.Value;
         _logger = logger;
@@ -165,6 +169,20 @@ public sealed class SchemaDriftDetectorService : ISchemaDriftDetector
             "Schema drift scan complete",
             $"Detected {findings.Count} drift finding(s).",
             new { databaseConnectionId, findingCount = findings.Count },
+            cancellationToken);
+
+        await _webhookPublisher.PublishAsync(
+            WebhookEventTypes.DriftDetected,
+            new
+            {
+                databaseConnectionId,
+                connectionName = connection.Name,
+                applicationId = connection.ApplicationId,
+                findingCount = findings.Count,
+                criticalCount = findings.Count(f => f.Severity == DriftSeverity.Critical),
+                detectedAt = DateTime.UtcNow
+            },
+            null,
             cancellationToken);
 
         var criticalCount = findings.Count(f => f.Severity == DriftSeverity.Critical);

@@ -1,0 +1,173 @@
+@page
+@model EnhancementHub.Web.Pages.Admin.WebhooksModel
+@using EnhancementHub.Application.Common
+@{
+    ViewData["AdminSection"] = "webhooks";
+    ViewData["Title"] = "Webhooks";
+}
+
+<partial name="_AdminNav" />
+
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+        <h1>Outbound webhooks</h1>
+        <p>Register HTTPS endpoints to receive signed workflow events</p>
+    </div>
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-info">@Model.StatusMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+{
+    <div class="alert alert-danger">@Model.ErrorMessage</div>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.CreatedWebhookSecret))
+{
+    <div class="alert alert-warning">
+        <strong>Copy this signing secret now — it will not be shown again.</strong>
+        <pre class="mb-0 mt-2 user-select-all">@Model.CreatedWebhookSecret</pre>
+        <p class="small mb-0 mt-2">Verify requests using header <code>@WebhookSigningUtility.SignatureHeaderName</code></p>
+    </div>
+}
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card-panel p-4">
+            <h2 class="h6 mb-3">Create subscription</h2>
+            <form method="post" asp-page-handler="Create">
+                <div class="mb-3">
+                    <label asp-for="NewSubscriptionName" class="form-label">Name</label>
+                    <input asp-for="NewSubscriptionName" class="form-control" required maxlength="200" placeholder="Zapier approval hook" />
+                </div>
+                <div class="mb-3">
+                    <label asp-for="NewSubscriptionUrl" class="form-label">Endpoint URL</label>
+                    <input asp-for="NewSubscriptionUrl" class="form-control" required maxlength="2000" placeholder="https://hooks.example.com/enhancementhub" />
+                </div>
+                <fieldset class="mb-3">
+                    <legend class="form-label fs-6">Event types</legend>
+                    @foreach (var eventType in WebhookEventTypes.All)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="SelectedEventTypes" value="@eventType" id="event-@eventType.Replace('.', '-')" checked="@(eventType == WebhookEventTypes.RequestApproved)" />
+                            <label class="form-check-label" for="event-@eventType.Replace('.', '-')">@eventType</label>
+                        </div>
+                    }
+                </fieldset>
+                <button type="submit" class="btn btn-primary">Create webhook</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card-panel mb-4">
+            <div class="card-header px-3 pt-3">Subscriptions</div>
+            @if (Model.Subscriptions.Count == 0)
+            {
+                <div class="p-4 text-muted">No webhook subscriptions yet.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-enterprise mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>URL</th>
+                                <th>Events</th>
+                                <th>Status</th>
+                                <th>Failed</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var subscription in Model.Subscriptions)
+                            {
+                                <tr>
+                                    <td><strong>@subscription.Name</strong></td>
+                                    <td class="small text-break">@subscription.Url</td>
+                                    <td class="small">@subscription.EventTypes</td>
+                                    <td>
+                                        @if (subscription.IsActive)
+                                        {
+                                            <span class="badge text-bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge text-bg-secondary">Revoked</span>
+                                        }
+                                    </td>
+                                    <td>@subscription.FailedDeliveryCount</td>
+                                    <td class="text-end">
+                                        @if (subscription.IsActive)
+                                        {
+                                            <form method="post" asp-page-handler="Revoke" onsubmit="return confirm('Revoke this webhook subscription?');">
+                                                <input type="hidden" name="RevokeSubscriptionId" value="@subscription.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger">Revoke</button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+
+        <div class="card-panel">
+            <div class="card-header px-3 pt-3">Recent deliveries</div>
+            @if (Model.Deliveries.Count == 0)
+            {
+                <div class="p-4 text-muted">No deliveries yet.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-enterprise mb-0">
+                        <thead>
+                            <tr>
+                                <th>Subscription</th>
+                                <th>Event</th>
+                                <th>Status</th>
+                                <th>Attempts</th>
+                                <th>HTTP</th>
+                                <th>When</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var delivery in Model.Deliveries)
+                            {
+                                <tr>
+                                    <td>@delivery.SubscriptionName</td>
+                                    <td><code class="small">@delivery.EventType</code></td>
+                                    <td>
+                                        <span class="badge @(delivery.Status == "Delivered" ? "text-bg-success" : delivery.Status == "Failed" ? "text-bg-danger" : "text-bg-warning")">
+                                            @delivery.Status
+                                        </span>
+                                    </td>
+                                    <td>@delivery.AttemptCount</td>
+                                    <td>@(delivery.HttpStatusCode?.ToString() ?? "—")</td>
+                                    <td class="small">@delivery.CreatedAt.ToString("u")</td>
+                                </tr>
+                                @if (!string.IsNullOrWhiteSpace(delivery.LastError))
+                                {
+                                    <tr>
+                                        <td colspan="6" class="small text-danger pb-3">@delivery.LastError</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<p class="text-muted small mt-3 mb-0">
+    Payloads are signed with HMAC-SHA256. See <a asp-page="/Admin/Settings">docs/INTEGRATIONS.md</a> in the repository for payload schemas and verification steps.
+</p>

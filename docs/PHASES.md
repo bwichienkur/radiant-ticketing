@@ -435,6 +435,14 @@ Guide: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md)
 - Command palette (`Ctrl+K`) uses SPA search API with recent searches
 - `UxController` search delegates to unified query; demo indexed `CancelOrder` symbol seeded
 
+## Phase 52 — Webhooks & workflow automation MVP (complete)
+
+- `WebhookSubscription` + `WebhookDelivery` entities with signed outbound POST delivery
+- Admin UI at `/Admin/Webhooks` — create subscription, view delivery log
+- Events: `request.approved`, `analysis.completed`, `drift.detected`
+- Hangfire-backed retry with exponential backoff (up to 5 attempts)
+- `docs/INTEGRATIONS.md` — payload schemas and HMAC verification guide
+
 ## Phases 46–57 — Due diligence execution (planned)
 
 Post-audit roadmap to reach world-class enterprise readiness. Full task breakdown: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md).

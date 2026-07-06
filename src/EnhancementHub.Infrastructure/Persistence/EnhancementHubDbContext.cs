@@ -79,6 +79,8 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<ApplicationRegressionRun> ApplicationRegressionRuns => Set<ApplicationRegressionRun>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
+    public DbSet<WebhookSubscription> WebhookSubscriptions => Set<WebhookSubscription>();
+    public DbSet<WebhookDelivery> WebhookDeliveries => Set<WebhookDelivery>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

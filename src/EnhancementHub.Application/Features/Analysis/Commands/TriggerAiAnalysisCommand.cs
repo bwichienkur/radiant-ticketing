@@ -24,6 +24,7 @@ public sealed class TriggerAiAnalysisCommandHandler
     private readonly ITenantBillingService _tenantBillingService;
     private readonly IRequestCollaborationNotifier _collaborationNotifier;
     private readonly INotificationService _notificationService;
+    private readonly IWebhookEventPublisher _webhookPublisher;
 
     public TriggerAiAnalysisCommandHandler(
         IEnhancementHubDbContext dbContext,
@@ -33,7 +34,8 @@ public sealed class TriggerAiAnalysisCommandHandler
         ITenantMeteringService tenantMeteringService,
         ITenantBillingService tenantBillingService,
         IRequestCollaborationNotifier collaborationNotifier,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IWebhookEventPublisher webhookPublisher)
     {
         _dbContext = dbContext;
         _aiAnalysisService = aiAnalysisService;
@@ -43,6 +45,7 @@ public sealed class TriggerAiAnalysisCommandHandler
         _tenantBillingService = tenantBillingService;
         _collaborationNotifier = collaborationNotifier;
         _notificationService = notificationService;
+        _webhookPublisher = webhookPublisher;
     }
 
     public async Task<EnhancementAnalysisDto> Handle(
@@ -138,6 +141,20 @@ public sealed class TriggerAiAnalysisCommandHandler
                 enhancementRequest.SubmittedByUserId,
                 enhancementRequest.Id,
                 enhancementRequest.Title,
+                submitterTenantId,
+                cancellationToken);
+
+            await _webhookPublisher.PublishAsync(
+                WebhookEventTypes.AnalysisCompleted,
+                new
+                {
+                    enhancementRequestId = enhancementRequest.Id,
+                    title = enhancementRequest.Title,
+                    analysisId = analysis.Id,
+                    analysisVersion = analysis.Version,
+                    status = enhancementRequest.Status.ToString(),
+                    completedAt = DateTime.UtcNow
+                },
                 submitterTenantId,
                 cancellationToken);
         }
