@@ -5,12 +5,12 @@ namespace EnhancementHub.Tests.Unit;
 public sealed class Phase54ApprovalCopilotTests
 {
     [Fact]
-    public void GetApprovalRecommendationQuery_BuildsGuidanceSummary()
+    public void GetApprovalRecommendationQuery_DelegatesToCopilotService()
     {
         var handler = File.ReadAllText(GetPath(
             "src/EnhancementHub.Application/Features/Approvals/Queries/GetApprovalRecommendationQuery.cs"));
         handler.Should().Contain("GetApprovalRecommendationQuery");
-        handler.Should().Contain("BuildSummary");
+        handler.Should().Contain("IApprovalCopilotService");
     }
 
     [Fact]
@@ -27,6 +27,7 @@ public sealed class Phase54ApprovalCopilotTests
         var page = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/apps/ApprovalQueueApp.tsx"));
         page.Should().Contain("getApprovalRecommendation");
         page.Should().Contain("recommendation.summary");
+        page.Should().Contain("recommendationSourceLabel");
     }
 
     [Fact]

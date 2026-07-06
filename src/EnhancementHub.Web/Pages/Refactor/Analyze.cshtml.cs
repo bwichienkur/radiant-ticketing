@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.Refactor;
 
+/// <summary>Legacy Razor refactor analysis — redirects to <c>/Spa/Refactor/Analyze</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/Refactor/Analyze. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize]
 public class AnalyzeModel : PageModel
 {
@@ -24,10 +26,16 @@ public class AnalyzeModel : PageModel
     public IReadOnlyList<ApplicationDto> Applications { get; private set; } = [];
     public BlastRadiusResultDto? Result { get; private set; }
 
-    public async Task OnGetAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToPagePermanent("/Spa/RefactorAnalyze");
+        }
+
         Applications = await _mediator.Send(new ListApplicationsQuery(), cancellationToken);
         ApplicationId = Applications.FirstOrDefault()?.Id ?? Guid.Empty;
+        return Page();
     }
 
     public async Task OnPostAsync(CancellationToken cancellationToken)

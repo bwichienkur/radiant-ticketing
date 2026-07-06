@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.Admin;
 
+/// <summary>Legacy Razor webhooks — redirects to <c>/Spa/Settings/Webhooks</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/Settings/Webhooks. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize(Roles = "Admin")]
 public class WebhooksModel : PageModel
 {
@@ -38,10 +40,16 @@ public class WebhooksModel : PageModel
     [TempData]
     public string? CreatedWebhookSecret { get; set; }
 
-    public async Task OnGetAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectPermanent("/Spa/Settings/Webhooks");
+        }
+
         Subscriptions = await _mediator.Send(new ListWebhookSubscriptionsQuery(), cancellationToken);
         Deliveries = await _mediator.Send(new ListWebhookDeliveriesQuery(50), cancellationToken);
+        return Page();
     }
 
     public async Task<IActionResult> OnPostCreateAsync(CancellationToken cancellationToken)

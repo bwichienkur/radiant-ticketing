@@ -61,7 +61,7 @@ Overall = average of the three dimensions (equal weight).
 | Enterprise procurement | 5 | 8.5 | SCIM, CSP, signed audit export — [SECURITY.md](SECURITY.md) |
 | Pricing / packaging | 2 | 8.0 | [PRICING.md](PRICING.md), self-service trial signup, Stripe checkout |
 | Competitive story | 5 | 7.5 | Polyglot + OpenAPI broadens beyond .NET-only ICP |
-| Customer proof (pilots, NPS, case studies) | 1 | 5 | Pilot #1 playbook + in-product NPS; case study template ready |
+| Customer proof (pilots, NPS, case studies) | 1 | 5.5 | Pilot #1 measured; partner #2 tracker + case study draft |
 
 **Notes:** Largest absolute gain. Paper readiness for pilots and security review is strong; market validation remains the main gap.
 
@@ -115,15 +115,15 @@ Buyer-facing readiness distinct from dimension averages.
 
 ## Roadmap metrics (targets vs measured)
 
-From [ROADMAP.md](ROADMAP.md). **Pilot #1 baselines** captured via `/Admin/Roi` and in-product feedback (Phase 56).
+From [ROADMAP.md](ROADMAP.md). **Pilot #1 baselines** captured via `/Spa/Insights` and in-product feedback (Phase 56). Pilot #2 tracked in [DESIGN_PARTNER_2_TRACKER.md](DESIGN_PARTNER_2_TRACKER.md).
 
-| Metric | Pilot target | Enterprise target | Measured |
-|--------|--------------|-------------------|----------|
-| Request submitted → analysis complete | < 30 min | < 10 min | **18 min** (pilot #1 median) |
-| Analysis → approval decision | < 5 days | < 2 days | **2.4 days** (pilot #1 median) |
-| % requests with linked application + repo | > 80% | > 95% | **85%** (pilot #1) |
-| Pilot NPS (architects + PMs) | > 30 | > 50 | **38** (pilot #1, n=12) |
-| Platform uptime | 99% | 99.9% | **99.2%** (pilot #1 window) |
+| Metric | Pilot target | Enterprise target | Pilot #1 | Pilot #2 |
+|--------|--------------|-------------------|----------|----------|
+| Request submitted → analysis complete | < 30 min | < 10 min | **18 min** (median) | — |
+| Analysis → approval decision | < 5 days | < 2 days | **2.4 days** (median) | — |
+| % requests with linked application + repo | > 80% | > 95% | **85%** | — |
+| Pilot NPS (architects + PMs) | > 30 | > 50 | **38** (n=12) | — |
+| Platform uptime | 99% | 99.9% | **99.2%** (pilot window) | — |
 
 ---
 
@@ -149,6 +149,7 @@ When closing a phase or horizon:
 
 | Date | Phase / milestone | Overall | Notes |
 |------|-------------------|---------|-------|
+| 2026-07-06 | Wave 2 — Phases 64–66 | 8.4 → 8.5 | Insights SPA, LLM approval copilot, partner #2 tracker |
 | 2026-07-06 | Phase 57 — Enterprise hardening | 8.4 → 8.4 | SCIM, custom fields, SLA, CodeQL, CSP, signed audit export |
 | 2026-07-06 | Phase 56 — Design partner program | 8.3 → 8.4 | Playbook, feedback widget, ROI pilot metrics, scorecard measured column |
 | 2026-07-06 | Phase 55 — Horizon 3 load test proof | 8.3 → 8.3 | k6 Horizon 3 proven; nightly CI smoke |
@@ -171,4 +172,4 @@ When closing a phase or horizon:
 
 ---
 
-*Last updated: July 2026 — Phase 57 (enterprise hardening; due diligence roadmap complete).*
+*Last updated: July 2026 — Wave 2 complete (Phases 64–66).*

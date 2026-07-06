@@ -635,9 +635,8 @@
         /*
          * SPA vs full-page navigation (Phase 48):
          * - Client-side (no reload): /, /Index, /Spa/*
-         * - Full Razor page load: /DatabaseConnections, /Documentation, /Refactor,
-         *   /Applications/Details, /Admin/*
-         * Intelligence list pages (Applications, Drift, Repositories, Audit) are in the SPA shell.
+         * - Full Razor page load: /Applications/Details, /Admin/*
+         * Intelligence list pages (Applications, Drift, Repositories, Audit, Databases, Docs, Refactor) are in the SPA shell.
          */
         const spaExact = new Set(['/', '/Index']);
         const spaPrefixes = [
@@ -652,6 +651,12 @@
             '/Spa/Repositories',
             '/Spa/Audit',
             '/Spa/Search',
+            '/Spa/DatabaseConnections',
+            '/Spa/Documentation/Export',
+            '/Spa/Refactor/Analyze',
+            '/Spa/Refactor/Plans',
+            '/Spa/Settings',
+            '/Spa/Insights',
         ];
 
         function isSpaPath(pathname) {
