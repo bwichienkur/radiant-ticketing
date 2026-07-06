@@ -386,4 +386,23 @@
 - `OnboardingAdvancedSteps` tabs in React wizard (parity with classic wizard)
 - Guide: `docs/UX_MODERNIZATION.md` (Phase 37 section)
 
+## Phases 46–57 — Due diligence execution (planned)
+
+Post-audit roadmap to reach world-class enterprise readiness. Full task breakdown: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md).
+
+| Phase | Name |
+|-------|------|
+| 46 | CI quality gate & E2E repair |
+| 47 | Production trust guards |
+| 48 | Route consolidation & legacy deprecation |
+| 49 | Intelligence pages in React shell |
+| 50 | Notification system |
+| 51 | Global entity search |
+| 52 | Webhooks & automation MVP |
+| 53 | Drift-to-request AI workflow |
+| 54 | Approval & intake copilot expansion |
+| 55 | Horizon 3 load test proof |
+| 56 | Design partner program |
+| 57 | Enterprise hardening & procurement |
+
 ## Future enhancements

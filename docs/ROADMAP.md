@@ -5,6 +5,8 @@ Organized into four horizons: **Now**, **Next**, **Scale**, and **Grow**.
 
 Track scores over time in [PRODUCT_SCORECARD.md](PRODUCT_SCORECARD.md).
 
+**Post-audit execution plan:** [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md) — phases 46–57 to close CI, trust, UX unification, enterprise parity, and GTM evidence gaps.
+
 ---
 
 ## Vision
@@ -242,11 +244,14 @@ Track monthly from first pilot:
 
 ## Recommended immediate next steps (this sprint)
 
-1. ~~**Remove duplicate `ApplicationDiscoveryJob` from Web**~~ — done (Horizon 1)
-2. ~~**Add health checks + deployment doc**~~ — done (Horizon 1)
-3. ~~**Rewrite README value proposition**~~ — done (Horizon 1)
-4. **Continue Phase 16** (authorization completeness + Entra ID hardening) — started with application scoping
-5. **Plan Phase 18** (job queue) — unblocks scale testing
+See [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md) for the full phased plan. **Start here:**
+
+1. **Phase 46** — Add `.github/workflows/ci.yml` with `dotnet test` + ClientApp build; fix E2E `#spa-root` selectors
+2. **Phase 47** — Extend `ProductionConfigurationValidator` to reject mock AI, InMemory vector, and simulated QA in Production
+3. **Phase 48** — Redirect `/EnhancementRequests/*` → `/Spa/*`; dashboard deep links to drift and approvals
+4. **Phase 56** — Kick off design partner #1 with measured architect-hour baseline
+
+Horizons 1–4 feature work is largely complete; execution focus shifts to **world-class readiness** (waves 0–5 in the diligence roadmap).
 
 ---
 
@@ -262,4 +267,4 @@ Avoid distracting from pilot closure:
 
 ---
 
-*Last updated: July 2026 — Phase 25 (UX modernization).*
+*Last updated: July 2026 — Horizons 1–4 complete; see [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md) for phases 46–57.*
