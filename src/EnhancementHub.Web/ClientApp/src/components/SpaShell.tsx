@@ -21,7 +21,16 @@ import { SchemaDriftApp } from '../apps/SchemaDriftApp';
 import { RepositoriesApp } from '../apps/RepositoriesApp';
 import { AuditApp } from '../apps/AuditApp';
 import { SearchApp } from '../apps/SearchApp';
+import { DatabaseConnectionsApp } from '../apps/DatabaseConnectionsApp';
+import { DatabaseConnectionRegisterApp } from '../apps/DatabaseConnectionRegisterApp';
+import { DatabaseConnectionDetailsApp } from '../apps/DatabaseConnectionDetailsApp';
+import { DatabaseConnectionErdApp } from '../apps/DatabaseConnectionErdApp';
+import { DocumentationExportApp } from '../apps/DocumentationExportApp';
+import { RefactorAnalyzeApp } from '../apps/RefactorAnalyzeApp';
+import { RefactorPlansApp } from '../apps/RefactorPlansApp';
+import { SettingsApp } from '../apps/SettingsApp';
 import { FeedbackWidget } from './FeedbackWidget';
+import { MockAiTrustBanner } from './MockAiTrustBanner';
 import { readSpaContext } from '../spaRoutes';
 
 function RequestListRoute() {
@@ -63,6 +72,24 @@ function SystemMapRoute() {
   return <SystemMapApp initialApplicationId={applicationId ?? undefined} />;
 }
 
+function DatabaseConnectionDetailRoute() {
+  const { id } = useParams<{ id: string }>();
+  if (!id) {
+    return <Navigate to="/Spa/DatabaseConnections" replace />;
+  }
+
+  return <DatabaseConnectionDetailsApp connectionId={id} />;
+}
+
+function DatabaseConnectionErdRoute() {
+  const { id } = useParams<{ id: string }>();
+  if (!id) {
+    return <Navigate to="/Spa/DatabaseConnections" replace />;
+  }
+
+  return <DatabaseConnectionErdApp connectionId={id} />;
+}
+
 function UnknownSpaRoute() {
   return (
     <div className="card-panel p-4" role="status">
@@ -99,6 +126,7 @@ export function SpaShell() {
   return (
     <BrowserRouter>
       <SpaNavigationBridge />
+      <MockAiTrustBanner />
       <FeedbackWidget />
       <Routes>
         <Route path="/" element={<DashboardApp />} />
@@ -116,6 +144,14 @@ export function SpaShell() {
         <Route path="/Spa/Repositories" element={<RepositoriesApp />} />
         <Route path="/Spa/Audit" element={<AuditApp />} />
         <Route path="/Spa/Search" element={<SearchApp />} />
+        <Route path="/Spa/DatabaseConnections" element={<DatabaseConnectionsApp />} />
+        <Route path="/Spa/DatabaseConnections/Register" element={<DatabaseConnectionRegisterApp />} />
+        <Route path="/Spa/DatabaseConnections/:id/erd" element={<DatabaseConnectionErdRoute />} />
+        <Route path="/Spa/DatabaseConnections/:id" element={<DatabaseConnectionDetailRoute />} />
+        <Route path="/Spa/Documentation/Export" element={<DocumentationExportApp />} />
+        <Route path="/Spa/Refactor/Analyze" element={<RefactorAnalyzeApp />} />
+        <Route path="/Spa/Refactor/Plans" element={<RefactorPlansApp />} />
+        <Route path="/Spa/Settings/*" element={<SettingsApp />} />
         <Route path="*" element={<UnknownSpaRoute />} />
       </Routes>
     </BrowserRouter>

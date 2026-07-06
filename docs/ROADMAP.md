@@ -242,16 +242,16 @@ Track monthly from first pilot:
 
 ---
 
-## Recommended immediate next steps (post–Phase 57)
+## Recommended immediate next steps (post–Phase 60)
 
-Due diligence phases **46–57 are complete** and merged to `main`. Focus shifts to **post-57 polish** and second design partner:
+Phases **46–60 are complete**. Execution focus is the **85+ product quality roadmap** ([ROADMAP_85.md](ROADMAP_85.md)):
 
-1. **Phase 58** — Scorecard recalibration, API versioning policy, roadmap closure docs
-2. **Phase 59** — E2E axe accessibility on 5 core flows; admin `_PageHeader` consistency
-3. **Phase 60** — Config-driven `IFeatureService` for gradual rollouts
-4. **GTM** — Second design partner using [DESIGN_PARTNER_PLAYBOOK.md](DESIGN_PARTNER_PLAYBOOK.md)
+1. **Phase 61** — Shell unification: DatabaseConnections, Documentation, Refactor → React SPA
+2. **Phase 62** — Custom fields on intake + mock-AI trust banner
+3. **Phase 63** — Unified Admin Settings SPA
+4. **Phase 64** — Second design partner + published case study (GTM, parallel)
 
-Horizons 1–4 and diligence waves 0–5 are complete. Execution focus is **customer proof at scale**, not net-new platform pillars.
+Horizons 1–4 and diligence waves 0–5 are complete. Next waves target **UX cohesion**, **market proof**, and **engineering credibility**.
 
 ---
 

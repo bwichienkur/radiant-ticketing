@@ -284,12 +284,12 @@ export function DashboardApp() {
             </ChecklistLink>
             <ChecklistLink
               done={onboardingStatus.databaseConnectionCount > 0}
-              href="/DatabaseConnections/Index"
+              href="/Spa/DatabaseConnections"
               step="3"
             >
               Connect a database (IT)
             </ChecklistLink>
-            <ChecklistLink done={onboardingStatus.hasIndexedRepository} href="/Repositories/Index" step="4">
+            <ChecklistLink done={onboardingStatus.hasIndexedRepository} href="/Spa/Repositories" step="4">
               Scan code for dependencies (IT)
             </ChecklistLink>
             <ChecklistLink done={onboardingStatus.hasSystemGraph} href="/Spa/SystemMap" step="5">

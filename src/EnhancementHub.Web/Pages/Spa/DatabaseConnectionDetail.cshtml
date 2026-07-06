@@ -1,0 +1,12 @@
+@page "/Spa/DatabaseConnections/{id:guid}"
+@model EnhancementHub.Web.Pages.Spa.DatabaseConnectionDetailModel
+@{
+    ViewData["Title"] = "Database Connection";
+    ViewData["Breadcrumb"] = "Database";
+}
+
+<partial name="_SpaRoot" />
+
+@section Scripts {
+    <script type="module" src="~/spa/react/spa-shell.js" asp-append-version="true"></script>
+}
