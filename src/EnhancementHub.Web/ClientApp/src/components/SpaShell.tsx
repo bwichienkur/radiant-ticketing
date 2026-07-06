@@ -162,9 +162,7 @@ export function SpaShell() {
       <SpaNavigationBridge />
       <SpaAppearanceBootstrap />
       <MockAiTrustBanner />
-      <div className="eh-theme-preference-bar">
-        <ThemePreferenceSelector />
-      </div>
+      <ThemePreferenceSelector />
       <CommandPalette />
       <FeedbackWidget />
       <Routes>

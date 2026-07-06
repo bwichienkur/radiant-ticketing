@@ -10,7 +10,6 @@ import {
   ErrorState,
   FormField,
   LoadingState,
-  PageHeader,
   useToast,
 } from '../../components/ui';
 import type { CreateServiceApiKeyResult, ServiceApiKeySummary, TeamSummary } from '../../types/spa';
@@ -105,10 +104,8 @@ export function SettingsApiKeysSection() {
 
   return (
     <div>
-      <PageHeader
-        title="Service API keys"
-        description="Machine-to-machine authentication for integrations and automation"
-      />
+      <h2 className="eh-section-title mb-1">Service API keys</h2>
+      <p className="text-muted small mb-3">Machine-to-machine authentication for integrations and automation</p>
 
       {createdKey ? (
         <AlertBanner variant="warning" title="Copy this API key now — it will not be shown again." className="mb-3">

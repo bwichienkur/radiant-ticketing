@@ -1586,6 +1586,49 @@ a.checklist-item-link:focus-visible {
     box-shadow: 0 0.5rem 1.25rem rgba(15, 23, 42, 0.15);
 }
 
+.topbar-icon-svg {
+    display: block;
+}
+
+.topbar-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 0.5rem;
+}
+
+.topbar-theme-slot .theme-preference-selector select {
+    min-width: 6.5rem;
+}
+
+.mobile-data-card {
+    border: 1px solid var(--eh-border);
+}
+
+.mobile-data-card .mobile-data-card-title {
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+}
+
+.mobile-data-card .mobile-data-card-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    padding: 0.15rem 0;
+}
+
+.mobile-data-card .mobile-data-card-label {
+    color: var(--eh-muted);
+}
+
+.mobile-data-card .mobile-data-card-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
 .eh-feedback-panel {
     box-shadow: 0 1rem 2.5rem rgba(15, 23, 42, 0.2);
 }
@@ -1652,12 +1695,6 @@ a.checklist-item-link:focus-visible {
 }
 
 @media (max-width: 991.98px) {
-    .eh-theme-preference-bar {
-        top: auto;
-        bottom: 5.5rem;
-        right: 1rem;
-    }
-
     .portfolio-heatmap-header {
         display: none;
     }

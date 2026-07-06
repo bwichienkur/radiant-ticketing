@@ -639,8 +639,8 @@ Full plan: [MARKET_READINESS_PLAN.md](MARKET_READINESS_PLAN.md)
 
 | Phase | Name | Wave | Status |
 |-------|------|------|--------|
-| 73 | Command palette & theme unification | A | Planned |
-| 74 | Mobile data surface parity | A | Planned |
+| 73 | Command palette & theme unification | A | Complete |
+| 74 | Mobile data surface parity | A | Complete |
 | 75 | Demo path continuity | A | Planned |
 | 76 | Unified admin SPA (Jobs, Custom fields, Compliance) | B | Planned |
 | 77 | Remaining admin migration | B | Planned |

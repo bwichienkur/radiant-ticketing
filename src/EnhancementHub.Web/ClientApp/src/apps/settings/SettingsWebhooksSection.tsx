@@ -11,7 +11,6 @@ import {
   ErrorState,
   FormField,
   LoadingState,
-  PageHeader,
   useToast,
 } from '../../components/ui';
 import type {
@@ -120,10 +119,8 @@ export function SettingsWebhooksSection() {
 
   return (
     <div>
-      <PageHeader
-        title="Outbound webhooks"
-        description="Register HTTPS endpoints to receive signed workflow events"
-      />
+      <h2 className="eh-section-title mb-1">Outbound webhooks</h2>
+      <p className="text-muted small mb-3">Register HTTPS endpoints to receive signed workflow events</p>
 
       {createdSecret ? (
         <AlertBanner variant="warning" title="Copy this signing secret now — it will not be shown again." className="mb-3">

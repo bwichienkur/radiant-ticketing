@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { listApplications } from '../api/spaClient';
 import { SpaLink } from '../components/SpaLink';
-import { EmptyState, ErrorState, LoadingState, PageHeader } from '../components/ui';
+import { EmptyState, ErrorState, LoadingState, PageHeader, ResponsiveDataList } from '../components/ui';
 import type { ApplicationListItem } from '../types/spa';
 
 export function ApplicationsApp() {
@@ -48,36 +48,55 @@ export function ApplicationsApp() {
           }
         />
       ) : (
-        <div className="card-panel table-desktop-only">
-          <div className="table-responsive">
-            <table className="table table-hover table-enterprise mb-0">
-              <thead>
-                <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">Domain</th>
-                  <th scope="col">Repositories</th>
-                  <th scope="col" />
-                </tr>
-              </thead>
-              <tbody>
-                {applications.map((app) => (
-                  <tr key={app.id}>
-                    <td>
-                      <strong>{app.name}</strong>
-                    </td>
-                    <td>{app.businessDomain ?? '—'}</td>
-                    <td>{app.repositoryCount}</td>
-                    <td className="text-end">
-                      <a href={`/Applications/Details/${app.id}`} className="btn btn-sm btn-outline-primary">
-                        Profile
-                      </a>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <ResponsiveDataList
+          items={applications}
+          getRowKey={(app) => app.id}
+          columns={[
+            {
+              id: 'name',
+              header: 'Name',
+              cell: (app) => <strong>{app.name}</strong>,
+            },
+            {
+              id: 'domain',
+              header: 'Domain',
+              cell: (app) => app.businessDomain ?? '—',
+            },
+            {
+              id: 'repos',
+              header: 'Repositories',
+              cell: (app) => app.repositoryCount,
+            },
+            {
+              id: 'actions',
+              header: '',
+              cell: (app) => (
+                <SpaLink href={`/Spa/SystemMap?ApplicationId=${app.id}`} className="btn btn-sm btn-outline-primary">
+                  System map
+                </SpaLink>
+              ),
+              cellClassName: 'text-end',
+            },
+          ]}
+          renderMobileCard={(app) => (
+            <>
+              <div className="mobile-data-card-title">{app.name}</div>
+              <div className="mobile-data-card-row">
+                <span className="mobile-data-card-label">Domain</span>
+                <span>{app.businessDomain ?? '—'}</span>
+              </div>
+              <div className="mobile-data-card-row">
+                <span className="mobile-data-card-label">Repositories</span>
+                <span>{app.repositoryCount}</span>
+              </div>
+              <div className="mobile-data-card-actions">
+                <SpaLink href={`/Spa/SystemMap?ApplicationId=${app.id}`} className="btn btn-sm btn-outline-primary">
+                  System map
+                </SpaLink>
+              </div>
+            </>
+          )}
+        />
       )}
     </div>
   );

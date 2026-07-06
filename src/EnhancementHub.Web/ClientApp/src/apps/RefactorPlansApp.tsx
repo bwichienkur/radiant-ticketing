@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { getRefactorPlan, listRefactorPlans } from '../api/spaClient';
 import { SpaLink } from '../components/SpaLink';
-import { EmptyState, ErrorState, LoadingState, PageHeader } from '../components/ui';
+import { EmptyState, ErrorState, LoadingState, PageHeader, ResponsiveDataList } from '../components/ui';
 import type { RefactorPlanDetail, RefactorPlanSummary } from '../types/spa';
 
 export function RefactorPlansApp() {
@@ -71,42 +71,56 @@ export function RefactorPlansApp() {
           }
         />
       ) : (
-        <div className="card-panel table-desktop-only">
-          <div className="table-responsive">
-            <table className="table table-hover table-enterprise mb-0">
-              <thead>
-                <tr>
-                  <th scope="col">Title</th>
-                  <th scope="col">Target</th>
-                  <th scope="col">Risk</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Created</th>
-                </tr>
-              </thead>
-              <tbody>
-                {plans.map((plan) => (
-                  <tr key={plan.id}>
-                    <td>
-                      <button
-                        type="button"
-                        className="btn btn-link p-0 align-baseline"
-                        onClick={() => selectPlan(plan.id)}
-                      >
-                        {plan.title}
-                      </button>
-                    </td>
-                    <td>{plan.targetDescription}</td>
-                    <td>
-                      <span className="badge text-bg-warning badge-status">{plan.riskLevel}</span>
-                    </td>
-                    <td>{plan.status}</td>
-                    <td>{new Date(plan.createdAt).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <ResponsiveDataList
+          items={plans}
+          getRowKey={(plan) => plan.id}
+          columns={[
+            {
+              id: 'title',
+              header: 'Title',
+              cell: (plan) => (
+                <button
+                  type="button"
+                  className="btn btn-link p-0 align-baseline"
+                  onClick={() => selectPlan(plan.id)}
+                >
+                  {plan.title}
+                </button>
+              ),
+            },
+            { id: 'target', header: 'Target', cell: (plan) => plan.targetDescription },
+            {
+              id: 'risk',
+              header: 'Risk',
+              cell: (plan) => <span className="badge text-bg-warning badge-status">{plan.riskLevel}</span>,
+            },
+            { id: 'status', header: 'Status', cell: (plan) => plan.status },
+            {
+              id: 'created',
+              header: 'Created',
+              cell: (plan) => new Date(plan.createdAt).toLocaleString(),
+            },
+          ]}
+          renderMobileCard={(plan) => (
+            <>
+              <button
+                type="button"
+                className="btn btn-link p-0 mobile-data-card-title text-start"
+                onClick={() => selectPlan(plan.id)}
+              >
+                {plan.title}
+              </button>
+              <div className="mobile-data-card-row">
+                <span className="mobile-data-card-label">Risk</span>
+                <span>{plan.riskLevel}</span>
+              </div>
+              <div className="mobile-data-card-row">
+                <span className="mobile-data-card-label">Status</span>
+                <span>{plan.status}</span>
+              </div>
+            </>
+          )}
+        />
       )}
 
       {selectedPlan ? (

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getAuthenticationConfigurationStatus } from '../../api/spaClient';
-import { ErrorState, LoadingState, PageHeader } from '../../components/ui';
+import { ErrorState, LoadingState } from '../../components/ui';
 import type { AuthenticationConfigurationStatus } from '../../types/spa';
 
 export function SettingsAuthenticationSection() {
@@ -34,21 +34,21 @@ export function SettingsAuthenticationSection() {
 
   return (
     <div>
-      <PageHeader
-        title="Authentication"
-        description="OpenID Connect / Entra ID configuration and role mapping validation"
-        actions={
-          status.openIdConnectEnabled ? (
-            <span
-              className={`badge ${status.isProductionReady ? 'text-bg-success' : 'text-bg-warning'} badge-status`}
-            >
-              {status.isProductionReady ? 'Production ready' : 'Needs attention'}
-            </span>
-          ) : (
-            <span className="badge text-bg-secondary badge-status">Local auth</span>
-          )
-        }
-      />
+      <div className="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+        <div>
+          <h2 className="eh-section-title mb-1">Authentication</h2>
+          <p className="text-muted small mb-0">OpenID Connect / Entra ID configuration and role mapping validation</p>
+        </div>
+        {status.openIdConnectEnabled ? (
+          <span
+            className={`badge ${status.isProductionReady ? 'text-bg-success' : 'text-bg-warning'} badge-status`}
+          >
+            {status.isProductionReady ? 'Production ready' : 'Needs attention'}
+          </span>
+        ) : (
+          <span className="badge text-bg-secondary badge-status">Local auth</span>
+        )}
+      </div>
 
       <div className="row g-4 mb-4">
         <div className="col-md-6">

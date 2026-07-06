@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { getUserAppearance, updateThemePreference } from '../api/spaClient';
 import type { ThemePreference } from '../theme';
 import { applyThemePreference } from '../theme';
@@ -33,9 +34,9 @@ export function ThemePreferenceSelector() {
     }
   }
 
-  return (
+  const content = (
     <div className="theme-preference-selector d-flex align-items-center gap-2" aria-label="Theme preference">
-      <span className="small text-muted">Theme</span>
+      <span className="small text-muted d-none d-lg-inline">Theme</span>
       <select
         className="form-select form-select-sm"
         value={preference}
@@ -51,4 +52,11 @@ export function ThemePreferenceSelector() {
       </select>
     </div>
   );
+
+  const slot = document.getElementById('eh-topbar-theme-slot');
+  if (slot) {
+    return createPortal(content, slot);
+  }
+
+  return content;
 }

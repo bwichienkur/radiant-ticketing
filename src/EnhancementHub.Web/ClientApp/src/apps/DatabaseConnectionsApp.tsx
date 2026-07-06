@@ -4,7 +4,7 @@ import {
   triggerDatabaseScan,
 } from '../api/spaClient';
 import { SpaLink } from '../components/SpaLink';
-import { EmptyState, ErrorState, LoadingState, PageHeader, useToast } from '../components/ui';
+import { EmptyState, ErrorState, LoadingState, PageHeader, ResponsiveDataList, useToast } from '../components/ui';
 import type { DatabaseConnectionSummary } from '../types/spa';
 
 export function DatabaseConnectionsApp() {
@@ -80,63 +80,98 @@ export function DatabaseConnectionsApp() {
           }
         />
       ) : (
-        <div className="card-panel table-desktop-only">
-          <div className="table-responsive">
-            <table className="table table-hover table-enterprise mb-0">
-              <thead>
-                <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">Application</th>
-                  <th scope="col">Provider</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Last scan</th>
-                  <th scope="col" />
-                </tr>
-              </thead>
-              <tbody>
-                {connections.map((connection) => (
-                  <tr key={connection.id}>
-                    <td>
-                      <strong>{connection.name}</strong>
-                    </td>
-                    <td>{connection.applicationName ?? '—'}</td>
-                    <td>{connection.provider ?? '—'}</td>
-                    <td>
-                      <span
-                        className={`badge text-bg-${
-                          connection.scanStatus === 'Completed' ? 'success' : 'secondary'
-                        } badge-status`}
-                      >
-                        {connection.scanStatus}
-                      </span>
-                    </td>
-                    <td>
-                      {connection.lastScannedAt
-                        ? new Date(connection.lastScannedAt).toLocaleString()
-                        : '—'}
-                    </td>
-                    <td className="text-end">
-                      <SpaLink
-                        href={`/Spa/DatabaseConnections/${connection.id}`}
-                        className="btn btn-sm btn-outline-primary me-1"
-                      >
-                        Details
-                      </SpaLink>
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline-secondary"
-                        disabled={scanningId === connection.id}
-                        onClick={() => void handleScan(connection.id)}
-                      >
-                        {scanningId === connection.id ? 'Scanning…' : 'Scan'}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <ResponsiveDataList
+          items={connections}
+          getRowKey={(connection) => connection.id}
+          columns={[
+            {
+              id: 'name',
+              header: 'Name',
+              cell: (connection) => <strong>{connection.name}</strong>,
+            },
+            {
+              id: 'application',
+              header: 'Application',
+              cell: (connection) => connection.applicationName ?? '—',
+            },
+            {
+              id: 'provider',
+              header: 'Provider',
+              cell: (connection) => connection.provider ?? '—',
+            },
+            {
+              id: 'status',
+              header: 'Status',
+              cell: (connection) => (
+                <span
+                  className={`badge text-bg-${
+                    connection.scanStatus === 'Completed' ? 'success' : 'secondary'
+                  } badge-status`}
+                >
+                  {connection.scanStatus}
+                </span>
+              ),
+            },
+            {
+              id: 'scanned',
+              header: 'Last scan',
+              cell: (connection) =>
+                connection.lastScannedAt ? new Date(connection.lastScannedAt).toLocaleString() : '—',
+            },
+            {
+              id: 'actions',
+              header: '',
+              cell: (connection) => (
+                <>
+                  <SpaLink
+                    href={`/Spa/DatabaseConnections/${connection.id}`}
+                    className="btn btn-sm btn-outline-primary me-1"
+                  >
+                    Details
+                  </SpaLink>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-secondary"
+                    disabled={scanningId === connection.id}
+                    onClick={() => void handleScan(connection.id)}
+                  >
+                    {scanningId === connection.id ? 'Scanning…' : 'Scan'}
+                  </button>
+                </>
+              ),
+              cellClassName: 'text-end',
+            },
+          ]}
+          renderMobileCard={(connection) => (
+            <>
+              <div className="mobile-data-card-title">{connection.name}</div>
+              <div className="mobile-data-card-row">
+                <span className="mobile-data-card-label">Application</span>
+                <span>{connection.applicationName ?? '—'}</span>
+              </div>
+              <div className="mobile-data-card-row">
+                <span className="mobile-data-card-label">Status</span>
+                <span>{connection.scanStatus}</span>
+              </div>
+              <div className="mobile-data-card-actions">
+                <SpaLink
+                  href={`/Spa/DatabaseConnections/${connection.id}`}
+                  className="btn btn-sm btn-outline-primary"
+                >
+                  Details
+                </SpaLink>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  disabled={scanningId === connection.id}
+                  onClick={() => void handleScan(connection.id)}
+                >
+                  {scanningId === connection.id ? 'Scanning…' : 'Scan'}
+                </button>
+              </div>
+            </>
+          )}
+        />
       )}
     </div>
   );

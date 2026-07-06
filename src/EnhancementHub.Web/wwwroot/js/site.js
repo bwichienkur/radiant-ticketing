@@ -805,6 +805,8 @@
         });
     }
 
+    const isSpaShell = !!document.getElementById('spa-root');
+
     document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
         btn.addEventListener('click', toggleTheme);
     });
@@ -812,7 +814,9 @@
     initTheme();
     initSidebar();
     initNotifications();
-    initCommandPalette();
+    if (!isSpaShell) {
+        initCommandPalette();
+    }
     initCopilot();
     initAccordions();
     initApprovalQueue();

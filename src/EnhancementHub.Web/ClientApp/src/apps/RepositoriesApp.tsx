@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { listRepositoriesCatalog, triggerRepositoryReindex } from '../api/spaClient';
 import { SpaLink } from '../components/SpaLink';
-import { EmptyState, ErrorState, LoadingState, PageHeader, useToast } from '../components/ui';
+import { EmptyState, ErrorState, LoadingState, PageHeader, ResponsiveDataList, useToast } from '../components/ui';
 import type { RepositoryListItem } from '../types/spa';
 
 export function RepositoriesApp() {
@@ -72,49 +72,85 @@ export function RepositoriesApp() {
           }
         />
       ) : (
-        <div className="card-panel table-desktop-only">
-          <div className="table-responsive">
-            <table className="table table-hover table-enterprise mb-0">
-              <thead>
-                <tr>
-                  <th scope="col">Name</th>
-                  <th scope="col">Application</th>
-                  <th scope="col">URL</th>
-                  <th scope="col">Status</th>
-                  <th scope="col">Last indexed</th>
-                  <th scope="col" />
-                </tr>
-              </thead>
-              <tbody>
-                {repositories.map((repo) => (
-                  <tr key={repo.id}>
-                    <td>
-                      <strong>{repo.name}</strong>
-                    </td>
-                    <td>{repo.applicationName ?? '—'}</td>
-                    <td className="small text-truncate" style={{ maxWidth: '12rem' }}>
-                      {repo.url}
-                    </td>
-                    <td>
-                      <span className="badge text-bg-secondary badge-status">{repo.indexingStatus}</span>
-                    </td>
-                    <td>{repo.lastIndexedAt ? new Date(repo.lastIndexedAt).toLocaleString() : '—'}</td>
-                    <td className="text-end">
-                      <button
-                        type="button"
-                        className="btn btn-sm btn-outline-primary"
-                        disabled={reindexingId === repo.id}
-                        onClick={() => void handleReindex(repo.id)}
-                      >
-                        {reindexingId === repo.id ? 'Starting…' : 'Re-index'}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <ResponsiveDataList
+          items={repositories}
+          getRowKey={(repo) => repo.id}
+          columns={[
+            {
+              id: 'name',
+              header: 'Name',
+              cell: (repo) => <strong>{repo.name}</strong>,
+            },
+            {
+              id: 'application',
+              header: 'Application',
+              cell: (repo) => repo.applicationName ?? '—',
+            },
+            {
+              id: 'url',
+              header: 'URL',
+              cell: (repo) => (
+                <span className="small text-truncate d-inline-block" style={{ maxWidth: '12rem' }}>
+                  {repo.url}
+                </span>
+              ),
+            },
+            {
+              id: 'status',
+              header: 'Status',
+              cell: (repo) => (
+                <span className="badge text-bg-secondary badge-status">{repo.indexingStatus}</span>
+              ),
+            },
+            {
+              id: 'indexed',
+              header: 'Last indexed',
+              cell: (repo) => (repo.lastIndexedAt ? new Date(repo.lastIndexedAt).toLocaleString() : '—'),
+            },
+            {
+              id: 'actions',
+              header: '',
+              cell: (repo) => (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-primary"
+                  disabled={reindexingId === repo.id}
+                  onClick={() => void handleReindex(repo.id)}
+                >
+                  {reindexingId === repo.id ? 'Starting…' : 'Re-index'}
+                </button>
+              ),
+              cellClassName: 'text-end',
+            },
+          ]}
+          renderMobileCard={(repo) => (
+            <>
+              <div className="mobile-data-card-title">{repo.name}</div>
+              <div className="mobile-data-card-row">
+                <span className="mobile-data-card-label">Application</span>
+                <span>{repo.applicationName ?? '—'}</span>
+              </div>
+              <div className="mobile-data-card-row">
+                <span className="mobile-data-card-label">Status</span>
+                <span>{repo.indexingStatus}</span>
+              </div>
+              <div className="mobile-data-card-row">
+                <span className="mobile-data-card-label">Last indexed</span>
+                <span>{repo.lastIndexedAt ? new Date(repo.lastIndexedAt).toLocaleString() : '—'}</span>
+              </div>
+              <div className="mobile-data-card-actions">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-primary"
+                  disabled={reindexingId === repo.id}
+                  onClick={() => void handleReindex(repo.id)}
+                >
+                  {reindexingId === repo.id ? 'Starting…' : 'Re-index'}
+                </button>
+              </div>
+            </>
+          )}
+        />
       )}
     </div>
   );

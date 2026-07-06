@@ -8,5 +8,7 @@ export { ListToolbar } from './ListToolbar';
 export { LoadingState } from './LoadingState';
 export { PageHeader } from './PageHeader';
 export { SectionCard } from './SectionCard';
+export { ResponsiveDataList } from './ResponsiveDataList';
+export type { DataColumn, ResponsiveDataListProps } from './ResponsiveDataList';
 export { StatusBadge } from './StatusBadge';
 export { useToast } from './useToast';

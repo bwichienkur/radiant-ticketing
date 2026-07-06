@@ -8,7 +8,6 @@ import {
   ErrorState,
   FormField,
   LoadingState,
-  PageHeader,
   useToast,
 } from '../../components/ui';
 import type { TeamSummary } from '../../types/spa';
@@ -68,10 +67,8 @@ export function SettingsTeamsSection() {
 
   return (
     <div>
-      <PageHeader
-        title="Teams"
-        description="Manage team membership and application ownership"
-      />
+      <h2 className="eh-section-title mb-1">Teams</h2>
+      <p className="text-muted small mb-3">Manage team membership and application ownership</p>
 
       <div className="row g-4">
         <div className="col-lg-4">

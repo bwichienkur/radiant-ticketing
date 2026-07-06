@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { listSystemSettings, updateSystemSetting } from '../../api/spaClient';
-import { ErrorState, LoadingState, PageHeader, useToast } from '../../components/ui';
+import { ErrorState, LoadingState, useToast } from '../../components/ui';
 import type { SystemSetting } from '../../types/spa';
 
 export function SettingsGeneralSection() {
@@ -49,10 +49,8 @@ export function SettingsGeneralSection() {
 
   return (
     <div>
-      <PageHeader
-        title="System settings"
-        description="Configure platform behavior and feature flags"
-      />
+      <h2 className="eh-section-title mb-1">System settings</h2>
+      <p className="text-muted small mb-3">Configure platform behavior and feature flags</p>
 
       {settings.length === 0 ? (
         <div className="card-panel p-4 text-muted">No settings configured yet.</div>

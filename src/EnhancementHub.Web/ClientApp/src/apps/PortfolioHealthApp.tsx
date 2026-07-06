@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getPortfolioHealth } from '../api/spaClient';
-import { ErrorState, LoadingState, PageHeader } from '../components/ui';
+import { ErrorState, EmptyState, LoadingState, PageHeader } from '../components/ui';
 import { SpaLink } from '../components/SpaLink';
 import type { PortfolioHealthReport } from '../types/spa';
 
@@ -70,7 +70,11 @@ export function PortfolioHealthApp() {
             <span role="columnheader">Score</span>
           </div>
           {report.applications.length === 0 ? (
-            <p className="text-muted small mb-0 p-2">No applications indexed yet.</p>
+            <EmptyState
+              title="No applications indexed"
+              description="Register applications and connect repositories to populate the portfolio risk heatmap."
+              icon="inbox"
+            />
           ) : (
             report.applications.map((row) => (
               <div key={row.applicationId} className={`portfolio-heatmap-row ${riskClass(row.riskScore)}`} role="row">
