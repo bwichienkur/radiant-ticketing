@@ -486,7 +486,25 @@ Guide: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md)
 - `SecurityHeadersMiddleware` (CSP, X-Frame-Options, etc.) documented in `SECURITY.md`
 - `GET /api/v1/audit/export` signed download URLs via `AuditController`
 
-## Phases 46–57 — Due diligence execution (planned)
+## Phase 58 — Post-diligence closure (complete)
+
+- Recalibrated `PRODUCT_SCORECARD.md` for Phase 57 exit (overall 8.4, all horizon targets met)
+- `docs/API_VERSIONING.md` — v1 policy and deprecation timeline
+- Marked due diligence quick wins complete in `DUE_DILIGENCE_ROADMAP.md`
+- Updated `ROADMAP.md` post-57 next steps
+
+## Phase 59 — E2E accessibility & admin polish (complete)
+
+- `@axe-core/playwright` accessibility suite on 5 core SPA flows
+- `/Admin/Jobs` and `/Admin/Teams` migrated to shared `_PageHeader` partial
+- Mobile approval queue polish at 375px (stacked action buttons)
+
+## Phase 60 — Feature flags (complete)
+
+- `IFeatureService` + `ConfigurationFeatureService` (`Features:*` in appsettings)
+- Feature flags exposed on `GET /web-api/spa/platform/runtime-status`
+
+## Phases 46–57 — Due diligence execution (complete)
 
 Post-audit roadmap to reach world-class enterprise readiness. Full task breakdown: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md).
 
@@ -504,5 +522,13 @@ Post-audit roadmap to reach world-class enterprise readiness. Full task breakdow
 | 55 | Horizon 3 load test proof | ✅ Complete |
 | 56 | Design partner program | ✅ Complete |
 | 57 | Enterprise hardening & procurement | ✅ Complete |
+
+## Post-diligence (complete)
+
+| Phase | Name |
+|-------|------|
+| 58 | Post-diligence closure |
+| 59 | E2E accessibility & admin polish |
+| 60 | Feature flags |
 
 ## Future enhancements

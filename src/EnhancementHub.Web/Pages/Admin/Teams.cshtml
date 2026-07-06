@@ -3,16 +3,15 @@
 @{
     ViewData["AdminSection"] = "teams";
     ViewData["Title"] = "Teams";
+    ViewData["PageHeaderTitle"] = "Teams";
+    ViewData["PageHeaderDescription"] = "Manage team membership and application ownership";
 }
 
 <partial name="_AdminNav" />
 
-<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
-    <div>
-        <h1>Teams</h1>
-        <p>Manage team membership and application ownership</p>
-    </div>
-</div>
+<header class="page-header">
+    <partial name="_PageHeader" />
+</header>
 
 @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
 {

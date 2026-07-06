@@ -6,4 +6,5 @@ public sealed record PlatformRuntimeStatus(
     string VectorSearchProvider,
     string QaRunner,
     bool AllowMockInProduction,
-    bool UsesSimulatedBackends);
+    bool UsesSimulatedBackends,
+    IReadOnlyDictionary<string, bool> FeatureFlags);

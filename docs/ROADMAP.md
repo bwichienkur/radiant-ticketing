@@ -242,16 +242,16 @@ Track monthly from first pilot:
 
 ---
 
-## Recommended immediate next steps (this sprint)
+## Recommended immediate next steps (post–Phase 57)
 
-See [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md) for the full phased plan. **Start here:**
+Due diligence phases **46–57 are complete** and merged to `main`. Focus shifts to **post-57 polish** and second design partner:
 
-1. **Phase 46** — Add `.github/workflows/ci.yml` with `dotnet test` + ClientApp build; fix E2E `#spa-root` selectors
-2. **Phase 47** — Extend `ProductionConfigurationValidator` to reject mock AI, InMemory vector, and simulated QA in Production
-3. **Phase 48** — Redirect `/EnhancementRequests/*` → `/Spa/*`; dashboard deep links to drift and approvals
-4. **Phase 56** — Kick off design partner #1 with measured architect-hour baseline
+1. **Phase 58** — Scorecard recalibration, API versioning policy, roadmap closure docs
+2. **Phase 59** — E2E axe accessibility on 5 core flows; admin `_PageHeader` consistency
+3. **Phase 60** — Config-driven `IFeatureService` for gradual rollouts
+4. **GTM** — Second design partner using [DESIGN_PARTNER_PLAYBOOK.md](DESIGN_PARTNER_PLAYBOOK.md)
 
-Horizons 1–4 feature work is largely complete; execution focus shifts to **world-class readiness** (waves 0–5 in the diligence roadmap).
+Horizons 1–4 and diligence waves 0–5 are complete. Execution focus is **customer proof at scale**, not net-new platform pillars.
 
 ---
 
@@ -267,4 +267,4 @@ Avoid distracting from pilot closure:
 
 ---
 
-*Last updated: July 2026 — Horizons 1–4 complete; see [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md) for phases 46–57.*
+*Last updated: July 2026 — Horizons 1–4 and due diligence phases 46–57 complete.*

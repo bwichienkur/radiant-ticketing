@@ -1,5 +1,7 @@
 # Due Diligence Implementation Roadmap
 
+**Status:** Complete (phases 46–57 shipped July 2026)
+
 **Source:** Comprehensive product & engineering audit (July 2026)  
 **Goal:** Move EnhancementHub from **credible pilot (67/100)** to **world-class enterprise SaaS (80+/100)**  
 **Audience:** Engineering leadership, product, and investors tracking execution
@@ -341,8 +343,8 @@ Run these continuously across all waves.
 - [x] Fix `tests/e2e/smoke.spec.ts` selectors (`#spa-root`)  
 - [x] Add production validator rules for AI/vector/QA  
 - [x] Redirect `/EnhancementRequests` → `/Spa/RequestList` (permanent)  
-- [ ] Dashboard widgets linking to drift + pending approvals  
-- [ ] Recalibrate `PRODUCT_SCORECARD.md` external readiness view  
+- [x] Dashboard widgets linking to drift + pending approvals  
+- [x] Recalibrate `PRODUCT_SCORECARD.md` external readiness view  
 
 ---
 

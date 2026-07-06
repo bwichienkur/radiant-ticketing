@@ -1424,6 +1424,24 @@ a.checklist-item-link:focus-visible {
     }
 }
 
+@media (max-width: 575.98px) {
+    .approval-queue-item {
+        padding: 1rem 0.85rem;
+    }
+
+    .approval-quick-actions {
+        flex-direction: column;
+    }
+
+    .approval-quick-actions .approval-action-btn {
+        width: 100%;
+    }
+
+    .approval-queue-list {
+        max-height: 12rem;
+    }
+}
+
 /* SPA pilot shell */
 #spa-content[aria-busy="true"] {
     opacity: 0.6;

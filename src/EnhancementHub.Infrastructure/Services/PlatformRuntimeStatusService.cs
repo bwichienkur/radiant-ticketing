@@ -8,8 +8,13 @@ namespace EnhancementHub.Infrastructure.Services;
 public sealed class PlatformRuntimeStatusService : IPlatformRuntimeStatusService
 {
     private readonly IConfiguration _configuration;
+    private readonly IFeatureService _featureService;
 
-    public PlatformRuntimeStatusService(IConfiguration configuration) => _configuration = configuration;
+    public PlatformRuntimeStatusService(IConfiguration configuration, IFeatureService featureService)
+    {
+        _configuration = configuration;
+        _featureService = featureService;
+    }
 
     public PlatformRuntimeStatus GetStatus()
     {
@@ -23,12 +28,20 @@ public sealed class PlatformRuntimeStatusService : IPlatformRuntimeStatusService
             || string.Equals(vectorProvider, "InMemory", StringComparison.OrdinalIgnoreCase)
             || string.Equals(qaRunner, "Simulated", StringComparison.OrdinalIgnoreCase);
 
+        var featureFlags = new Dictionary<string, bool>
+        {
+            [FeatureFlags.IntakeCopilot] = _featureService.IsEnabled(FeatureFlags.IntakeCopilot),
+            [FeatureFlags.GlobalSearch] = _featureService.IsEnabled(FeatureFlags.GlobalSearch),
+            [FeatureFlags.FeedbackWidget] = _featureService.IsEnabled(FeatureFlags.FeedbackWidget)
+        };
+
         return new PlatformRuntimeStatus(
             aiConfigured,
             AiConfigurationReader.ResolveAiProviderLabel(_configuration),
             vectorProvider,
             qaRunner,
             allowMock,
-            usesSimulated);
+            usesSimulated,
+            featureFlags);
     }
 }

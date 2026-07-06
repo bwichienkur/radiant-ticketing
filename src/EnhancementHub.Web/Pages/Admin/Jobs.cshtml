@@ -3,21 +3,20 @@
 @{
     ViewData["AdminSection"] = "jobs";
     ViewData["Title"] = "Background Jobs";
+    ViewData["PageHeaderTitle"] = "Background Jobs";
+    ViewData["PageHeaderDescription"] = "Queue depth, schedules, and failed job recovery";
     var status = Model.Status;
 }
 
 <partial name="_AdminNav" />
 
-<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
-    <div>
-        <h1>Background Jobs</h1>
-        <p>Queue depth, schedules, and failed job recovery</p>
-    </div>
+<header class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <partial name="_PageHeader" />
     @if (status is not null)
     {
         <span class="badge text-bg-secondary badge-status">Provider: @status.Provider</span>
     }
-</div>
+</header>
 
 @if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
 {

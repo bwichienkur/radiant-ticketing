@@ -21,7 +21,9 @@ public sealed class Soc2ReadinessServiceTests
             })
             .Build();
 
-        var runtimeStatus = new PlatformRuntimeStatusService(configuration);
+        var runtimeStatus = new PlatformRuntimeStatusService(
+            configuration,
+            new ConfigurationFeatureService(configuration));
         var service = new Soc2ReadinessService(configuration, new TestHostEnvironment("Production"), runtimeStatus);
         var report = service.GetReport();
 

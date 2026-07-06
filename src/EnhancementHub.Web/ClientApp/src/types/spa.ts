@@ -5,6 +5,7 @@ export interface PlatformRuntimeStatus {
   qaRunner: string;
   allowMockInProduction: boolean;
   usesSimulatedBackends: boolean;
+  featureFlags?: Record<string, boolean>;
 }
 
 export interface CommentSummary {

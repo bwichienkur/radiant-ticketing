@@ -91,7 +91,9 @@ public sealed class Phase47ProductionTrustTests
             })
             .Build();
 
-        var service = new Infrastructure.Services.PlatformRuntimeStatusService(configuration);
+        var service = new Infrastructure.Services.PlatformRuntimeStatusService(
+            configuration,
+            new Infrastructure.Services.ConfigurationFeatureService(configuration));
         var status = service.GetStatus();
 
         status.AiConfigured.Should().BeFalse();
