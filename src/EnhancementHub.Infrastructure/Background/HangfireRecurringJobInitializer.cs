@@ -54,6 +54,11 @@ public sealed class HangfireRecurringJobInitializer : IHostedService
             executor => executor.ExecuteAsync(CancellationToken.None),
             "*/1 * * * *");
 
+        RecurringJob.AddOrUpdate<NightlyRegressionJobExecutor>(
+            "nightly-regression",
+            executor => executor.ExecuteAsync(CancellationToken.None),
+            Cron.Daily(3));
+
         _logger.LogInformation("Hangfire recurring jobs registered.");
         return Task.CompletedTask;
     }

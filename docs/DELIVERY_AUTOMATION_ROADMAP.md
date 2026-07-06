@@ -193,6 +193,45 @@ Gates: approval → QA evidence → requester UAT → change window (optional se
 | POST | `/web-api/spa/delivery/requests/{requestId}/uat` | Authenticated |
 | GET | `/web-api/spa/delivery/requests/{requestId}/artifacts/{kind}` | Authenticated |
 
+## Test catalog (Phase D+)
+
+Regression test cases are stored per application and executed as part of each delivery QA run.
+
+### Entities
+
+| Entity | Purpose |
+|--------|---------|
+| `ApplicationTestSuite` | Named suite per application (default: Regression) |
+| `TestCase` | Structured steps, status (Draft/Active/Retired), origin (AI/Manual/Promoted) |
+| `TestCaseVersion` | Immutable snapshot executed for a given run |
+| `DeliveryRunTestResult` | Per-case pass/fail, duration, and artifact paths for one delivery run |
+
+### Flow
+
+1. **Analysis** produces `TestingPlan` text.
+2. **Before QA**, `ITestCaseCatalogService.PrepareQaRunAsync` syncs draft cases for the request and builds a manifest: active regression cases + new drafts.
+3. **`IQaRunner`** executes the manifest (`SimulatedQaRunner` today; Playwright worker next).
+4. Results are stored on `EnhancementDeliveryRun` and `DeliveryRunTestResults`.
+5. **On QA pass**, draft cases that passed are promoted to `Active` regression cases.
+
+### API
+
+| Method | Route |
+|--------|-------|
+| GET | `/web-api/spa/delivery/applications/{applicationId}/test-suite` |
+| GET | `/web-api/spa/delivery/applications/{applicationId}/regression-runs` |
+
+### QA runners
+
+| Runner | Config | Behavior |
+|--------|--------|----------|
+| `PlaywrightQaRunner` (default) | `Delivery:Qa:Runner=Playwright` | HTTP validation against `testUrl`; optional browser when `Delivery:Qa:PlaywrightBrowserEnabled=true` |
+| `SimulatedQaRunner` | `Delivery:Qa:Runner=Simulated` | Always simulated artifacts |
+
+On PR creation, draft test cases export to `tests/e2e/eh-{requestId}.spec.ts` on the feature branch.
+
+Nightly Hangfire job `nightly-regression` (03:00 UTC) runs active regression cases per application against the tenant Test environment URL.
+
 ## Related docs
 
 - [ROADMAP.md](ROADMAP.md) — Horizon 4.6

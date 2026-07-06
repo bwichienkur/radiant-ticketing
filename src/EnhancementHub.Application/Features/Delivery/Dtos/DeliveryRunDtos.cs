@@ -7,6 +7,14 @@ public sealed record DeliveryTimelineEventDto(DateTime OccurredAt, string Messag
 
 public sealed record QaTestStepDto(string Step, bool Passed, string Detail);
 
+public sealed record DeliveryRunTestResultDto(
+    Guid TestCaseId,
+    string Title,
+    bool IsRegressionCase,
+    bool Passed,
+    int DurationMs,
+    string? Detail);
+
 public sealed record EnhancementDeliveryRunDto(
     Guid Id,
     Guid EnhancementRequestId,
@@ -19,9 +27,13 @@ public sealed record EnhancementDeliveryRunDto(
     string? TestUrl,
     string? TestDeployReference,
     IReadOnlyList<QaTestStepDto> QaSteps,
+    IReadOnlyList<DeliveryRunTestResultDto> TestCaseResults,
     bool? QaPassed,
     string? QaVideoUrl,
     string? QaReportUrl,
+    string QaRunner,
+    DateTime? QaStartedAt,
+    DateTime? QaFinishedAt,
     bool UatApproved,
     DateTime? UatSignedOffAt,
     string? UatNotes,

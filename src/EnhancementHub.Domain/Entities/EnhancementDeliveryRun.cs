@@ -33,6 +33,12 @@ public class EnhancementDeliveryRun : BaseEntity
 
     public string? QaReportStoragePath { get; set; }
 
+    public QaRunnerKind QaRunner { get; set; } = QaRunnerKind.Simulated;
+
+    public DateTime? QaStartedAt { get; set; }
+
+    public DateTime? QaFinishedAt { get; set; }
+
     public Guid? UatSignedOffByUserId { get; set; }
 
     public DateTime? UatSignedOffAt { get; set; }
@@ -52,4 +58,6 @@ public class EnhancementDeliveryRun : BaseEntity
     public string? LastError { get; set; }
 
     public EnhancementRequest EnhancementRequest { get; set; } = null!;
+
+    public ICollection<DeliveryRunTestResult> TestResults { get; set; } = new List<DeliveryRunTestResult>();
 }

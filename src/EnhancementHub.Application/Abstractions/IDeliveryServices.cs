@@ -12,6 +12,8 @@ public sealed record GitHubPullRequestResult(
     bool IsSimulation,
     string? ErrorMessage);
 
+public sealed record GitHubFileUpsertResult(bool Succeeded, string? CommitSha, bool IsSimulation, string? ErrorMessage);
+
 public interface IGitHubAppRepositoryService
 {
     bool IsConfigured { get; }
@@ -24,6 +26,16 @@ public interface IGitHubAppRepositoryService
         string title,
         string body,
         string implementationMarkdown,
+        long? installationId = null,
+        CancellationToken cancellationToken = default);
+
+    Task<GitHubFileUpsertResult> UpsertBranchFileAsync(
+        string owner,
+        string repository,
+        string branch,
+        string path,
+        string content,
+        string commitMessage,
         long? installationId = null,
         CancellationToken cancellationToken = default);
 }
@@ -80,12 +92,96 @@ public interface IDeploymentAdapterFactory
 
 public sealed record QaTestStepResult(string Step, bool Passed, string Detail);
 
+public sealed record TestCaseStepDefinition(
+    int Order,
+    string Action,
+    string? ExpectedResult);
+
+public sealed record QaManifestCase(
+    Guid TestCaseId,
+    Guid TestCaseVersionId,
+    string Title,
+    bool IsRegressionCase,
+    IReadOnlyList<TestCaseStepDefinition> Steps);
+
+public sealed record QaRunManifest(
+    Guid EnhancementRequestId,
+    Guid DeliveryRunId,
+    Guid ApplicationId,
+    string TestUrl,
+    string DesiredOutcome,
+    IReadOnlyList<QaManifestCase> Cases);
+
+public sealed record QaCaseRunResult(
+    Guid TestCaseId,
+    Guid TestCaseVersionId,
+    string Title,
+    bool IsRegressionCase,
+    bool Passed,
+    int DurationMs,
+    string Detail,
+    IReadOnlyList<QaTestStepResult> Steps,
+    string? ScreenshotStoragePath);
+
 public sealed record QaEvidenceResult(
     bool Passed,
     IReadOnlyList<QaTestStepResult> Steps,
+    IReadOnlyList<QaCaseRunResult> CaseResults,
     string? VideoStoragePath,
     string? ReportStoragePath,
+    QaRunnerKind Runner,
     bool IsSimulation);
+
+public interface ITestCaseCatalogService
+{
+    Task EnsureDraftCasesForRequestAsync(Guid enhancementRequestId, CancellationToken cancellationToken = default);
+
+    Task<QaRunManifest> PrepareQaRunAsync(
+        EnhancementDeliveryRun run,
+        CancellationToken cancellationToken = default);
+
+    Task<QaRunManifest> PrepareRegressionManifestAsync(
+        Guid applicationId,
+        string testUrl,
+        CancellationToken cancellationToken = default);
+
+    Task PromotePassedCasesToRegressionAsync(
+        Guid enhancementRequestId,
+        Guid deliveryRunId,
+        CancellationToken cancellationToken = default);
+
+    Task<IReadOnlyList<TestCaseExportItem>> GetExportableCasesForRequestAsync(
+        Guid enhancementRequestId,
+        CancellationToken cancellationToken = default);
+}
+
+public sealed record TestCaseExportItem(
+    Guid TestCaseId,
+    string Title,
+    string StepsJson,
+    string SuggestedRepositoryPath);
+
+public interface ITestCaseRepoExporter
+{
+    Task ExportRequestCasesToBranchAsync(
+        Guid enhancementRequestId,
+        string owner,
+        string repository,
+        string branch,
+        CancellationToken cancellationToken = default);
+}
+
+public interface INightlyRegressionService
+{
+    Task RunScheduledRegressionAsync(CancellationToken cancellationToken = default);
+}
+
+public interface IQaRunner
+{
+    QaRunnerKind RunnerKind { get; }
+
+    Task<QaEvidenceResult> RunAsync(QaRunManifest manifest, CancellationToken cancellationToken = default);
+}
 
 public interface IQaEvidenceService
 {

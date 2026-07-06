@@ -67,6 +67,12 @@ public sealed class DeliveryOrchestrationTests : IDisposable
         run.TestUrl.Should().NotBeNullOrWhiteSpace();
         run.QaPassed.Should().BeTrue();
         run.QaStepsJson.Should().Contain("Open test environment");
+
+        var caseResults = await _dbContext.DeliveryRunTestResults
+            .Where(r => r.EnhancementDeliveryRunId == run.Id)
+            .ToListAsync();
+        caseResults.Should().NotBeEmpty();
+        caseResults.Should().OnlyContain(r => r.Passed);
     }
 
     [Fact]
@@ -99,6 +105,7 @@ public sealed class DeliveryOrchestrationTests : IDisposable
         var content = File.ReadAllText(path);
         content.Should().Contain("requests/{requestId:guid}/start");
         content.Should().Contain("requests/{requestId:guid}/uat");
+        content.Should().Contain("applications/{applicationId:guid}/test-suite");
         content.Should().Contain("GetDeliveryRunQuery");
     }
 
@@ -142,7 +149,12 @@ public sealed class DeliveryOrchestrationTests : IDisposable
                 ["Storage:LocalRoot"] = Path.Combine(Path.GetTempPath(), "eh-delivery-tests")
             }).Build());
 
-        var qa = new QaEvidenceService(fileStorage);
+        var testCaseCatalog = new TestCaseCatalogService(_dbContext);
+        var testCaseRepoExporter = new TestCaseRepoExporter(
+            testCaseCatalog,
+            gitHubRepo.Object,
+            NullLogger<TestCaseRepoExporter>.Instance);
+        var qaRunner = new SimulatedQaRunner(fileStorage);
         var changeWindow = new ChangeWindowEvaluator();
         var audit = new AuditService(_dbContext, Mock.Of<ICurrentUserService>());
         var configuration = new ConfigurationBuilder().Build();
@@ -152,7 +164,9 @@ public sealed class DeliveryOrchestrationTests : IDisposable
             gitHubRepo.Object,
             configBuilder,
             adapterFactory,
-            qa,
+            testCaseCatalog,
+            testCaseRepoExporter,
+            qaRunner,
             changeWindow,
             audit,
             configuration,

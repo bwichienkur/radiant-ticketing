@@ -31,6 +31,7 @@ public sealed class GetDeliveryRunQueryHandler : IRequestHandler<GetDeliveryRunQ
 
         var run = await _dbContext.EnhancementDeliveryRuns
             .AsNoTracking()
+            .Include(r => r.TestResults)
             .Where(r => r.EnhancementRequestId == request.EnhancementRequestId)
             .OrderByDescending(r => r.RunNumber)
             .FirstOrDefaultAsync(cancellationToken);

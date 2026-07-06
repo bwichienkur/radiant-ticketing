@@ -3,6 +3,7 @@ using System;
 using EnhancementHub.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EnhancementHub.Infrastructure.Migrations
 {
     [DbContext(typeof(EnhancementHubDbContext))]
-    partial class EnhancementHubDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260706012947_Phase43QaTestCatalog")]
+    partial class Phase43QaTestCatalog
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");
@@ -574,61 +577,6 @@ namespace EnhancementHub.Infrastructure.Migrations
                     b.HasIndex("ApplicationId", "RepositoryId");
 
                     b.ToTable("ApplicationProfiles", (string)null);
-                });
-
-            modelBuilder.Entity("EnhancementHub.Domain.Entities.ApplicationRegressionRun", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("ApplicationId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("CaseCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsSimulation")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool>("Passed")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("PassedCaseCount")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("QaRunner")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("ReportStoragePath")
-                        .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ResultsJson")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("TestUrl")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationId", "CreatedAt");
-
-                    b.ToTable("ApplicationRegressionRuns", (string)null);
                 });
 
             modelBuilder.Entity("EnhancementHub.Domain.Entities.ApplicationTestSuite", b =>
@@ -3500,17 +3448,6 @@ namespace EnhancementHub.Infrastructure.Migrations
                     b.Navigation("Repository");
                 });
 
-            modelBuilder.Entity("EnhancementHub.Domain.Entities.ApplicationRegressionRun", b =>
-                {
-                    b.HasOne("EnhancementHub.Domain.Entities.Application", "Application")
-                        .WithMany("RegressionRuns")
-                        .HasForeignKey("ApplicationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Application");
-                });
-
             modelBuilder.Entity("EnhancementHub.Domain.Entities.ApplicationTestSuite", b =>
                 {
                     b.HasOne("EnhancementHub.Domain.Entities.Application", "Application")
@@ -4194,8 +4131,6 @@ namespace EnhancementHub.Infrastructure.Migrations
                     b.Navigation("OpenApiRegistrations");
 
                     b.Navigation("Profiles");
-
-                    b.Navigation("RegressionRuns");
 
                     b.Navigation("Repositories");
 

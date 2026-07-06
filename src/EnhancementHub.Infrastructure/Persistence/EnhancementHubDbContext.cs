@@ -72,6 +72,11 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<TenantDeploymentEnvironment> TenantDeploymentEnvironments => Set<TenantDeploymentEnvironment>();
     public DbSet<ApplicationDeliveryProfile> ApplicationDeliveryProfiles => Set<ApplicationDeliveryProfile>();
     public DbSet<EnhancementDeliveryRun> EnhancementDeliveryRuns => Set<EnhancementDeliveryRun>();
+    public DbSet<ApplicationTestSuite> ApplicationTestSuites => Set<ApplicationTestSuite>();
+    public DbSet<TestCase> TestCases => Set<TestCase>();
+    public DbSet<TestCaseVersion> TestCaseVersions => Set<TestCaseVersion>();
+    public DbSet<DeliveryRunTestResult> DeliveryRunTestResults => Set<DeliveryRunTestResult>();
+    public DbSet<ApplicationRegressionRun> ApplicationRegressionRuns => Set<ApplicationRegressionRun>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
