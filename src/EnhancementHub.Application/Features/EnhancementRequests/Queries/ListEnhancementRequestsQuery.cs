@@ -1,4 +1,5 @@
 using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Common;
 using EnhancementHub.Application.Common.Mappings;
 using EnhancementHub.Application.Features.EnhancementRequests.Dtos;
 using EnhancementHub.Domain.Enums;
@@ -21,10 +22,13 @@ public sealed record ListEnhancementRequestsQuery(
     string? Search = null,
     string? Priority = null,
     RiskLevel? MinRisk = null,
-    EnhancementRequestSort Sort = EnhancementRequestSort.Newest) : IRequest<IReadOnlyList<EnhancementRequestDto>>;
+    EnhancementRequestSort Sort = EnhancementRequestSort.Newest,
+    IReadOnlyList<Guid>? Ids = null,
+    int Page = 1,
+    int PageSize = 0) : IRequest<PagedResult<EnhancementRequestDto>>;
 
 public sealed class ListEnhancementRequestsQueryHandler
-    : IRequestHandler<ListEnhancementRequestsQuery, IReadOnlyList<EnhancementRequestDto>>
+    : IRequestHandler<ListEnhancementRequestsQuery, PagedResult<EnhancementRequestDto>>
 {
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly IEnhancementRequestAccessService _accessService;
@@ -37,7 +41,7 @@ public sealed class ListEnhancementRequestsQueryHandler
         _accessService = accessService;
     }
 
-    public async Task<IReadOnlyList<EnhancementRequestDto>> Handle(
+    public async Task<PagedResult<EnhancementRequestDto>> Handle(
         ListEnhancementRequestsQuery request,
         CancellationToken cancellationToken)
     {
@@ -56,6 +60,11 @@ public sealed class ListEnhancementRequestsQueryHandler
         if (request.TargetApplicationId.HasValue)
         {
             query = query.Where(r => r.TargetApplicationId == request.TargetApplicationId.Value);
+        }
+
+        if (request.Ids is { Count: > 0 })
+        {
+            query = query.Where(r => request.Ids.Contains(r.Id));
         }
 
         if (!string.IsNullOrWhiteSpace(request.Search))
@@ -123,6 +132,19 @@ public sealed class ListEnhancementRequestsQueryHandler
             _ => results.OrderByDescending(r => r.CreatedAt).ToList()
         };
 
-        return results;
+        var totalCount = results.Count;
+        if (request.PageSize > 0)
+        {
+            var page = Math.Max(1, request.Page);
+            var pageSize = Math.Clamp(request.PageSize, 1, 200);
+            results = results
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return new PagedResult<EnhancementRequestDto>(results, totalCount, page, pageSize);
+        }
+
+        return new PagedResult<EnhancementRequestDto>(results, totalCount, 1, totalCount);
     }
 }

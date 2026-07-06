@@ -1,3 +1,4 @@
+using System.Text;
 using EnhancementHub.Application.Features.Analysis.Queries;
 using EnhancementHub.Application.Features.Approvals.Commands;
 using EnhancementHub.Application.Features.Approvals.Queries;
@@ -28,6 +29,8 @@ public sealed class SpaRequestsController : ControllerBase
         [FromQuery] string? priority,
         [FromQuery] string? view,
         [FromQuery] EnhancementRequestSort sort = EnhancementRequestSort.Newest,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 25,
         CancellationToken cancellationToken = default)
     {
         RiskLevel? minRisk = view == "highrisk" ? RiskLevel.High : null;
@@ -39,14 +42,58 @@ public sealed class SpaRequestsController : ControllerBase
                 : User.Identity.Name;
         }
 
-        return Ok(await _mediator.Send(
+        var result = await _mediator.Send(
             new ListEnhancementRequestsQuery(
                 status,
                 Search: search,
                 Priority: priority,
                 MinRisk: minRisk,
-                Sort: sort),
-            cancellationToken));
+                Sort: sort,
+                Page: page,
+                PageSize: pageSize),
+            cancellationToken);
+
+        return Ok(new
+        {
+            items = result.Items,
+            totalCount = result.TotalCount,
+            page = result.Page,
+            pageSize = result.PageSize,
+            totalPages = result.TotalPages,
+        });
+    }
+
+    [HttpPost("requests/export")]
+    public async Task<IActionResult> ExportRequests(
+        [FromBody] SpaExportRequestsRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (request.Ids is not { Count: > 0 })
+        {
+            return BadRequest(new { message = "Select at least one request to export." });
+        }
+
+        var result = await _mediator.Send(
+            new ListEnhancementRequestsQuery(Ids: request.Ids),
+            cancellationToken);
+
+        var csv = new StringBuilder();
+        csv.AppendLine("Id,Title,Status,Priority,Risk,Application,SubmittedBy,CreatedAt");
+        foreach (var item in result.Items)
+        {
+            csv.AppendLine(string.Join(',',
+                Csv(item.Id.ToString()),
+                Csv(item.Title),
+                Csv(item.Status.ToString()),
+                Csv(item.Priority),
+                Csv(item.LatestRiskLevel?.ToString() ?? ""),
+                Csv(item.TargetApplicationName ?? ""),
+                Csv(item.SubmittedByUserName ?? ""),
+                Csv(item.CreatedAt.ToString("O"))));
+        }
+
+        var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+        return File(bytes, "text/csv", $"enhancement-requests-{DateTime.UtcNow:yyyyMMdd-HHmmss}.csv");
     }
 
     [HttpGet("requests/{id:guid}")]
@@ -108,4 +155,16 @@ public sealed class SpaRequestsController : ControllerBase
                 request.SupportingNotes,
                 request.TemplateId),
             cancellationToken));
+
+    private static string Csv(string value)
+    {
+        if (value.Contains('"') || value.Contains(',') || value.Contains('\n'))
+        {
+            return $"\"{value.Replace("\"", "\"\"")}\"";
+        }
+
+        return value;
+    }
 }
+
+public sealed record SpaExportRequestsRequest(IReadOnlyList<Guid> Ids);

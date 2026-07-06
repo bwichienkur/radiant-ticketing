@@ -17,12 +17,16 @@ public sealed class SpaApprovalsController : ControllerBase
     public SpaApprovalsController(IMediator mediator) => _mediator = mediator;
 
     [HttpGet("pending")]
-    public async Task<IActionResult> ListPendingApprovals(CancellationToken cancellationToken) =>
-        Ok(await _mediator.Send(
+    public async Task<IActionResult> ListPendingApprovals(CancellationToken cancellationToken)
+    {
+        var result = await _mediator.Send(
             new ListEnhancementRequestsQuery(
                 EnhancementRequestStatus.PendingApproval,
                 Sort: EnhancementRequestSort.HighestRisk),
-            cancellationToken));
+            cancellationToken);
+
+        return Ok(result.Items);
+    }
 
     [HttpPost("{id:guid}/action")]
     public async Task<IActionResult> SubmitApprovalAction(

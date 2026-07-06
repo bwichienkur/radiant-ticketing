@@ -109,6 +109,33 @@ public sealed class Phase27UxOverhaulTests
         applications.Should().Contain("_EmptyState");
     }
 
+    [Fact]
+    public void SpaEntries_UseSharedSpUiRoot()
+    {
+        var dashboard = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/entries/dashboard.tsx"));
+        dashboard.Should().Contain("SpUiRoot");
+    }
+
+    [Fact]
+    public void SpaRequestsController_SupportsPagedListAndExport()
+    {
+        var controller = File.ReadAllText(GetPath("src/EnhancementHub.Web/Controllers/Spa/SpaRequestsController.cs"));
+        controller.Should().Contain("pageSize");
+        controller.Should().Contain("requests/export");
+        controller.Should().Contain("totalCount");
+    }
+
+    [Fact]
+    public void ListEnhancementRequestsQuery_SupportsPaginationAndIdFilter()
+    {
+        var query = File.ReadAllText(GetPath(
+            "src/EnhancementHub.Application/Features/EnhancementRequests/Queries/ListEnhancementRequestsQuery.cs"));
+        query.Should().Contain("PagedResult<EnhancementRequestDto>");
+        query.Should().Contain("int Page = 1");
+        query.Should().Contain("int PageSize = 0");
+        query.Should().Contain("IReadOnlyList<Guid>? Ids");
+    }
+
     private static string GetPath(string relative) =>
         Path.Combine(GetRepoRoot(), relative);
 

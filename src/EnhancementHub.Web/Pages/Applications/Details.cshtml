@@ -4,26 +4,32 @@
     ViewData["Title"] = Model.Application?.Name ?? "Application";
     var app = Model.Application!;
     var profile = Model.Profiles.FirstOrDefault();
+    ViewData["PageHeaderTitle"] = app.Name;
+    ViewData["PageHeaderDescription"] = app.BusinessDomain ?? "Application profile";
 }
 
-<div class="page-header">
-    <h1>@app.Name</h1>
-    <p>@(app.BusinessDomain ?? "Application profile")</p>
-</div>
+<header class="page-header d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <partial name="_PageHeader" />
+    <div class="page-header-actions d-flex flex-wrap gap-2">
+        <a href="/Spa/SystemMap?applicationId=@app.Id" class="btn btn-outline-primary btn-sm">System map</a>
+        <a href="/Spa/OnboardingWizard" class="btn btn-outline-secondary btn-sm">Setup wizard</a>
+    </div>
+</header>
 
 <div class="row g-4">
     <div class="col-lg-7">
-        <div class="card-panel p-4">
+        <div class="card-panel p-4 mb-4">
+            <h2 class="eh-section-title mb-3">Overview</h2>
             <p><strong>Purpose:</strong> @(app.Purpose ?? "—")</p>
             <p><strong>Description:</strong> @(app.Description ?? "—")</p>
             <p class="mb-0"><strong>Risk-sensitive areas:</strong> @(app.RiskSensitiveAreas ?? "—")</p>
         </div>
         @if (profile is not null)
         {
-            <div class="card-panel p-4 mt-4">
-                <h2 class="h6 text-uppercase text-muted">Generated Profile</h2>
+            <div class="card-panel p-4">
+                <h2 class="eh-section-title mb-3">Generated profile</h2>
                 <p><strong>Key components:</strong></p>
-                <pre class="small">@(profile.KeyComponents ?? "—")</pre>
+                <pre class="small bg-body-secondary rounded p-3">@(profile.KeyComponents ?? "—")</pre>
                 <p><strong>Database usage:</strong> @(profile.DatabaseUsage ?? "—")</p>
                 <p><strong>Integrations:</strong> @(profile.ExternalIntegrations ?? "—")</p>
                 <p class="mb-0 text-muted small">Generated @profile.GeneratedAt.ToString("g")</p>
@@ -32,8 +38,9 @@
     </div>
     <div class="col-lg-5">
         <div class="card-panel p-4">
-            <div class="card-header px-0">Repositories</div>
+            <h2 class="eh-section-title mb-3">Repositories</h2>
             <p class="mb-0">@app.RepositoryCount repository(ies) registered.</p>
+            <a href="/Repositories/Index" class="btn btn-sm btn-outline-primary mt-3">View repositories</a>
         </div>
     </div>
 </div>

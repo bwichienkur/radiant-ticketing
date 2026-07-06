@@ -47,14 +47,14 @@ public class IndexModel : PageModel
                 : User.Identity.Name;
         }
 
-        Requests = await _mediator.Send(
+        Requests = (await _mediator.Send(
             new ListEnhancementRequestsQuery(
                 Status,
                 Search: Q,
                 Priority: Priority,
                 MinRisk: minRisk,
                 Sort: Sort),
-            cancellationToken);
+            cancellationToken)).Items;
 
         return Page();
     }

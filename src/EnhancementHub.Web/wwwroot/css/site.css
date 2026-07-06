@@ -49,6 +49,7 @@
     --eh-border: #334155;
     --eh-text: #e2e8f0;
     --eh-muted: #94a3b8;
+    --eh-text-muted: var(--eh-muted);
     --eh-accent: #3b82f6;
     --eh-accent-soft: #1e3a5f;
     --bs-primary: #3b82f6;
@@ -56,6 +57,23 @@
     --bs-body-bg: var(--eh-bg);
     --bs-body-color: var(--eh-text);
     --bs-border-color: var(--eh-border);
+}
+
+[data-bs-theme="dark"] .empty-state-graphic {
+    background: var(--eh-accent-soft);
+}
+
+[data-bs-theme="dark"] .empty-state-graphic-document::before {
+    background: var(--eh-surface);
+    border-color: var(--eh-accent);
+}
+
+[data-bs-theme="dark"] .eh-modal-backdrop {
+    background: rgba(2, 6, 23, 0.72);
+}
+
+[data-bs-theme="dark"] .eh-bulk-toolbar {
+    background: rgba(59, 130, 246, 0.12);
 }
 
 body {

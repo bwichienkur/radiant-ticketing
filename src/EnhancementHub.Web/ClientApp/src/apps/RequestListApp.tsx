@@ -1,14 +1,14 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { listEnhancementRequests } from '../api/spaClient';
+import { exportEnhancementRequests, listEnhancementRequests } from '../api/spaClient';
 import {
   EmptyState,
   ErrorState,
   ListToolbar,
   LoadingState,
   PageHeader,
-  paginateItems,
   Pagination,
   StatusBadge,
+  useToast,
 } from '../components/ui';
 import type { EnhancementRequestListItem } from '../types/spa';
 import { formatRequestStatus, normalizeRequestStatus } from '../utils/requestLabels';
@@ -93,52 +93,62 @@ function buildFilterSummary(filters: ListFilters): string | undefined {
 const DEFAULT_PAGE_SIZE = 25;
 
 export function RequestListApp() {
+  const toast = useToast();
   const [filters, setFilters] = useState<ListFilters>(readFiltersFromUrl);
   const [draftFilters, setDraftFilters] = useState<ListFilters>(readFiltersFromUrl);
   const [requests, setRequests] = useState<EnhancementRequestListItem[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
 
-  const loadRequests = useCallback(async (activeFilters: ListFilters) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const items = await listEnhancementRequests({
-        q: activeFilters.q || undefined,
-        status: activeFilters.status || undefined,
-        priority: activeFilters.priority || undefined,
-        view: activeFilters.view || undefined,
-        sort: activeFilters.sort || 'Newest',
-      });
-      setRequests(items);
-    } catch {
-      setError('Failed to load enhancement requests.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const loadRequests = useCallback(
+    async (activeFilters: ListFilters, activePage: number, activePageSize: number) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const result = await listEnhancementRequests({
+          q: activeFilters.q || undefined,
+          status: activeFilters.status || undefined,
+          priority: activeFilters.priority || undefined,
+          view: activeFilters.view || undefined,
+          sort: activeFilters.sort || 'Newest',
+          page: activePage,
+          pageSize: activePageSize,
+        });
+        setRequests(result.items);
+        setTotalCount(result.totalCount);
+      } catch {
+        setError('Failed to load enhancement requests.');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
-    void loadRequests(filters);
+    void loadRequests(filters, page, pageSize);
+  }, [filters, page, pageSize, loadRequests]);
+
+  useEffect(() => {
     setPage(1);
     setSelectedIds(new Set());
-  }, [filters, loadRequests]);
-
-  const pagedRequests = useMemo(() => paginateItems(requests, page, pageSize), [requests, page, pageSize]);
+  }, [filters]);
 
   const allPageSelected =
-    pagedRequests.length > 0 && pagedRequests.every((item) => selectedIds.has(item.id));
+    requests.length > 0 && requests.every((item) => selectedIds.has(item.id));
 
   function toggleSelectAllOnPage() {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       if (allPageSelected) {
-        pagedRequests.forEach((item) => next.delete(item.id));
+        requests.forEach((item) => next.delete(item.id));
       } else {
-        pagedRequests.forEach((item) => next.add(item.id));
+        requests.forEach((item) => next.add(item.id));
       }
       return next;
     });
@@ -164,6 +174,22 @@ export function RequestListApp() {
       ).length,
     [requests, selectedIds],
   );
+
+  async function handleExportSelected() {
+    if (selectedIds.size === 0) {
+      return;
+    }
+
+    setExporting(true);
+    try {
+      await exportEnhancementRequests([...selectedIds]);
+      toast.success('Export ready', 'Your CSV download should begin shortly.');
+    } catch {
+      toast.danger('Export failed', 'Could not export the selected requests.');
+    } finally {
+      setExporting(false);
+    }
+  }
 
   const chipHref = useMemo(() => {
     return (chip: Partial<ListFilters>) => {
@@ -314,8 +340,8 @@ export function RequestListApp() {
       {loading ? (
         <LoadingState label="Loading requests…" />
       ) : error ? (
-        <ErrorState message={error} onRetry={() => void loadRequests(filters)} />
-      ) : requests.length === 0 ? (
+        <ErrorState message={error} onRetry={() => void loadRequests(filters, page, pageSize)} />
+      ) : totalCount === 0 ? (
         <EmptyState
           title="No requests match your filters"
           description="Try clearing filters or create a new enhancement request."
@@ -334,7 +360,7 @@ export function RequestListApp() {
       ) : (
         <>
           <ListToolbar
-            count={requests.length}
+            count={totalCount}
             noun="request"
             filterSummary={buildFilterSummary(filters)}
           />
@@ -347,6 +373,14 @@ export function RequestListApp() {
                     Review in approval queue
                   </a>
                 ) : null}
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-primary"
+                  disabled={exporting}
+                  onClick={() => void handleExportSelected()}
+                >
+                  {exporting ? 'Exporting…' : 'Export CSV'}
+                </button>
                 <button
                   type="button"
                   className="btn btn-sm btn-outline-secondary"
@@ -380,7 +414,7 @@ export function RequestListApp() {
                   </tr>
                 </thead>
                 <tbody>
-                  {pagedRequests.map((item) => (
+                  {requests.map((item) => (
                     <tr key={item.id}>
                       <td>
                         <input
@@ -417,7 +451,7 @@ export function RequestListApp() {
             <Pagination
               page={page}
               pageSize={pageSize}
-              totalCount={requests.length}
+              totalCount={totalCount}
               onPageChange={setPage}
               onPageSizeChange={(size) => {
                 setPageSize(size);
@@ -427,7 +461,7 @@ export function RequestListApp() {
           </div>
 
           <div className="cards-mobile-only">
-            {pagedRequests.map((item) => (
+            {requests.map((item) => (
               <a
                 key={item.id}
                 href={`/Spa/RequestDetail/${item.id}`}
@@ -447,7 +481,7 @@ export function RequestListApp() {
             <Pagination
               page={page}
               pageSize={pageSize}
-              totalCount={requests.length}
+              totalCount={totalCount}
               onPageChange={setPage}
               onPageSizeChange={(size) => {
                 setPageSize(size);

@@ -67,6 +67,9 @@ Typography: Inter (400–700). Page titles 1.75rem/600. Section labels 0.75rem u
 | `FormField` | Label, control, hint, error grouping |
 | `SectionCard` | Titled panel sections on detail pages |
 | `ListToolbar` | Result count + filter summary |
+| `ConfirmDialog` | Destructive action confirmation modal |
+| `Pagination` | Server/client page navigation |
+| `SpUiRoot` | Shared SPA wrapper with live region |
 
 Utilities: `utils/riskLabels.ts` — single source for risk badge classes and plain-language labels.
 
@@ -84,6 +87,7 @@ Toasts: React apps call `window.EhUx.showToast()` (Bootstrap toast in `_Layout`)
 | 4 | Razor CRUD pages (Applications, DB, Repos, Audit, Drift) | Done (this PR) |
 | 5 | Table pagination, bulk actions, confirmation modals | Done (this PR) |
 | 6 | SVG sidebar icons | Done (this PR) |
+| 7 | Server-side pagination, CSV export, SpUiRoot, remaining Razor + System map | Done (this PR) |
 
 ---
 
@@ -100,9 +104,7 @@ Toasts: React apps call `window.EhUx.showToast()` (Bootstrap toast in `_Layout`)
 
 ## Remaining improvements
 
-- Shared React layout shell (would require routing strategy change)
-- Server-side pagination for very large request lists
-- Bulk approve/export actions beyond selection toolbar
+- Full React router shell (MPA → SPA migration) — `SpUiRoot` provides shared live region today
 - Storybook or visual regression for UI kit
-- Dark-mode audit for new empty-state illustrations
-- Additional Razor pages (Refactor, Documentation, Application details)
+- Admin Razor form polish (Settings, Tenancy, Delivery config panels)
+- Bulk approve workflow (requires multi-action API)
