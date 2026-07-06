@@ -1,7 +1,10 @@
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Features.Delivery.Dtos;
+using EnhancementHub.Domain.Entities;
+using EnhancementHub.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using ApplicationEntity = EnhancementHub.Domain.Entities.Application;
 
 namespace EnhancementHub.Application.Features.Delivery.Queries;
 
@@ -27,7 +30,9 @@ public sealed class GetDeliveryRunQueryHandler : IRequestHandler<GetDeliveryRunQ
         GetDeliveryRunQuery request,
         CancellationToken cancellationToken)
     {
-        await _accessService.GetAccessibleRequestAsync(request.EnhancementRequestId, cancellationToken);
+        var enhancementRequest = await _accessService.GetAccessibleRequestAsync(
+            request.EnhancementRequestId,
+            cancellationToken);
 
         var run = await _dbContext.EnhancementDeliveryRuns
             .AsNoTracking()
@@ -36,6 +41,47 @@ public sealed class GetDeliveryRunQueryHandler : IRequestHandler<GetDeliveryRunQ
             .OrderByDescending(r => r.RunNumber)
             .FirstOrDefaultAsync(cancellationToken);
 
-        return run is null ? null : await DeliveryRunMapper.ToDtoAsync(run, _fileStorage, cancellationToken);
+        if (run is null)
+        {
+            return null;
+        }
+
+        TenantDeliveryProfile? tenantProfile = null;
+        ApplicationDeliveryProfile? appProfile = null;
+        if (enhancementRequest.TargetApplicationId.HasValue)
+        {
+            appProfile = await _dbContext.ApplicationDeliveryProfiles
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.ApplicationId == enhancementRequest.TargetApplicationId, cancellationToken);
+
+            var tenantId = await (
+                from app in _dbContext.Applications.AsNoTracking()
+                join team in _dbContext.Teams.AsNoTracking() on app.OwnerTeamId equals team.Id
+                where app.Id == enhancementRequest.TargetApplicationId
+                select team.TenantId).FirstOrDefaultAsync(cancellationToken);
+
+            if (tenantId != Guid.Empty)
+            {
+                tenantProfile = await _dbContext.TenantDeliveryProfiles
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(p => p.TenantId == tenantId, cancellationToken);
+            }
+        }
+
+        var rollbackPlan = await _dbContext.EnhancementAnalyses
+            .AsNoTracking()
+            .Where(a => a.EnhancementRequestId == request.EnhancementRequestId)
+            .OrderByDescending(a => a.Version)
+            .Select(a => a.RollbackPlan)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return await DeliveryRunMapper.ToDtoAsync(
+            run,
+            _fileStorage,
+            DeliveryRunGates.CanDeployToProduction(run, tenantProfile, appProfile),
+            DeliveryRunGates.CanRollbackProduction(run, tenantProfile),
+            appProfile?.RequiresHumanProdDeploy ?? false,
+            rollbackPlan,
+            cancellationToken);
     }
 }

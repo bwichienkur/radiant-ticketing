@@ -35,6 +35,13 @@ public enum DatabaseMigrationStrategy
     Manual = 3
 }
 
+public enum TestDataStrategy
+{
+    Synthetic = 0,
+    MaskedProdClone = 1,
+    SubsetClone = 2
+}
+
 public enum DeliveryRunPhase
 {
     Pending,
@@ -47,5 +54,6 @@ public enum DeliveryRunPhase
     ProdScheduled,
     DeployingToProduction,
     Completed,
+    RolledBack,
     Failed
 }

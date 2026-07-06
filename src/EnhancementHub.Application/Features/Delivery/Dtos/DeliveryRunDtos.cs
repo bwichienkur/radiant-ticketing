@@ -40,5 +40,13 @@ public sealed record EnhancementDeliveryRunDto(
     DateTime? ProdScheduledAt,
     string? ProdDeployReference,
     DateTime? ProdDeployedAt,
+    string? ProdArtifactReference,
+    string? RollbackTargetCommitSha,
+    bool? PostDeploySmokePassed,
+    DateTime? RolledBackAt,
+    bool CanDeployToProduction,
+    bool CanRollbackProduction,
+    bool RequiresHumanProdDeploy,
+    string? RollbackPlan,
     IReadOnlyList<DeliveryTimelineEventDto> Timeline,
     string? LastError);

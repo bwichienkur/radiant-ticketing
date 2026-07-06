@@ -10,6 +10,10 @@ public static class DeliveryRunMapper
     public static async Task<EnhancementDeliveryRunDto> ToDtoAsync(
         EnhancementDeliveryRun run,
         IFileStorageService? fileStorage,
+        bool canDeployToProduction = false,
+        bool canRollbackProduction = false,
+        bool requiresHumanProdDeploy = false,
+        string? rollbackPlan = null,
         CancellationToken cancellationToken = default)
     {
         IReadOnlyList<QaTestStepDto> qaSteps;
@@ -64,6 +68,14 @@ public static class DeliveryRunMapper
             run.ProdScheduledAt,
             run.ProdDeployReference,
             run.ProdDeployedAt,
+            run.ProdArtifactReference,
+            run.RollbackTargetCommitSha,
+            run.PostDeploySmokePassed,
+            run.RolledBackAt,
+            canDeployToProduction,
+            canRollbackProduction,
+            requiresHumanProdDeploy,
+            rollbackPlan,
             timeline,
             run.LastError);
     }

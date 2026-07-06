@@ -20,6 +20,10 @@ public static class DeliveryProfileMapper
             profile.RequireProdChangeWindow,
             profile.ChangeWindowNotes,
             profile.QaVideoRetentionDays,
+            profile.AllowOneClickProdDeploy,
+            profile.AllowOneClickRollback,
+            profile.TestDataStrategy,
+            profile.AllowProdToTestRefresh,
             profile.Environments
                 .OrderBy(e => e.SortOrder)
                 .ThenBy(e => e.Name)

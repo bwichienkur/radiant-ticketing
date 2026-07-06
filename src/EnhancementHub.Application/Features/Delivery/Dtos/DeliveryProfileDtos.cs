@@ -24,6 +24,10 @@ public sealed record TenantDeliveryProfileDto(
     bool RequireProdChangeWindow,
     string? ChangeWindowNotes,
     int QaVideoRetentionDays,
+    bool AllowOneClickProdDeploy,
+    bool AllowOneClickRollback,
+    TestDataStrategy TestDataStrategy,
+    bool AllowProdToTestRefresh,
     IReadOnlyList<TenantDeploymentEnvironmentDto> Environments);
 
 public sealed record ApplicationDeliveryProfileDto(

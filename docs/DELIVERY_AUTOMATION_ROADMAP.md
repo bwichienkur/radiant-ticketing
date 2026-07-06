@@ -232,6 +232,23 @@ On PR creation, draft test cases export to `tests/e2e/eh-{requestId}.spec.ts` on
 
 Nightly Hangfire job `nightly-regression` (03:00 UTC) runs active regression cases per application against the tenant Test environment URL.
 
+## CI/CD hardening (Phase F)
+
+| Feature | Description |
+|---------|-------------|
+| One-click production deploy | Gated button when `RequiresHumanProdDeploy` and QA/UAT pass |
+| One-click production rollback | Dispatches rollback workflow with previous `commitSha` / deploy ref |
+| Artifact promotion | Production deploy passes `artifactRef` + `promoteFromEnvironment=Test` |
+| Post-deploy smoke | Regression manifest re-run against production URL after deploy |
+| Tenant policies | `AllowOneClickProdDeploy`, `AllowOneClickRollback`, `TestDataStrategy`, `AllowProdToTestRefresh` |
+
+### API
+
+| Method | Route |
+|--------|-------|
+| POST | `/web-api/spa/delivery/requests/{requestId}/deploy-production` |
+| POST | `/web-api/spa/delivery/requests/{requestId}/rollback-production` |
+
 ## Related docs
 
 - [ROADMAP.md](ROADMAP.md) — Horizon 4.6

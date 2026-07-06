@@ -413,9 +413,136 @@ public sealed class DeliveryOrchestrationService : IDeliveryOrchestrationService
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task TriggerProductionDeployAsync(Guid enhancementRequestId, CancellationToken cancellationToken = default)
+    {
+        var run = await GetActiveRunAsync(enhancementRequestId, cancellationToken);
+        var context = await LoadContextAsync(run.EnhancementRequest, cancellationToken);
+
+        if (context.TenantProfile?.AllowOneClickProdDeploy == false)
+        {
+            throw new InvalidOperationException("One-click production deploy is disabled for this tenant.");
+        }
+
+        if (!CanDeployToProduction(run, context))
+        {
+            throw new InvalidOperationException("Production deploy gates are not satisfied.");
+        }
+
+        if (context.TenantProfile?.RequireProdChangeWindow == true
+            && !_changeWindowEvaluator.IsProductionDeployAllowed(
+                DateTime.UtcNow,
+                context.TenantProfile.ChangeWindowNotes,
+                true))
+        {
+            run.Phase = DeliveryRunPhase.ProdScheduled;
+            run.ProdScheduledAt = NextSundayWindowUtc(DateTime.UtcNow);
+            run.TimelineJson = DeliveryTimeline.AppendEvent(
+                run.TimelineJson,
+                $"Production deploy scheduled for {run.ProdScheduledAt:u} (change window).");
+            run.EnhancementRequest.Status = EnhancementRequestStatus.ProdScheduled;
+        }
+        else
+        {
+            run.Phase = DeliveryRunPhase.DeployingToProduction;
+            run.TimelineJson = DeliveryTimeline.AppendEvent(run.TimelineJson, "Production deploy triggered manually.");
+            run.EnhancementRequest.Status = EnhancementRequestStatus.DeployingToProduction;
+        }
+
+        run.UpdatedAt = DateTime.UtcNow;
+        run.EnhancementRequest.UpdatedAt = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        if (run.Phase == DeliveryRunPhase.DeployingToProduction)
+        {
+            await DeployToProductionAsync(run, cancellationToken);
+        }
+    }
+
+    public async Task RollbackProductionAsync(
+        Guid enhancementRequestId,
+        string? reason,
+        CancellationToken cancellationToken = default)
+    {
+        var run = await GetActiveRunAsync(enhancementRequestId, cancellationToken);
+        var context = await LoadContextAsync(run.EnhancementRequest, cancellationToken);
+
+        if (context.TenantProfile?.AllowOneClickRollback == false)
+        {
+            throw new InvalidOperationException("One-click rollback is disabled for this tenant.");
+        }
+
+        if (!CanRollbackProduction(run, context))
+        {
+            throw new InvalidOperationException("Production rollback is not available for this delivery run.");
+        }
+
+        if (context.AppProfile is null)
+        {
+            throw new InvalidOperationException("Application delivery profile is required.");
+        }
+
+        var (owner, repo) = RepositoryCoordinates.Resolve(
+            context.Repository?.Url,
+            context.Repository?.Name ?? "app",
+            _demoOwner);
+
+        var rollbackContext = new RollbackContext(
+            run.EnhancementRequestId,
+            context.AppProfile.ApplicationId,
+            run.Id,
+            context.AppProfile.CicdProviderOverride ?? context.TenantProfile?.DefaultCicdProvider ?? CicdProvider.GitHubActions,
+            context.AppProfile.CicdPipelineReference,
+            context.AppProfile.DeploymentMechanism,
+            owner,
+            repo,
+            context.Repository?.DefaultBranch,
+            run.RollbackTargetDeployReference,
+            run.RollbackTargetCommitSha);
+
+        var adapter = _adapterFactory.ResolveForRollback(rollbackContext);
+        var result = await adapter.RollbackAsync(rollbackContext, cancellationToken);
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(result.ErrorMessage ?? "Production rollback failed.");
+        }
+
+        run.Phase = DeliveryRunPhase.RolledBack;
+        run.RolledBackAt = DateTime.UtcNow;
+        run.TimelineJson = DeliveryTimeline.AppendEvent(
+            run.TimelineJson,
+            $"Production rolled back to {run.RollbackTargetCommitSha ?? run.RollbackTargetDeployReference ?? "previous version"}."
+            + (string.IsNullOrWhiteSpace(reason) ? "" : $" Reason: {reason.Trim()}"));
+        run.EnhancementRequest.Status = EnhancementRequestStatus.InProgress;
+        run.UpdatedAt = DateTime.UtcNow;
+        run.EnhancementRequest.UpdatedAt = DateTime.UtcNow;
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        await _auditService.LogAsync(
+            "ProductionRollback",
+            nameof(EnhancementDeliveryRun),
+            run.Id,
+            reason ?? "One-click production rollback",
+            cancellationToken);
+    }
+
     private async Task ScheduleProductionIfAllowedAsync(EnhancementDeliveryRun run, CancellationToken cancellationToken)
     {
         var context = await LoadContextAsync(run.EnhancementRequest, cancellationToken);
+
+        if (context.AppProfile?.RequiresHumanProdDeploy == true
+            && context.TenantProfile?.AllowOneClickProdDeploy != false)
+        {
+            run.Phase = DeliveryRunPhase.UatApproved;
+            run.TimelineJson = DeliveryTimeline.AppendEvent(
+                run.TimelineJson,
+                "UAT approved — awaiting one-click production deploy.");
+            run.EnhancementRequest.Status = EnhancementRequestStatus.UatApproved;
+            run.UpdatedAt = DateTime.UtcNow;
+            run.EnhancementRequest.UpdatedAt = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return;
+        }
+
         var requireWindow = context.TenantProfile?.RequireProdChangeWindow ?? true;
         var notes = context.TenantProfile?.ChangeWindowNotes;
 
@@ -460,6 +587,11 @@ public sealed class DeliveryOrchestrationService : IDeliveryOrchestrationService
             throw new InvalidOperationException("Production environment and application profile are required.");
         }
 
+        await CaptureRollbackTargetAsync(run, context.AppProfile.ApplicationId, cancellationToken);
+
+        var artifactRef = run.CommitSha ?? run.TestDeployReference;
+        run.ProdArtifactReference = artifactRef;
+
         var bundle = await _configBundleBuilder.BuildAsync(context.AppProfile, context.ProdEnvironment, cancellationToken);
         var (owner, repo) = RepositoryCoordinates.Resolve(
             context.Repository?.Url,
@@ -477,7 +609,9 @@ public sealed class DeliveryOrchestrationService : IDeliveryOrchestrationService
             bundle,
             owner,
             repo,
-            context.Repository?.DefaultBranch);
+            context.Repository?.DefaultBranch,
+            artifactRef,
+            DeploymentEnvironmentType.Test.ToString());
 
         var adapter = _adapterFactory.Resolve(deployContext);
         var result = await adapter.DeployAsync(deployContext, cancellationToken);
@@ -488,12 +622,111 @@ public sealed class DeliveryOrchestrationService : IDeliveryOrchestrationService
 
         run.ProdDeployReference = result.DeploymentReference;
         run.ProdDeployedAt = DateTime.UtcNow;
+        run.TimelineJson = DeliveryTimeline.AppendEvent(
+            run.TimelineJson,
+            $"Production deployment completed (artifact: {artifactRef ?? "latest"}).");
+
+        await RunPostDeploySmokeAsync(run, context, bundle.BaseUrl, cancellationToken);
+
         run.Phase = DeliveryRunPhase.Completed;
-        run.TimelineJson = DeliveryTimeline.AppendEvent(run.TimelineJson, "Production deployment completed.");
         run.EnhancementRequest.Status = EnhancementRequestStatus.Completed;
         run.UpdatedAt = DateTime.UtcNow;
         run.EnhancementRequest.UpdatedAt = DateTime.UtcNow;
         await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task CaptureRollbackTargetAsync(
+        EnhancementDeliveryRun run,
+        Guid applicationId,
+        CancellationToken cancellationToken)
+    {
+        var previous = await (
+            from deliveryRun in _dbContext.EnhancementDeliveryRuns.AsNoTracking()
+            join request in _dbContext.EnhancementRequests.AsNoTracking()
+                on deliveryRun.EnhancementRequestId equals request.Id
+            where request.TargetApplicationId == applicationId
+                && deliveryRun.Id != run.Id
+                && deliveryRun.Phase == DeliveryRunPhase.Completed
+                && deliveryRun.ProdDeployReference != null
+            orderby deliveryRun.ProdDeployedAt descending
+            select new { deliveryRun.ProdDeployReference, deliveryRun.CommitSha, deliveryRun.ProdArtifactReference })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (previous is not null)
+        {
+            run.RollbackTargetDeployReference = previous.ProdDeployReference;
+            run.RollbackTargetCommitSha = previous.CommitSha ?? previous.ProdArtifactReference;
+        }
+    }
+
+    private async Task RunPostDeploySmokeAsync(
+        EnhancementDeliveryRun run,
+        DeliveryContextBundle context,
+        string? prodUrl,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(prodUrl) || context.AppProfile is null)
+        {
+            return;
+        }
+
+        var manifest = await _testCaseCatalog.PrepareRegressionManifestAsync(
+            context.AppProfile.ApplicationId,
+            prodUrl,
+            cancellationToken);
+        if (manifest.Cases.Count == 0)
+        {
+            return;
+        }
+
+        var smoke = await _qaRunner.RunAsync(manifest, cancellationToken);
+        run.PostDeploySmokePassed = smoke.Passed;
+        run.TimelineJson = DeliveryTimeline.AppendEvent(
+            run.TimelineJson,
+            smoke.Passed
+                ? $"Post-deploy smoke passed ({smoke.CaseResults.Count} cases)."
+                : "Post-deploy smoke failed — consider rollback.");
+    }
+
+    private static bool CanDeployToProduction(EnhancementDeliveryRun run, DeliveryContextBundle context)
+    {
+        if (context.TenantProfile?.AllowOneClickProdDeploy == false)
+        {
+            return false;
+        }
+
+        if (context.AppProfile?.RequiresHumanProdDeploy != true)
+        {
+            return false;
+        }
+
+        if (run.QaPassed != true)
+        {
+            return false;
+        }
+
+        if (context.TenantProfile?.RequireUatSignoff == true && !run.UatApproved)
+        {
+            return false;
+        }
+
+        return run.Phase is DeliveryRunPhase.UatApproved or DeliveryRunPhase.ProdScheduled;
+    }
+
+    private static bool CanRollbackProduction(EnhancementDeliveryRun run, DeliveryContextBundle context)
+    {
+        if (context.TenantProfile?.AllowOneClickRollback == false)
+        {
+            return false;
+        }
+
+        if (run.Phase != DeliveryRunPhase.Completed)
+        {
+            return false;
+        }
+
+        return !string.IsNullOrWhiteSpace(run.RollbackTargetDeployReference)
+            || !string.IsNullOrWhiteSpace(run.RollbackTargetCommitSha);
     }
 
     private Task CompleteProductionDeployAsync(EnhancementDeliveryRun run, CancellationToken cancellationToken) =>

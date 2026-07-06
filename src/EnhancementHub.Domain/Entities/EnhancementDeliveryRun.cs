@@ -53,6 +53,16 @@ public class EnhancementDeliveryRun : BaseEntity
 
     public DateTime? ProdDeployedAt { get; set; }
 
+    public string? ProdArtifactReference { get; set; }
+
+    public string? RollbackTargetDeployReference { get; set; }
+
+    public string? RollbackTargetCommitSha { get; set; }
+
+    public DateTime? RolledBackAt { get; set; }
+
+    public bool? PostDeploySmokePassed { get; set; }
+
     public string? TimelineJson { get; set; }
 
     public string? LastError { get; set; }

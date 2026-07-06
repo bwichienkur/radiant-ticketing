@@ -46,6 +46,7 @@ internal static class DeliveryStatusMapper
             DeliveryRunPhase.ProdScheduled => EnhancementRequestStatus.ProdScheduled,
             DeliveryRunPhase.DeployingToProduction => EnhancementRequestStatus.DeployingToProduction,
             DeliveryRunPhase.Completed => EnhancementRequestStatus.Completed,
+            DeliveryRunPhase.RolledBack => EnhancementRequestStatus.InProgress,
             DeliveryRunPhase.Failed => EnhancementRequestStatus.InProgress,
             _ => EnhancementRequestStatus.InProgress
         };

@@ -184,6 +184,7 @@ See [FINOPS_INFRASTRUCTURE_ROADMAP.md](FINOPS_INFRASTRUCTURE_ROADMAP.md).
 - [x] Test deploy adapters (GitHub Actions, webhook) (Phase C)
 - [x] Automated QA + video evidence (Phase D)
 - [x] Requester UAT + production scheduling (Phase E)
+- [x] One-click prod deploy/rollback + artifact promotion (Phase F)
 
 See [DELIVERY_AUTOMATION_ROADMAP.md](DELIVERY_AUTOMATION_ROADMAP.md).
 

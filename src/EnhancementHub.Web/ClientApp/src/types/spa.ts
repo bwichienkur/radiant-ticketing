@@ -337,6 +337,14 @@ export interface EnhancementDeliveryRun {
   prodScheduledAt?: string;
   prodDeployReference?: string;
   prodDeployedAt?: string;
+  prodArtifactReference?: string;
+  rollbackTargetCommitSha?: string;
+  postDeploySmokePassed?: boolean;
+  rolledBackAt?: string;
+  canDeployToProduction: boolean;
+  canRollbackProduction: boolean;
+  requiresHumanProdDeploy: boolean;
+  rollbackPlan?: string;
   timeline: DeliveryTimelineEvent[];
   lastError?: string;
 }
