@@ -13,6 +13,13 @@ export const SPA_PREFIXES = [
   '/Spa/Repositories',
   '/Spa/Audit',
   '/Spa/Search',
+  '/Spa/DatabaseConnections',
+  '/Spa/Documentation/Export',
+  '/Spa/Refactor/Analyze',
+  '/Spa/Refactor/Plans',
+  '/Spa/Settings',
+  '/Spa/Insights',
+  '/Spa/PortfolioHealth',
 ];
 
 export function isSpaPath(pathname: string): boolean {

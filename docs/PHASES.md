@@ -531,4 +531,106 @@ Post-audit roadmap to reach world-class enterprise readiness. Full task breakdow
 | 59 | E2E accessibility & admin polish |
 | 60 | Feature flags |
 
+## Phase 61 — Shell unification (complete)
+
+- Migrated DatabaseConnections, Documentation Export, and Refactor to React SPA
+- BFF endpoints on `SpaIntelligenceController`
+- Legacy Razor redirects; `Phase61ShellUnificationTests`
+
+## Phase 62 — Enterprise intake + demo trust (complete)
+
+- Custom fields on `CreateRequestApp.tsx`
+- `MockAiTrustBanner` in `SpaShell.tsx`
+- `Phase62EnterpriseIntakeTests`
+
+## Phase 63 — Unified Admin Settings SPA (complete)
+
+- `SettingsApp.tsx` at `/Spa/Settings/*` with left-nav sections
+- Migrated: General, Authentication, API keys, Teams, Webhooks
+- `SpaSettingsController` BFF endpoints
+- Legacy admin pages redirect to SPA settings sections
+- `Phase63SettingsSpaTests`
+
+## Phase 64 — Design partner #2 + case study (complete — GTM track)
+
+- [DESIGN_PARTNER_2_TRACKER.md](DESIGN_PARTNER_2_TRACKER.md) — pipeline, week-by-week checklist, combined NPS gate
+- Playbook extended for second partner; pilot #1 case study in draft
+- Scorecard measured column includes pilot #2 targets
+
+## Phase 65 — Executive ROI dashboard (complete)
+
+- `InsightsApp.tsx` at `/Spa/Insights` — read-only ROI for Admin and Approver roles
+- `SpaInsightsController` BFF: `GET roi`, `GET roi/export` (CSV)
+- Legacy `/Admin/Roi` redirects to SPA; sidebar Insights link
+- `Phase65InsightsSpaTests`
+
+## Phase 66 — LLM approval copilot (complete)
+
+- `IApprovalCopilotService` + `ApprovalCopilotService` with `Features:ApprovalCopilot` flag
+- Heuristic fallback when LLM unavailable; `Source` field on recommendation DTO
+- Approval queue shows AI copilot vs rule-based badge
+- `Phase66ApprovalCopilotLlmTests`
+
+## Phase 67 — Command palette + semantic search (complete)
+
+- `CommandPalette.tsx` in SPA shell (⌘K / Ctrl+K)
+- `GlobalEntitySearchQuery` semantic mode + `Features:SemanticSearch`
+- `Phase67CommandPaletteTests`
+
+## Phase 68 — EF decoupling wave 1 (complete)
+
+- Aggregate repositories: EnhancementRequest, Application, Team, GitRepository, EnhancementAnalysis, User
+- 20 handlers migrated off `IEnhancementHubDbContext`
+- Global `TenantId` query filters on tenant-scoped entities
+- `docs/ef-handler-allowlist.txt` + CI enforcement
+- `Phase68EfDecouplingTests`
+
+## Phase 69 — Postgres load CI + visual/a11y gates (complete)
+
+- `k6-postgres-gate.js` + CI job with PostgreSQL service
+- Storybook build in CI (`UIKit.stories.tsx` baseline)
+- axe E2E suite blocks serious violations on PR
+- `Phase69CiProofTests`
+
+## Phase 70 — Drift autopilot + portfolio risk heatmap (complete)
+
+- `IDriftAutopilotService` + Hangfire `drift-autopilot` job behind `Features:DriftAutopilot`
+- `PortfolioHealthApp.tsx` at `/Spa/PortfolioHealth` — risk heatmap for Admin/Approver
+- `SpaPortfolioController` BFF: `GET health`
+- `Phase70DriftAutopilotTests`
+
+## Phase 71 — Per-tenant branding + dark mode (complete)
+
+- `TenantBranding` entity + `Users.ThemePreference` (System/Light/Dark)
+- `SpaBrandingController` BFF: appearance, theme, tenant branding
+- `SettingsBrandingSection` at `/Spa/Settings/Branding`
+- `ThemePreferenceSelector` + `theme.ts` applied across SPA shell
+- `Phase71BrandingThemeTests`
+
+## Phase 72 — 85+ gate verification (complete)
+
+- [GATE_85_VERIFICATION.md](GATE_85_VERIFICATION.md) — exit gate checklist
+- [UX_HEURISTIC_REVIEW.md](UX_HEURISTIC_REVIEW.md) — 5-reviewer heuristic review
+- `PRODUCT_SCORECARD.md` updated to **8.5** overall
+- `Phase72GateVerificationTests`
+
+## Roadmap to 85+ (complete)
+
+Full plan: [ROADMAP_85.md](ROADMAP_85.md)
+
+| Phase | Name | Wave | Status |
+|-------|------|------|--------|
+| 61 | Shell unification (DB, Docs, Refactor → React) | 1 | Complete |
+| 62 | Enterprise intake + demo trust | 1 | Complete |
+| 63 | Unified Admin Settings SPA | 1 | Complete |
+| 64 | Design partner #2 + case study | 2 | Complete |
+| 65 | Executive ROI dashboard | 2 | Complete |
+| 66 | LLM approval copilot | 2 | Complete |
+| 67 | Command palette + semantic search | 3 | Complete |
+| 68 | EF decoupling wave 1 | 3 | Complete |
+| 69 | Postgres load CI + visual regression | 3 | Complete |
+| 70 | Drift autopilot + portfolio heatmap | 4 | Complete |
+| 71 | Per-tenant branding + dark mode | 4 | Complete |
+| 72 | 85+ gate verification | 4 | Complete |
+
 ## Future enhancements

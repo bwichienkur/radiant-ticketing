@@ -6,7 +6,7 @@
 <nav class="admin-subnav mb-4" aria-label="Admin sections">
     <a class="admin-subnav-link @(TabActive("settings") ? "active" : "")" asp-page="/Admin/Settings">Settings</a>
     <a class="admin-subnav-link @(TabActive("jobs") ? "active" : "")" asp-page="/Admin/Jobs">Jobs</a>
-    <a class="admin-subnav-link @(TabActive("roi") ? "active" : "")" asp-page="/Admin/Roi">ROI</a>
+    <a class="admin-subnav-link @(TabActive("roi") ? "active" : "")" href="/Spa/Insights">ROI</a>
     <a class="admin-subnav-link @(TabActive("teams") ? "active" : "")" asp-page="/Admin/Teams">Teams</a>
     <a class="admin-subnav-link @(TabActive("tenancy") ? "active" : "")" asp-page="/Admin/Tenancy">Tenancy</a>
     <a class="admin-subnav-link @(TabActive("apikeys") ? "active" : "")" asp-page="/Admin/ApiKeys">API Keys</a>

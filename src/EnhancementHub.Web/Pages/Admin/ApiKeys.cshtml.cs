@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.Admin;
 
+/// <summary>Legacy Razor API keys — redirects to <c>/Spa/Settings/ApiKeys</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/Settings/ApiKeys. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize(Roles = "Admin")]
 public class ApiKeysModel : PageModel
 {
@@ -44,10 +46,16 @@ public class ApiKeysModel : PageModel
     [TempData]
     public string? CreatedApiKey { get; set; }
 
-    public async Task OnGetAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectPermanent("/Spa/Settings/ApiKeys");
+        }
+
         ApiKeys = await _mediator.Send(new ListServiceApiKeysQuery(), cancellationToken);
         Teams = await _mediator.Send(new ListTeamsQuery(), cancellationToken);
+        return Page();
     }
 
     public async Task<IActionResult> OnPostCreateAsync(CancellationToken cancellationToken)

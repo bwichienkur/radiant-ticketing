@@ -1,9 +1,8 @@
 using System.Text.Json;
-using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Abstractions.Persistence;
 using EnhancementHub.Application.Features.CustomFields.Dtos;
 using EnhancementHub.Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace EnhancementHub.Application.Features.CustomFields.Queries;
 
@@ -13,26 +12,16 @@ public sealed record ListCustomFieldDefinitionsQuery(bool ActiveOnly = true)
 public sealed class ListCustomFieldDefinitionsQueryHandler
     : IRequestHandler<ListCustomFieldDefinitionsQuery, IReadOnlyList<CustomFieldDefinitionDto>>
 {
-    private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IEnhancementRequestRepository _requests;
 
-    public ListCustomFieldDefinitionsQueryHandler(IEnhancementHubDbContext dbContext) =>
-        _dbContext = dbContext;
+    public ListCustomFieldDefinitionsQueryHandler(IEnhancementRequestRepository requests) =>
+        _requests = requests;
 
     public async Task<IReadOnlyList<CustomFieldDefinitionDto>> Handle(
         ListCustomFieldDefinitionsQuery request,
         CancellationToken cancellationToken)
     {
-        var query = _dbContext.CustomFieldDefinitions.AsNoTracking().AsQueryable();
-        if (request.ActiveOnly)
-        {
-            query = query.Where(d => d.IsActive);
-        }
-
-        var definitions = await query
-            .OrderBy(d => d.SortOrder)
-            .ThenBy(d => d.Label)
-            .ToListAsync(cancellationToken);
-
+        var definitions = await _requests.ListCustomFieldDefinitionsAsync(request.ActiveOnly, cancellationToken);
         return definitions.Select(CustomFieldQueries.ToDto).ToList();
     }
 }
@@ -43,21 +32,17 @@ public sealed record GetRequestCustomFieldValuesQuery(Guid RequestId)
 public sealed class GetRequestCustomFieldValuesQueryHandler
     : IRequestHandler<GetRequestCustomFieldValuesQuery, IReadOnlyList<CustomFieldValueDto>>
 {
-    private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IEnhancementRequestRepository _requests;
 
-    public GetRequestCustomFieldValuesQueryHandler(IEnhancementHubDbContext dbContext) =>
-        _dbContext = dbContext;
+    public GetRequestCustomFieldValuesQueryHandler(IEnhancementRequestRepository requests) =>
+        _requests = requests;
 
     public async Task<IReadOnlyList<CustomFieldValueDto>> Handle(
         GetRequestCustomFieldValuesQuery request,
         CancellationToken cancellationToken)
     {
-        return await _dbContext.EnhancementRequestCustomFieldValues
-            .AsNoTracking()
-            .Include(v => v.Definition)
-            .Include(v => v.UserValue)
-            .Where(v => v.EnhancementRequestId == request.RequestId)
-            .OrderBy(v => v.Definition.SortOrder)
+        var values = await _requests.GetCustomFieldValuesAsync(request.RequestId, cancellationToken);
+        return values
             .Select(v => new CustomFieldValueDto(
                 v.Definition.Key,
                 v.Definition.Label,
@@ -66,8 +51,8 @@ public sealed class GetRequestCustomFieldValuesQueryHandler
                 v.NumberValue,
                 v.DateValue,
                 v.UserValueId,
-                v.UserValue != null ? v.UserValue.DisplayName : null))
-            .ToListAsync(cancellationToken);
+                v.UserValue?.DisplayName))
+            .ToList();
     }
 }
 

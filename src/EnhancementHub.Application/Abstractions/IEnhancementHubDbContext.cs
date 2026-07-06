@@ -55,6 +55,7 @@ public interface IEnhancementHubDbContext
     DbSet<OnboardingSession> OnboardingSessions { get; }
     DbSet<ServiceApiKey> ServiceApiKeys { get; }
     DbSet<Tenant> Tenants { get; }
+    DbSet<TenantBranding> TenantBrandings { get; }
     DbSet<TenantUsageSnapshot> TenantUsageSnapshots { get; }
     DbSet<IntakeCopilotSession> IntakeCopilotSessions { get; }
     DbSet<TenantDeliveryProfile> TenantDeliveryProfiles { get; }

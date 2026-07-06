@@ -17,6 +17,10 @@ const checks = [
     mustContain: ["aria-current={isCurrent ? 'step' : undefined}"],
   },
   {
+    file: 'src/EnhancementHub.Web/ClientApp/src/components/CommandPalette.tsx',
+    mustContain: ['role="dialog"', 'aria-label="Command palette"', 'role="listbox"'],
+  },
+  {
     file: 'src/EnhancementHub.Web/ClientApp/src/components/SystemMapGraph.tsx',
     mustContain: ['tabIndex={0}', 'onKeyDown'],
   },

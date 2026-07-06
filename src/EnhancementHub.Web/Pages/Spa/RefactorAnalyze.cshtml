@@ -1,0 +1,12 @@
+@page "/Spa/Refactor/Analyze"
+@model EnhancementHub.Web.Pages.Spa.RefactorAnalyzeModel
+@{
+    ViewData["Title"] = "Refactor Analysis";
+    ViewData["Breadcrumb"] = "Refactor";
+}
+
+<partial name="_SpaRoot" />
+
+@section Scripts {
+    <script type="module" src="~/spa/react/spa-shell.js" asp-append-version="true"></script>
+}

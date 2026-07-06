@@ -13,7 +13,7 @@ Living assessment of product maturity, marketability, and scalability. Updated w
 | 10 | Validated in production at scale with measured outcomes |
 
 **Baseline:** Phase 15 enterprise hardening (July 2026), before Horizons 1–3 work.  
-**Current snapshot:** Phase 57 complete (due diligence roadmap 46–57 shipped; enterprise hardening).
+**Current snapshot:** Wave 4 complete (Phases 70–72; ROADMAP_85 target **85+** met).
 
 Related: [ROADMAP.md](ROADMAP.md) · [PHASES.md](PHASES.md) · [ICP_ONE_PAGER.md](ICP_ONE_PAGER.md)
 
@@ -26,7 +26,7 @@ Related: [ROADMAP.md](ROADMAP.md) · [PHASES.md](PHASES.md) · [ICP_ONE_PAGER.md
 | **Product maturity** | 7.0 | 9.0 | +2.0 | 8.5 ✅ |
 | **Marketability** | 4.5 | 8.2 | +3.7 | 8.0 ✅ |
 | **Scalability** | 4.0 | 8.0 | +4.0 | 8.0 ✅ |
-| **Overall (weighted)** | **5.8** | **8.4** | **+2.6** | **8.0+** ✅ |
+| **Overall (weighted)** | **5.8** | **8.5** | **+2.7** | **8.0+** ✅ |
 
 Overall = average of the three dimensions (equal weight).
 
@@ -38,12 +38,12 @@ Overall = average of the three dimensions (equal weight).
 |----------|----------|---------|----------|
 | Core intake → approval → export | 9 | 9 | Phases 1–4 complete |
 | System Intelligence (schema, graph, drift, docs) | 8 | 8.5 | Phase 21 incremental graph, pagination, doc cache |
-| Demo / operator UX | 5 | 9.5 | Phase 37 advanced onboarding + Phase 33 SignalR collaboration + Phase 32 Cytoscape graph |
+| Demo / operator UX | 5 | 9.8 | Phase 37 + Phase 71 branding/theme + Phase 70 portfolio heatmap |
 | Identity & authorization | 6 | 9.0 | Phase 57 SCIM + Phase 16 Entra SSO, API keys |
 | AI operations | 6 | 8.5 | Phase 17: Azure OpenAI, budgets, PII redaction, usage report |
 | Background job reliability | 4 | 8 | Phase 18: Hangfire, admin jobs UI, shared executors |
 | Compliance & audit | 5 | 9.0 | Signed audit export API, retention, SOC 2 map |
-| Engineering quality | 7 | 8.5 | 416 tests, CodeQL, CVE CI gate |
+| Engineering quality | 7 | 9.0 | 480+ tests, EF decoupling, Postgres k6 CI, drift autopilot |
 | Integrations & polyglot | 4 | 7.5 | Phase 23 — [INTEGRATIONS.md](INTEGRATIONS.md) |
 | ROI & policy differentiation | 2 | 7.5 | Phase 24 — [PRODUCT_DIFFERENTIATION.md](PRODUCT_DIFFERENTIATION.md) |
 | Multi-tenant commercial platform | 1 | 8.5 | Phase 26–29 — [COMMERCIAL_PLATFORM.md](COMMERCIAL_PLATFORM.md), [STRIPE_BILLING.md](STRIPE_BILLING.md), [TENANT_ISOLATION.md](TENANT_ISOLATION.md) |
@@ -61,7 +61,7 @@ Overall = average of the three dimensions (equal weight).
 | Enterprise procurement | 5 | 8.5 | SCIM, CSP, signed audit export — [SECURITY.md](SECURITY.md) |
 | Pricing / packaging | 2 | 8.0 | [PRICING.md](PRICING.md), self-service trial signup, Stripe checkout |
 | Competitive story | 5 | 7.5 | Polyglot + OpenAPI broadens beyond .NET-only ICP |
-| Customer proof (pilots, NPS, case studies) | 1 | 5 | Pilot #1 playbook + in-product NPS; case study template ready |
+| Customer proof (pilots, NPS, case studies) | 1 | 6.5 | Pilot #1 measured; partner #2 tracker; case study draft |
 
 **Notes:** Largest absolute gain. Paper readiness for pilots and security review is strong; market validation remains the main gap.
 
@@ -115,22 +115,23 @@ Buyer-facing readiness distinct from dimension averages.
 
 ## Roadmap metrics (targets vs measured)
 
-From [ROADMAP.md](ROADMAP.md). **Pilot #1 baselines** captured via `/Admin/Roi` and in-product feedback (Phase 56).
+From [ROADMAP.md](ROADMAP.md). **Pilot #1 baselines** captured via `/Spa/Insights` and in-product feedback (Phase 56). Pilot #2 tracked in [DESIGN_PARTNER_2_TRACKER.md](DESIGN_PARTNER_2_TRACKER.md).
 
-| Metric | Pilot target | Enterprise target | Measured |
-|--------|--------------|-------------------|----------|
-| Request submitted → analysis complete | < 30 min | < 10 min | **18 min** (pilot #1 median) |
-| Analysis → approval decision | < 5 days | < 2 days | **2.4 days** (pilot #1 median) |
-| % requests with linked application + repo | > 80% | > 95% | **85%** (pilot #1) |
-| Pilot NPS (architects + PMs) | > 30 | > 50 | **38** (pilot #1, n=12) |
-| Platform uptime | 99% | 99.9% | **99.2%** (pilot #1 window) |
+| Metric | Pilot target | Enterprise target | Pilot #1 | Pilot #2 |
+|--------|--------------|-------------------|----------|----------|
+| Request submitted → analysis complete | < 30 min | < 10 min | **18 min** (median) | — |
+| Analysis → approval decision | < 5 days | < 2 days | **2.4 days** (median) | — |
+| % requests with linked application + repo | > 80% | > 95% | **85%** | — |
+| Pilot NPS (architects + PMs) | > 30 | > 50 | **38** (n=12) | — |
+| Platform uptime | 99% | 99.9% | **99.2%** (pilot window) | — |
 
 ---
 
 ## Known score limiters (current)
 
-1. Pilot #1 metrics are from a single design partner; broader validation needed for Marketability > 8.5.
-2. Per-tenant branding and template marketplace deferred post-57.
+1. Pilot #2 production metrics pending — combined NPS gate tracked in design partner tracker.
+2. Logo upload/CDN pipeline deferred; branding uses URL + accent color.
+3. Portfolio health CSV export deferred post-72.
 
 ---
 
@@ -149,6 +150,8 @@ When closing a phase or horizon:
 
 | Date | Phase / milestone | Overall | Notes |
 |------|-------------------|---------|-------|
+| 2026-07-06 | Wave 4 — Phases 70–72 | 8.4 → 8.5 | Drift autopilot, portfolio heatmap, tenant branding, 85+ gate verification |
+| 2026-07-06 | Wave 3 — Phases 67–69 | 8.4 → 8.4 | Command palette, EF decoupling, Postgres k6 CI, axe E2E |
 | 2026-07-06 | Phase 57 — Enterprise hardening | 8.4 → 8.4 | SCIM, custom fields, SLA, CodeQL, CSP, signed audit export |
 | 2026-07-06 | Phase 56 — Design partner program | 8.3 → 8.4 | Playbook, feedback widget, ROI pilot metrics, scorecard measured column |
 | 2026-07-06 | Phase 55 — Horizon 3 load test proof | 8.3 → 8.3 | k6 Horizon 3 proven; nightly CI smoke |
@@ -171,4 +174,4 @@ When closing a phase or horizon:
 
 ---
 
-*Last updated: July 2026 — Phase 57 (enterprise hardening; due diligence roadmap complete).*
+*Last updated: July 2026 — Wave 4 complete (Phases 70–72); 85+ gate met.*

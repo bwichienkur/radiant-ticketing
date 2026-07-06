@@ -150,21 +150,41 @@
         });
     }
 
+    function resolveThemePreference(preference) {
+        if (preference === 'Light') {
+            return 'light';
+        }
+
+        if (preference === 'Dark') {
+            return 'dark';
+        }
+
+        if (preference === 'light' || preference === 'dark') {
+            return preference;
+        }
+
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
     function initTheme() {
         const saved = localStorage.getItem(STORAGE_THEME);
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = saved || (prefersDark ? 'dark' : 'light');
+        const theme = resolveThemePreference(saved);
         document.documentElement.setAttribute('data-bs-theme', theme);
         document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
             btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
-            btn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+            const title = saved === 'System' || !saved
+                ? 'Theme: system'
+                : theme === 'dark'
+                    ? 'Switch to light mode'
+                    : 'Switch to dark mode';
+            btn.title = title;
         });
     }
 
     function toggleTheme() {
-        const html = document.documentElement;
-        const next = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
-        html.setAttribute('data-bs-theme', next);
+        const saved = localStorage.getItem(STORAGE_THEME);
+        const current = resolveThemePreference(saved);
+        const next = current === 'dark' ? 'Light' : 'Dark';
         localStorage.setItem(STORAGE_THEME, next);
         initTheme();
     }
@@ -635,9 +655,8 @@
         /*
          * SPA vs full-page navigation (Phase 48):
          * - Client-side (no reload): /, /Index, /Spa/*
-         * - Full Razor page load: /DatabaseConnections, /Documentation, /Refactor,
-         *   /Applications/Details, /Admin/*
-         * Intelligence list pages (Applications, Drift, Repositories, Audit) are in the SPA shell.
+         * - Full Razor page load: /Applications/Details, /Admin/*
+         * Intelligence list pages (Applications, Drift, Repositories, Audit, Databases, Docs, Refactor) are in the SPA shell.
          */
         const spaExact = new Set(['/', '/Index']);
         const spaPrefixes = [
@@ -652,6 +671,13 @@
             '/Spa/Repositories',
             '/Spa/Audit',
             '/Spa/Search',
+            '/Spa/DatabaseConnections',
+            '/Spa/Documentation/Export',
+            '/Spa/Refactor/Analyze',
+            '/Spa/Refactor/Plans',
+            '/Spa/Settings',
+            '/Spa/Insights',
+            '/Spa/PortfolioHealth',
         ];
 
         function isSpaPath(pathname) {

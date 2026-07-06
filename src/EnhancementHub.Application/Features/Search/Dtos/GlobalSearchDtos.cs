@@ -10,4 +10,5 @@ public sealed record GlobalSearchItemDto(
 public sealed record GlobalSearchResultDto(
     string Query,
     IReadOnlyList<GlobalSearchItemDto> Items,
-    IReadOnlyDictionary<string, IReadOnlyList<GlobalSearchItemDto>> Groups);
+    IReadOnlyDictionary<string, IReadOnlyList<GlobalSearchItemDto>> Groups,
+    string? SemanticHint = null);
