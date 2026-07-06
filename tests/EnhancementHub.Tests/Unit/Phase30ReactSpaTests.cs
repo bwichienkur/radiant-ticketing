@@ -19,7 +19,7 @@ public sealed class Phase30ReactSpaTests
     public void ReactBundles_ArePublishedToWwwroot()
     {
         File.Exists(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/spa-shell.js")).Should().BeTrue();
-        Directory.Exists(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/chunks")).Should().BeTrue();
+        new FileInfo(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/spa-shell.js")).Length.Should().BeGreaterThan(100_000);
     }
 
     [Fact]
