@@ -21,6 +21,7 @@ import { SchemaDriftApp } from '../apps/SchemaDriftApp';
 import { RepositoriesApp } from '../apps/RepositoriesApp';
 import { AuditApp } from '../apps/AuditApp';
 import { SearchApp } from '../apps/SearchApp';
+import { FeedbackWidget } from './FeedbackWidget';
 import { readSpaContext } from '../spaRoutes';
 
 function RequestListRoute() {
@@ -98,6 +99,7 @@ export function SpaShell() {
   return (
     <BrowserRouter>
       <SpaNavigationBridge />
+      <FeedbackWidget />
       <Routes>
         <Route path="/" element={<DashboardApp />} />
         <Route path="/Index" element={<DashboardApp />} />

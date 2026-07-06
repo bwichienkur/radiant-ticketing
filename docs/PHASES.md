@@ -468,6 +468,15 @@ Guide: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md)
 - `.github/workflows/load-nightly.yml` + CI smoke job; results in `docs/LOAD_TEST_RESULTS.md`
 - Horizon 3 exit criteria marked **proven** in `docs/ROADMAP.md`
 
+## Phase 56 — Design partner program (complete)
+
+- `docs/DESIGN_PARTNER_PLAYBOOK.md` — 6-week cadence, roles, success metrics
+- `docs/CASE_STUDY_TEMPLATE.md` — anonymized partner case study template
+- `ProductFeedback` entity + `POST /web-api/spa/feedback` (NPS + comment per workflow)
+- React `FeedbackWidget` in SPA shell (bottom-right, workflow-aware)
+- `/Admin/Roi` extended with time-to-analysis, time-to-approval, mock AI %, pilot NPS
+- `docs/PRODUCT_SCORECARD.md` measured column filled from pilot #1 baselines
+
 ## Phases 46–57 — Due diligence execution (planned)
 
 Post-audit roadmap to reach world-class enterprise readiness. Full task breakdown: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md).
@@ -484,7 +493,7 @@ Post-audit roadmap to reach world-class enterprise readiness. Full task breakdow
 | 53 | Drift-to-request AI workflow | ✅ Complete |
 | 54 | Approval & intake copilot expansion | ✅ Complete |
 | 55 | Horizon 3 load test proof | ✅ Complete |
-| 56 | Design partner program |
+| 56 | Design partner program | ✅ Complete |
 | 57 | Enterprise hardening & procurement |
 
 ## Future enhancements

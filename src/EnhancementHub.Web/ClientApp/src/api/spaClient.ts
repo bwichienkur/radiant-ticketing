@@ -579,3 +579,15 @@ export async function rollbackProduction(
 export async function getPlatformRuntimeStatus(): Promise<PlatformRuntimeStatus> {
   return fetchJson<PlatformRuntimeStatus>('/web-api/spa/platform/runtime-status');
 }
+
+export interface SubmitProductFeedbackInput {
+  workflowKey: string;
+  npsScore: number;
+  comment?: string;
+}
+
+export async function submitProductFeedback(
+  input: SubmitProductFeedbackInput,
+): Promise<{ id: string; workflowKey: string; npsScore: number }> {
+  return postJson('/web-api/spa/feedback', input);
+}

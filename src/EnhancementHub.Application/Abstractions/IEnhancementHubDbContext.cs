@@ -70,6 +70,7 @@ public interface IEnhancementHubDbContext
     DbSet<NotificationPreference> NotificationPreferences { get; }
     DbSet<WebhookSubscription> WebhookSubscriptions { get; }
     DbSet<WebhookDelivery> WebhookDeliveries { get; }
+    DbSet<ProductFeedback> ProductFeedbacks { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

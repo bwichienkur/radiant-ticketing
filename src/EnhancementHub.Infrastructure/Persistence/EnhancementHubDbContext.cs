@@ -81,6 +81,7 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<NotificationPreference> NotificationPreferences => Set<NotificationPreference>();
     public DbSet<WebhookSubscription> WebhookSubscriptions => Set<WebhookSubscription>();
     public DbSet<WebhookDelivery> WebhookDeliveries => Set<WebhookDelivery>();
+    public DbSet<ProductFeedback> ProductFeedbacks => Set<ProductFeedback>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

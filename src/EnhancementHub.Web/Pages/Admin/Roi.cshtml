@@ -67,6 +67,37 @@ else
         </div>
     </div>
 
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="label">Avg time to analysis</div>
+                <div class="value fs-5">@(report.AverageTimeToAnalysisHours?.ToString("0.##") ?? "—") h</div>
+                <div class="small text-muted">Request submitted → first analysis</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="label">Avg time to approval</div>
+                <div class="value fs-5">@(report.AverageTimeToApprovalHours?.ToString("0.##") ?? "—") h</div>
+                <div class="small text-muted">Request submitted → approved</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="label">Mock AI runs</div>
+                <div class="value fs-5">@report.MockAiRunPercent%</div>
+                <div class="small text-muted">@report.TotalAiRunsCompleted completed run(s)</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="label">Pilot NPS</div>
+                <div class="value fs-5">@(report.AveragePilotNps?.ToString("0.#") ?? "—")</div>
+                <div class="small text-muted">@report.TotalFeedbackSubmissions in-product submission(s)</div>
+            </div>
+        </div>
+    </div>
+
     @if (report.TemplateUsageByCategory.Count > 0)
     {
         <div class="card-panel p-4">

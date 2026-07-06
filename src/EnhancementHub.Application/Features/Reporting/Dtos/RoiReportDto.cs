@@ -13,7 +13,13 @@ public sealed record RoiReportDto(
     int ArchitectEditsRecorded,
     int HumanApprovedFindings,
     int AiSuggestedFindings,
-    IReadOnlyList<RoiCategoryMetricDto> TemplateUsageByCategory);
+    IReadOnlyList<RoiCategoryMetricDto> TemplateUsageByCategory,
+    double? AverageTimeToAnalysisHours,
+    double? AverageTimeToApprovalHours,
+    double MockAiRunPercent,
+    int TotalAiRunsCompleted,
+    double? AveragePilotNps,
+    int TotalFeedbackSubmissions);
 
 public sealed record RoiCategoryMetricDto(
     string Category,
