@@ -655,6 +655,7 @@
             '/Spa/Documentation/Export',
             '/Spa/Refactor/Analyze',
             '/Spa/Refactor/Plans',
+            '/Spa/Settings',
         ];
 
         function isSpaPath(pathname) {

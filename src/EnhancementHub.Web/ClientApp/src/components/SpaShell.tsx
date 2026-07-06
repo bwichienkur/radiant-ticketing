@@ -28,6 +28,7 @@ import { DatabaseConnectionErdApp } from '../apps/DatabaseConnectionErdApp';
 import { DocumentationExportApp } from '../apps/DocumentationExportApp';
 import { RefactorAnalyzeApp } from '../apps/RefactorAnalyzeApp';
 import { RefactorPlansApp } from '../apps/RefactorPlansApp';
+import { SettingsApp } from '../apps/SettingsApp';
 import { FeedbackWidget } from './FeedbackWidget';
 import { MockAiTrustBanner } from './MockAiTrustBanner';
 import { readSpaContext } from '../spaRoutes';
@@ -150,6 +151,7 @@ export function SpaShell() {
         <Route path="/Spa/Documentation/Export" element={<DocumentationExportApp />} />
         <Route path="/Spa/Refactor/Analyze" element={<RefactorAnalyzeApp />} />
         <Route path="/Spa/Refactor/Plans" element={<RefactorPlansApp />} />
+        <Route path="/Spa/Settings/*" element={<SettingsApp />} />
         <Route path="*" element={<UnknownSpaRoute />} />
       </Routes>
     </BrowserRouter>

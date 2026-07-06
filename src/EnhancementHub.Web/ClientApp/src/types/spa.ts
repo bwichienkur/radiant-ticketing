@@ -608,3 +608,93 @@ export interface GlobalSearchResult {
   items: GlobalSearchItem[];
   groups: Record<string, GlobalSearchItem[]>;
 }
+
+export interface AuthenticationConfigurationStatus {
+  openIdConnectEnabled: boolean;
+  isProductionReady: boolean;
+  authority?: string;
+  clientId?: string;
+  clientSecretConfigured: boolean;
+  defaultRole?: string;
+  scopes: string[];
+  roleMappings: Array<{
+    source: string;
+    targetRole: string;
+    isValidTargetRole: boolean;
+    isGuidFormat: boolean;
+  }>;
+  issues: Array<{
+    severity: string;
+    message: string;
+  }>;
+}
+
+export interface SystemSetting {
+  id: string;
+  key: string;
+  value: string;
+  category: string;
+  description?: string;
+}
+
+export interface TeamSummary {
+  id: string;
+  name: string;
+  description?: string;
+  memberCount: number;
+  applicationCount: number;
+}
+
+export interface ServiceApiKeySummary {
+  id: string;
+  name: string;
+  description?: string;
+  keyPrefix: string;
+  role: string;
+  isActive: boolean;
+  expiresAt?: string;
+  lastUsedAt?: string;
+  createdAt: string;
+}
+
+export interface CreateServiceApiKeyResult {
+  id: string;
+  name: string;
+  apiKey: string;
+  keyPrefix: string;
+  role: string;
+  expiresAt?: string;
+}
+
+export interface WebhookSubscriptionSummary {
+  id: string;
+  name: string;
+  url: string;
+  secretPrefix: string;
+  eventTypes: string;
+  isActive: boolean;
+  createdAt: string;
+  lastDeliveryAt?: string;
+  failedDeliveryCount: number;
+}
+
+export interface CreateWebhookSubscriptionResult {
+  id: string;
+  name: string;
+  secret: string;
+  secretPrefix: string;
+  eventTypes: string;
+}
+
+export interface WebhookDeliverySummary {
+  id: string;
+  webhookSubscriptionId: string;
+  subscriptionName: string;
+  eventType: string;
+  status: string;
+  attemptCount: number;
+  httpStatusCode?: number;
+  lastError?: string;
+  createdAt: string;
+  deliveredAt?: string;
+}

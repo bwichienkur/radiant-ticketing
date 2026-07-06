@@ -543,6 +543,14 @@ Post-audit roadmap to reach world-class enterprise readiness. Full task breakdow
 - `MockAiTrustBanner` in `SpaShell.tsx`
 - `Phase62EnterpriseIntakeTests`
 
+## Phase 63 — Unified Admin Settings SPA (complete)
+
+- `SettingsApp.tsx` at `/Spa/Settings/*` with left-nav sections
+- Migrated: General, Authentication, API keys, Teams, Webhooks
+- `SpaSettingsController` BFF endpoints
+- Legacy admin pages redirect to SPA settings sections
+- `Phase63SettingsSpaTests`
+
 ## Roadmap to 85+ (active)
 
 Full plan: [ROADMAP_85.md](ROADMAP_85.md)
@@ -551,7 +559,7 @@ Full plan: [ROADMAP_85.md](ROADMAP_85.md)
 |-------|------|------|--------|
 | 61 | Shell unification (DB, Docs, Refactor → React) | 1 | Complete |
 | 62 | Enterprise intake + demo trust | 1 | Complete |
-| 63 | Unified Admin Settings SPA | 1 | Planned |
+| 63 | Unified Admin Settings SPA | 1 | Complete |
 | 64 | Design partner #2 + case study | 2 | Planned |
 | 65 | Executive ROI dashboard | 2 | Planned |
 | 66 | LLM approval copilot | 2 | Planned |

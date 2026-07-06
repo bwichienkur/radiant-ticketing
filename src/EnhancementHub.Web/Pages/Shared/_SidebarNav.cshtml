@@ -67,7 +67,7 @@
             </a>
             @if (User.IsInRole("Admin"))
             {
-                <a class="sidebar-link @(isAdmin ? "active" : "")" asp-page="/Admin/Settings">
+                <a class="sidebar-link @(NavActive("/Spa/Settings") ? "active" : "")" href="/Spa/Settings">
                     <span class="sidebar-icon"><partial name="_SidebarIcon" model='"admin"' /></span> Admin
                 </a>
             }

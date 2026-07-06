@@ -38,6 +38,14 @@ import type {
   RefactorPlanDetail,
   RegisterDatabaseConnectionInput,
   DocumentationExportFormat,
+  AuthenticationConfigurationStatus,
+  SystemSetting,
+  TeamSummary,
+  ServiceApiKeySummary,
+  CreateServiceApiKeyResult,
+  WebhookSubscriptionSummary,
+  CreateWebhookSubscriptionResult,
+  WebhookDeliverySummary,
   GlobalSearchItem,
   GlobalSearchResult,
   SystemMap,
@@ -55,6 +63,22 @@ async function fetchJson<T>(url: string): Promise<T> {
 async function postJson<T>(url: string, body?: unknown): Promise<T> {
   const response = await fetch(url, {
     method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorBody = (await response.json().catch(() => null)) as { message?: string } | null;
+    throw new Error(errorBody?.message ?? `Request failed: ${response.status}`);
+  }
+
+  return response.json() as Promise<T>;
+}
+
+async function putJson<T>(url: string, body?: unknown): Promise<T> {
+  const response = await fetch(url, {
+    method: 'PUT',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -150,6 +174,69 @@ export async function listRefactorPlans(): Promise<RefactorPlanSummary[]> {
 
 export async function getRefactorPlan(planId: string): Promise<RefactorPlanDetail> {
   return fetchJson<RefactorPlanDetail>(`/web-api/spa/refactor/plans/${planId}`);
+}
+
+export async function getAuthenticationConfigurationStatus(): Promise<AuthenticationConfigurationStatus> {
+  return fetchJson<AuthenticationConfigurationStatus>('/web-api/spa/settings/authentication');
+}
+
+export async function listSystemSettings(): Promise<SystemSetting[]> {
+  return fetchJson<SystemSetting[]>('/web-api/spa/settings/system');
+}
+
+export async function updateSystemSetting(settingId: string, value: string): Promise<void> {
+  await putJson(`/web-api/spa/settings/system/${settingId}`, { value });
+}
+
+export async function listAdminTeams(): Promise<TeamSummary[]> {
+  return fetchJson<TeamSummary[]>('/web-api/spa/settings/teams');
+}
+
+export async function createAdminTeam(name: string, description?: string): Promise<TeamSummary> {
+  return postJson<TeamSummary>('/web-api/spa/settings/teams', { name, description });
+}
+
+export async function listServiceApiKeys(): Promise<ServiceApiKeySummary[]> {
+  return fetchJson<ServiceApiKeySummary[]>('/web-api/spa/settings/api-keys');
+}
+
+export async function createServiceApiKey(input: {
+  name: string;
+  description?: string;
+  role: string;
+  teamId?: string;
+  expiresInDays?: number;
+}): Promise<CreateServiceApiKeyResult> {
+  return postJson<CreateServiceApiKeyResult>('/web-api/spa/settings/api-keys', input);
+}
+
+export async function revokeServiceApiKey(keyId: string): Promise<void> {
+  await postJson(`/web-api/spa/settings/api-keys/${keyId}/revoke`);
+}
+
+export async function listWebhookEventTypes(): Promise<string[]> {
+  const result = await fetchJson<{ eventTypes: string[] }>('/web-api/spa/settings/webhooks');
+  return result.eventTypes;
+}
+
+export async function listWebhookSubscriptions(): Promise<WebhookSubscriptionSummary[]> {
+  return fetchJson<WebhookSubscriptionSummary[]>('/web-api/spa/settings/webhooks/subscriptions');
+}
+
+export async function listWebhookDeliveries(): Promise<WebhookDeliverySummary[]> {
+  return fetchJson<WebhookDeliverySummary[]>('/web-api/spa/settings/webhooks/deliveries');
+}
+
+export async function createWebhookSubscription(input: {
+  name: string;
+  url: string;
+  eventTypes: string[];
+}): Promise<CreateWebhookSubscriptionResult> {
+  return postJson<CreateWebhookSubscriptionResult>('/web-api/spa/settings/webhooks/subscriptions', input);
+}
+
+export async function revokeWebhookSubscription(subscriptionId: string): Promise<void> {
+  await postJson(`/web-api/spa/settings/webhooks/subscriptions/${subscriptionId}/revoke`);
 }
 
 export async function listDriftConnections(): Promise<DatabaseConnectionSummary[]> {

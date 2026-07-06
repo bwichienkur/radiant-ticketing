@@ -17,6 +17,7 @@ export const SPA_PREFIXES = [
   '/Spa/Documentation/Export',
   '/Spa/Refactor/Analyze',
   '/Spa/Refactor/Plans',
+  '/Spa/Settings',
 ];
 
 export function isSpaPath(pathname: string): boolean {
