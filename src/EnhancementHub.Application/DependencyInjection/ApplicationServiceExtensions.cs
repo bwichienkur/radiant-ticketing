@@ -1,5 +1,6 @@
 using System.Reflection;
 using EnhancementHub.Application.Common.Behaviors;
+using EnhancementHub.Application.Features.Delivery.Commands;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,7 @@ public static class ApplicationServiceExtensions
 
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
+        services.AddScoped<IDeliveryApprovalHook, DeliveryApprovalHook>();
 
         return services;
     }

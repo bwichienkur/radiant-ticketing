@@ -35,11 +35,11 @@ Secrets are **references** (`kv://…`, `secret://…`), never raw connection st
 
 ### Request — what happened (Phase B+)
 
-| Entity (planned) | Purpose |
-|------------------|---------|
+| Entity | Purpose |
+|--------|---------|
 | `EnhancementDeliveryRun` | Branch, PR, deploy IDs, QA run, video URL, UAT sign-off, prod schedule |
 
-## End-to-end status flow (planned)
+## End-to-end status flow (shipped)
 
 ```text
 Approved → Implementing → InTest → QaInProgress → AwaitingUat
@@ -70,13 +70,13 @@ Gates: approval → QA evidence → requester UAT → change window (optional se
 
 **Goal:** On `Approved` (or manual trigger), code agent creates branch + PR from analysis/refactor plan.
 
-| Deliverable | Notes |
-|-------------|-------|
-| `EnhancementDeliveryRun` entity + status enum extension | Versioned runs per request |
-| `IDeliveryOrchestrationService` + Hangfire job | Idempotent steps |
-| GitHub App: create branch, commit, open PR | Extend existing repo integration |
-| Policy: `RequirePullRequestReview` from tenant profile | No auto-merge in v1 |
-| Request detail UI: implementation timeline | Link to PR |
+| Deliverable | Status |
+|-------------|--------|
+| `EnhancementDeliveryRun` entity + status enum extension | Done |
+| `IDeliveryOrchestrationService` + Hangfire job | Done |
+| GitHub App: create branch, commit, open PR | Done (simulated when App not configured) |
+| Policy: `RequirePullRequestReview` from tenant profile | Done |
+| Request detail UI: implementation timeline | Done (`DeliveryRunPanel`) |
 
 **Exit criteria:** Approved demo request gets a linked PR; audit log records branch name.
 
@@ -84,13 +84,13 @@ Gates: approval → QA evidence → requester UAT → change window (optional se
 
 **Goal:** Invoke customer CI/CD to deploy to Test environment.
 
-| Deliverable | Notes |
-|-------------|-------|
-| `IDeploymentAdapter` interface | `DeployAsync(DeploymentContext)` |
-| `GitHubActionsDeploymentAdapter` | `workflow_dispatch` with env + config bundle |
-| `WebhookDeploymentAdapter` | Generic POST for custom CI |
-| Config bundle builder | Merges transforms + vault-resolved connection refs for target env |
-| Azure App Service adapter (optional) | Slot deploy for .NET ICP |
+| Deliverable | Status |
+|-------------|--------|
+| `IDeploymentAdapter` interface | Done |
+| `GitHubActionsDeploymentAdapter` | Done (`workflow_dispatch` + simulation fallback) |
+| `WebhookDeploymentAdapter` | Done |
+| Config bundle builder | Done |
+| Azure App Service adapter (optional) | Deferred |
 
 **Exit criteria:** Test deploy triggered via GitHub Actions sample workflow; `testUrl` stored on delivery run.
 
@@ -98,12 +98,12 @@ Gates: approval → QA evidence → requester UAT → change window (optional se
 
 **Goal:** Playwright tests from analysis `TestingPlan`; store step list + video.
 
-| Deliverable | Notes |
-|-------------|-------|
-| QA script generator from analysis | Structured steps |
-| Playwright runner in Worker | `recordVideo` against `testUrl` |
-| Artifact store (S3/blob) | Tenant-scoped retention from `QaVideoRetentionDays` |
-| Request UI: QA report + video | Before UAT |
+| Deliverable | Status |
+|-------------|--------|
+| QA script generator from analysis | Done (structured steps from testing plan) |
+| Playwright runner in Worker | Simulated HTML walkthrough artifact (real Playwright in follow-up) |
+| Artifact store (S3/blob) | Done via `IFileStorageService` (local/S3) |
+| Request UI: QA report + video | Done |
 
 **Exit criteria:** Demo request shows pass/fail steps and playable video after test deploy.
 
@@ -111,13 +111,13 @@ Gates: approval → QA evidence → requester UAT → change window (optional se
 
 **Goal:** Requester sign-off; prod deploy respects change windows.
 
-| Deliverable | Notes |
-|-------------|-------|
-| UAT portal for requester | Checklist from `desiredOutcome` |
-| `RequireUatSignoff` enforcement | Blocks prod until signed |
-| Change window scheduler | `ProdScheduled` until window opens |
-| Prod deploy via same adapters | `environmentType = Production` |
-| Optional re-approval for prod | Tenant policy |
+| Deliverable | Status |
+|-------------|--------|
+| UAT portal for requester | Done (Request Detail `DeliveryRunPanel`) |
+| `RequireUatSignoff` enforcement | Done |
+| Change window scheduler | Done (`ChangeWindowEvaluator`) |
+| Prod deploy via same adapters | Done |
+| Optional re-approval for prod | Tenant policy hooks ready |
 
 **Exit criteria:** Full demo path from approval → test → QA → UAT → scheduled prod (sandbox).
 
@@ -175,7 +175,7 @@ Gates: approval → QA evidence → requester UAT → change window (optional se
 - All stages write to audit log + `EnhancementDeliveryRun` timeline.
 - v1: single primary repo per request; multi-repo coordination in a later phase.
 
-## API reference (Phase A)
+## API reference (Phase A–E)
 
 | Method | Route | Role |
 |--------|-------|------|
@@ -187,6 +187,11 @@ Gates: approval → QA evidence → requester UAT → change window (optional se
 | GET | `/web-api/spa/delivery/applications/{id}/profile` | Authenticated |
 | PUT | `/web-api/spa/delivery/applications/{id}/profile` | Authenticated |
 | POST | `/web-api/spa/delivery/applications/{id}/profile/validate` | Authenticated |
+| GET | `/web-api/spa/delivery/requests/{requestId}/run` | Authenticated |
+| POST | `/web-api/spa/delivery/requests/{requestId}/start` | Authenticated |
+| POST | `/web-api/spa/delivery/requests/{requestId}/advance-pr` | Authenticated |
+| POST | `/web-api/spa/delivery/requests/{requestId}/uat` | Authenticated |
+| GET | `/web-api/spa/delivery/requests/{requestId}/artifacts/{kind}` | Authenticated |
 
 ## Related docs
 

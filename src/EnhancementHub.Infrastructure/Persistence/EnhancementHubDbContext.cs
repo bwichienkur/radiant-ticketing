@@ -71,6 +71,7 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<TenantDeliveryProfile> TenantDeliveryProfiles => Set<TenantDeliveryProfile>();
     public DbSet<TenantDeploymentEnvironment> TenantDeploymentEnvironments => Set<TenantDeploymentEnvironment>();
     public DbSet<ApplicationDeliveryProfile> ApplicationDeliveryProfiles => Set<ApplicationDeliveryProfile>();
+    public DbSet<EnhancementDeliveryRun> EnhancementDeliveryRuns => Set<EnhancementDeliveryRun>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

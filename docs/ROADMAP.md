@@ -180,10 +180,10 @@ See [FINOPS_INFRASTRUCTURE_ROADMAP.md](FINOPS_INFRASTRUCTURE_ROADMAP.md).
 
 ### 4.6 Delivery automation (Phase 41+)
 - [x] Tenant + application delivery profiles and environment registry (Phase A)
-- [ ] Implement on approval: branch + PR from analysis (Phase B)
-- [ ] Test deploy adapters (GitHub Actions, webhook) (Phase C)
-- [ ] Automated QA + video evidence (Phase D)
-- [ ] Requester UAT + production scheduling (Phase E)
+- [x] Implement on approval: branch + PR from analysis (Phase B)
+- [x] Test deploy adapters (GitHub Actions, webhook) (Phase C)
+- [x] Automated QA + video evidence (Phase D)
+- [x] Requester UAT + production scheduling (Phase E)
 
 See [DELIVERY_AUTOMATION_ROADMAP.md](DELIVERY_AUTOMATION_ROADMAP.md).
 

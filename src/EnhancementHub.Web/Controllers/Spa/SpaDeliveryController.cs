@@ -1,3 +1,4 @@
+using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Features.Delivery.Commands;
 using EnhancementHub.Application.Features.Delivery.Queries;
 using EnhancementHub.Domain.Enums;
@@ -13,8 +14,13 @@ namespace EnhancementHub.Web.Controllers.Spa;
 public sealed class SpaDeliveryController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IFileStorageService _fileStorage;
 
-    public SpaDeliveryController(IMediator mediator) => _mediator = mediator;
+    public SpaDeliveryController(IMediator mediator, IFileStorageService fileStorage)
+    {
+        _mediator = mediator;
+        _fileStorage = fileStorage;
+    }
 
     [HttpGet("tenant-profile")]
     [Authorize(Roles = "Admin")]
@@ -102,6 +108,40 @@ public sealed class SpaDeliveryController : ControllerBase
         Guid applicationId,
         CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new ValidateApplicationDeliveryProfileQuery(applicationId), cancellationToken));
+
+    public async Task<IActionResult> GetDeliveryRun(Guid requestId, CancellationToken cancellationToken)
+    {
+        var run = await _mediator.Send(new GetDeliveryRunQuery(requestId), cancellationToken);
+        return run is null ? NotFound() : Ok(run);
+    }
+
+    [HttpPost("requests/{requestId:guid}/start")]
+    public async Task<IActionResult> StartDeliveryRun(Guid requestId, CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new StartDeliveryRunCommand(requestId), cancellationToken));
+
+    [HttpPost("requests/{requestId:guid}/advance-pr")]
+    public async Task<IActionResult> AdvancePastPullRequest(Guid requestId, CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new AdvanceDeliveryPastPrCommand(requestId), cancellationToken));
+
+    [HttpPost("requests/{requestId:guid}/uat")]
+    public async Task<IActionResult> SignUat(
+        Guid requestId,
+        [FromBody] SpaUatSignoffRequest request,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new SignUatCommand(requestId, request.Approved, request.Notes), cancellationToken));
+
+    [HttpGet("artifacts")]
+    public async Task<IActionResult> GetArtifact([FromQuery] string path, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(path) || path.Contains("..", StringComparison.Ordinal))
+        {
+            return BadRequest();
+        }
+
+        var stream = await _fileStorage.OpenReadAsync(path, cancellationToken);
+        var contentType = path.EndsWith(".html", StringComparison.OrdinalIgnoreCase) ? "text/html" : "application/octet-stream";
+        return File(stream, contentType);
+    }
 }
 
 public sealed record SpaTenantDeliveryProfileRequest(
@@ -136,3 +176,5 @@ public sealed record SpaApplicationDeliveryProfileRequest(
     bool RequiresHumanProdDeploy,
     string? ConfigTransformsJson,
     string? ConnectionMappingsJson);
+
+public sealed record SpaUatSignoffRequest(bool Approved, string? Notes);

@@ -291,3 +291,39 @@ export interface IntakeCopilotTurnResponse {
   isComplete: boolean;
   usedMockAi: boolean;
 }
+
+export interface DeliveryTimelineEvent {
+  occurredAt: string;
+  message: string;
+}
+
+export interface QaTestStep {
+  step: string;
+  passed: boolean;
+  detail: string;
+}
+
+export interface EnhancementDeliveryRun {
+  id: string;
+  enhancementRequestId: string;
+  runNumber: number;
+  phase: string;
+  isSimulation: boolean;
+  branchName?: string;
+  pullRequestUrl?: string;
+  pullRequestNumber?: number;
+  testUrl?: string;
+  testDeployReference?: string;
+  qaSteps: QaTestStep[];
+  qaPassed?: boolean;
+  qaVideoUrl?: string;
+  qaReportUrl?: string;
+  uatApproved: boolean;
+  uatSignedOffAt?: string;
+  uatNotes?: string;
+  prodScheduledAt?: string;
+  prodDeployReference?: string;
+  prodDeployedAt?: string;
+  timeline: DeliveryTimelineEvent[];
+  lastError?: string;
+}

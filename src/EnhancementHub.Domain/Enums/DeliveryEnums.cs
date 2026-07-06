@@ -34,3 +34,18 @@ public enum DatabaseMigrationStrategy
     Flyway = 2,
     Manual = 3
 }
+
+public enum DeliveryRunPhase
+{
+    Pending,
+    Implementing,
+    AwaitingPullRequestReview,
+    DeployingToTest,
+    RunningQa,
+    AwaitingUat,
+    UatApproved,
+    ProdScheduled,
+    DeployingToProduction,
+    Completed,
+    Failed
+}

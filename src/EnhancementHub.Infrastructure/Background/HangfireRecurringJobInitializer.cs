@@ -49,6 +49,11 @@ public sealed class HangfireRecurringJobInitializer : IHostedService
             executor => executor.ExecuteAsync(CancellationToken.None),
             "0 */6 * * *");
 
+        RecurringJob.AddOrUpdate<DeliveryOrchestrationJobExecutor>(
+            "delivery-orchestration",
+            executor => executor.ExecuteAsync(CancellationToken.None),
+            "*/1 * * * *");
+
         _logger.LogInformation("Hangfire recurring jobs registered.");
         return Task.CompletedTask;
     }

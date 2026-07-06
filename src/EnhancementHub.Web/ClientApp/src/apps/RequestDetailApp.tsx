@@ -6,6 +6,7 @@ import {
   postRequestComment,
 } from '../api/spaClient';
 import { AnalysisDetailSections, AnalysisSummaryBanner } from '../components/AnalysisDetailSections';
+import { DeliveryRunPanel } from '../components/DeliveryRunPanel';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { MissionControl } from '../components/MissionControl';
 import { useRequestCollaboration } from '../hooks/useRequestCollaboration';
@@ -192,6 +193,12 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
 
       <div className="row g-4">
         <div className="col-lg-8">
+          <DeliveryRunPanel
+            requestId={requestId}
+            requestStatus={detail.status}
+            desiredOutcome={detail.desiredOutcome}
+          />
+
           <section className="card-panel p-4 mb-3">
             <h2 className="h6 text-muted text-uppercase">Your original request</h2>
             <p className="mb-2">

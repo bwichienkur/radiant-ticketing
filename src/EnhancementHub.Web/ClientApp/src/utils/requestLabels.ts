@@ -9,6 +9,13 @@ const STATUS_BY_VALUE: Record<number, string> = {
   7: 'InProgress',
   8: 'Completed',
   9: 'Cancelled',
+  10: 'Implementing',
+  11: 'InTest',
+  12: 'QaInProgress',
+  13: 'AwaitingUat',
+  14: 'UatApproved',
+  15: 'ProdScheduled',
+  16: 'DeployingToProduction',
 };
 
 const STATUS_LABELS: Record<string, string> = {
@@ -23,6 +30,13 @@ const STATUS_LABELS: Record<string, string> = {
   InProgress: 'In progress',
   Completed: 'Completed',
   Cancelled: 'Cancelled',
+  Implementing: 'Building the change',
+  InTest: 'Deployed to test',
+  QaInProgress: 'Running automated QA',
+  AwaitingUat: 'Waiting for your acceptance',
+  UatApproved: 'Accepted — scheduling production',
+  ProdScheduled: 'Production deploy scheduled',
+  DeployingToProduction: 'Deploying to production',
 };
 
 const STATUS_NEXT_STEP: Record<string, string> = {
@@ -37,6 +51,13 @@ const STATUS_NEXT_STEP: Record<string, string> = {
   InProgress: 'Work on this change is underway.',
   Completed: 'This change has been completed.',
   Cancelled: 'This request was cancelled.',
+  Implementing: 'We are creating a branch and pull request for this change.',
+  InTest: 'The change is live in your test environment.',
+  QaInProgress: 'Automated tests are running against the test environment.',
+  AwaitingUat: 'Please review the test environment and approve when ready.',
+  UatApproved: 'You approved the change. Production deploy is being scheduled.',
+  ProdScheduled: 'Production deploy is scheduled for the next change window.',
+  DeployingToProduction: 'Production deployment is in progress.',
 };
 
 const APPROVAL_ACTION_LABELS: Record<string, string> = {
