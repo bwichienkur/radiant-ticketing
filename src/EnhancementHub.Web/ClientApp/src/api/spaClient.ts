@@ -26,6 +26,8 @@ import type {
   PlatformRuntimeStatus,
   RepositoryPathValidation,
   RepositoryListItem,
+  GlobalSearchItem,
+  GlobalSearchResult,
   SystemMap,
 } from '../types/spa';
 
@@ -335,6 +337,18 @@ export function getOnboardingExportDocsUrl(sessionId: string): string {
 
 export async function getDashboard(): Promise<DashboardPageData> {
   return fetchJson('/web-api/spa/dashboard');
+}
+
+export async function searchGlobal(query: string, limit = 20): Promise<GlobalSearchItem[]> {
+  return fetchJson<GlobalSearchItem[]>(
+    `/web-api/spa/search?q=${encodeURIComponent(query)}&limit=${limit}`,
+  );
+}
+
+export async function searchGlobalGrouped(query: string, limit = 20): Promise<GlobalSearchResult> {
+  return fetchJson<GlobalSearchResult>(
+    `/web-api/spa/search?q=${encodeURIComponent(query)}&grouped=true&limit=${limit}`,
+  );
 }
 
 export async function searchPipeline(query: string): Promise<

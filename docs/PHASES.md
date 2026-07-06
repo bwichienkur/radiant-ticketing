@@ -427,6 +427,14 @@ Guide: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md)
 - `/Account/NotificationPreferences` for per-category email/in-app opt-out
 - Hooks: `PendingApproval` (approvers + submitter), critical schema drift
 
+## Phase 51 — Global entity search (complete)
+
+- `GET /web-api/spa/search?q=` — unified keyword + vector search across requests, apps, repos, drift, symbols, artifacts
+- `GlobalEntitySearchQuery` MediatR handler with tenant/access filters
+- `SearchApp` at `/Spa/Search` with grouped results UI
+- Command palette (`Ctrl+K`) uses SPA search API with recent searches
+- `UxController` search delegates to unified query; demo indexed `CancelOrder` symbol seeded
+
 ## Phases 46–57 — Due diligence execution (planned)
 
 Post-audit roadmap to reach world-class enterprise readiness. Full task breakdown: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md).

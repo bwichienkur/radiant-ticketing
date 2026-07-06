@@ -1,4 +1,4 @@
-using EnhancementHub.Application.Features.Applications.Queries;
+using EnhancementHub.Application.Features.Search.Queries;
 using EnhancementHub.Application.Features.EnhancementRequests.Queries;
 using EnhancementHub.Domain.Enums;
 using MediatR;
@@ -19,43 +19,8 @@ public sealed class UxController : ControllerBase
     [HttpGet("search")]
     public async Task<IActionResult> Search([FromQuery] string q, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(q))
-        {
-            return Ok(Array.Empty<object>());
-        }
-
-        var term = q.Trim();
-        var requests = (await _mediator.Send(
-            new ListEnhancementRequestsQuery(Search: term),
-            cancellationToken)).Items;
-
-        var apps = await _mediator.Send(new ListApplicationsQuery(), cancellationToken);
-        var appMatches = apps
-            .Where(a => a.Name.Contains(term, StringComparison.OrdinalIgnoreCase))
-            .Take(5)
-            .Select(a => new
-            {
-                type = "application",
-                title = a.Name,
-                subtitle = a.BusinessDomain ?? "Application",
-                url = "/Spa/Applications"
-            });
-
-        var requestMatches = requests.Take(8).Select(r => new
-        {
-            type = "request",
-            title = r.Title,
-            subtitle = $"{r.Status} · {r.Priority}",
-            url = $"/Spa/RequestDetail/{r.Id}"
-        }).ToList();
-
-        var pages = GetStaticPages()
-            .Where(p => p.title.Contains(term, StringComparison.OrdinalIgnoreCase)
-                        || p.keywords.Any(k => k.Contains(term, StringComparison.OrdinalIgnoreCase)))
-            .Take(5)
-            .Select(p => new { type = "page", p.title, subtitle = "Navigate", url = p.url });
-
-        return Ok(pages.Concat(requestMatches).Concat(appMatches).Take(12));
+        var result = await _mediator.Send(new GlobalEntitySearchQuery(q), cancellationToken);
+        return Ok(result.Items);
     }
 
     [HttpGet("copilot")]
@@ -104,20 +69,4 @@ public sealed class UxController : ControllerBase
 
         return Ok(new { answer, items = results });
     }
-
-    private static IEnumerable<(string title, string url, string[] keywords)> GetStaticPages() =>
-    [
-        ("Dashboard", "/Index", ["home", "overview", "metrics"]),
-        ("Enhancement Requests", "/Spa/RequestList", ["requests", "intake"]),
-        ("Approval Queue", "/Spa/ApprovalQueue", ["approve", "pending"]),
-        ("New Request", "/Spa/CreateRequest", ["create", "submit"]),
-        ("System Map", "/Spa/SystemMap", ["graph", "architecture", "map"]),
-        ("Onboarding Wizard", "/Spa/OnboardingWizard", ["setup", "onboard", "wizard"]),
-        ("Applications", "/Spa/Applications", ["applications", "systems"]),
-        ("Repositories", "/Spa/Repositories", ["repos", "git", "index"]),
-        ("Audit Log", "/Spa/Audit", ["audit", "compliance", "history"]),
-        ("Schema Drift", "/Spa/SchemaDrift", ["drift", "schema"]),
-        ("ROI Dashboard", "/Admin/Roi", ["roi", "metrics", "admin"]),
-        ("Tenancy & Billing", "/Admin/Tenancy", ["tenant", "billing", "commercial"])
-    ];
 }

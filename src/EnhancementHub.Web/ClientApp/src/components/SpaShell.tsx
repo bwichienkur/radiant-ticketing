@@ -20,6 +20,7 @@ import { ApplicationsApp } from '../apps/ApplicationsApp';
 import { SchemaDriftApp } from '../apps/SchemaDriftApp';
 import { RepositoriesApp } from '../apps/RepositoriesApp';
 import { AuditApp } from '../apps/AuditApp';
+import { SearchApp } from '../apps/SearchApp';
 import { readSpaContext } from '../spaRoutes';
 
 function RequestListRoute() {
@@ -103,6 +104,7 @@ export function SpaShell() {
         <Route path="/Spa/SchemaDrift" element={<SchemaDriftApp />} />
         <Route path="/Spa/Repositories" element={<RepositoriesApp />} />
         <Route path="/Spa/Audit" element={<AuditApp />} />
+        <Route path="/Spa/Search" element={<SearchApp />} />
         <Route path="*" element={<UnknownSpaRoute />} />
       </Routes>
     </BrowserRouter>

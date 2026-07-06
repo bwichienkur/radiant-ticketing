@@ -230,6 +230,8 @@
             .replace(/>/g, '&gt;');
     }
 
+    const STORAGE_RECENT_SEARCHES = 'eh-recent-searches';
+
     const commandPages = [
         { title: 'Dashboard', url: '/Index', keys: ['home', 'dashboard'] },
         { title: 'New Request', url: '/Spa/CreateRequest', keys: ['new', 'create'] },
@@ -237,11 +239,41 @@
         { title: 'Approval Queue', url: '/Spa/ApprovalQueue', keys: ['approve', 'approval'] },
         { title: 'System Map', url: '/Spa/SystemMap', keys: ['map', 'graph'] },
         { title: 'Onboarding', url: '/Spa/OnboardingWizard', keys: ['setup', 'wizard'] },
-        { title: 'Applications', url: '/Applications/Index', keys: ['apps'] },
-        { title: 'Schema Drift', url: '/SchemaDrift/Index', keys: ['drift'] },
+        { title: 'Applications', url: '/Spa/Applications', keys: ['apps', 'applications'] },
+        { title: 'Repositories', url: '/Spa/Repositories', keys: ['repos', 'git'] },
+        { title: 'Schema Drift', url: '/Spa/SchemaDrift', keys: ['drift', 'schema'] },
+        { title: 'Global Search', url: '/Spa/Search', keys: ['search', 'find'] },
         { title: 'Admin Settings', url: '/Admin/Settings', keys: ['admin', 'settings'] },
         { title: 'Tenancy & Billing', url: '/Admin/Tenancy', keys: ['tenant', 'billing'] }
     ];
+
+    function loadRecentSearches() {
+        try {
+            return JSON.parse(localStorage.getItem(STORAGE_RECENT_SEARCHES) || '[]');
+        } catch {
+            return [];
+        }
+    }
+
+    function saveRecentSearch(query) {
+        const trimmed = query.trim();
+        if (trimmed.length < 2) {
+            return;
+        }
+
+        const recent = [trimmed, ...loadRecentSearches().filter(item => item.toLowerCase() !== trimmed.toLowerCase())]
+            .slice(0, 5);
+        localStorage.setItem(STORAGE_RECENT_SEARCHES, JSON.stringify(recent));
+    }
+
+    function recentSearchResults() {
+        return loadRecentSearches().map(term => ({
+            type: 'recent',
+            title: term,
+            subtitle: 'Recent search',
+            url: `/Spa/Search?q=${encodeURIComponent(term)}`
+        }));
+    }
 
     function initCommandPalette() {
         const modal = document.getElementById('commandPalette');
@@ -269,7 +301,7 @@
             links[activeIndex].scrollIntoView({ block: 'nearest' });
         }
 
-        function renderResults(items) {
+        function renderResults(items, footerHtml = '') {
             if (items.length === 0) {
                 results.innerHTML = '<p class="text-muted small px-3 py-2 mb-0">No results</p>';
                 activeIndex = 0;
@@ -280,7 +312,7 @@
                     <span class="command-result-type">${escapeHtml(item.type ?? 'page')}</span>
                     <span class="command-result-title">${escapeHtml(item.title)}</span>
                     <span class="command-result-sub">${escapeHtml(item.subtitle ?? '')}</span>
-                </a>`).join('');
+                </a>`).join('') + footerHtml;
             activeIndex = 0;
         }
 
@@ -294,7 +326,12 @@
 
         function openPalette() {
             input.value = '';
-            renderResults(commandPages.map(p => ({ type: 'page', title: p.title, subtitle: 'Navigate', url: p.url })));
+            const recent = recentSearchResults();
+            if (recent.length > 0) {
+                renderResults(recent);
+            } else {
+                renderResults(commandPages.map(p => ({ type: 'page', title: p.title, subtitle: 'Navigate', url: p.url })));
+            }
             bsModal.show();
             setTimeout(() => input.focus(), 100);
         }
@@ -315,8 +352,15 @@
                     return;
                 }
                 try {
-                    const res = await fetch(`/web-api/ux/search?q=${encodeURIComponent(q)}`);
-                    if (res.ok) renderResults(await res.json());
+                    const res = await fetch(`/web-api/spa/search?q=${encodeURIComponent(q)}`);
+                    if (res.ok) {
+                        const items = await res.json();
+                        saveRecentSearch(q);
+                        const footer = items.length > 0
+                            ? `<div class="border-top px-3 py-2"><a href="/Spa/Search?q=${encodeURIComponent(q)}" class="small">View all grouped results</a></div>`
+                            : '';
+                        renderResults(items, footer);
+                    }
                 } catch {
                     renderResults(localSearch(q));
                 }
@@ -607,6 +651,7 @@
             '/Spa/SchemaDrift',
             '/Spa/Repositories',
             '/Spa/Audit',
+            '/Spa/Search',
         ];
 
         function isSpaPath(pathname) {

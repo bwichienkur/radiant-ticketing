@@ -55,7 +55,7 @@ public class NotificationPreferencesModel : PageModel
             .Select(p => new UpdateNotificationPreferenceInput(p.Type, p.EmailEnabled, p.InAppEnabled))
             .ToList();
 
-        Preferences = await _notificationService.UpdatePreferencesAsync(userId, updates, cancellationToken);
+        await _notificationService.UpdatePreferencesAsync(userId, updates, cancellationToken);
         TempData["StatusMessage"] = "Notification preferences saved.";
         return RedirectToPage();
     }

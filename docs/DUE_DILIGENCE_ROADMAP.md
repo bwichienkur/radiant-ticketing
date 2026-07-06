@@ -180,14 +180,14 @@ Migrate high-traffic Intelligence pages into `SpaShell.tsx` routes. Order by tra
 
 **Exit criteria:** Approver receives in-app + email when request enters `PendingApproval`.
 
-### Phase 51 — Global entity search
+### Phase 51 — Global entity search (complete)
 
-| # | Task | Files / location | Acceptance criteria |
-|---|------|------------------|---------------------|
-| 51.1 | Unified search API | `GET /web-api/spa/search?q=` | Returns requests, applications, repos, drift findings |
-| 51.2 | Extend command palette | `site.js` + optional `CommandPaletteApp.tsx` | Keyboard nav; recent items |
-| 51.3 | Search results UI | Modal or dedicated `/Spa/Search` | Grouped by entity type |
-| 51.4 | Leverage hybrid vector search | `IVectorSearchService` | Semantic matches on indexed artifacts |
+| # | Task | Status |
+|---|------|--------|
+| 51.1 | Unified search API `GET /web-api/spa/search?q=` | Done |
+| 51.2 | Extend command palette (`site.js`) | Done |
+| 51.3 | Search results UI (`/Spa/Search`) | Done |
+| 51.4 | Hybrid vector search via `IVectorSearchService` | Done |
 
 **Exit criteria:** `Ctrl+K` → "order cancellation" finds request, app, and related repo symbols.
 

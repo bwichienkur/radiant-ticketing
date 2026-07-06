@@ -423,3 +423,17 @@ export interface EnhancementDeliveryRun {
   timeline: DeliveryTimelineEvent[];
   lastError?: string;
 }
+
+export interface GlobalSearchItem {
+  type: string;
+  title: string;
+  subtitle?: string;
+  url: string;
+  score?: number;
+}
+
+export interface GlobalSearchResult {
+  query: string;
+  items: GlobalSearchItem[];
+  groups: Record<string, GlobalSearchItem[]>;
+}

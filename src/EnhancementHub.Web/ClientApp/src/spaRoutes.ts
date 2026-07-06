@@ -12,6 +12,7 @@ export const SPA_PREFIXES = [
   '/Spa/SchemaDrift',
   '/Spa/Repositories',
   '/Spa/Audit',
+  '/Spa/Search',
 ];
 
 export function isSpaPath(pathname: string): boolean {

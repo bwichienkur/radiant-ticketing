@@ -15,6 +15,8 @@ public static class DevDataSeeder
 
     public static readonly Guid DemoRequestId = Guid.Parse("279c38dc-8da4-400b-828f-711726210eb6");
     public static readonly Guid DemoApplicationId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+    public static readonly Guid DemoRepositoryId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+    public static readonly Guid DemoRepositoryBranchId = Guid.Parse("77777777-7777-7777-7777-777777777777");
     public static readonly Guid DemoTeamId = Guid.Parse("22222222-2222-2222-2222-222222222222");
     public static readonly Guid DemoAdminUserId = Guid.Parse("11111111-1111-1111-1111-111111111111");
     public static readonly Guid DefaultTenantId = Guid.Parse("99999999-9999-9999-9999-999999999999");
@@ -291,6 +293,74 @@ public static class DevDataSeeder
         }
 
         await SeedDemoSystemGraphAsync(db, logger, cancellationToken);
+        await SeedDemoSearchArtifactsAsync(db, logger, cancellationToken);
+    }
+
+    private static async Task SeedDemoSearchArtifactsAsync(
+        IEnhancementHubDbContext db,
+        ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        if (await db.IndexedSymbols.AnyAsync(symbol => symbol.SymbolName == "CancelOrder", cancellationToken))
+        {
+            return;
+        }
+
+        if (!await db.Repositories.AnyAsync(repo => repo.Id == DemoRepositoryId, cancellationToken))
+        {
+            return;
+        }
+
+        logger.LogInformation("Seeding demo indexed symbols for global search.");
+
+        var now = DateTime.UtcNow;
+        if (!await db.RepositoryBranches.AnyAsync(branch => branch.Id == DemoRepositoryBranchId, cancellationToken))
+        {
+            db.RepositoryBranches.Add(new RepositoryBranch
+            {
+                Id = DemoRepositoryBranchId,
+                RepositoryId = DemoRepositoryId,
+                BranchName = "main",
+                LastIndexedAt = now,
+                CreatedAt = now,
+                UpdatedAt = now
+            });
+        }
+
+        var indexedFileId = Guid.Parse("88888888-8888-8888-8888-888888888888");
+        if (!await db.IndexedFiles.AnyAsync(file => file.Id == indexedFileId, cancellationToken))
+        {
+            db.IndexedFiles.Add(new IndexedFile
+            {
+                Id = indexedFileId,
+                RepositoryId = DemoRepositoryId,
+                BranchId = DemoRepositoryBranchId,
+                FilePath = "src/Orders/OrderCancellationService.cs",
+                Language = "csharp",
+                FileType = ".cs",
+                ComponentType = ComponentType.Service,
+                ClassName = "OrderCancellationService",
+                Summary = "Handles order cancellation workflow and reason capture.",
+                LastIndexedAt = now,
+                CreatedAt = now,
+                UpdatedAt = now
+            });
+        }
+
+        db.IndexedSymbols.Add(new IndexedSymbol
+        {
+            Id = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+            IndexedFileId = indexedFileId,
+            SymbolName = "CancelOrder",
+            SymbolKind = "Method",
+            Summary = "Cancels an order and records the cancellation reason for compliance reporting.",
+            LineStart = 42,
+            LineEnd = 78,
+            CreatedAt = now,
+            UpdatedAt = now
+        });
+
+        await db.SaveChangesAsync(cancellationToken);
     }
 
     private static async Task EnsureDevAdminCredentialsAsync(
@@ -326,7 +396,7 @@ public static class DevDataSeeder
 
         logger.LogInformation("Seeding demo system graph nodes.");
         var now = DateTime.UtcNow;
-        var repositoryId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+        var repositoryId = DemoRepositoryId;
 
         var appNodeId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
         var repoNodeId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
@@ -433,7 +503,7 @@ public static class DevDataSeeder
 
         var teamId = DemoTeamId;
         var applicationId = DemoApplicationId;
-        var repositoryId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+        var repositoryId = DemoRepositoryId;
         var now = DateTime.UtcNow;
 
         db.Teams.Add(new Team
@@ -572,7 +642,7 @@ public static class DevDataSeeder
                 UpdatedAt = now,
             });
 
-        var repositoryId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+        var repositoryId = DemoRepositoryId;
         db.ApplicationDeliveryProfiles.Add(new ApplicationDeliveryProfile
         {
             Id = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"),
