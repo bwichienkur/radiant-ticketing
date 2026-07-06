@@ -62,6 +62,10 @@ export function OnboardingCodeStep({
   return (
     <div>
       <h2 className="h4 mb-3">Step 2 — Connect code</h2>
+      <div className="alert alert-light border small mb-3" role="note">
+        <strong>Usually done by IT:</strong> Connecting source code helps us understand how systems
+        relate to each other. Ask your IT team if you are unsure which option to use.
+      </div>
       <div className="btn-group mb-3" role="group" aria-label="Code connection mode">
         {(['local', 'zip', 'github', 'git'] as CodeMode[]).map((item) => (
           <button

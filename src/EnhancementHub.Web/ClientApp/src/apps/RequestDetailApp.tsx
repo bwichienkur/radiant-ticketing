@@ -9,6 +9,7 @@ import { AnalysisDetailSections, AnalysisSummaryBanner } from '../components/Ana
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { MissionControl } from '../components/MissionControl';
 import { useRequestCollaboration } from '../hooks/useRequestCollaboration';
+import { formatApprovalAction, formatRequestStatus, getStatusNextStep } from '../utils/requestLabels';
 import type {
   ApprovalHistoryItem,
   CommentSummary,
@@ -145,11 +146,11 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
 
   return (
     <div aria-live="polite">
-      <header className="page-header d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+      <header className="page-header d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
         <div>
           <h1 className="h3 mb-1">{detail.title}</h1>
           <p className="mb-0">
-            <span className="badge text-bg-secondary badge-status">{detail.status}</span>
+            <span className="badge text-bg-secondary badge-status">{formatRequestStatus(detail.status)}</span>
             {detail.submittedByUserName ? (
               <span className="text-muted ms-2">Submitted by {detail.submittedByUserName}</span>
             ) : null}
@@ -170,6 +171,10 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
         </div>
       </header>
 
+      <div className="alert alert-light border mb-4" role="status">
+        <strong>What happens next:</strong> {getStatusNextStep(detail.status)}
+      </div>
+
       {analysisUpdateMessage ? (
         <div className="alert alert-info" role="status">
           {analysisUpdateMessage}
@@ -180,13 +185,33 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
         <div className="card-panel p-4 mb-3" id="analysis-in-progress" role="status">
           <div className="d-flex align-items-center gap-2">
             <span className="spinner-border spinner-border-sm text-primary" aria-hidden="true" />
-            <span>AI analysis is in progress. This page refreshes automatically.</span>
+            <span>We are reviewing your request. This page refreshes automatically.</span>
           </div>
         </div>
       ) : null}
 
       <div className="row g-4">
         <div className="col-lg-8">
+          <section className="card-panel p-4 mb-3">
+            <h2 className="h6 text-muted text-uppercase">Your original request</h2>
+            <p className="mb-2">
+              <strong>What problem are you solving?</strong>
+            </p>
+            <p>{detail.businessDescription}</p>
+            <p className="mb-2">
+              <strong>What does success look like?</strong>
+            </p>
+            <p className="mb-0">{detail.desiredOutcome}</p>
+            {detail.supportingNotes ? (
+              <>
+                <p className="mb-2 mt-3">
+                  <strong>Additional notes</strong>
+                </p>
+                <p className="mb-0">{detail.supportingNotes}</p>
+              </>
+            ) : null}
+          </section>
+
           {analysis ? (
             <>
               <AnalysisSummaryBanner analysis={analysis} />
@@ -197,33 +222,13 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
                 href={`/Spa/SystemMap?applicationId=${detail.targetApplicationId}`}
                 className="btn btn-sm btn-outline-primary"
               >
-                Open system map
+                View affected systems
               </a>
             </div>
           ) : null}
               <AnalysisDetailSections analysis={analysis} />
             </>
           ) : null}
-
-          <section className="card-panel p-4 mb-3">
-            <h2 className="h6 text-muted text-uppercase">Original ask</h2>
-            <p className="mb-2">
-              <strong>Business description</strong>
-            </p>
-            <p>{detail.businessDescription}</p>
-            <p className="mb-2">
-              <strong>Desired outcome</strong>
-            </p>
-            <p className="mb-0">{detail.desiredOutcome}</p>
-            {detail.supportingNotes ? (
-              <>
-                <p className="mb-2 mt-3">
-                  <strong>Supporting notes</strong>
-                </p>
-                <p className="mb-0">{detail.supportingNotes}</p>
-              </>
-            ) : null}
-          </section>
         </div>
 
         <div className="col-lg-4">
@@ -289,7 +294,7 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
               <ul className="list-group list-group-flush">
                 {approvalHistory.map((action) => (
                   <li key={action.id} className="list-group-item px-0">
-                    <strong>{action.actionType}</strong> by {action.userDisplayName}
+                    <strong>{formatApprovalAction(action.actionType)}</strong> by {action.userDisplayName}
                     <br />
                     <span className="text-muted small">
                       {new Date(action.createdAt).toLocaleString()}

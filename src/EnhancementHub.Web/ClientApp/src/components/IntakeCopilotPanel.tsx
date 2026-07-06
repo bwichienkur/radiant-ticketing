@@ -202,13 +202,17 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
   }
 
   return (
-    <section className="card-panel p-4 mb-4 intake-copilot-panel" aria-label="Intake copilot">
+    <section
+      className="card-panel p-4 mb-4 intake-copilot-panel"
+      aria-label="Describe your need"
+      data-tour="intake-copilot"
+    >
       <div className="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
         <div>
-          <h2 className="h5 mb-1">Intake copilot</h2>
+          <h2 className="h5 mb-1">Describe your need</h2>
           <p className="small text-muted mb-0">
-            Describe your enhancement in plain language. I'll ask follow-ups based on your
-            applications and draft the request form — not a general chatbot.
+            Tell us what you want changed in everyday language. We will ask a few follow-up questions
+            and draft your request — this is not a general chatbot.
           </p>
         </div>
         {usedMockAi ? (
@@ -217,10 +221,14 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
       </div>
 
       <div className="mb-3 p-3 border rounded bg-light-subtle">
-        <div className="small fw-semibold mb-2">Compliance policy intake</div>
+        <div className="small fw-semibold mb-2">Have a compliance policy?</div>
         <p className="small text-muted mb-2">
-          Attach a policy document or paste a public HTTPS URL. The copilot will extract obligations
-          and draft a compliance-oriented enhancement request.
+          Upload a PDF or paste a public web link. We will read the policy and help draft a
+          compliance-related request.
+        </p>
+        <p className="small text-muted mb-2">
+          <strong>Privacy note:</strong> Policy text is stored only for this request and sensitive
+          details are redacted before saving.
         </p>
         {policyLabel ? (
           <div className="alert alert-info py-2 small mb-2" role="status">
@@ -256,7 +264,7 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
             className="btn btn-outline-primary btn-sm"
             disabled={policyLoading || loading || !policyUrl.trim()}
           >
-            Fetch URL
+            Use this link
           </button>
         </form>
       </div>
@@ -268,13 +276,13 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
               key={`${message.occurredAt}-${index}`}
               className={`intake-copilot-message intake-copilot-message-${message.role}`}
             >
-              <div className="small text-muted mb-1">{message.role === 'user' ? 'You' : 'Copilot'}</div>
+              <div className="small text-muted mb-1">{message.role === 'user' ? 'You' : 'Assistant'}</div>
               <div>{message.content}</div>
             </div>
           ))}
           {loading ? (
             <div className="intake-copilot-message intake-copilot-message-assistant">
-              <div className="small text-muted mb-1">Copilot</div>
+              <div className="small text-muted mb-1">Assistant</div>
               <div className="text-muted">Thinking…</div>
             </div>
           ) : null}
@@ -284,7 +292,7 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
 
       {followUpQuestions.length > 0 && !isComplete ? (
         <div className="mb-3">
-          <div className="small fw-semibold mb-2">Suggested follow-ups</div>
+          <div className="small fw-semibold mb-2">Quick replies</div>
           <div className="d-flex flex-wrap gap-2">
             {followUpQuestions.map((question) => (
               <button
@@ -302,7 +310,7 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
 
       {isComplete ? (
         <div className="alert alert-success py-2 small mb-3" role="status">
-          Draft is ready — review the form below and submit when satisfied.
+          Your draft is ready — review the details below and submit when you are happy with them.
         </div>
       ) : null}
 
@@ -314,7 +322,7 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
 
       <form onSubmit={(e) => void (messages.length === 0 ? handleQuickDraft(e) : handleSendMessage(e))}>
         <label className="form-label small" htmlFor="intake-copilot-input">
-          {messages.length === 0 ? 'Describe your enhancement' : 'Your reply'}
+          {messages.length === 0 ? 'What do you need changed?' : 'Your reply'}
         </label>
         <textarea
           id="intake-copilot-input"
@@ -327,7 +335,7 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
         />
         <div className="d-flex gap-2 flex-wrap">
           <button type="submit" className="btn btn-primary btn-sm" disabled={loading || !input.trim()}>
-            {messages.length === 0 ? 'Draft request' : 'Send'}
+            {messages.length === 0 ? 'Start draft' : 'Send reply'}
           </button>
           {sessionId ? (
             <button
@@ -340,7 +348,7 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
                 }
               })}
             >
-              Re-apply draft to form
+              Refresh form from draft
             </button>
           ) : null}
         </div>

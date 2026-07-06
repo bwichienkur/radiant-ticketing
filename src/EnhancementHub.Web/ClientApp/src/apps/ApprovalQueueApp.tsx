@@ -6,6 +6,7 @@ import {
 } from '../api/spaClient';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { riskBadgeClass } from '../components/MissionControl';
+import { formatApprovalAction, formatConfidenceLabel } from '../utils/requestLabels';
 import type { ApprovalRequestDetail, PendingApprovalItem } from '../types/spa';
 
 interface ApprovalQueueAppProps {
@@ -112,7 +113,7 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
     setActionInFlight(true);
     try {
       await submitApprovalAction(selectedId, actionType, comments || undefined);
-      setActionMessage(`Action submitted: ${actionType}`);
+      setActionMessage(`${formatApprovalAction(actionType)} — your decision was recorded.`);
       setComments('');
       await loadQueue();
     } catch (err) {
@@ -138,7 +139,15 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
   }
 
   return (
-    <div className="approval-queue-layout row g-3 g-lg-4" aria-live="polite">
+    <div aria-live="polite">
+      <div className="page-header mb-4">
+        <h1>Requests waiting for your decision</h1>
+        <p className="mb-0 text-muted">
+          Review each request, read the summary, and approve, reject, or ask for more information.
+        </p>
+      </div>
+
+    <div className="approval-queue-layout row g-3 g-lg-4">
       <div className="col-lg-4">
         <nav className="card-panel approval-queue-nav" aria-label="Pending requests">
           <div className="card-header d-flex justify-content-between align-items-center">
@@ -146,8 +155,11 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
             <span className="badge text-bg-primary">{pending.length}</span>
           </div>
           {pending.length === 0 ? (
-            <div className="empty-state py-4">
-              <p className="text-muted mb-0">No requests pending approval.</p>
+            <div className="empty-state py-4 px-3">
+              <p className="mb-1 fw-semibold">All caught up</p>
+              <p className="text-muted mb-0 small">
+                No requests need your decision right now. New submissions will appear here.
+              </p>
             </div>
           ) : (
             <ul className="list-group list-group-flush approval-queue-list" role="list">
@@ -212,8 +224,8 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
                         <span className={`badge ${riskBadgeClass(latestAnalysis.riskLevel)} badge-status`}>
                           {latestAnalysis.riskLevel} risk
                         </span>
-                        <span className="ms-1">
-                          {Math.round(latestAnalysis.confidenceScore * 100)}% confidence
+                        <span className="ms-1" title="How confident the AI is in its assessment">
+                          {formatConfidenceLabel(latestAnalysis.confidenceScore)}
                         </span>
                       </>
                     ) : null}
@@ -244,7 +256,7 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
                 disabled={actionInFlight}
                 onClick={() => void handleAction('Approve')}
               >
-                {actionInFlight ? 'Submitting…' : 'Approve'}
+                {actionInFlight ? 'Submitting…' : 'Approve request'}
               </button>
               <button
                 type="button"
@@ -252,7 +264,7 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
                 disabled={actionInFlight}
                 onClick={() => void handleAction('RequestClarification')}
               >
-                {actionInFlight ? 'Submitting…' : 'Request clarification'}
+                {actionInFlight ? 'Submitting…' : 'Ask for more information'}
               </button>
               <button
                 type="button"
@@ -260,12 +272,12 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
                 disabled={actionInFlight}
                 onClick={() => void handleAction('Reject')}
               >
-                {actionInFlight ? 'Submitting…' : 'Reject'}
+                {actionInFlight ? 'Submitting…' : 'Decline request'}
               </button>
             </div>
 
             <label className="form-label" htmlFor="approval-comments">
-              Comments (optional)
+              Add a note for the requester (optional)
             </label>
             <textarea
               id="approval-comments"
@@ -277,9 +289,12 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
             />
           </article>
         ) : (
-          <div className="card-panel p-4 text-muted">Select a request from the queue.</div>
+          <div className="card-panel p-4 text-muted">
+            Select a request from the list to review it.
+          </div>
         )}
       </div>
+    </div>
     </div>
   );
 }
