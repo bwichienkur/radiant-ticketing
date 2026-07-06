@@ -1,5 +1,6 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
-import { exportEnhancementRequests, bulkSubmitApprovalActions, listEnhancementRequests } from '../api/spaClient';
+import { bulkSubmitApprovalActions, exportEnhancementRequests, listEnhancementRequests } from '../api/spaClient';
+import { SpaLink } from '../components/SpaLink';
 import {
   ConfirmDialog,
   EmptyState,
@@ -106,7 +107,9 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [bulkApproving, setBulkApproving] = useState(false);
+  const [bulkDeclining, setBulkDeclining] = useState(false);
   const [showBulkApproveConfirm, setShowBulkApproveConfirm] = useState(false);
+  const [showBulkDeclineConfirm, setShowBulkDeclineConfirm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -259,6 +262,39 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
     }
   }
 
+  async function handleBulkDecline() {
+    const pendingIds = [...selectedIds].filter(
+      (id) => normalizeRequestStatus(selectedMeta.get(id) ?? '') === 'PendingApproval',
+    );
+    if (pendingIds.length === 0) {
+      return;
+    }
+
+    setBulkDeclining(true);
+    try {
+      const result = await bulkSubmitApprovalActions(pendingIds, 'Reject');
+      if (result.succeededCount > 0) {
+        toast.success(
+          `${result.succeededCount} request${result.succeededCount === 1 ? '' : 's'} declined`,
+          result.failedCount > 0
+            ? `${result.failedCount} could not be declined (policy or status).`
+            : 'Your decisions were recorded.',
+        );
+      } else {
+        toast.danger('No requests declined', 'Selected items may not be pending or are blocked by policy.');
+      }
+
+      setShowBulkDeclineConfirm(false);
+      setSelectedIds(new Set());
+      setSelectedMeta(new Map());
+      await loadRequests(filters, page, pageSize);
+    } catch {
+      toast.danger('Bulk decline failed', 'Could not submit decline actions.');
+    } finally {
+      setBulkDeclining(false);
+    }
+  }
+
   const chipHref = useMemo(() => {
     return (chip: Partial<ListFilters>) => {
       const next = { q: '', status: '', priority: '', view: '', sort: filters.sort, ...chip };
@@ -297,9 +333,9 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
         title="Enhancement Requests"
         description="Triage, search, and open request details"
         actions={
-          <a href="/Spa/CreateRequest" className="btn btn-primary">
+          <SpaLink href="/Spa/CreateRequest" className="btn btn-primary">
             New request
-          </a>
+          </SpaLink>
         }
       />
 
@@ -378,30 +414,30 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
           </div>
         </div>
         <div className="filter-chips mt-3">
-          <a
+          <SpaLink
             className={`filter-chip ${isChipActive({}) ? 'active' : ''}`}
             href={chipHref({ q: '', status: '', priority: '', view: '' })}
           >
             All
-          </a>
-          <a
+          </SpaLink>
+          <SpaLink
             className={`filter-chip ${isChipActive({ status: 'PendingApproval' }) ? 'active' : ''}`}
             href={chipHref({ q: '', status: 'PendingApproval', priority: '', view: '' })}
           >
             Pending approval
-          </a>
-          <a
+          </SpaLink>
+          <SpaLink
             className={`filter-chip ${isChipActive({ status: 'Submitted' }) ? 'active' : ''}`}
             href={chipHref({ q: '', status: 'Submitted', priority: '', view: '' })}
           >
             Awaiting analysis
-          </a>
-          <a
+          </SpaLink>
+          <SpaLink
             className={`filter-chip ${isChipActive({ view: 'highrisk' }) ? 'active' : ''}`}
             href={chipHref({ q: '', status: '', priority: '', view: 'highrisk' })}
           >
             High risk
-          </a>
+          </SpaLink>
         </div>
       </form>
 
@@ -416,12 +452,12 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
           icon="search"
           action={
             <>
-              <a href="/Spa/CreateRequest" className="btn btn-primary me-2">
+              <SpaLink href="/Spa/CreateRequest" className="btn btn-primary me-2">
                 New request
-              </a>
-              <a href="/Spa/RequestList" className="btn btn-outline-secondary">
+              </SpaLink>
+              <SpaLink href="/Spa/RequestList" className="btn btn-outline-secondary">
                 Clear filters
-              </a>
+              </SpaLink>
             </>
           }
         />
@@ -437,19 +473,29 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
               <div className="eh-bulk-toolbar" role="toolbar" aria-label="Bulk actions">
                 <span className="small fw-semibold">{selectedIds.size} selected</span>
                 {isApprover && selectedPendingCount > 0 ? (
-                  <button
-                    type="button"
-                    className="btn btn-sm btn-success"
-                    disabled={bulkApproving}
-                    onClick={() => setShowBulkApproveConfirm(true)}
-                  >
-                    {bulkApproving ? 'Approving…' : `Approve ${selectedPendingCount}`}
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-success"
+                      disabled={bulkApproving || bulkDeclining}
+                      onClick={() => setShowBulkApproveConfirm(true)}
+                    >
+                      {bulkApproving ? 'Approving…' : `Approve ${selectedPendingCount}`}
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-outline-danger"
+                      disabled={bulkApproving || bulkDeclining}
+                      onClick={() => setShowBulkDeclineConfirm(true)}
+                    >
+                      {bulkDeclining ? 'Declining…' : `Decline ${selectedPendingCount}`}
+                    </button>
+                  </>
                 ) : null}
                 {selectedPendingCount > 0 ? (
-                  <a href="/Spa/ApprovalQueue" className="btn btn-sm btn-outline-primary">
+                  <SpaLink href="/Spa/ApprovalQueue" className="btn btn-sm btn-outline-primary">
                     Review in queue
-                  </a>
+                  </SpaLink>
                 ) : null}
                 <button
                   type="button"
@@ -520,9 +566,9 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
                       <td>{item.submittedByUserName ?? '—'}</td>
                       <td>{item.daysInStatus ?? 0}d</td>
                       <td>
-                        <a href={`/Spa/RequestDetail/${item.id}`} className="btn btn-sm btn-outline-primary">
+                        <SpaLink href={`/Spa/RequestDetail/${item.id}`} className="btn btn-sm btn-outline-primary">
                           View
-                        </a>
+                        </SpaLink>
                       </td>
                     </tr>
                   ))}
@@ -543,7 +589,7 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
 
           <div className="cards-mobile-only">
             {requests.map((item) => (
-              <a
+              <SpaLink
                 key={item.id}
                 href={`/Spa/RequestDetail/${item.id}`}
                 className={`request-card-mobile ${
@@ -557,7 +603,7 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
                 <div className="small text-muted">
                   {formatRequestStatus(item.status)} · {item.priority} · {item.daysInStatus ?? 0}d
                 </div>
-              </a>
+              </SpaLink>
             ))}
             <Pagination
               page={page}
@@ -582,6 +628,17 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
         loading={bulkApproving}
         onConfirm={() => void handleBulkApprove()}
         onCancel={() => setShowBulkApproveConfirm(false)}
+      />
+
+      <ConfirmDialog
+        open={showBulkDeclineConfirm}
+        title={`Decline ${selectedPendingCount} request${selectedPendingCount === 1 ? '' : 's'}?`}
+        message="Pending requests will be declined in bulk. Requesters will be notified. Items not awaiting approval will be skipped."
+        confirmLabel="Decline selected"
+        variant="danger"
+        loading={bulkDeclining}
+        onConfirm={() => void handleBulkDecline()}
+        onCancel={() => setShowBulkDeclineConfirm(false)}
       />
     </>
   );

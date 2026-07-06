@@ -29,7 +29,8 @@ public sealed class Phase27UxOverhaulTests
         var app = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/apps/DashboardApp.tsx"));
         var page = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Index.cshtml"));
 
-        page.Should().Contain("spa-dashboard-root");
+        page.Should().Contain("_SpaRoot");
+        page.Should().Contain("spa-shell.js");
         app.Should().Contain("copilot-bar");
         app.Should().Contain("Recent activity");
         app.Should().Contain("sparkline");
@@ -112,8 +113,45 @@ public sealed class Phase27UxOverhaulTests
     [Fact]
     public void SpaEntries_UseSharedSpUiRoot()
     {
-        var dashboard = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/entries/dashboard.tsx"));
-        dashboard.Should().Contain("SpUiRoot");
+        var shell = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/entries/spa-shell.tsx"));
+        shell.Should().Contain("SpUiRoot");
+        shell.Should().Contain("SpaShell");
+    }
+
+    [Fact]
+    public void SpaShell_UsesReactRouter()
+    {
+        var shell = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/components/SpaShell.tsx"));
+        shell.Should().Contain("BrowserRouter");
+        shell.Should().Contain("/Spa/RequestList");
+    }
+
+    [Fact]
+    public void Storybook_ConfigExists()
+    {
+        var main = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/.storybook/main.ts"));
+        var stories = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/components/ui/UIKit.stories.tsx"));
+        main.Should().Contain(".stories");
+        stories.Should().Contain("PageHeader");
+        stories.Should().Contain("StatusBadge");
+    }
+
+    [Fact]
+    public void RequestListApp_SupportsBulkDecline()
+    {
+        var app = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/apps/RequestListApp.tsx"));
+        app.Should().Contain("bulkSubmitApprovalActions(pendingIds, 'Reject')");
+        app.Should().Contain("Decline selected");
+    }
+
+    [Fact]
+    public void SpaPages_UseUnifiedShellScript()
+    {
+        var index = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Index.cshtml"));
+        var requestList = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Spa/RequestList.cshtml"));
+        index.Should().Contain("spa-shell.js");
+        index.Should().Contain("_SpaRoot");
+        requestList.Should().Contain("spa-shell.js");
     }
 
     [Fact]

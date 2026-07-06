@@ -17,6 +17,7 @@ import {
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { formatApprovalAction, formatConfidenceLabel } from '../utils/requestLabels';
 import type { ApprovalRequestDetail, PendingApprovalItem } from '../types/spa';
+import { SpaLink } from '../components/SpaLink';
 
 interface ApprovalQueueAppProps {
   initialRequestId?: string;
@@ -231,9 +232,9 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
                       ) : null}
                     </div>
                   </div>
-                  <a href={`/Spa/RequestDetail/${selected.id}`} className="btn btn-sm btn-outline-primary">
+                  <SpaLink href={`/Spa/RequestDetail/${selected.id}`} className="btn btn-sm btn-outline-primary">
                     View details
-                  </a>
+                  </SpaLink>
                 </div>
                 {latestAnalysis?.featureSummary ? (
                   <p className="mb-0 small">

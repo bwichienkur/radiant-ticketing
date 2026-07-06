@@ -70,6 +70,8 @@ Typography: Inter (400–700). Page titles 1.75rem/600. Section labels 0.75rem u
 | `ConfirmDialog` | Destructive action confirmation modal |
 | `Pagination` | Server/client page navigation |
 | `SpUiRoot` | Shared SPA wrapper with live region |
+| `SpaShell` | React Router shell for client-side navigation |
+| `SpaLink` | Router-aware link for in-app routes |
 
 Utilities: `utils/riskLabels.ts` — single source for risk badge classes and plain-language labels.
 
@@ -89,6 +91,7 @@ Toasts: React apps call `window.EhUx.showToast()` (Bootstrap toast in `_Layout`)
 | 6 | SVG sidebar icons | Done (this PR) |
 | 7 | Server-side pagination, CSV export, SpUiRoot, remaining Razor + System map | Done (this PR) |
 | 8 | Admin Razor polish (Settings, Tenancy, Delivery), bulk approve, DB pagination | Done (this PR) |
+| 9 | React router shell, Storybook, bulk decline | Done (this PR) |
 
 ---
 
@@ -105,6 +108,4 @@ Toasts: React apps call `window.EhUx.showToast()` (Bootstrap toast in `_Layout`)
 
 ## Remaining improvements
 
-- Full React router shell (MPA → SPA migration) — `SpUiRoot` provides shared live region today
-- Storybook or visual regression for UI kit
-- Bulk decline workflow from request list (bulk approve is implemented)
+All planned UX follow-ups are implemented. Optional future work: move Razor admin/CRUD pages into the React shell.

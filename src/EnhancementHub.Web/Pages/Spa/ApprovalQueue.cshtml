@@ -5,8 +5,8 @@
     ViewData["Breadcrumb"] = "Approvals";
 }
 
-<div id="spa-approval-queue-root" data-request-id="@(Model.RequestId?.ToString() ?? string.Empty)"></div>
+<partial name="_SpaRoot" />
 
 @section Scripts {
-    <script type="module" src="~/spa/react/approval-queue.js" asp-append-version="true"></script>
+    <script type="module" src="~/spa/react/spa-shell.js" asp-append-version="true"></script>
 }

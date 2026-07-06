@@ -10,6 +10,7 @@ import {
   SectionCard,
 } from '../components/ui';
 import { SystemMapGraph } from '../components/SystemMapGraph';
+import { SpaLink } from '../components/SpaLink';
 import { nodeColor } from '../components/systemMapGraph';
 import type { ApplicationSummary, SystemMap } from '../types/spa';
 
@@ -146,9 +147,9 @@ export function SystemMapApp({ initialApplicationId }: SystemMapAppProps) {
         description="Register an application before viewing the system map."
         icon="document"
         action={
-          <a href="/Spa/OnboardingWizard" className="btn btn-primary">
+          <SpaLink href="/Spa/OnboardingWizard" className="btn btn-primary">
             Start onboarding wizard
-          </a>
+          </SpaLink>
         }
       />
     );

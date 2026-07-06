@@ -6,6 +6,7 @@ import {
   getEnhancementTemplate,
 } from '../api/spaClient';
 import { IntakeCopilotPanel, type IntakeCopilotFormDraft } from '../components/IntakeCopilotPanel';
+import { SpaLink } from '../components/SpaLink';
 import {
   AlertBanner,
   ErrorState,
@@ -326,9 +327,9 @@ export function CreateRequestApp({ initialTemplateId }: CreateRequestAppProps) {
               <button type="submit" className="btn btn-primary" disabled={submitting}>
                 {submitting ? 'Submitting…' : 'Submit request'}
               </button>
-              <a href="/" className="btn btn-outline-secondary">
+              <SpaLink href="/" className="btn btn-outline-secondary">
                 Cancel
-              </a>
+              </SpaLink>
             </div>
           </form>
         </div>

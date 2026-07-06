@@ -13,6 +13,7 @@ import {
   submitOnboardingDatabase,
 } from '../api/spaClient';
 import { OnboardingCodeStep, OnboardingDatabaseStep } from '../components/OnboardingAdvancedSteps';
+import { SpaLink } from '../components/SpaLink';
 import {
   AlertBanner,
   EmptyState,
@@ -445,16 +446,16 @@ export function OnboardingWizardApp({ initialSessionId }: OnboardingWizardAppPro
             icon="document"
             action={
               <div className="d-flex justify-content-center gap-2 flex-wrap">
-                <a href="/" className="btn btn-primary">
+                <SpaLink href="/" className="btn btn-primary">
                   Go to dashboard
-                </a>
+                </SpaLink>
                 {session.applicationId ? (
-                  <a
+                  <SpaLink
                     href={`/Spa/SystemMap?applicationId=${session.applicationId}`}
                     className="btn btn-outline-secondary"
                   >
                     View system map
-                  </a>
+                  </SpaLink>
                 ) : null}
               </div>
             }

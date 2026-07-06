@@ -5,8 +5,8 @@
     ViewData["Breadcrumb"] = "Setup";
 }
 
-<div id="spa-onboarding-wizard-root" data-session-id="@(Model.SessionId?.ToString() ?? string.Empty)"></div>
+<partial name="_SpaRoot" />
 
 @section Scripts {
-    <script type="module" src="~/spa/react/onboarding-wizard.js" asp-append-version="true"></script>
+    <script type="module" src="~/spa/react/spa-shell.js" asp-append-version="true"></script>
 }

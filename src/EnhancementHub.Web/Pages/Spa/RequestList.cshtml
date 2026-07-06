@@ -5,8 +5,8 @@
     ViewData["Breadcrumb"] = "Requests";
 }
 
-<div id="spa-request-list-root" data-is-approver="@Model.IsApprover.ToString().ToLowerInvariant()"></div>
+<partial name="_SpaRoot" />
 
 @section Scripts {
-    <script type="module" src="~/spa/react/request-list.js" asp-append-version="true"></script>
+    <script type="module" src="~/spa/react/spa-shell.js" asp-append-version="true"></script>
 }

@@ -7,6 +7,7 @@ import {
 } from '../api/spaClient';
 import { AnalysisDetailSections, AnalysisSummaryBanner } from '../components/AnalysisDetailSections';
 import { DeliveryRunPanel } from '../components/DeliveryRunPanel';
+import { SpaLink } from '../components/SpaLink';
 import {
   AlertBanner,
   ErrorState,
@@ -157,16 +158,16 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
         }
         actions={
           <>
-            <a href="/Spa/ApprovalQueue" className="btn btn-outline-primary btn-sm">
+            <SpaLink href="/Spa/ApprovalQueue" className="btn btn-outline-primary btn-sm">
               Approval queue
-            </a>
+            </SpaLink>
             {detail.targetApplicationId ? (
-              <a
+              <SpaLink
                 href={`/Spa/SystemMap?applicationId=${detail.targetApplicationId}`}
                 className="btn btn-outline-secondary btn-sm"
               >
                 System map
-              </a>
+              </SpaLink>
             ) : null}
           </>
         }
@@ -224,12 +225,12 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
               <MissionControl analysis={analysis} />
           {detail.targetApplicationId ? (
             <div className="mb-3">
-              <a
+              <SpaLink
                 href={`/Spa/SystemMap?applicationId=${detail.targetApplicationId}`}
                 className="btn btn-sm btn-outline-primary"
               >
                 View affected systems
-              </a>
+              </SpaLink>
             </div>
           ) : null}
               <AnalysisDetailSections analysis={analysis} />

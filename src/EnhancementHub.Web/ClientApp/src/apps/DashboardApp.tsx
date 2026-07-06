@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { getDashboard, searchPipeline } from '../api/spaClient';
+import { SpaLink } from '../components/SpaLink';
 import {
   EmptyState,
   ErrorState,
@@ -110,12 +111,12 @@ export function DashboardApp() {
         tourId="dashboard-header"
         actions={
           <>
-            <a href="/Spa/OnboardingWizard" className="btn btn-outline-primary">
+            <SpaLink href="/Spa/OnboardingWizard" className="btn btn-outline-primary">
               Set up a system
-            </a>
-            <a href="/Spa/CreateRequest" className="btn btn-primary" data-tour="new-request">
+            </SpaLink>
+            <SpaLink href="/Spa/CreateRequest" className="btn btn-primary" data-tour="new-request">
               New request
-            </a>
+            </SpaLink>
           </>
         }
       />
@@ -145,10 +146,10 @@ export function DashboardApp() {
         <div id="copilot-results" className="mt-2" aria-live="polite">
           {searchAnswer ? <p className="small fw-semibold mb-2">{searchAnswer}</p> : null}
           {searchResults.map((item) => (
-            <a key={`${item.url}-${item.title}`} href={item.url} className="copilot-result d-block">
+            <SpaLink key={`${item.url}-${item.title}`} href={item.url} className="copilot-result d-block">
               <strong>{item.title}</strong>
               {item.subtitle ? <span className="small text-muted d-block">{item.subtitle}</span> : null}
-            </a>
+            </SpaLink>
           ))}
         </div>
       </div>
@@ -157,24 +158,24 @@ export function DashboardApp() {
         <div className="row g-3 mb-4">
           {isApprover && insights.myPendingApprovals > 0 ? (
             <div className="col-md-6 col-xl-4">
-              <a href="/Spa/ApprovalQueue" className="text-decoration-none">
+              <SpaLink href="/Spa/ApprovalQueue" className="text-decoration-none">
                 <div className="stat-card queue-action-card urgent stat-card-link">
                   <div className="label">Needs your decision</div>
                   <div className="value text-danger">{insights.myPendingApprovals}</div>
                   <div className="small text-muted">Open approval queue →</div>
                 </div>
-              </a>
+              </SpaLink>
             </div>
           ) : null}
           {insights.myAwaitingAnalysis > 0 ? (
             <div className="col-md-6 col-xl-4">
-              <a href="/Spa/RequestList?status=Submitted" className="text-decoration-none">
+              <SpaLink href="/Spa/RequestList?status=Submitted" className="text-decoration-none">
                 <div className="stat-card queue-action-card stat-card-link">
                   <div className="label">Being reviewed</div>
                   <div className="value text-info">{insights.myAwaitingAnalysis}</div>
                   <div className="small text-muted">View submitted requests →</div>
                 </div>
-              </a>
+              </SpaLink>
             </div>
           ) : null}
         </div>
@@ -191,16 +192,16 @@ export function DashboardApp() {
               </p>
             </div>
             {onboardingStatus.activeSessionId ? (
-              <a
+              <SpaLink
                 href={`/Spa/OnboardingWizard/${onboardingStatus.activeSessionId}`}
                 className="btn btn-sm btn-primary"
               >
                 Resume wizard
-              </a>
+              </SpaLink>
             ) : (
-              <a href="/Spa/OnboardingWizard" className="btn btn-sm btn-primary">
+              <SpaLink href="/Spa/OnboardingWizard" className="btn btn-sm btn-primary">
                 Start wizard
-              </a>
+              </SpaLink>
             )}
           </div>
           <div className="onboarding-checklist">
@@ -298,9 +299,9 @@ export function DashboardApp() {
           description="Submit your first change request to see progress here."
           icon="inbox"
           action={
-            <a href="/Spa/CreateRequest" className="btn btn-primary">
+            <SpaLink href="/Spa/CreateRequest" className="btn btn-primary">
               Submit a request
-            </a>
+            </SpaLink>
           }
         />
       )}
@@ -320,10 +321,10 @@ function ChecklistLink({
   children: ReactNode;
 }) {
   return (
-    <a className={`checklist-item checklist-item-link ${done ? 'done' : ''}`} href={href}>
+    <SpaLink className={`checklist-item checklist-item-link ${done ? 'done' : ''}`} href={href}>
       <span className="check">{done ? '✓' : step}</span>
       <span>{children}</span>
-    </a>
+    </SpaLink>
   );
 }
 
@@ -363,12 +364,12 @@ function LinkedStatCard({
 }) {
   return (
     <div className={colClass}>
-      <a href={href} className="text-decoration-none">
+      <SpaLink href={href} className="text-decoration-none">
         <div className="stat-card stat-card-link">
           <div className="label">{label}</div>
           <div className={`value ${valueClass ?? ''}`.trim()}>{value}</div>
         </div>
-      </a>
+      </SpaLink>
     </div>
   );
 }
@@ -381,7 +382,7 @@ function ActivityFeed({ items }: { items: DashboardActivityItem[] }) {
         <p className="text-muted small mb-0">No recent activity yet.</p>
       ) : (
         items.map((item) => (
-          <a key={`${item.linkPath}-${item.occurredAt}`} href={item.linkPath} className="activity-feed-item">
+          <SpaLink key={`${item.linkPath}-${item.occurredAt}`} href={item.linkPath} className="activity-feed-item">
             <span className="activity-dot" />
             <div>
               <div className="small fw-semibold">{item.title}</div>
@@ -389,7 +390,7 @@ function ActivityFeed({ items }: { items: DashboardActivityItem[] }) {
                 {item.subtitle ?? item.eventType} · {new Date(item.occurredAt).toLocaleString()}
               </div>
             </div>
-          </a>
+          </SpaLink>
         ))
       )}
     </div>

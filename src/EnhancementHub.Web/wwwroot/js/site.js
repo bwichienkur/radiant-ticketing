@@ -521,6 +521,111 @@
         renderStep();
     }
 
+    function initSpaNavigation() {
+        const root = document.getElementById('spa-root');
+        if (!root) return null;
+
+        const spaExact = new Set(['/', '/Index']);
+        const spaPrefixes = [
+            '/Spa/RequestList',
+            '/Spa/CreateRequest',
+            '/Spa/RequestDetail',
+            '/Spa/ApprovalQueue',
+            '/Spa/OnboardingWizard',
+            '/Spa/SystemMap',
+        ];
+
+        function isSpaPath(pathname) {
+            if (spaExact.has(pathname)) return true;
+            return spaPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+        }
+
+        function linkMatchesPath(linkPath, currentPath) {
+            if (linkPath === '/' || linkPath === '/Index') {
+                return currentPath === '/' || currentPath === '/Index';
+            }
+            if (linkPath === '/Spa/RequestList') {
+                return currentPath.startsWith('/Spa/RequestList')
+                    && !currentPath.startsWith('/Spa/CreateRequest')
+                    && !currentPath.startsWith('/Spa/ApprovalQueue');
+            }
+            if (linkPath === '/Spa/ApprovalQueue') {
+                return currentPath.startsWith('/Spa/ApprovalQueue');
+            }
+            if (linkPath === '/Spa/CreateRequest') {
+                return currentPath.startsWith('/Spa/CreateRequest');
+            }
+            if (linkPath === '/Spa/OnboardingWizard') {
+                return currentPath.startsWith('/Spa/OnboardingWizard');
+            }
+            if (linkPath === '/Spa/SystemMap') {
+                return currentPath.startsWith('/Spa/SystemMap');
+            }
+            return currentPath === linkPath || currentPath.startsWith(`${linkPath}/`);
+        }
+
+        function updateSidebarActive(pathname) {
+            const path = pathname || window.location.pathname;
+            document.querySelectorAll('.sidebar-link').forEach((link) => {
+                const href = link.getAttribute('href');
+                if (!href) return;
+                let linkPath;
+                try {
+                    linkPath = new URL(href, window.location.origin).pathname;
+                } catch {
+                    return;
+                }
+                link.classList.toggle('active', linkMatchesPath(linkPath, path));
+            });
+
+            const adminActive = path.startsWith('/Admin');
+            document.querySelectorAll('.sidebar-link[href*="/Admin"]').forEach((link) => {
+                if (adminActive) {
+                    link.classList.add('active');
+                } else {
+                    try {
+                        const linkPath = new URL(link.href, window.location.origin).pathname;
+                        if (!linkMatchesPath(linkPath, path)) {
+                            link.classList.remove('active');
+                        }
+                    } catch {
+                        /* ignore */
+                    }
+                }
+            });
+        }
+
+        document.addEventListener('click', (event) => {
+            const link = event.target.closest('a[href]');
+            if (!link || link.target === '_blank' || event.defaultPrevented) return;
+            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+            let url;
+            try {
+                url = new URL(link.href, window.location.origin);
+            } catch {
+                return;
+            }
+
+            if (url.origin !== window.location.origin || !isSpaPath(url.pathname)) return;
+
+            event.preventDefault();
+            const nextPath = `${url.pathname}${url.search}${url.hash}`;
+            window.history.pushState(null, '', nextPath);
+            window.dispatchEvent(new CustomEvent('eh-spa-navigate', { detail: { path: nextPath } }));
+            updateSidebarActive(url.pathname);
+        });
+
+        window.addEventListener('popstate', () => {
+            const path = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+            window.dispatchEvent(new CustomEvent('eh-spa-navigate', { detail: { path } }));
+            updateSidebarActive(window.location.pathname);
+        });
+
+        updateSidebarActive(window.location.pathname);
+        return { updateSidebarActive };
+    }
+
     function initApprovalQueue() {
         const form = document.querySelector('.approval-decision-form');
         if (!form) return;
@@ -555,8 +660,9 @@
     initAccordions();
     initApprovalQueue();
     initProductTour();
+    const spaNav = initSpaNavigation();
 
-    window.EhUx = { toggleTheme, addNotification, showToast, initProductTour };
+    window.EhUx = { toggleTheme, addNotification, showToast, initProductTour, updateSidebarActive: spaNav?.updateSidebarActive };
 
     initCommandPaletteKbd();
 })();

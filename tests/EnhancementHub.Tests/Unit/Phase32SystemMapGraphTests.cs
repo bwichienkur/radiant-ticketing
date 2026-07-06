@@ -50,7 +50,9 @@ public sealed class Phase32SystemMapGraphTests
     [Fact]
     public void ReactSystemMapBundle_IsPublishedToWwwroot()
     {
-        File.Exists(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/system-map.js")).Should().BeTrue();
+        File.Exists(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/spa-shell.js")).Should().BeTrue();
+        Directory.GetFiles(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/chunks"), "SystemMapApp-*.js")
+            .Should().NotBeEmpty();
     }
 
     private static string GetPath(string relativePath) =>
