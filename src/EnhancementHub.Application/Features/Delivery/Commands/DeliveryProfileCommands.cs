@@ -20,6 +20,10 @@ public sealed record UpdateTenantDeliveryProfileCommand(
     bool RequireProdChangeWindow,
     string? ChangeWindowNotes,
     int QaVideoRetentionDays,
+    bool AllowOneClickProdDeploy,
+    bool AllowOneClickRollback,
+    TestDataStrategy TestDataStrategy,
+    bool AllowProdToTestRefresh,
     Guid? TenantId = null) : IRequest<TenantDeliveryProfileDto>;
 
 public sealed class UpdateTenantDeliveryProfileCommandValidator : AbstractValidator<UpdateTenantDeliveryProfileCommand>
@@ -81,6 +85,10 @@ public sealed class UpdateTenantDeliveryProfileCommandHandler
         profile.RequireProdChangeWindow = request.RequireProdChangeWindow;
         profile.ChangeWindowNotes = request.ChangeWindowNotes?.Trim();
         profile.QaVideoRetentionDays = request.QaVideoRetentionDays;
+        profile.AllowOneClickProdDeploy = request.AllowOneClickProdDeploy;
+        profile.AllowOneClickRollback = request.AllowOneClickRollback;
+        profile.TestDataStrategy = request.TestDataStrategy;
+        profile.AllowProdToTestRefresh = request.AllowProdToTestRefresh;
         profile.UpdatedAt = now;
 
         await _dbContext.SaveChangesAsync(cancellationToken);

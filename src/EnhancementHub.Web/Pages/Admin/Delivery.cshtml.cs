@@ -51,6 +51,18 @@ public class DeliveryModel : PageModel
     public int QaVideoRetentionDays { get; set; } = 90;
 
     [BindProperty]
+    public bool AllowOneClickProdDeploy { get; set; } = true;
+
+    [BindProperty]
+    public bool AllowOneClickRollback { get; set; } = true;
+
+    [BindProperty]
+    public TestDataStrategy TestDataStrategy { get; set; } = TestDataStrategy.Synthetic;
+
+    [BindProperty]
+    public bool AllowProdToTestRefresh { get; set; }
+
+    [BindProperty]
     public Guid? EditEnvironmentId { get; set; }
 
     [BindProperty]
@@ -93,7 +105,11 @@ public class DeliveryModel : PageModel
                     RequireUatSignoff,
                     RequireProdChangeWindow,
                     ChangeWindowNotes,
-                    QaVideoRetentionDays),
+                    QaVideoRetentionDays,
+                    AllowOneClickProdDeploy,
+                    AllowOneClickRollback,
+                    TestDataStrategy,
+                    AllowProdToTestRefresh),
                 cancellationToken);
             StatusMessage = "Tenant delivery policies saved.";
         }
@@ -160,6 +176,10 @@ public class DeliveryModel : PageModel
             RequireProdChangeWindow = Profile.RequireProdChangeWindow;
             ChangeWindowNotes = Profile.ChangeWindowNotes;
             QaVideoRetentionDays = Profile.QaVideoRetentionDays;
+            AllowOneClickProdDeploy = Profile.AllowOneClickProdDeploy;
+            AllowOneClickRollback = Profile.AllowOneClickRollback;
+            TestDataStrategy = Profile.TestDataStrategy;
+            AllowProdToTestRefresh = Profile.AllowProdToTestRefresh;
         }
     }
 }

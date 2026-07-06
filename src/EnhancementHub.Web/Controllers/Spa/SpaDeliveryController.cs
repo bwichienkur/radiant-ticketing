@@ -42,7 +42,11 @@ public sealed class SpaDeliveryController : ControllerBase
                 request.RequireUatSignoff,
                 request.RequireProdChangeWindow,
                 request.ChangeWindowNotes,
-                request.QaVideoRetentionDays),
+                request.QaVideoRetentionDays,
+                request.AllowOneClickProdDeploy,
+                request.AllowOneClickRollback,
+                request.TestDataStrategy,
+                request.AllowProdToTestRefresh),
             cancellationToken));
 
     [HttpPost("tenant-profile/validate")]
@@ -143,6 +147,17 @@ public sealed class SpaDeliveryController : ControllerBase
         CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new SignUatCommand(requestId, request.Approved, request.Notes), cancellationToken));
 
+    [HttpPost("requests/{requestId:guid}/deploy-production")]
+    public async Task<IActionResult> DeployProduction(Guid requestId, CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new DeployProductionCommand(requestId), cancellationToken));
+
+    [HttpPost("requests/{requestId:guid}/rollback-production")]
+    public async Task<IActionResult> RollbackProduction(
+        Guid requestId,
+        [FromBody] SpaRollbackProductionRequest request,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new RollbackProductionCommand(requestId, request.Reason), cancellationToken));
+
     [HttpGet("artifacts")]
     public async Task<IActionResult> GetArtifact([FromQuery] string path, CancellationToken cancellationToken)
     {
@@ -166,7 +181,11 @@ public sealed record SpaTenantDeliveryProfileRequest(
     bool RequireUatSignoff,
     bool RequireProdChangeWindow,
     string? ChangeWindowNotes,
-    int QaVideoRetentionDays);
+    int QaVideoRetentionDays,
+    bool AllowOneClickProdDeploy,
+    bool AllowOneClickRollback,
+    TestDataStrategy TestDataStrategy,
+    bool AllowProdToTestRefresh);
 
 public sealed record SpaTenantDeploymentEnvironmentRequest(
     Guid? EnvironmentId,
@@ -191,3 +210,5 @@ public sealed record SpaApplicationDeliveryProfileRequest(
     string? ConnectionMappingsJson);
 
 public sealed record SpaUatSignoffRequest(bool Approved, string? Notes);
+
+public sealed record SpaRollbackProductionRequest(string? Reason);

@@ -29,6 +29,14 @@ public class TenantDeliveryProfile : BaseEntity
 
     public int QaVideoRetentionDays { get; set; } = 90;
 
+    public bool AllowOneClickProdDeploy { get; set; } = true;
+
+    public bool AllowOneClickRollback { get; set; } = true;
+
+    public TestDataStrategy TestDataStrategy { get; set; } = TestDataStrategy.Synthetic;
+
+    public bool AllowProdToTestRefresh { get; set; }
+
     public Tenant Tenant { get; set; } = null!;
     public ICollection<TenantDeploymentEnvironment> Environments { get; set; } = new List<TenantDeploymentEnvironment>();
 }

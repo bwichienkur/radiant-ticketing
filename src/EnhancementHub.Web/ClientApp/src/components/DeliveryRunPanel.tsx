@@ -1,7 +1,9 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import {
   advanceDeliveryPastPr,
+  deployProduction,
   getDeliveryRun,
+  rollbackProduction,
   signUat,
   startDeliveryRun,
 } from '../api/spaClient';
@@ -18,6 +20,7 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
   const [loading, setLoading] = useState(true);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
   const [uatNotes, setUatNotes] = useState('');
+  const [rollbackReason, setRollbackReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const reload = useCallback(async () => {
@@ -76,6 +79,32 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
     try {
       setRun(await signUat(requestId, approved, uatNotes || undefined));
       setActionMessage(approved ? 'UAT approved — production scheduling started.' : 'UAT rejected.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleDeployProduction() {
+    setSubmitting(true);
+    setActionMessage(null);
+    try {
+      setRun(await deployProduction(requestId));
+      setActionMessage('Production deploy started.');
+    } catch {
+      setActionMessage('Could not deploy to production.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleRollbackProduction() {
+    setSubmitting(true);
+    setActionMessage(null);
+    try {
+      setRun(await rollbackProduction(requestId, rollbackReason || undefined));
+      setActionMessage('Production rollback triggered.');
+    } catch {
+      setActionMessage('Could not roll back production.');
     } finally {
       setSubmitting(false);
     }
@@ -210,6 +239,57 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
                   </a>
                 ) : null}
               </div>
+            </div>
+          ) : null}
+
+          {run.rollbackPlan ? (
+            <div className="mb-3 border rounded p-3 bg-light-subtle">
+              <h3 className="h6">Rollback plan</h3>
+              <p className="small mb-0">{run.rollbackPlan}</p>
+            </div>
+          ) : null}
+
+          {run.canDeployToProduction ? (
+            <button
+              type="button"
+              className="btn btn-success btn-sm mb-3"
+              disabled={submitting}
+              onClick={() => void handleDeployProduction()}
+            >
+              Deploy to production
+            </button>
+          ) : null}
+
+          {run.canRollbackProduction ? (
+            <div className="mb-3 border rounded p-3">
+              <h3 className="h6">Rollback production</h3>
+              <p className="small text-muted">
+                Restore the previous production version
+                {run.rollbackTargetCommitSha ? ` (${run.rollbackTargetCommitSha})` : ''}.
+              </p>
+              <label className="form-label small" htmlFor="rollback-reason">
+                Reason (optional)
+              </label>
+              <input
+                id="rollback-reason"
+                className="form-control form-control-sm mb-2"
+                value={rollbackReason}
+                onChange={(event) => setRollbackReason(event.target.value)}
+              />
+              <button
+                type="button"
+                className="btn btn-outline-danger btn-sm"
+                disabled={submitting}
+                onClick={() => void handleRollbackProduction()}
+              >
+                Roll back production
+              </button>
+            </div>
+          ) : null}
+
+          {run.postDeploySmokePassed === false ? (
+            <div className="alert alert-warning py-2 small mb-3" role="alert">
+              Post-deploy smoke tests failed. Consider rolling back production.
             </div>
           ) : null}
 

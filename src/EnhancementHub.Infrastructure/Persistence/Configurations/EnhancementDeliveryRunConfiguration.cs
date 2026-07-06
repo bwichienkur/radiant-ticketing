@@ -21,6 +21,9 @@ public class EnhancementDeliveryRunConfiguration : IEntityTypeConfiguration<Enha
         builder.Property(x => x.QaReportStoragePath).HasMaxLength(1000);
         builder.Property(x => x.UatNotes).HasMaxLength(4000);
         builder.Property(x => x.ProdDeployReference).HasMaxLength(500);
+        builder.Property(x => x.ProdArtifactReference).HasMaxLength(500);
+        builder.Property(x => x.RollbackTargetDeployReference).HasMaxLength(500);
+        builder.Property(x => x.RollbackTargetCommitSha).HasMaxLength(64);
         builder.Property(x => x.TimelineJson).HasColumnType("TEXT");
         builder.Property(x => x.LastError).HasMaxLength(4000);
         builder.HasOne(x => x.EnhancementRequest)

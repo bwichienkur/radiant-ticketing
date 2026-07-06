@@ -108,6 +108,57 @@ public sealed class AdvanceDeliveryPastPrCommandHandler : IRequestHandler<Advanc
     }
 }
 
+public sealed record DeployProductionCommand(Guid EnhancementRequestId) : IRequest<EnhancementDeliveryRunDto>;
+
+public sealed class DeployProductionCommandHandler : IRequestHandler<DeployProductionCommand, EnhancementDeliveryRunDto>
+{
+    private readonly IDeliveryOrchestrationService _orchestration;
+    private readonly IMediator _mediator;
+
+    public DeployProductionCommandHandler(
+        IDeliveryOrchestrationService orchestration,
+        IMediator mediator)
+    {
+        _orchestration = orchestration;
+        _mediator = mediator;
+    }
+
+    public async Task<EnhancementDeliveryRunDto> Handle(
+        DeployProductionCommand request,
+        CancellationToken cancellationToken)
+    {
+        await _orchestration.TriggerProductionDeployAsync(request.EnhancementRequestId, cancellationToken);
+        return (await _mediator.Send(new GetDeliveryRunQuery(request.EnhancementRequestId), cancellationToken))!;
+    }
+}
+
+public sealed record RollbackProductionCommand(Guid EnhancementRequestId, string? Reason) : IRequest<EnhancementDeliveryRunDto>;
+
+public sealed class RollbackProductionCommandHandler : IRequestHandler<RollbackProductionCommand, EnhancementDeliveryRunDto>
+{
+    private readonly IDeliveryOrchestrationService _orchestration;
+    private readonly IMediator _mediator;
+
+    public RollbackProductionCommandHandler(
+        IDeliveryOrchestrationService orchestration,
+        IMediator mediator)
+    {
+        _orchestration = orchestration;
+        _mediator = mediator;
+    }
+
+    public async Task<EnhancementDeliveryRunDto> Handle(
+        RollbackProductionCommand request,
+        CancellationToken cancellationToken)
+    {
+        await _orchestration.RollbackProductionAsync(
+            request.EnhancementRequestId,
+            request.Reason,
+            cancellationToken);
+        return (await _mediator.Send(new GetDeliveryRunQuery(request.EnhancementRequestId), cancellationToken))!;
+    }
+}
+
 public interface IDeliveryApprovalHook
 {
     Task TryStartAfterApprovalAsync(Guid requestId, CancellationToken cancellationToken);

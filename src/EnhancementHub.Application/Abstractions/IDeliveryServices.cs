@@ -66,7 +66,22 @@ public sealed record DeploymentContext(
     DeploymentConfigBundle ConfigBundle,
     string? RepositoryOwner,
     string? RepositoryName,
-    string? DefaultBranch);
+    string? DefaultBranch,
+    string? ArtifactReference = null,
+    string? PromoteFromEnvironment = null);
+
+public sealed record RollbackContext(
+    Guid EnhancementRequestId,
+    Guid ApplicationId,
+    Guid DeliveryRunId,
+    CicdProvider Provider,
+    string? PipelineReference,
+    DeploymentMechanism Mechanism,
+    string? RepositoryOwner,
+    string? RepositoryName,
+    string? DefaultBranch,
+    string? RollbackDeployReference,
+    string? RollbackCommitSha);
 
 public interface IDeploymentConfigBundleBuilder
 {
@@ -83,11 +98,15 @@ public interface IDeploymentAdapter
     bool CanHandle(DeploymentContext context);
 
     Task<DeploymentResult> DeployAsync(DeploymentContext context, CancellationToken cancellationToken = default);
+
+    Task<DeploymentResult> RollbackAsync(RollbackContext context, CancellationToken cancellationToken = default);
 }
 
 public interface IDeploymentAdapterFactory
 {
     IDeploymentAdapter Resolve(DeploymentContext context);
+
+    IDeploymentAdapter ResolveForRollback(RollbackContext context);
 }
 
 public sealed record QaTestStepResult(string Step, bool Passed, string Detail);
@@ -213,6 +232,10 @@ public interface IDeliveryOrchestrationService
         CancellationToken cancellationToken = default);
 
     Task AdvancePastPullRequestReviewAsync(Guid enhancementRequestId, CancellationToken cancellationToken = default);
+
+    Task TriggerProductionDeployAsync(Guid enhancementRequestId, CancellationToken cancellationToken = default);
+
+    Task RollbackProductionAsync(Guid enhancementRequestId, string? reason, CancellationToken cancellationToken = default);
 }
 
 public interface IDeliveryOrchestrationDispatcher

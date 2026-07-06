@@ -392,3 +392,16 @@ export async function signUat(
     notes,
   });
 }
+
+export async function deployProduction(requestId: string): Promise<EnhancementDeliveryRun> {
+  return postJson<EnhancementDeliveryRun>(`/web-api/spa/delivery/requests/${requestId}/deploy-production`);
+}
+
+export async function rollbackProduction(
+  requestId: string,
+  reason?: string,
+): Promise<EnhancementDeliveryRun> {
+  return postJson<EnhancementDeliveryRun>(`/web-api/spa/delivery/requests/${requestId}/rollback-production`, {
+    reason,
+  });
+}

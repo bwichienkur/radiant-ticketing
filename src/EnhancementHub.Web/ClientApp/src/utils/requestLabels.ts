@@ -37,6 +37,7 @@ const STATUS_LABELS: Record<string, string> = {
   UatApproved: 'Accepted — scheduling production',
   ProdScheduled: 'Production deploy scheduled',
   DeployingToProduction: 'Deploying to production',
+  RolledBack: 'Production rolled back',
 };
 
 const STATUS_NEXT_STEP: Record<string, string> = {
@@ -58,6 +59,7 @@ const STATUS_NEXT_STEP: Record<string, string> = {
   UatApproved: 'You approved the change. Production deploy is being scheduled.',
   ProdScheduled: 'Production deploy is scheduled for the next change window.',
   DeployingToProduction: 'Production deployment is in progress.',
+  RolledBack: 'Production was rolled back to the previous version.',
 };
 
 const APPROVAL_ACTION_LABELS: Record<string, string> = {
