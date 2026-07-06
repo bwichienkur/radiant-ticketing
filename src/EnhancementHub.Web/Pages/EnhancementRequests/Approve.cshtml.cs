@@ -36,7 +36,7 @@ public class ApproveModel : PageModel
     {
         if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
         {
-            return RedirectToPage("/Spa/ApprovalQueue", id.HasValue ? new { id } : null);
+            return RedirectToPagePermanent("/Spa/ApprovalQueue", id.HasValue ? new { id } : null);
         }
 
         Pending = (await _mediator.Send(

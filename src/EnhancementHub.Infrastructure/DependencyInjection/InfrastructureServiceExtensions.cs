@@ -254,6 +254,7 @@ public static class InfrastructureServiceExtensions
         services.AddSingleton<IAuthenticationConfigurationService, AuthenticationConfigurationService>();
         services.AddScoped<IDataRetentionService, DataRetentionService>();
         services.AddSingleton<ISoc2ReadinessService, Soc2ReadinessService>();
+        services.AddSingleton<IPlatformRuntimeStatusService, PlatformRuntimeStatusService>();
 
         services.AddHttpClient(OpenAiHttpClientName)
             .AddPolicyHandler(GetRetryPolicy());

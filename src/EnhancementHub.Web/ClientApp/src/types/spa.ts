@@ -1,3 +1,12 @@
+export interface PlatformRuntimeStatus {
+  aiConfigured: boolean;
+  aiProvider: string;
+  vectorSearchProvider: string;
+  qaRunner: string;
+  allowMockInProduction: boolean;
+  usesSimulatedBackends: boolean;
+}
+
 export interface CommentSummary {
   id: string;
   userDisplayName: string;

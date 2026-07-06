@@ -19,6 +19,7 @@ import type {
   OnboardingSession,
   OnPremAgentSetup,
   PendingApprovalItem,
+  PlatformRuntimeStatus,
   RepositoryPathValidation,
   SystemMap,
 } from '../types/spa';
@@ -460,4 +461,8 @@ export async function rollbackProduction(
   return postJson<EnhancementDeliveryRun>(`/web-api/spa/delivery/requests/${requestId}/rollback-production`, {
     reason,
   });
+}
+
+export async function getPlatformRuntimeStatus(): Promise<PlatformRuntimeStatus> {
+  return fetchJson<PlatformRuntimeStatus>('/web-api/spa/platform/runtime-status');
 }

@@ -49,6 +49,38 @@ public static class ProductionConfigurationValidator
         {
             ValidateOpenIdConnectConfiguration(configuration);
         }
+
+        ValidateProductionBackends(configuration);
+    }
+
+    private static void ValidateProductionBackends(IConfiguration configuration)
+    {
+        var allowMock = configuration.GetValue("AI:AllowMockInProduction", false);
+
+        if (!allowMock && !AiConfigurationReader.IsAiConfigured(configuration))
+        {
+            throw new InvalidOperationException(
+                "An AI provider must be configured in Production (OpenAI or Azure OpenAI). " +
+                "Set AI:AllowMockInProduction=true only for explicit demo overrides.");
+        }
+
+        var vectorProvider = configuration["VectorSearch:Provider"] ?? "InMemory";
+        if (string.Equals(vectorProvider, "InMemory", StringComparison.OrdinalIgnoreCase)
+            && !configuration.GetValue("VectorSearch:AllowInMemoryInProduction", false))
+        {
+            throw new InvalidOperationException(
+                "VectorSearch:Provider=InMemory is not allowed in Production. " +
+                "Use PgVector, Qdrant, or Azure Search, or set VectorSearch:AllowInMemoryInProduction=true.");
+        }
+
+        var qaRunner = configuration.GetValue<string>("Delivery:Qa:Runner") ?? "Playwright";
+        if (string.Equals(qaRunner, "Simulated", StringComparison.OrdinalIgnoreCase)
+            && !configuration.GetValue("Delivery:Qa:AllowSimulatedInProduction", false))
+        {
+            throw new InvalidOperationException(
+                "Delivery:Qa:Runner=Simulated is not allowed in Production. " +
+                "Use Playwright or set Delivery:Qa:AllowSimulatedInProduction=true.");
+        }
     }
 
     private static void ValidateOpenIdConnectConfiguration(IConfiguration configuration)

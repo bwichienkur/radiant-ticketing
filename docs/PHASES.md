@@ -386,6 +386,21 @@
 - `OnboardingAdvancedSteps` tabs in React wizard (parity with classic wizard)
 - Guide: `docs/UX_MODERNIZATION.md` (Phase 37 section)
 
+## Phases 46–47 — Due diligence execution (complete)
+
+### Phase 46 — CI quality gate & E2E repair
+- `.github/workflows/ci.yml` — `dotnet test` + ClientApp build on every PR
+- Playwright smoke tests use unified `#spa-root` selector; bulk approve smoke test added
+- Storybook preview imports `site.css`; orphaned Vite entries removed
+- Shared `RiskLevelUi` for Razor risk badges; permanent redirects to SPA routes
+
+### Phase 47 — Production trust guards
+- `ProductionConfigurationValidator` rejects mock AI, InMemory vector, simulated QA in Production
+- `GET /web-api/spa/platform/runtime-status` + mock/simulation banners in React apps
+- Admin SOC 2 page shows runtime backend status; 7 new unit tests (325 total)
+
+Guide: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md)
+
 ## Phases 46–57 — Due diligence execution (planned)
 
 Post-audit roadmap to reach world-class enterprise readiness. Full task breakdown: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md).

@@ -33,7 +33,7 @@ public class DetailsModel : PageModel
     {
         if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
         {
-            return RedirectToPage("/Spa/RequestDetail", new { id });
+            return RedirectToPagePermanent("/Spa/RequestDetail", new { id });
         }
 
         Detail = await _mediator.Send(new GetEnhancementRequestByIdQuery(id), cancellationToken);

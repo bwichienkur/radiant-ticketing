@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
+import { AlertBanner } from './ui';
 import {
   attachIntakePolicyDocument,
   attachIntakePolicyUrl,
@@ -215,10 +216,13 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
             and draft your request — this is not a general chatbot.
           </p>
         </div>
-        {usedMockAi ? (
-          <span className="badge text-bg-secondary">Offline draft mode</span>
-        ) : null}
       </div>
+
+      {usedMockAi ? (
+        <AlertBanner variant="warning" title="Offline draft mode" className="mb-3">
+          AI provider is not configured — responses use deterministic mock drafting.
+        </AlertBanner>
+      ) : null}
 
       <div className="mb-3 p-3 border rounded bg-light-subtle">
         <div className="small fw-semibold mb-2">Have a compliance policy?</div>

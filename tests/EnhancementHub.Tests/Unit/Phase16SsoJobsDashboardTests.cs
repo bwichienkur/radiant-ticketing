@@ -46,6 +46,7 @@ public sealed class Phase16SsoJobsDashboardTests
             ["Authentication:OpenIdConnect:ClientSecret"] = "client-secret",
             ["Authentication:OpenIdConnect:DefaultRole"] = "Developer"
         };
+        ProductionConfigurationTestDefaults.ApplyProductionBackendDefaults(configuration);
 
         var act = () => ProductionConfigurationValidator.Validate(
             new ConfigurationBuilder().AddInMemoryCollection(configuration).Build(),

@@ -31,6 +31,21 @@
     See <code>docs/SOC2_READINESS.md</code> and <code>docs/SECURITY.md</code> for full detail.
 </p>
 
+@if (Model.RuntimeStatus.UsesSimulatedBackends)
+{
+    <div class="alert alert-warning" role="alert">
+        <strong>Simulated or offline backends detected.</strong>
+        AI: @Model.RuntimeStatus.AiProvider · Vector: @Model.RuntimeStatus.VectorSearchProvider · QA: @Model.RuntimeStatus.QaRunner.
+        Configure production providers before buyer demos or set explicit override flags documented in <code>docs/PRODUCTION_EVAL.md</code>.
+    </div>
+}
+else
+{
+    <div class="alert alert-success py-2" role="status">
+        Production backends active — AI: @Model.RuntimeStatus.AiProvider · Vector: @Model.RuntimeStatus.VectorSearchProvider · QA: @Model.RuntimeStatus.QaRunner.
+    </div>
+}
+
 @if (report is null)
 {
     <div class="card-panel p-4"><p class="text-muted mb-0">Unable to load compliance report.</p></div>

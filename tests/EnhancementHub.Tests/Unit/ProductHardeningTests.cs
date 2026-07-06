@@ -163,12 +163,12 @@ public sealed class ProductHardeningTests
         var onboarding = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/Onboarding/Wizard.cshtml.cs"));
         var requestList = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/EnhancementRequests/Index.cshtml.cs"));
 
-        details.Should().Contain("RedirectToPage(\"/Spa/RequestDetail\"");
+        details.Should().Contain("RedirectToPagePermanent(\"/Spa/RequestDetail\"");
         details.Should().Contain("\"classic\"");
-        approve.Should().Contain("RedirectToPage(\"/Spa/ApprovalQueue\"");
+        approve.Should().Contain("RedirectToPagePermanent(\"/Spa/ApprovalQueue\"");
         systemMap.Should().Contain("RedirectToPage(\"/Spa/SystemMap\"");
         onboarding.Should().Contain("RedirectToPage(\"/Spa/OnboardingWizard\"");
-        requestList.Should().Contain("RedirectToPage(\"/Spa/RequestList\"");
+        requestList.Should().Contain("RedirectToPagePermanent(\"/Spa/RequestList\"");
     }
 
     [Fact]
@@ -243,7 +243,7 @@ public sealed class ProductHardeningTests
         File.Exists(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/ClientApp/src/apps/RequestListApp.tsx")).Should().BeTrue();
 
         var index = File.ReadAllText(Path.Combine(GetRepoRoot(), "src/EnhancementHub.Web/Pages/EnhancementRequests/Index.cshtml.cs"));
-        index.Should().Contain("RedirectToPage(\"/Spa/RequestList\"");
+        index.Should().Contain("RedirectToPagePermanent(\"/Spa/RequestList\"");
     }
 
     [Fact]

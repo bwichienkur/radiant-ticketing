@@ -1,6 +1,7 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   getApprovalHistory,
+  getPlatformRuntimeStatus,
   getRequestAnalysis,
   getRequestDetail,
   postRequestComment,
@@ -25,6 +26,7 @@ import type {
   CommentSummary,
   EnhancementAnalysis,
   EnhancementRequestDetail,
+  PlatformRuntimeStatus,
 } from '../types/spa';
 
 interface RequestDetailAppProps {
@@ -40,6 +42,7 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
   const [commentText, setCommentText] = useState('');
   const [commentInternal, setCommentInternal] = useState(false);
   const [postingComment, setPostingComment] = useState(false);
+  const [runtimeStatus, setRuntimeStatus] = useState<PlatformRuntimeStatus | null>(null);
 
   const reload = useCallback(async () => {
     const [detailResult, analysisResult, historyResult] = await Promise.all([
@@ -82,6 +85,12 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
       cancelled = true;
     };
   }, [reload]);
+
+  useEffect(() => {
+    void getPlatformRuntimeStatus()
+      .then(setRuntimeStatus)
+      .catch(() => setRuntimeStatus(null));
+  }, []);
 
   useEffect(() => {
     if (!detail || (detail.status !== 'Analyzing' && detail.status !== 'AiAnalyzing' && detail.status !== 'Submitted')) {
@@ -145,6 +154,12 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
 
   return (
     <div aria-live="polite">
+      {runtimeStatus && !runtimeStatus.aiConfigured && analysis ? (
+        <AlertBanner variant="warning" title="Mock AI analysis" className="mb-3">
+          AI provider is not configured ({runtimeStatus.aiProvider}). Analysis shown may be
+          deterministic mock output — configure OpenAI or Azure OpenAI for production.
+        </AlertBanner>
+      ) : null}
       <PageHeader
         title={detail.title}
         titleAs="h1"

@@ -10,11 +10,16 @@ public sealed class Soc2ReadinessService : ISoc2ReadinessService
 {
     private readonly IConfiguration _configuration;
     private readonly IHostEnvironment _environment;
+    private readonly IPlatformRuntimeStatusService _runtimeStatus;
 
-    public Soc2ReadinessService(IConfiguration configuration, IHostEnvironment environment)
+    public Soc2ReadinessService(
+        IConfiguration configuration,
+        IHostEnvironment environment,
+        IPlatformRuntimeStatusService runtimeStatus)
     {
         _configuration = configuration;
         _environment = environment;
+        _runtimeStatus = runtimeStatus;
     }
 
     public Soc2ReadinessReportDto GetReport()
@@ -157,7 +162,9 @@ public sealed class Soc2ReadinessService : ISoc2ReadinessService
                 "PII in AI workflows",
                 "PiiRedactionService (email, phone, SSN, card patterns)",
                 _configuration.GetValue("AI:PiiRedactionEnabled", true) ? "Implemented" : "Partial",
-                "Keep AI:PiiRedactionEnabled=true unless explicitly approved otherwise.")
+                "Keep AI:PiiRedactionEnabled=true unless explicitly approved otherwise."),
+
+            BuildSimulationTransparencyControl()
         };
 
         return new Soc2ReadinessReportDto(
@@ -205,6 +212,27 @@ public sealed class Soc2ReadinessService : ISoc2ReadinessService
     private bool IsHangfireConfigured() =>
         string.Equals(_configuration["BackgroundJobs:Provider"], "Hangfire", StringComparison.OrdinalIgnoreCase)
         && string.Equals(_configuration["Database:Provider"], "PostgreSQL", StringComparison.OrdinalIgnoreCase);
+
+    private Soc2ControlStatusDto BuildSimulationTransparencyControl()
+    {
+        var runtime = _runtimeStatus.GetStatus();
+        var status = runtime.UsesSimulatedBackends
+            ? runtime.AllowMockInProduction ? "Partial" : "Gap"
+            : "Implemented";
+
+        var hint = runtime.UsesSimulatedBackends
+            ? $"AI: {runtime.AiProvider}; Vector: {runtime.VectorSearchProvider}; QA: {runtime.QaRunner}. " +
+              "Configure production backends before buyer demos."
+            : $"AI: {runtime.AiProvider}; Vector: {runtime.VectorSearchProvider}; QA: {runtime.QaRunner}.";
+
+        return Build(
+            "CC7.2",
+            "Security",
+            "Simulation transparency",
+            "Production validators and runtime status for AI, vector search, and QA runners",
+            status,
+            hint);
+    }
 
     private static Soc2ControlStatusDto Build(
         string controlId,

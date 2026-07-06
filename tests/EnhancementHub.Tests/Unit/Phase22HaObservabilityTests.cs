@@ -36,13 +36,16 @@ public sealed class Phase22HaObservabilityTests
     [Fact]
     public void ProductionConfigurationValidator_AcceptsAzureBlobInsteadOfKeysPath()
     {
+        var values = new Dictionary<string, string?>
+        {
+            ["Jwt:Secret"] = "production-secret-that-is-long-enough-32chars",
+            ["DataProtection:StorageProvider"] = "AzureBlob",
+            ["DataProtection:AzureBlob:ConnectionString"] = "UseDevelopmentStorage=true"
+        };
+        ProductionConfigurationTestDefaults.ApplyProductionBackendDefaults(values);
+
         var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["Jwt:Secret"] = "production-secret-that-is-long-enough-32chars",
-                ["DataProtection:StorageProvider"] = "AzureBlob",
-                ["DataProtection:AzureBlob:ConnectionString"] = "UseDevelopmentStorage=true"
-            })
+            .AddInMemoryCollection(values)
             .Build();
 
         var act = () => ProductionConfigurationValidator.Validate(

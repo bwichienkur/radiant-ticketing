@@ -1,13 +1,17 @@
 import { expect, test } from '@playwright/test';
 import { DEMO_REQUEST_ID, loginAsAdmin } from './helpers';
 
+async function expectSpaShell(page: import('@playwright/test').Page) {
+  await expect(page.locator('#spa-root')).toBeVisible({ timeout: 15_000 });
+}
+
 test.describe('EnhancementHub smoke', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsAdmin(page);
   });
 
   test('dashboard shows pipeline search and stats', async ({ page }) => {
-    await expect(page.locator('#spa-dashboard-root')).toBeVisible();
+    await expectSpaShell(page);
     await expect(page.locator('.copilot-bar .fw-semibold')).toHaveText('Pipeline search', {
       timeout: 15_000,
     });
@@ -23,14 +27,14 @@ test.describe('EnhancementHub smoke', () => {
 
   test('approval queue SPA loads pending items', async ({ page }) => {
     await page.goto('/Spa/ApprovalQueue');
-    await expect(page.locator('#spa-approval-queue-root')).toBeVisible();
+    await expectSpaShell(page);
     await expect(page.getByText('Pending', { exact: true })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByText(/order cancellation|compliance/i).first()).toBeVisible({ timeout: 15_000 });
   });
 
   test('request detail SPA loads demo request', async ({ page }) => {
     await page.goto(`/Spa/RequestDetail/${DEMO_REQUEST_ID}`);
-    await expect(page.locator('#spa-request-detail-root')).toBeVisible();
+    await expectSpaShell(page);
     await expect(page.getByRole('heading', { name: /order cancellation/i })).toBeVisible({
       timeout: 20_000,
     });
@@ -38,21 +42,21 @@ test.describe('EnhancementHub smoke', () => {
 
   test('system map SPA loads applications', async ({ page }) => {
     await page.goto('/Spa/SystemMap');
-    await expect(page.locator('#spa-system-map-root')).toBeVisible();
+    await expectSpaShell(page);
     await expect(page.getByLabel('Application')).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole('button', { name: 'Rebuild graph' })).toBeVisible();
   });
 
   test('onboarding wizard SPA mounts', async ({ page }) => {
     await page.goto('/Spa/OnboardingWizard');
-    await expect(page.locator('#spa-onboarding-wizard-root')).toBeVisible();
+    await expectSpaShell(page);
     await expect(page.getByRole('list', { name: 'Onboarding steps' })).toBeVisible({ timeout: 15_000 });
     await expect(page.getByRole('listitem').filter({ hasText: 'Basics' })).toBeVisible();
   });
 
   test('create request SPA loads form', async ({ page }) => {
     await page.goto('/Spa/CreateRequest');
-    await expect(page.locator('#spa-create-request-root')).toBeVisible();
+    await expectSpaShell(page);
     await expect(page.getByRole('heading', { name: 'Tell us what you need changed' })).toBeVisible({
       timeout: 15_000,
     });
@@ -73,6 +77,7 @@ test.describe('EnhancementHub smoke', () => {
 
   test('request list SPA loads backlog', async ({ page }) => {
     await page.goto('/Spa/RequestList');
+    await expectSpaShell(page);
     await expect(page.getByRole('heading', { name: 'Enhancement Requests' })).toBeVisible({
       timeout: 15_000,
     });
@@ -80,5 +85,22 @@ test.describe('EnhancementHub smoke', () => {
     await expect(page.getByText(/order cancellation|compliance/i).first()).toBeVisible({
       timeout: 15_000,
     });
+  });
+
+  test('request list bulk approve toolbar appears for pending items', async ({ page }) => {
+    await page.goto('/Spa/RequestList?status=PendingApproval');
+    await expectSpaShell(page);
+    const firstRowCheckbox = page.locator('tbody input[type="checkbox"]').first();
+    await expect(firstRowCheckbox).toBeVisible({ timeout: 15_000 });
+    await firstRowCheckbox.check();
+    await expect(page.getByRole('toolbar', { name: 'Bulk actions' })).toBeVisible();
+    const approveButton = page.getByRole('button', { name: /Approve \d+/ });
+    if (await approveButton.isVisible()) {
+      await approveButton.click();
+      await page.getByRole('button', { name: 'Approve selected' }).click();
+      await expect(page.getByText(/approved|could not be approved/i).first()).toBeVisible({
+        timeout: 15_000,
+      });
+    }
   });
 });

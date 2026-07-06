@@ -1,17 +1,10 @@
 @page "{id?}"
 @model EnhancementHub.Web.Pages.EnhancementRequests.ApproveModel
 @using EnhancementHub.Domain.Enums
+@using EnhancementHub.Web.Ui
 @{
     ViewData["Title"] = "Approval Queue";
     ViewData["Breadcrumb"] = "Approvals";
-
-    string RiskClass(RiskLevel risk) => risk switch
-    {
-        RiskLevel.Critical => "text-bg-danger",
-        RiskLevel.High => "text-bg-warning",
-        RiskLevel.Medium => "text-bg-info",
-        _ => "text-bg-success"
-    };
 }
 
 <div class="page-header">
@@ -46,7 +39,7 @@
                                     <strong class="d-block">@item.Title</strong>
                                     @if (analysis.HasValue)
                                     {
-                                        <span class="badge @RiskClass(analysis.Value) badge-status">@analysis</span>
+                                        <span class="badge @RiskLevelUi.BadgeClass(analysis.Value) badge-status">@analysis</span>
                                     }
                                 </div>
                                 <span class="d-block small approval-queue-meta">
@@ -75,7 +68,7 @@
                                 @if (latest is not null)
                                 {
                                     <span> · </span>
-                                    <span class="badge @RiskClass(latest.RiskLevel) badge-status">@latest.RiskLevel risk</span>
+                                    <span class="badge @RiskLevelUi.BadgeClass(latest.RiskLevel) badge-status">@latest.RiskLevel risk</span>
                                     <span class="ms-1">@($"{latest.ConfidenceScore:P0}") confidence</span>
                                 }
                             </div>

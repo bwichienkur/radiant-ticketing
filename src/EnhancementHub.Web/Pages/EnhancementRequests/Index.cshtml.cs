@@ -36,7 +36,7 @@ public class IndexModel : PageModel
     {
         if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
         {
-            return RedirectToPage("/Spa/RequestList", new { q = Q, status = Status, priority = Priority, view = View, sort = Sort });
+            return RedirectToPagePermanent("/Spa/RequestList", new { q = Q, status = Status, priority = Priority, view = View, sort = Sort });
         }
 
         RiskLevel? minRisk = View == "highrisk" ? RiskLevel.High : null;

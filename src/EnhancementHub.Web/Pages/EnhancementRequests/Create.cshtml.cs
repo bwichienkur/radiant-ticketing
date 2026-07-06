@@ -28,7 +28,7 @@ public class CreateModel : PageModel
     {
         if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
         {
-            return RedirectToPage("/Spa/CreateRequest", templateId.HasValue ? new { templateId } : null);
+            return RedirectToPagePermanent("/Spa/CreateRequest", templateId.HasValue ? new { templateId } : null);
         }
 
         await LoadLookupsAsync(cancellationToken);

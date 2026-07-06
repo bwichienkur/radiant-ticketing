@@ -16,6 +16,7 @@ services:
       Database__Provider: PostgreSQL
       VectorSearch__Provider: PgVector
       VectorSearch__Dimensions: 64
+      Delivery__Qa__Runner: Playwright
       Onboarding__ApiBaseUrl: http://api:8080
       Observability__Enabled: "true"
 

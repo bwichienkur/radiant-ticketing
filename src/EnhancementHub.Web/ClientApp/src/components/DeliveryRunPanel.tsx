@@ -3,6 +3,7 @@ import {
   advanceDeliveryPastPr,
   deployProduction,
   getDeliveryRun,
+  getPlatformRuntimeStatus,
   rollbackProduction,
   signUat,
   startDeliveryRun,
@@ -14,7 +15,7 @@ import {
   SectionCard,
   useToast,
 } from '../components/ui';
-import type { EnhancementDeliveryRun } from '../types/spa';
+import type { EnhancementDeliveryRun, PlatformRuntimeStatus } from '../types/spa';
 
 interface DeliveryRunPanelProps {
   requestId: string;
@@ -32,6 +33,7 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
   const [rollbackReason, setRollbackReason] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [confirmKind, setConfirmKind] = useState<ConfirmKind>(null);
+  const [runtimeStatus, setRuntimeStatus] = useState<PlatformRuntimeStatus | null>(null);
 
   const reload = useCallback(async () => {
     try {
@@ -47,6 +49,12 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
   useEffect(() => {
     void reload();
   }, [reload]);
+
+  useEffect(() => {
+    void getPlatformRuntimeStatus()
+      .then(setRuntimeStatus)
+      .catch(() => setRuntimeStatus(null));
+  }, []);
 
   useEffect(() => {
     if (!run || run.phase === 'Completed' || run.phase === 'Failed') {
@@ -135,6 +143,12 @@ export function DeliveryRunPanel({ requestId, requestStatus, desiredOutcome }: D
       ariaLabel="Delivery progress"
       actions={run?.isSimulation ? <span className="badge text-bg-secondary">Simulation mode</span> : undefined}
     >
+      {runtimeStatus?.qaRunner === 'Simulated' ? (
+        <AlertBanner variant="warning" title="Simulated QA runner" className="mb-3">
+          Delivery QA is using the simulated runner. Configure Delivery:Qa:Runner=Playwright for
+          live browser validation.
+        </AlertBanner>
+      ) : null}
       <p className="small text-muted mb-3">
         Automated implementation, test deploy, QA evidence, and UAT.
         {run ? (

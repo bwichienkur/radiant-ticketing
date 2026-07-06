@@ -337,10 +337,10 @@ Run these continuously across all waves.
 
 ## Quick wins checklist (start this week)
 
-- [ ] Create `.github/workflows/ci.yml` with `dotnet test` + ClientApp build  
-- [ ] Fix `tests/e2e/smoke.spec.ts` selectors (`#spa-root`)  
-- [ ] Add production validator rules for AI/vector/QA  
-- [ ] Redirect `/EnhancementRequests` → `/Spa/RequestList`  
+- [x] Create `.github/workflows/ci.yml` with `dotnet test` + ClientApp build  
+- [x] Fix `tests/e2e/smoke.spec.ts` selectors (`#spa-root`)  
+- [x] Add production validator rules for AI/vector/QA  
+- [x] Redirect `/EnhancementRequests` → `/Spa/RequestList` (permanent)  
 - [ ] Dashboard widgets linking to drift + pending approvals  
 - [ ] Recalibrate `PRODUCT_SCORECARD.md` external readiness view  
 

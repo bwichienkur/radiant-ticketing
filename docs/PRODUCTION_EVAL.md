@@ -27,7 +27,30 @@ docker compose -f docker-compose.yml -f docker-compose.eval.yml up --build
 | Background jobs | Polling (worker default) | **Hangfire** on worker |
 | Qdrant | Optional profile `scale` | Not required (PgVector) |
 | Demo seed | On Web startup | On Web startup |
-| OpenAI | Empty → mock AI | Set `OPENAI_API_KEY` for real analysis |
+| OpenAI | Empty → mock AI (dev only) | Set `OPENAI_API_KEY` for real analysis |
+| Production validators | N/A in Development | See **Production overrides** below |
+
+## Mock / simulation transparency
+
+The eval profile runs in **Development** — mock AI is allowed and banners appear in the UI when providers are not configured.
+
+For **Production** deployments (`ASPNETCORE_ENVIRONMENT=Production`), startup validates:
+
+| Setting | Requirement |
+|---------|-------------|
+| `OpenAI:ApiKey` or Azure OpenAI | Required unless `AI:AllowMockInProduction=true` |
+| `VectorSearch:Provider` | Must not be `InMemory` unless `VectorSearch:AllowInMemoryInProduction=true` |
+| `Delivery:Qa:Runner` | Must not be `Simulated` unless `Delivery:Qa:AllowSimulatedInProduction=true` |
+
+Check runtime status at **Admin → SOC 2 Readiness** or `GET /web-api/spa/platform/runtime-status`.
+
+## CI quality gates
+
+Pull requests run:
+
+- `.github/workflows/ci.yml` — `dotnet test` (318+ tests) + ClientApp build
+- `.github/workflows/e2e-smoke.yml` — Playwright smoke tests
+- `.github/workflows/accessibility.yml` — static accessibility checks
 
 ## Optional: enable Qdrant (large vector workloads)
 
@@ -46,7 +69,7 @@ cd tests/e2e && npm install && npx playwright install chromium
 node ../../scripts/run-e2e-smoke.mjs
 ```
 
-Runs automatically on pull requests via `.github/workflows/e2e-smoke.yml`.
+Runs automatically on pull requests via `.github/workflows/e2e-smoke.yml` and `.github/workflows/ci.yml`.
 
 ## Stopping and reset
 

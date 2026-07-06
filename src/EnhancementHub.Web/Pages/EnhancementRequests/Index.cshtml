@@ -2,18 +2,10 @@
 @model EnhancementHub.Web.Pages.EnhancementRequests.IndexModel
 @using EnhancementHub.Domain.Enums
 @using EnhancementHub.Application.Features.EnhancementRequests.Queries
+@using EnhancementHub.Web.Ui
 @{
     ViewData["Title"] = "Enhancement Requests";
     ViewData["Breadcrumb"] = "Requests";
-
-    string RiskClass(RiskLevel? risk) => risk switch
-    {
-        RiskLevel.Critical => "text-bg-danger",
-        RiskLevel.High => "text-bg-warning",
-        RiskLevel.Medium => "text-bg-info",
-        RiskLevel.Low => "text-bg-success",
-        _ => "text-bg-secondary"
-    };
 
     string StatusRowClass(EnhancementRequestStatus status) => status switch
     {
@@ -103,7 +95,7 @@ else
                         <td>
                             @if (item.LatestRiskLevel.HasValue)
                             {
-                                <span class="badge @RiskClass(item.LatestRiskLevel) badge-status">@item.LatestRiskLevel</span>
+                                <span class="badge @RiskLevelUi.BadgeClass(item.LatestRiskLevel) badge-status">@item.LatestRiskLevel</span>
                             }
                             else { <span class="text-muted">—</span> }
                         </td>
@@ -127,7 +119,7 @@ else
                     <strong>@item.Title</strong>
                     @if (item.LatestRiskLevel.HasValue)
                     {
-                        <span class="badge @RiskClass(item.LatestRiskLevel) badge-status">@item.LatestRiskLevel</span>
+                        <span class="badge @RiskLevelUi.BadgeClass(item.LatestRiskLevel) badge-status">@item.LatestRiskLevel</span>
                     }
                 </div>
                 <div class="small text-muted">@item.Status · @item.Priority · @(item.DaysInStatus ?? 0)d</div>
