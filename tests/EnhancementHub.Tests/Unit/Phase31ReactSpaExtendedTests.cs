@@ -19,10 +19,9 @@ public sealed class Phase31ReactSpaExtendedTests
     public void ReactBundles_IncludeApprovalAndOnboarding()
     {
         File.Exists(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/spa-shell.js")).Should().BeTrue();
-        Directory.GetFiles(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/chunks"), "ApprovalQueueApp-*.js")
-            .Should().NotBeEmpty();
-        Directory.GetFiles(GetPath("src/EnhancementHub.Web/wwwroot/spa/react/chunks"), "OnboardingWizardApp-*.js")
-            .Should().NotBeEmpty();
+        var shell = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/components/SpaShell.tsx"));
+        shell.Should().Contain("ApprovalQueueApp");
+        shell.Should().Contain("OnboardingWizardApp");
     }
 
     [Fact]

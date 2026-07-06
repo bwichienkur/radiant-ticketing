@@ -4,6 +4,9 @@ import { resolve } from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    dedupe: ['react', 'react-dom', 'react-router', 'react-router-dom'],
+  },
   build: {
     outDir: resolve(__dirname, '../wwwroot/spa/react'),
     emptyOutDir: true,
