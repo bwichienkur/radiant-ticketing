@@ -5,7 +5,7 @@ import {
   submitApprovalAction,
 } from '../api/spaClient';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
-import { riskBadgeClass } from '../components/MissionControl';
+import { riskBadgeClass } from '../utils/riskLabels';
 import { formatApprovalAction, formatConfidenceLabel } from '../utils/requestLabels';
 import type { ApprovalRequestDetail, PendingApprovalItem } from '../types/spa';
 

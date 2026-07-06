@@ -1,7 +1,13 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import { listEnhancementRequests } from '../api/spaClient';
-import { LoadingSkeleton } from '../components/LoadingSkeleton';
-import { riskBadgeClass } from '../components/MissionControl';
+import {
+  EmptyState,
+  ErrorState,
+  ListToolbar,
+  LoadingState,
+  PageHeader,
+  StatusBadge,
+} from '../components/ui';
 import type { EnhancementRequestListItem } from '../types/spa';
 import { formatRequestStatus, normalizeRequestStatus } from '../utils/requestLabels';
 
@@ -64,31 +70,22 @@ function filtersToSearchParams(filters: ListFilters): URLSearchParams {
   return params;
 }
 
-const RISK_BY_VALUE: Record<number, string> = {
-  0: 'Low',
-  1: 'Medium',
-  2: 'High',
-  3: 'Critical',
-};
 
-function normalizeStatus(status: string | number): string {
-  return normalizeRequestStatus(status);
-}
-
-function normalizeRisk(risk: string | number | undefined): string | undefined {
-  if (risk === undefined || risk === null) {
-    return undefined;
+function buildFilterSummary(filters: ListFilters): string | undefined {
+  const parts: string[] = [];
+  if (filters.q.trim()) {
+    parts.push(`search “${filters.q.trim()}”`);
   }
-
-  if (typeof risk === 'number') {
-    return RISK_BY_VALUE[risk] ?? String(risk);
+  if (filters.status) {
+    parts.push(formatRequestStatus(filters.status));
   }
-
-  if (/^\d+$/.test(risk)) {
-    return RISK_BY_VALUE[Number(risk)] ?? risk;
+  if (filters.priority) {
+    parts.push(filters.priority);
   }
-
-  return risk;
+  if (filters.view === 'highrisk') {
+    parts.push('high risk');
+  }
+  return parts.length > 0 ? parts.join(', ') : undefined;
 }
 
 export function RequestListApp() {
@@ -155,17 +152,17 @@ export function RequestListApp() {
 
   return (
     <>
-      <div className="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div>
-          <h1>Enhancement Requests</h1>
-          <p>Triage, search, and open request details</p>
-        </div>
-        <a href="/Spa/CreateRequest" className="btn btn-primary">
-          New Request
-        </a>
-      </div>
+      <PageHeader
+        title="Enhancement Requests"
+        description="Triage, search, and open request details"
+        actions={
+          <a href="/Spa/CreateRequest" className="btn btn-primary">
+            New request
+          </a>
+        }
+      />
 
-      <form className="card-panel p-3 mb-3" onSubmit={applyFilters}>
+      <form className="card-panel p-3 mb-3 eh-filter-panel" onSubmit={applyFilters} aria-label="Filter requests">
         <div className="row g-2 align-items-end">
           <div className="col-md-4">
             <label className="form-label small" htmlFor="search-q">
@@ -268,22 +265,32 @@ export function RequestListApp() {
       </form>
 
       {loading ? (
-        <LoadingSkeleton />
+        <LoadingState label="Loading requests…" />
       ) : error ? (
-        <div className="alert alert-danger" role="alert">
-          {error}
-        </div>
+        <ErrorState message={error} onRetry={() => void loadRequests(filters)} />
       ) : requests.length === 0 ? (
-        <div className="card-panel empty-state">
-          <div className="empty-state-icon">☰</div>
-          <h2 className="h5">No requests match your filters</h2>
-          <p className="mb-3">Try clearing filters or create a new enhancement request.</p>
-          <a href="/Spa/CreateRequest" className="btn btn-primary">
-            New Request
-          </a>
-        </div>
+        <EmptyState
+          title="No requests match your filters"
+          description="Try clearing filters or create a new enhancement request."
+          icon="search"
+          action={
+            <>
+              <a href="/Spa/CreateRequest" className="btn btn-primary me-2">
+                New request
+              </a>
+              <a href="/Spa/RequestList" className="btn btn-outline-secondary">
+                Clear filters
+              </a>
+            </>
+          }
+        />
       ) : (
         <>
+          <ListToolbar
+            count={requests.length}
+            noun="request"
+            filterSummary={buildFilterSummary(filters)}
+          />
           <div className="card-panel table-desktop-only">
             <div className="table-responsive">
               <table className="table table-hover table-enterprise mb-0">
@@ -307,19 +314,11 @@ export function RequestListApp() {
                       </td>
                       <td>{item.targetApplicationName ?? '—'}</td>
                       <td>
-                        {item.latestRiskLevel != null ? (
-                          <span
-                            className={`badge ${riskBadgeClass(normalizeRisk(item.latestRiskLevel)!)} badge-status`}
-                          >
-                            {normalizeRisk(item.latestRiskLevel)}
-                          </span>
-                        ) : (
-                          <span className="text-muted">—</span>
-                        )}
+                        <StatusBadge risk={item.latestRiskLevel} />
                       </td>
                       <td>{item.priority}</td>
                       <td>
-                        <span className="badge text-bg-secondary badge-status">{formatRequestStatus(item.status)}</span>
+                        <StatusBadge status={item.status} />
                       </td>
                       <td>{item.submittedByUserName ?? '—'}</td>
                       <td>{item.daysInStatus ?? 0}d</td>
@@ -341,18 +340,12 @@ export function RequestListApp() {
                 key={item.id}
                 href={`/Spa/RequestDetail/${item.id}`}
                 className={`request-card-mobile ${
-                  normalizeStatus(item.status) === 'PendingApproval' ? 'status-pending' : ''
+                  normalizeRequestStatus(item.status) === 'PendingApproval' ? 'status-pending' : ''
                 } d-block text-decoration-none text-reset`}
               >
                 <div className="d-flex justify-content-between align-items-start gap-2 mb-1">
                   <strong>{item.title}</strong>
-                  {item.latestRiskLevel != null ? (
-                    <span
-                      className={`badge ${riskBadgeClass(normalizeRisk(item.latestRiskLevel)!)} badge-status`}
-                    >
-                      {normalizeRisk(item.latestRiskLevel)}
-                    </span>
-                  ) : null}
+                  <StatusBadge risk={item.latestRiskLevel} />
                 </div>
                 <div className="small text-muted">
                   {formatRequestStatus(item.status)} · {item.priority} · {item.daysInStatus ?? 0}d

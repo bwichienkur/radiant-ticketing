@@ -5,6 +5,13 @@
     const STORAGE_THEME = 'eh-theme';
     const STORAGE_NOTIFICATIONS = 'eh-notifications';
 
+    function initCommandPaletteKbd() {
+        const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.platform);
+        document.querySelectorAll('[data-command-kbd]').forEach((el) => {
+            el.textContent = isMac ? '⌘K' : 'Ctrl+K';
+        });
+    }
+
     function initTheme() {
         const saved = localStorage.getItem(STORAGE_THEME);
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -138,14 +145,17 @@
     function showToast(payload) {
         const container = document.getElementById('notification-toast-container');
         if (!container) return;
+        const variant = payload.variant ?? 'info';
         const toast = document.createElement('div');
-        toast.className = 'toast show mb-2 border-0 shadow';
+        toast.className = `toast show mb-2 border-0 shadow eh-toast eh-toast-${variant}`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'assertive');
         toast.innerHTML = `
             <div class="toast-header">
                 <strong class="me-auto">${escapeHtml(payload.title ?? 'EnhancementHub')}</strong>
-                <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
-            <div class="toast-body">${escapeHtml(payload.message ?? '')}</div>`;
+            ${payload.message ? `<div class="toast-body">${escapeHtml(payload.message)}</div>` : ''}`;
         container.appendChild(toast);
         setTimeout(() => toast.remove(), 8000);
     }
@@ -546,5 +556,7 @@
     initApprovalQueue();
     initProductTour();
 
-    window.EhUx = { toggleTheme, addNotification, initProductTour };
+    window.EhUx = { toggleTheme, addNotification, showToast, initProductTour };
+
+    initCommandPaletteKbd();
 })();

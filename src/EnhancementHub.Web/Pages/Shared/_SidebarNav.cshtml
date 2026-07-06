@@ -3,6 +3,7 @@
     bool NavActive(params string[] segments) =>
         segments.Any(s => path.StartsWith(s, StringComparison.OrdinalIgnoreCase));
     bool NavExact(string segment) => string.Equals(path, segment, StringComparison.OrdinalIgnoreCase);
+    bool NavDashboard() => NavExact("/Index") || NavExact("/");
     var isAdmin = path.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase);
 }
 
@@ -16,7 +17,7 @@
     <nav class="sidebar-nav">
         <div class="sidebar-section">
             <div class="sidebar-section-label">Work</div>
-            <a class="sidebar-link @(NavExact("/Index") ? "active" : "")" asp-page="/Index">
+            <a class="sidebar-link @(NavDashboard() ? "active" : "")" asp-page="/Index">
                 <span class="sidebar-icon" aria-hidden="true">◉</span> Dashboard
             </a>
             <a class="sidebar-link @(NavActive("/Spa/RequestList", "/EnhancementRequests") && !NavActive("/EnhancementRequests/Approve", "/Spa/ApprovalQueue") && !NavActive("/EnhancementRequests/Create", "/Spa/CreateRequest") ? "active" : "")" href="/Spa/RequestList">

@@ -7,10 +7,18 @@ import {
 } from '../api/spaClient';
 import { AnalysisDetailSections, AnalysisSummaryBanner } from '../components/AnalysisDetailSections';
 import { DeliveryRunPanel } from '../components/DeliveryRunPanel';
-import { LoadingSkeleton } from '../components/LoadingSkeleton';
+import {
+  AlertBanner,
+  ErrorState,
+  FormField,
+  LoadingState,
+  PageHeader,
+  SectionCard,
+  StatusBadge,
+} from '../components/ui';
 import { MissionControl } from '../components/MissionControl';
 import { useRequestCollaboration } from '../hooks/useRequestCollaboration';
-import { formatApprovalAction, formatRequestStatus, getStatusNextStep } from '../utils/requestLabels';
+import { formatApprovalAction, getStatusNextStep } from '../utils/requestLabels';
 import type {
   ApprovalHistoryItem,
   CommentSummary,
@@ -119,26 +127,15 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
   }
 
   if (loading) {
-    return (
-      <div aria-busy="true" aria-live="polite">
-        <p className="text-muted" role="status">
-          Loading…
-        </p>
-        <LoadingSkeleton />
-      </div>
-    );
+    return <LoadingState label="Loading request…" />;
   }
 
   if (error || !detail) {
     return (
-      <div className="alert alert-danger d-flex flex-wrap justify-content-between align-items-center gap-2" role="alert">
-        <span>{error ?? 'Request not found.'}</span>
-        <div className="d-flex gap-2">
-          <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => void reload()}>
-            Retry
-          </button>
-        </div>
-      </div>
+      <ErrorState
+        message={error ?? 'Request not found.'}
+        onRetry={() => void reload()}
+      />
     );
   }
 
@@ -147,34 +144,37 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
 
   return (
     <div aria-live="polite">
-      <header className="page-header d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
-        <div>
-          <h1 className="h3 mb-1">{detail.title}</h1>
-          <p className="mb-0">
-            <span className="badge text-bg-secondary badge-status">{formatRequestStatus(detail.status)}</span>
+      <PageHeader
+        title={detail.title}
+        titleAs="h1"
+        description={
+          <>
+            <StatusBadge status={detail.status} />
             {detail.submittedByUserName ? (
               <span className="text-muted ms-2">Submitted by {detail.submittedByUserName}</span>
             ) : null}
-          </p>
-        </div>
-        <div className="d-flex flex-wrap gap-2">
-          <a href="/Spa/ApprovalQueue" className="btn btn-outline-primary btn-sm">
-            Approval queue
-          </a>
-          {detail.targetApplicationId ? (
-            <a
-              href={`/Spa/SystemMap?applicationId=${detail.targetApplicationId}`}
-              className="btn btn-outline-secondary btn-sm"
-            >
-              System map
+          </>
+        }
+        actions={
+          <>
+            <a href="/Spa/ApprovalQueue" className="btn btn-outline-primary btn-sm">
+              Approval queue
             </a>
-          ) : null}
-        </div>
-      </header>
+            {detail.targetApplicationId ? (
+              <a
+                href={`/Spa/SystemMap?applicationId=${detail.targetApplicationId}`}
+                className="btn btn-outline-secondary btn-sm"
+              >
+                System map
+              </a>
+            ) : null}
+          </>
+        }
+      />
 
-      <div className="alert alert-light border mb-4" role="status">
-        <strong>What happens next:</strong> {getStatusNextStep(detail.status)}
-      </div>
+      <AlertBanner variant="neutral" title="What happens next:" className="mb-4">
+        {getStatusNextStep(detail.status)}
+      </AlertBanner>
 
       {analysisUpdateMessage ? (
         <div className="alert alert-info" role="status">
@@ -199,8 +199,7 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
             desiredOutcome={detail.desiredOutcome}
           />
 
-          <section className="card-panel p-4 mb-3">
-            <h2 className="h6 text-muted text-uppercase">Your original request</h2>
+          <SectionCard title="Your original request">
             <p className="mb-2">
               <strong>What problem are you solving?</strong>
             </p>
@@ -217,7 +216,7 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
                 <p className="mb-0">{detail.supportingNotes}</p>
               </>
             ) : null}
-          </section>
+          </SectionCard>
 
           {analysis ? (
             <>
@@ -239,26 +238,24 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
         </div>
 
         <div className="col-lg-4">
-          <section className="card-panel p-3 mb-3" id="collaboration-panel" aria-label="Collaboration">
+          <SectionCard title="Live collaboration" id="collaboration-panel" ariaLabel="Collaboration">
             <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-              <h2 className="h6 mb-0">Live collaboration</h2>
               <span className="small text-muted" id="collaboration-presence" aria-live="polite">
                 {presence}
               </span>
             </div>
 
             <form onSubmit={(event) => void onSubmitComment(event)} className="mb-3">
-              <label className="form-label" htmlFor="spa-comment-content">
-                Add comment
-              </label>
-              <textarea
-                id="spa-comment-content"
-                className="form-control mb-2"
-                rows={2}
-                value={commentText}
-                onChange={(event) => setCommentText(event.target.value)}
-                required
-              />
+              <FormField id="spa-comment-content" label="Add comment" required>
+                <textarea
+                  id="spa-comment-content"
+                  className="form-control"
+                  rows={2}
+                  value={commentText}
+                  onChange={(event) => setCommentText(event.target.value)}
+                  required
+                />
+              </FormField>
               <div className="form-check mb-2">
                 <input
                   id="spa-comment-internal"
@@ -291,10 +288,9 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
                 ))
               )}
             </div>
-          </section>
+          </SectionCard>
 
-          <section className="card-panel p-3">
-            <h2 className="h6 mb-3">Approval history</h2>
+          <SectionCard title="Approval history">
             {approvalHistory.length === 0 ? (
               <p className="text-muted small mb-0">No approval actions yet.</p>
             ) : (
@@ -311,7 +307,7 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
                 ))}
               </ul>
             )}
-          </section>
+          </SectionCard>
         </div>
       </div>
     </div>

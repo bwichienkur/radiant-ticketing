@@ -1,6 +1,11 @@
 import { FormEvent, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { getDashboard, searchPipeline } from '../api/spaClient';
-import { LoadingSkeleton } from '../components/LoadingSkeleton';
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+  PageHeader,
+} from '../components/ui';
 import type { DashboardPageData, DashboardActivityItem } from '../types/spa';
 
 interface SearchResult {
@@ -19,32 +24,21 @@ export function DashboardApp() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [searching, setSearching] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      setLoading(true);
-      setError(null);
-      try {
-        const dashboard = await getDashboard();
-        if (!cancelled) {
-          setData(dashboard);
-        }
-      } catch {
-        if (!cancelled) {
-          setError('Failed to load dashboard.');
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
+  async function loadDashboard() {
+    setLoading(true);
+    setError(null);
+    try {
+      const dashboard = await getDashboard();
+      setData(dashboard);
+    } catch {
+      setError('Failed to load dashboard.');
+    } finally {
+      setLoading(false);
     }
+  }
 
-    void load();
-    return () => {
-      cancelled = true;
-    };
+  useEffect(() => {
+    void loadDashboard();
   }, []);
 
   useEffect(() => {
@@ -93,21 +87,15 @@ export function DashboardApp() {
   }
 
   if (loading) {
-    return (
-      <div aria-busy="true">
-        <p className="text-muted" role="status">
-          Loading dashboard…
-        </p>
-        <LoadingSkeleton />
-      </div>
-    );
+    return <LoadingState label="Loading dashboard…" />;
   }
 
   if (error || !data) {
     return (
-      <div className="alert alert-danger" role="alert">
-        {error ?? 'Dashboard unavailable.'}
-      </div>
+      <ErrorState
+        message={error ?? 'Dashboard unavailable.'}
+        onRetry={() => void loadDashboard()}
+      />
     );
   }
 
@@ -116,23 +104,21 @@ export function DashboardApp() {
 
   return (
     <div aria-live="polite">
-      <div
-        className="page-header d-flex justify-content-between align-items-center flex-wrap gap-2"
-        data-tour="dashboard-header"
-      >
-        <div>
-          <h1>Dashboard</h1>
-          <p className="mb-0">Track your change requests and see what needs attention</p>
-        </div>
-        <div className="d-flex gap-2">
-          <a href="/Spa/OnboardingWizard" className="btn btn-outline-primary">
-            Set up a system
-          </a>
-          <a href="/Spa/CreateRequest" className="btn btn-primary" data-tour="new-request">
-            New request
-          </a>
-        </div>
-      </div>
+      <PageHeader
+        title="Dashboard"
+        description="Track your change requests and see what needs attention"
+        tourId="dashboard-header"
+        actions={
+          <>
+            <a href="/Spa/OnboardingWizard" className="btn btn-outline-primary">
+              Set up a system
+            </a>
+            <a href="/Spa/CreateRequest" className="btn btn-primary" data-tour="new-request">
+              New request
+            </a>
+          </>
+        }
+      />
 
       <div className="copilot-bar" data-tour="copilot">
         <form className="d-flex gap-2 flex-wrap align-items-center" onSubmit={(e) => void handleSearch(e)}>
@@ -307,14 +293,16 @@ export function DashboardApp() {
           </div>
         </div>
       ) : (
-        <div className="card-panel empty-state">
-          <div className="empty-state-icon">☰</div>
-          <h2 className="h5">No requests yet</h2>
-          <p className="mb-3">Submit your first change request to see progress here.</p>
-          <a href="/Spa/CreateRequest" className="btn btn-primary">
-            Submit a request
-          </a>
-        </div>
+        <EmptyState
+          title="No requests yet"
+          description="Submit your first change request to see progress here."
+          icon="inbox"
+          action={
+            <a href="/Spa/CreateRequest" className="btn btn-primary">
+              Submit a request
+            </a>
+          }
+        />
       )}
     </div>
   );
