@@ -1,3 +1,4 @@
+using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Features.IntakeCopilot.Commands;
 using EnhancementHub.Application.Features.IntakeCopilot.Dtos;
 using EnhancementHub.Application.Features.IntakeCopilot.Queries;
@@ -14,8 +15,23 @@ namespace EnhancementHub.Web.Controllers.Spa;
 public sealed class SpaIntakeController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly IAiUsageBudgetService _budgetService;
 
-    public SpaIntakeController(IMediator mediator) => _mediator = mediator;
+    public SpaIntakeController(IMediator mediator, IAiUsageBudgetService budgetService)
+    {
+        _mediator = mediator;
+        _budgetService = budgetService;
+    }
+
+    [HttpGet("budget")]
+    public async Task<IActionResult> GetBudgetStatus(CancellationToken cancellationToken) =>
+        Ok(await _budgetService.GetStatusAsync(cancellationToken));
+
+    [HttpPost("score-draft")]
+    public async Task<IActionResult> ScoreDraft(
+        [FromBody] ScoreIntakeDraftRequest request,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new ScoreIntakeDraftQuery(request), cancellationToken));
 
     [HttpPost("sessions")]
     public async Task<IActionResult> StartSession(

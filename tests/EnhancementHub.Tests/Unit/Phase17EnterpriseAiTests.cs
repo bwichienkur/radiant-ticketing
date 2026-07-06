@@ -54,6 +54,17 @@ public sealed class Phase17EnterpriseAiTests
     {
         public Task EnsureWithinBudgetAsync(CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
+
+        public Task<Application.Abstractions.AiBudgetStatusDto> GetStatusAsync(
+            CancellationToken cancellationToken = default) =>
+            Task.FromResult(new Application.Abstractions.AiBudgetStatusDto(
+                false,
+                500_000,
+                0,
+                500_000,
+                50m,
+                0m,
+                50m));
     }
 
     private sealed class TestHttpClientFactory : System.Net.Http.IHttpClientFactory

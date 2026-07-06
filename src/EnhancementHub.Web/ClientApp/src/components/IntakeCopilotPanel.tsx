@@ -3,11 +3,19 @@ import { AlertBanner } from './ui';
 import {
   attachIntakePolicyDocument,
   attachIntakePolicyUrl,
+  getIntakeCopilotBudget,
   getIntakeCopilotSession,
+  scoreIntakeDraft,
   sendIntakeCopilotMessage,
   startIntakeCopilotSession,
 } from '../api/spaClient';
-import type { IntakeCopilotDraft, IntakeCopilotMessage, IntakeCopilotSession } from '../types/spa';
+import type {
+  AiBudgetStatus,
+  IntakeCopilotDraft,
+  IntakeCopilotMessage,
+  IntakeCopilotSession,
+  IntakeQualityScore,
+} from '../types/spa';
 
 export interface IntakeCopilotFormDraft {
   title: string;
@@ -37,6 +45,8 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
   const [policyLabel, setPolicyLabel] = useState<string | null>(null);
   const [policyUrl, setPolicyUrl] = useState('');
   const [policyLoading, setPolicyLoading] = useState(false);
+  const [budget, setBudget] = useState<AiBudgetStatus | null>(null);
+  const [qualityScore, setQualityScore] = useState<IntakeQualityScore | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -47,6 +57,34 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, loading]);
+
+  useEffect(() => {
+    void getIntakeCopilotBudget()
+      .then(setBudget)
+      .catch(() => setBudget(null));
+  }, []);
+
+  async function refreshQualityScore(draft: IntakeCopilotDraft | null | undefined) {
+    if (!draft) {
+      setQualityScore(null);
+      return;
+    }
+
+    try {
+      const score = await scoreIntakeDraft({
+        title: draft.title,
+        businessDescription: draft.businessDescription,
+        desiredOutcome: draft.desiredOutcome,
+        priority: draft.priority,
+        targetApplicationId: draft.targetApplicationId ?? undefined,
+        department: draft.department ?? undefined,
+        supportingNotes: draft.supportingNotes ?? undefined,
+      });
+      setQualityScore(score);
+    } catch {
+      setQualityScore(null);
+    }
+  }
 
   async function ensureSession() {
     if (sessionId) {
@@ -139,6 +177,7 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
 
     if (response.session.draft) {
       onApplyDraft(draftToForm(response.session.draft, response.session.suggestedTemplateId));
+      void refreshQualityScore(response.session.draft);
     }
   }
 
@@ -216,6 +255,18 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
             and draft your request — this is not a general chatbot.
           </p>
         </div>
+        {budget?.enabled ? (
+          <div className="small text-muted text-end" aria-live="polite">
+            <div className="fw-semibold">Daily AI budget</div>
+            <div>
+              {budget.tokensRemaining.toLocaleString()} tokens left
+              <span className="text-muted">
+                {' '}
+                / {budget.dailyTokenLimit.toLocaleString()}
+              </span>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {usedMockAi ? (
@@ -318,6 +369,25 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
         </div>
       ) : null}
 
+      {qualityScore ? (
+        <AlertBanner
+          variant={qualityScore.readyToSubmit ? 'success' : 'warning'}
+          title={`Intake quality: ${qualityScore.score}/100`}
+          className="mb-3"
+        >
+          {qualityScore.readyToSubmit ? (
+            <span>Your draft has the core fields needed to submit.</span>
+          ) : (
+            <span>
+              {qualityScore.missingFields.length > 0
+                ? `Missing: ${qualityScore.missingFields.join(', ')}. `
+                : ''}
+              {qualityScore.suggestions[0] ?? 'Add more detail before submitting.'}
+            </span>
+          )}
+        </AlertBanner>
+      ) : null}
+
       {error ? (
         <div className="alert alert-danger py-2 small" role="alert">
           {error}
@@ -349,6 +419,7 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
               onClick={() => void getIntakeCopilotSession(sessionId).then((s) => {
                 if (s.draft) {
                   onApplyDraft(draftToForm(s.draft, s.suggestedTemplateId));
+                  void refreshQualityScore(s.draft);
                 }
               })}
             >

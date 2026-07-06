@@ -318,6 +318,51 @@ export interface DashboardPageData {
   showOnboardingChecklist: boolean;
 }
 
+export interface ApprovalRecommendation {
+  enhancementRequestId: string;
+  recommendation: string;
+  summary: string;
+  riskLevel?: string;
+  confidenceScore?: number;
+  needsClarification: boolean;
+}
+
+export interface IntakeQualityScore {
+  score: number;
+  readyToSubmit: boolean;
+  missingFields: string[];
+  suggestions: string[];
+}
+
+export interface AiBudgetStatus {
+  enabled: boolean;
+  dailyTokenLimit: number;
+  tokensUsedToday: number;
+  tokensRemaining: number;
+  dailyCostLimitUsd: number;
+  costUsedTodayUsd: number;
+  costRemainingUsd: number;
+}
+
+export interface AnalysisFieldChange {
+  fieldName: string;
+  valueA?: string;
+  valueB?: string;
+  changed: boolean;
+}
+
+export interface AnalysisComparison {
+  enhancementRequestId: string;
+  versionA: number;
+  versionB: number;
+  riskLevelA: string;
+  riskLevelB: string;
+  confidenceScoreA: number;
+  confidenceScoreB: number;
+  fieldChanges: AnalysisFieldChange[];
+  architectEditsBetweenVersions: number;
+}
+
 export interface EnhancementTemplateSummary {
   id: string;
   name: string;

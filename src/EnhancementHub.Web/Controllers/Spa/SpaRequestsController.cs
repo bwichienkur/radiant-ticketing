@@ -1,5 +1,6 @@
 using System.Text;
 using EnhancementHub.Application.Features.Analysis.Queries;
+using EnhancementHub.Application.Features.Analysis.Queries;
 using EnhancementHub.Application.Features.Approvals.Commands;
 using EnhancementHub.Application.Features.Approvals.Queries;
 using EnhancementHub.Application.Features.Applications.Queries;
@@ -106,6 +107,19 @@ public sealed class SpaRequestsController : ControllerBase
         try
         {
             return Ok(await _mediator.Send(new GetEnhancementAnalysisQuery(requestId), cancellationToken));
+        }
+        catch (Application.Common.Exceptions.NotFoundException)
+        {
+            return NotFound();
+        }
+    }
+
+    [HttpGet("analysis/{requestId:guid}/evolution")]
+    public async Task<IActionResult> GetAnalysisEvolution(Guid requestId, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return Ok(await _mediator.Send(new GetRequestAnalysisEvolutionQuery(requestId), cancellationToken));
         }
         catch (Application.Common.Exceptions.NotFoundException)
         {

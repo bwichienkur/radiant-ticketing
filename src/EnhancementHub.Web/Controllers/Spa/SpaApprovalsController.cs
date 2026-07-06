@@ -1,4 +1,5 @@
 using EnhancementHub.Application.Features.Approvals.Commands;
+using EnhancementHub.Application.Features.Approvals.Queries;
 using EnhancementHub.Application.Features.EnhancementRequests.Queries;
 using EnhancementHub.Domain.Enums;
 using MediatR;
@@ -27,6 +28,12 @@ public sealed class SpaApprovalsController : ControllerBase
 
         return Ok(result.Items);
     }
+
+    [HttpGet("{id:guid}/recommendation")]
+    public async Task<IActionResult> GetApprovalRecommendation(
+        Guid id,
+        CancellationToken cancellationToken) =>
+        Ok(await _mediator.Send(new GetApprovalRecommendationQuery(id), cancellationToken));
 
     [HttpPost("{id:guid}/action")]
     public async Task<IActionResult> SubmitApprovalAction(

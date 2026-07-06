@@ -1,5 +1,9 @@
 import type {
+  AiBudgetStatus,
+  AnalysisComparison,
   ApplicationListItem,
+  ApprovalRecommendation,
+  IntakeQualityScore,
   AuditLogEntry,
   AuditLogFilters,
   DatabaseConnectionSummary,
@@ -166,6 +170,10 @@ export async function listPendingApprovals(): Promise<PendingApprovalItem[]> {
 
 export async function getApprovalRequestDetail(requestId: string): Promise<ApprovalRequestDetail> {
   return fetchJson<ApprovalRequestDetail>(`/web-api/spa/requests/${requestId}`);
+}
+
+export async function getApprovalRecommendation(requestId: string): Promise<ApprovalRecommendation> {
+  return fetchJson<ApprovalRecommendation>(`/web-api/spa/approvals/${requestId}/recommendation`);
 }
 
 export async function submitApprovalAction(
@@ -434,6 +442,29 @@ export async function createRequestFromIntakeSession(
     `/web-api/spa/intake/sessions/${sessionId}/create-request`,
     overrides ? { overrides } : {},
   );
+}
+
+export async function getIntakeCopilotBudget(): Promise<AiBudgetStatus> {
+  return fetchJson<AiBudgetStatus>('/web-api/spa/intake/budget');
+}
+
+export async function scoreIntakeDraft(draft: {
+  title?: string;
+  businessDescription?: string;
+  desiredOutcome?: string;
+  priority?: string;
+  targetApplicationId?: string;
+  department?: string;
+  supportingNotes?: string;
+}): Promise<IntakeQualityScore> {
+  return postJson<IntakeQualityScore>('/web-api/spa/intake/score-draft', {
+    ...draft,
+    targetApplicationId: draft.targetApplicationId || undefined,
+  });
+}
+
+export async function getAnalysisEvolution(requestId: string): Promise<AnalysisComparison> {
+  return fetchJson<AnalysisComparison>(`/web-api/spa/analysis/${requestId}/evolution`);
 }
 
 export async function listEnhancementRequests(params: {

@@ -452,6 +452,13 @@ Guide: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md)
 - Dashboard insights include top 5 unresolved drift findings
 - `DriftDigestJobExecutor` — weekly email digest to Admin/Approver users via Hangfire
 
+## Phase 54 — Approval & intake copilot expansion (complete)
+
+- `GET /web-api/spa/approvals/{id}/recommendation` — one-paragraph approve/reject guidance per queue item
+- `POST /web-api/spa/intake/score-draft` — intake quality score with missing-field suggestions
+- `GET /web-api/spa/analysis/{id}/evolution` — AI baseline vs architect edits comparison view
+- `GET /web-api/spa/intake/budget` — remaining daily AI token budget in intake copilot panel
+
 ## Phases 46–57 — Due diligence execution (planned)
 
 Post-audit roadmap to reach world-class enterprise readiness. Full task breakdown: [DUE_DILIGENCE_ROADMAP.md](DUE_DILIGENCE_ROADMAP.md).
@@ -466,7 +473,7 @@ Post-audit roadmap to reach world-class enterprise readiness. Full task breakdow
 | 51 | Global entity search |
 | 52 | Webhooks & automation MVP |
 | 53 | Drift-to-request AI workflow | ✅ Complete |
-| 54 | Approval & intake copilot expansion |
+| 54 | Approval & intake copilot expansion | ✅ Complete |
 | 55 | Horizon 3 load test proof |
 | 56 | Design partner program |
 | 57 | Enterprise hardening & procurement |

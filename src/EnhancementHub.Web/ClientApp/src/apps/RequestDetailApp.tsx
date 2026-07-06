@@ -1,5 +1,6 @@
 import { FormEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import {
+  getAnalysisEvolution,
   getApprovalHistory,
   getPlatformRuntimeStatus,
   getRequestAnalysis,
@@ -22,6 +23,7 @@ import { MissionControl } from '../components/MissionControl';
 import { useRequestCollaboration } from '../hooks/useRequestCollaboration';
 import { formatApprovalAction, getStatusNextStep } from '../utils/requestLabels';
 import type {
+  AnalysisComparison,
   ApprovalHistoryItem,
   CommentSummary,
   EnhancementAnalysis,
@@ -36,6 +38,7 @@ interface RequestDetailAppProps {
 export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
   const [detail, setDetail] = useState<EnhancementRequestDetail | null>(null);
   const [analysis, setAnalysis] = useState<EnhancementAnalysis | null>(null);
+  const [analysisEvolution, setAnalysisEvolution] = useState<AnalysisComparison | null>(null);
   const [approvalHistory, setApprovalHistory] = useState<ApprovalHistoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -53,6 +56,16 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
     setDetail(detailResult);
     setAnalysis(analysisResult);
     setApprovalHistory(historyResult);
+
+    if (analysisResult) {
+      try {
+        setAnalysisEvolution(await getAnalysisEvolution(requestId));
+      } catch {
+        setAnalysisEvolution(null);
+      }
+    } else {
+      setAnalysisEvolution(null);
+    }
   }, [requestId]);
 
   const { presence, liveComments, analysisUpdateMessage } = useRequestCollaboration(requestId, {
@@ -249,6 +262,40 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
             </div>
           ) : null}
               <AnalysisDetailSections analysis={analysis} />
+              {analysisEvolution &&
+              analysisEvolution.fieldChanges.some((change) => change.changed) ? (
+                <SectionCard title="AI recommendation vs architect edits" className="mb-3">
+                  <p className="small text-muted">
+                    Comparing AI baseline (v{analysisEvolution.versionA}) to current state
+                    {analysisEvolution.architectEditsBetweenVersions > 0
+                      ? ` · ${analysisEvolution.architectEditsBetweenVersions} architect edit(s) recorded`
+                      : ''}
+                    .
+                  </p>
+                  <div className="table-responsive">
+                    <table className="table table-sm align-middle mb-0">
+                      <thead>
+                        <tr>
+                          <th scope="col">Field</th>
+                          <th scope="col">AI recommendation</th>
+                          <th scope="col">Current</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {analysisEvolution.fieldChanges
+                          .filter((change) => change.changed)
+                          .map((change) => (
+                            <tr key={change.fieldName}>
+                              <td className="fw-semibold">{change.fieldName}</td>
+                              <td className="small">{change.valueA ?? '—'}</td>
+                              <td className="small">{change.valueB ?? '—'}</td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </SectionCard>
+              ) : null}
             </>
           ) : null}
         </div>

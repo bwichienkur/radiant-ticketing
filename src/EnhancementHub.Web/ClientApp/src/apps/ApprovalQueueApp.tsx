@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
+  getApprovalRecommendation,
   getApprovalRequestDetail,
   listPendingApprovals,
   submitApprovalAction,
 } from '../api/spaClient';
 import {
+  AlertBanner,
   ConfirmDialog,
   EmptyState,
   ErrorState,
@@ -16,7 +18,7 @@ import {
 } from '../components/ui';
 import { LoadingSkeleton } from '../components/LoadingSkeleton';
 import { formatApprovalAction, formatConfidenceLabel } from '../utils/requestLabels';
-import type { ApprovalRequestDetail, PendingApprovalItem } from '../types/spa';
+import type { ApprovalRecommendation, ApprovalRequestDetail, PendingApprovalItem } from '../types/spa';
 import { SpaLink } from '../components/SpaLink';
 
 interface ApprovalQueueAppProps {
@@ -30,6 +32,7 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
   const [pending, setPending] = useState<PendingApprovalItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(initialRequestId ?? null);
   const [selected, setSelected] = useState<ApprovalRequestDetail | null>(null);
+  const [recommendation, setRecommendation] = useState<ApprovalRecommendation | null>(null);
   const [comments, setComments] = useState('');
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -63,6 +66,7 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
   useEffect(() => {
     if (!selectedId) {
       setSelected(null);
+      setRecommendation(null);
       return;
     }
 
@@ -71,9 +75,13 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
     async function loadDetail() {
       setDetailLoading(true);
       try {
-        const detail = await getApprovalRequestDetail(selectedId!);
+        const [detail, rec] = await Promise.all([
+          getApprovalRequestDetail(selectedId!),
+          getApprovalRecommendation(selectedId!),
+        ]);
         if (!cancelled) {
           setSelected(detail);
+          setRecommendation(rec);
         }
       } catch {
         if (!cancelled) {
@@ -155,6 +163,37 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
   const latestAnalysis = selected?.analyses
     ?.slice()
     .sort((a, b) => b.version - a.version)[0];
+
+  function recommendationVariant(rec: ApprovalRecommendation): 'success' | 'warning' | 'danger' | 'info' {
+    switch (rec.recommendation) {
+      case 'Approve':
+        return 'success';
+      case 'ApproveWithCare':
+      case 'Caution':
+        return 'warning';
+      case 'Reject':
+        return 'danger';
+      default:
+        return 'info';
+    }
+  }
+
+  function recommendationLabel(rec: ApprovalRecommendation): string {
+    switch (rec.recommendation) {
+      case 'Approve':
+        return 'Recommend approve';
+      case 'ApproveWithCare':
+        return 'Approve with care';
+      case 'Caution':
+        return 'Proceed with caution';
+      case 'RequestClarification':
+        return 'Ask for clarification';
+      case 'Reject':
+        return 'Consider declining';
+      default:
+        return 'Review guidance';
+    }
+  }
 
   if (loading) {
     return <LoadingState label="Loading approval queue…" />;
@@ -242,6 +281,16 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
                   </p>
                 ) : null}
               </div>
+
+              {recommendation ? (
+                <AlertBanner
+                  variant={recommendationVariant(recommendation)}
+                  title={recommendationLabel(recommendation)}
+                  className="mb-3"
+                >
+                  {recommendation.summary}
+                </AlertBanner>
+              ) : null}
 
               <details className="mb-3" open>
                 <summary className="fw-semibold mb-2">Business context</summary>

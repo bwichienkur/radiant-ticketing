@@ -45,4 +45,28 @@ public sealed class AiUsageBudgetService : IAiUsageBudgetService
                 $"Daily AI cost limit of ${_options.Budget.DailyCostLimitUsd:F2} has been reached.");
         }
     }
+
+    public async Task<AiBudgetStatusDto> GetStatusAsync(CancellationToken cancellationToken = default)
+    {
+        var dayStart = DateTime.UtcNow.Date;
+        var runs = await _dbContext.AiPromptRuns
+            .AsNoTracking()
+            .Where(r => r.StartedAt >= dayStart)
+            .Select(r => new { r.TotalTokens, r.EstimatedCostUsd })
+            .ToListAsync(cancellationToken);
+
+        var tokensUsed = runs.Sum(r => r.TotalTokens ?? 0);
+        var costUsed = runs.Sum(r => r.EstimatedCostUsd ?? 0m);
+        var tokenLimit = _options.Budget.DailyTokenLimit;
+        var costLimit = _options.Budget.DailyCostLimitUsd;
+
+        return new AiBudgetStatusDto(
+            _options.Budget.Enabled,
+            tokenLimit,
+            tokensUsed,
+            Math.Max(0, tokenLimit - tokensUsed),
+            costLimit,
+            costUsed,
+            Math.Max(0m, costLimit - costUsed));
+    }
 }
