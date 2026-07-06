@@ -1,48 +1,54 @@
 @page
 @model EnhancementHub.Web.Pages.DatabaseConnections.IndexModel
-@{ ViewData["Title"] = "Database Connections"; }
+@{
+    ViewData["Title"] = "Database Connections";
+    ViewData["PageHeaderTitle"] = "Database Connections";
+    ViewData["PageHeaderDescription"] = "Read-only schema scanning for architecture documentation";
+}
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-0">Database Connections</h1>
-        <p class="text-muted mb-0 small">Read-only schema scanning for architecture documentation</p>
-    </div>
-    <div class="d-flex gap-2">
+<header class="page-header d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <partial name="_PageHeader" />
+    <div class="page-header-actions d-flex flex-wrap gap-2">
         <a class="btn btn-outline-primary" href="/Spa/OnboardingWizard">Add via setup wizard</a>
         <a class="btn btn-primary" asp-page="Register">Register connection</a>
     </div>
-</div>
+</header>
 
 @if (!Model.Connections.Any())
 {
-    <div class="card-panel p-5 text-center">
-        <h2 class="h5">No database connections</h2>
-        <p class="text-muted mb-4">Register a read-only database during onboarding, or use the on-prem agent for air-gapped environments.</p>
-        <a href="/Spa/OnboardingWizard" class="btn btn-primary">Start setup wizard</a>
-    </div>
+    ViewData["EmptyStateTitle"] = "No database connections";
+    ViewData["EmptyStateDescription"] = "Register a read-only database during onboarding, or use the on-prem agent for air-gapped environments.";
+    ViewData["EmptyStateIcon"] = "inbox";
+    ViewData["EmptyStateActionUrl"] = "/Spa/OnboardingWizard";
+    ViewData["EmptyStateActionText"] = "Start setup wizard";
+    <partial name="_EmptyState" />
 }
 else
 {
-<table class="table table-hover card-panel">
-    <thead><tr><th>Name</th><th>Application</th><th>Provider</th><th>Status</th><th>Last scan</th><th></th></tr></thead>
-    <tbody>
-    @foreach (var c in Model.Connections)
-    {
-        <tr>
-            <td>@c.Name</td>
-            <td>@c.ApplicationName</td>
-            <td>@c.Provider</td>
-            <td><span class="badge bg-@(c.ScanStatus == "Completed" ? "success" : "secondary")">@c.ScanStatus</span></td>
-            <td>@(c.LastScannedAt?.ToString("g") ?? "—")</td>
-            <td class="text-end">
-                <a class="btn btn-sm btn-outline-primary" asp-page="Details" asp-route-id="@c.Id">Details</a>
-                <form method="post" asp-page-handler="Scan" class="d-inline">
-                    <input type="hidden" name="id" value="@c.Id" />
-                    <button class="btn btn-sm btn-outline-secondary">Scan</button>
-                </form>
-            </td>
-        </tr>
-    }
-    </tbody>
-</table>
+<div class="card-panel">
+    <div class="table-responsive">
+        <table class="table table-hover table-enterprise mb-0">
+            <thead><tr><th scope="col">Name</th><th scope="col">Application</th><th scope="col">Provider</th><th scope="col">Status</th><th scope="col">Last scan</th><th scope="col"></th></tr></thead>
+            <tbody>
+            @foreach (var c in Model.Connections)
+            {
+                <tr>
+                    <td><strong>@c.Name</strong></td>
+                    <td>@c.ApplicationName</td>
+                    <td>@c.Provider</td>
+                    <td><span class="badge text-bg-@(c.ScanStatus == "Completed" ? "success" : "secondary") badge-status">@c.ScanStatus</span></td>
+                    <td>@(c.LastScannedAt?.ToString("g") ?? "—")</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-primary" asp-page="Details" asp-route-id="@c.Id">Details</a>
+                        <form method="post" asp-page-handler="Scan" class="d-inline">
+                            <input type="hidden" name="id" value="@c.Id" />
+                            <button class="btn btn-sm btn-outline-secondary">Scan</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
 }

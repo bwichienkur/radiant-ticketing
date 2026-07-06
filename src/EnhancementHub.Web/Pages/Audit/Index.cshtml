@@ -2,16 +2,15 @@
 @model EnhancementHub.Web.Pages.Audit.IndexModel
 @{
     ViewData["Title"] = "Audit Log";
+    ViewData["PageHeaderTitle"] = "Audit Log";
+    ViewData["PageHeaderDescription"] = "System activity and change history";
 }
 
-<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
-    <div>
-        <h1>Audit Log</h1>
-        <p>System activity and change history</p>
-    </div>
+<header class="page-header d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <partial name="_PageHeader" />
     @if (User.IsInRole("Admin"))
     {
-        <div class="d-flex gap-2">
+        <div class="page-header-actions d-flex flex-wrap gap-2">
             <a asp-page="./Index" asp-page-handler="Export" asp-route-format="csv"
                asp-route-entityType="@Model.EntityType" asp-route-action="@Model.Action"
                asp-route-from="@Model.From?.ToString("yyyy-MM-dd")" asp-route-to="@Model.To?.ToString("yyyy-MM-dd")"
@@ -22,37 +21,38 @@
                class="btn btn-outline-secondary btn-sm">Export JSON</a>
         </div>
     }
-</div>
+</header>
 
-<div class="card-panel p-3 mb-3">
-    <form method="get" class="row g-2 align-items-end">
+<div class="card-panel p-3 mb-3 eh-filter-panel">
+    <form method="get" class="row g-2 align-items-end" aria-label="Filter audit log">
         <div class="col-md-3">
-            <label class="form-label small mb-1">Entity type</label>
-            <input class="form-control" name="EntityType" value="@Model.EntityType" placeholder="EnhancementRequest" />
+            <label class="form-label small" for="audit-entity-type">Entity type</label>
+            <input class="form-control" id="audit-entity-type" name="EntityType" value="@Model.EntityType" placeholder="EnhancementRequest" />
         </div>
         <div class="col-md-3">
-            <label class="form-label small mb-1">Action</label>
-            <input class="form-control" name="Action" value="@Model.Action" placeholder="Approved" />
+            <label class="form-label small" for="audit-action">Action</label>
+            <input class="form-control" id="audit-action" name="Action" value="@Model.Action" placeholder="Approved" />
         </div>
         <div class="col-md-2">
-            <label class="form-label small mb-1">From</label>
-            <input class="form-control" type="date" name="From" value="@Model.From?.ToString("yyyy-MM-dd")" />
+            <label class="form-label small" for="audit-from">From</label>
+            <input class="form-control" id="audit-from" type="date" name="From" value="@Model.From?.ToString("yyyy-MM-dd")" />
         </div>
         <div class="col-md-2">
-            <label class="form-label small mb-1">To</label>
-            <input class="form-control" type="date" name="To" value="@Model.To?.ToString("yyyy-MM-dd")" />
+            <label class="form-label small" for="audit-to">To</label>
+            <input class="form-control" id="audit-to" type="date" name="To" value="@Model.To?.ToString("yyyy-MM-dd")" />
         </div>
         <div class="col-md-2">
-            <button type="submit" class="btn btn-primary w-100">Filter</button>
+            <button type="submit" class="btn btn-primary w-100">Apply filters</button>
         </div>
     </form>
 </div>
 
 @if (Model.Logs.Count == 0)
 {
-    <div class="card-panel p-4">
-        <p class="text-muted mb-0">No audit entries match the current filters.</p>
-    </div>
+    ViewData["EmptyStateTitle"] = "No audit entries";
+    ViewData["EmptyStateDescription"] = "No audit entries match the current filters.";
+    ViewData["EmptyStateIcon"] = "search";
+    <partial name="_EmptyState" />
 }
 else
 {

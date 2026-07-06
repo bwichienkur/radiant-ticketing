@@ -1,3 +1,5 @@
+export { ConfirmDialog } from './ConfirmDialog';
+export { paginateItems, Pagination } from './Pagination';
 export { AlertBanner } from './AlertBanner';
 export { EmptyState } from './EmptyState';
 export { ErrorState } from './ErrorState';

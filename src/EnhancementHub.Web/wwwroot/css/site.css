@@ -526,8 +526,23 @@ body {
 
 .sidebar-icon {
     width: 1.25rem;
-    text-align: center;
-    opacity: 0.85;
+    height: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    opacity: 0.9;
+}
+
+.sidebar-icon-svg {
+    display: block;
+}
+
+.sidebar-icon-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 999px;
+    background: currentColor;
 }
 
 .app-main {
@@ -618,6 +633,66 @@ body {
 .eh-toast-info .toast-header {
     background: var(--eh-accent-soft);
     color: var(--eh-accent);
+}
+
+.eh-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    background: rgba(15, 23, 42, 0.45);
+    display: grid;
+    place-items: center;
+    padding: var(--eh-space-4);
+}
+
+.eh-modal {
+    width: min(28rem, 100%);
+    padding: var(--eh-space-5);
+    box-shadow: var(--eh-shadow-md);
+}
+
+.eh-modal-title {
+    font-size: var(--eh-font-size-lg);
+    font-weight: 600;
+    margin-bottom: var(--eh-space-2);
+}
+
+.eh-modal-message {
+    color: var(--eh-muted);
+    margin-bottom: var(--eh-space-4);
+}
+
+.eh-pagination {
+    padding: var(--eh-space-3) var(--eh-space-4);
+    border-top: 1px solid var(--eh-border);
+}
+
+.eh-pagination-size {
+    width: auto;
+    min-width: 4.5rem;
+}
+
+.eh-pagination-current {
+    pointer-events: none;
+}
+
+.eh-table-checkbox-col {
+    width: 2.5rem;
+}
+
+.eh-bulk-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--eh-space-3);
+    padding: var(--eh-space-3) var(--eh-space-4);
+    border-bottom: 1px solid var(--eh-border);
+    background: var(--eh-accent-soft);
+}
+
+.embedded-empty-state {
+    padding: var(--eh-space-6) var(--eh-space-4);
+    text-align: center;
 }
 
 .app-content {
@@ -1113,6 +1188,13 @@ body {
     }
 }
 
+
+.onboarding-progress {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--eh-space-2);
+    margin-bottom: var(--eh-space-4);
+}
 
 .onboarding-progress .onboarding-step {
     flex: 1;

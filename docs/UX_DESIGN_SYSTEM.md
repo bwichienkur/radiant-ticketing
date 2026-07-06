@@ -79,10 +79,11 @@ Toasts: React apps call `window.EhUx.showToast()` (Bootstrap toast in `_Layout`)
 | Phase | Scope | Status |
 |-------|-------|--------|
 | 1 | Tokens, focus, empty states, app shell fixes | This PR |
-| 2 | Dashboard, request list, request detail, create request | This PR |
-| 3 | Approval queue, onboarding wizard, delivery panel polish | Follow-up |
-| 4 | Razor CRUD pages (Applications, DB, Admin forms) | Follow-up |
-| 5 | Table pagination, bulk actions, confirmation modals | Follow-up |
+| 2 | Dashboard, request list, request detail, create request | Done |
+| 3 | Approval queue, onboarding wizard, delivery panel polish | Done (this PR) |
+| 4 | Razor CRUD pages (Applications, DB, Repos, Audit, Drift) | Done (this PR) |
+| 5 | Table pagination, bulk actions, confirmation modals | Done (this PR) |
+| 6 | SVG sidebar icons | Done (this PR) |
 
 ---
 
@@ -100,8 +101,8 @@ Toasts: React apps call `window.EhUx.showToast()` (Bootstrap toast in `_Layout`)
 ## Remaining improvements
 
 - Shared React layout shell (would require routing strategy change)
-- Pagination and bulk selection on request list
-- Confirmation dialogs for destructive delivery actions
-- SVG icon set replacing Unicode sidebar glyphs
+- Server-side pagination for very large request lists
+- Bulk approve/export actions beyond selection toolbar
 - Storybook or visual regression for UI kit
 - Dark-mode audit for new empty-state illustrations
+- Additional Razor pages (Refactor, Documentation, Application details)

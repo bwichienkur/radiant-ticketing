@@ -2,37 +2,39 @@
 @model EnhancementHub.Web.Pages.Applications.IndexModel
 @{
     ViewData["Title"] = "Applications";
+    ViewData["PageHeaderTitle"] = "Applications";
+    ViewData["PageHeaderDescription"] = "Registered enterprise applications";
 }
 
-<div class="page-header d-flex justify-content-between align-items-center">
-    <div>
-        <h1>Applications</h1>
-        <p>Registered enterprise applications</p>
+<header class="page-header d-flex justify-content-between align-items-start flex-wrap gap-3">
+    <partial name="_PageHeader" />
+    <div class="page-header-actions d-flex flex-wrap gap-2">
+        <a href="/Spa/OnboardingWizard" class="btn btn-primary">Document new application</a>
     </div>
-    <a href="/Spa/OnboardingWizard" class="btn btn-primary">Document new application</a>
-</div>
+</header>
 
 @if (!Model.Applications.Any())
 {
-    <div class="card-panel p-5 text-center">
-        <h2 class="h5">No applications yet</h2>
-        <p class="text-muted mb-4">Use the guided setup wizard to register your first application, connect code and databases, and generate documentation.</p>
-        <a href="/Spa/OnboardingWizard" class="btn btn-primary">Start setup wizard</a>
-    </div>
+    ViewData["EmptyStateTitle"] = "No applications yet";
+    ViewData["EmptyStateDescription"] = "Use the guided setup wizard to register your first application, connect code and databases, and generate documentation.";
+    ViewData["EmptyStateIcon"] = "document";
+    ViewData["EmptyStateActionUrl"] = "/Spa/OnboardingWizard";
+    ViewData["EmptyStateActionText"] = "Start setup wizard";
+    <partial name="_EmptyState" />
 }
 else
 {
 <div class="card-panel">
     <table class="table table-hover table-enterprise mb-0">
-        <thead><tr><th>Name</th><th>Domain</th><th>Repositories</th><th></th></tr></thead>
+        <thead><tr><th scope="col">Name</th><th scope="col">Domain</th><th scope="col">Repositories</th><th scope="col"></th></tr></thead>
         <tbody>
         @foreach (var app in Model.Applications)
         {
             <tr>
-                <td>@app.Name</td>
+                <td><strong>@app.Name</strong></td>
                 <td>@(app.BusinessDomain ?? "—")</td>
                 <td>@app.RepositoryCount</td>
-                <td><a asp-page="Details" asp-route-id="@app.Id" class="btn btn-sm btn-outline-primary">Profile</a></td>
+                <td class="text-end"><a asp-page="Details" asp-route-id="@app.Id" class="btn btn-sm btn-outline-primary">Profile</a></td>
             </tr>
         }
         </tbody>

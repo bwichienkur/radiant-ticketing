@@ -6,6 +6,8 @@ import {
   ListToolbar,
   LoadingState,
   PageHeader,
+  paginateItems,
+  Pagination,
   StatusBadge,
 } from '../components/ui';
 import type { EnhancementRequestListItem } from '../types/spa';
@@ -88,12 +90,17 @@ function buildFilterSummary(filters: ListFilters): string | undefined {
   return parts.length > 0 ? parts.join(', ') : undefined;
 }
 
+const DEFAULT_PAGE_SIZE = 25;
+
 export function RequestListApp() {
   const [filters, setFilters] = useState<ListFilters>(readFiltersFromUrl);
   const [draftFilters, setDraftFilters] = useState<ListFilters>(readFiltersFromUrl);
   const [requests, setRequests] = useState<EnhancementRequestListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
 
   const loadRequests = useCallback(async (activeFilters: ListFilters) => {
     setLoading(true);
@@ -116,7 +123,47 @@ export function RequestListApp() {
 
   useEffect(() => {
     void loadRequests(filters);
+    setPage(1);
+    setSelectedIds(new Set());
   }, [filters, loadRequests]);
+
+  const pagedRequests = useMemo(() => paginateItems(requests, page, pageSize), [requests, page, pageSize]);
+
+  const allPageSelected =
+    pagedRequests.length > 0 && pagedRequests.every((item) => selectedIds.has(item.id));
+
+  function toggleSelectAllOnPage() {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allPageSelected) {
+        pagedRequests.forEach((item) => next.delete(item.id));
+      } else {
+        pagedRequests.forEach((item) => next.add(item.id));
+      }
+      return next;
+    });
+  }
+
+  function toggleSelect(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }
+
+  const selectedPendingCount = useMemo(
+    () =>
+      requests.filter(
+        (item) =>
+          selectedIds.has(item.id) && normalizeRequestStatus(item.status) === 'PendingApproval',
+      ).length,
+    [requests, selectedIds],
+  );
 
   const chipHref = useMemo(() => {
     return (chip: Partial<ListFilters>) => {
@@ -292,10 +339,36 @@ export function RequestListApp() {
             filterSummary={buildFilterSummary(filters)}
           />
           <div className="card-panel table-desktop-only">
+            {selectedIds.size > 0 ? (
+              <div className="eh-bulk-toolbar" role="toolbar" aria-label="Bulk actions">
+                <span className="small fw-semibold">{selectedIds.size} selected</span>
+                {selectedPendingCount > 0 ? (
+                  <a href="/Spa/ApprovalQueue" className="btn btn-sm btn-primary">
+                    Review in approval queue
+                  </a>
+                ) : null}
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  onClick={() => setSelectedIds(new Set())}
+                >
+                  Clear selection
+                </button>
+              </div>
+            ) : null}
             <div className="table-responsive">
               <table className="table table-hover table-enterprise mb-0">
                 <thead>
                   <tr>
+                    <th scope="col" className="eh-table-checkbox-col">
+                      <input
+                        type="checkbox"
+                        className="form-check-input"
+                        checked={allPageSelected}
+                        onChange={toggleSelectAllOnPage}
+                        aria-label="Select all on this page"
+                      />
+                    </th>
                     <th scope="col">Title</th>
                     <th scope="col">Application</th>
                     <th scope="col">Risk</th>
@@ -307,8 +380,17 @@ export function RequestListApp() {
                   </tr>
                 </thead>
                 <tbody>
-                  {requests.map((item) => (
+                  {pagedRequests.map((item) => (
                     <tr key={item.id}>
+                      <td>
+                        <input
+                          type="checkbox"
+                          className="form-check-input"
+                          checked={selectedIds.has(item.id)}
+                          onChange={() => toggleSelect(item.id)}
+                          aria-label={`Select ${item.title}`}
+                        />
+                      </td>
                       <td>
                         <strong>{item.title}</strong>
                       </td>
@@ -332,10 +414,20 @@ export function RequestListApp() {
                 </tbody>
               </table>
             </div>
+            <Pagination
+              page={page}
+              pageSize={pageSize}
+              totalCount={requests.length}
+              onPageChange={setPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setPage(1);
+              }}
+            />
           </div>
 
           <div className="cards-mobile-only">
-            {requests.map((item) => (
+            {pagedRequests.map((item) => (
               <a
                 key={item.id}
                 href={`/Spa/RequestDetail/${item.id}`}
@@ -352,6 +444,16 @@ export function RequestListApp() {
                 </div>
               </a>
             ))}
+            <Pagination
+              page={page}
+              pageSize={pageSize}
+              totalCount={requests.length}
+              onPageChange={setPage}
+              onPageSizeChange={(size) => {
+                setPageSize(size);
+                setPage(1);
+              }}
+            />
           </div>
         </>
       )}

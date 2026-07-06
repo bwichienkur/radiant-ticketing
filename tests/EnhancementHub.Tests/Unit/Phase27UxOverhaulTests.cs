@@ -85,6 +85,30 @@ public sealed class Phase27UxOverhaulTests
         nav.Should().Contain("/Admin/Tenancy");
     }
 
+    [Fact]
+    public void Sidebar_UsesSvgIconPartial()
+    {
+        var sidebar = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Shared/_SidebarNav.cshtml"));
+        sidebar.Should().Contain("_SidebarIcon");
+        sidebar.Should().NotContain("aria-hidden=\"true\">☰");
+    }
+
+    [Fact]
+    public void UiKit_IncludesConfirmDialogAndPagination()
+    {
+        var index = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/components/ui/index.ts"));
+        index.Should().Contain("ConfirmDialog");
+        index.Should().Contain("Pagination");
+    }
+
+    [Fact]
+    public void RazorPages_UseSharedPageHeaderPartial()
+    {
+        var applications = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Applications/Index.cshtml"));
+        applications.Should().Contain("_PageHeader");
+        applications.Should().Contain("_EmptyState");
+    }
+
     private static string GetPath(string relative) =>
         Path.Combine(GetRepoRoot(), relative);
 
