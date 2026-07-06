@@ -723,6 +723,28 @@ body {
     box-shadow: 0 20px 60px rgba(15, 23, 42, 0.15);
 }
 
+.command-palette-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 10vh 1rem 1rem;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.command-palette-modal {
+    width: min(640px, 100%);
+    border: 1px solid var(--eh-border);
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.2);
+    overflow: hidden;
+}
+
+.command-palette-input-wrap .form-control:focus {
+    box-shadow: none;
+}
+
 .command-palette-input {
     border: none;
     box-shadow: none !important;
@@ -797,6 +819,31 @@ body {
 
 .notification-item.unread {
     background: var(--eh-accent-soft);
+}
+
+.settings-nav-link {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--eh-radius-sm);
+    color: var(--eh-text);
+    text-decoration: none;
+    font-size: var(--eh-font-size-sm);
+}
+
+.settings-nav-link:hover {
+    background: var(--eh-surface-muted);
+    color: var(--eh-accent);
+}
+
+.settings-nav-link.active {
+    background: var(--eh-accent-soft);
+    color: var(--eh-accent);
+    font-weight: 600;
+}
+
+.settings-nav-link:focus-visible {
+    outline: 2px solid var(--eh-accent);
+    outline-offset: 2px;
 }
 
 .admin-subnav {

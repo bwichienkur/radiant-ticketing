@@ -7,6 +7,7 @@ using EnhancementHub.Infrastructure.Persistence;
 using EnhancementHub.Infrastructure.Persistence.Repositories;
 using EnhancementHub.Infrastructure.Security;
 using EnhancementHub.Infrastructure.Services;
+using EnhancementHub.Infrastructure.Services.Approvals;
 using EnhancementHub.Infrastructure.Services.Integrations;
 using EnhancementHub.Infrastructure.Services.Notifications;
 using EnhancementHub.Infrastructure.Services.Webhooks;
@@ -69,6 +70,12 @@ public static class InfrastructureServiceExtensions
 
         services.AddScoped<IEnhancementHubDbContext>(sp => sp.GetRequiredService<EnhancementHubDbContext>());
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+        services.AddScoped<IEnhancementRequestRepository, EnhancementRequestRepository>();
+        services.AddScoped<IApplicationRepository, ApplicationRepository>();
+        services.AddScoped<ITeamRepository, TeamRepository>();
+        services.AddScoped<IGitRepositoryRepository, GitRepositoryRepository>();
+        services.AddScoped<IEnhancementAnalysisRepository, EnhancementAnalysisRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
 
         services.ConfigureEnhancementHubDataProtection(configuration);
 
@@ -263,6 +270,7 @@ public static class InfrastructureServiceExtensions
                 sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<OpenAiAnalysisService>>()));
 
         services.AddScoped<IIntakeCopilotService, IntakeCopilotService>();
+        services.AddScoped<IApprovalCopilotService, ApprovalCopilotService>();
         services.AddScoped<IDocumentTextExtractor, DocumentTextExtractor>();
         services.AddScoped<IPolicyUrlFetcher, PolicyUrlFetcher>();
 

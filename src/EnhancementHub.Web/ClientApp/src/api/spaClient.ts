@@ -7,6 +7,7 @@ import type {
   AuditLogEntry,
   AuditLogFilters,
   DatabaseConnectionSummary,
+  DatabaseSchema,
   DriftReport,
   DriftRequestDraft,
   ApprovalHistoryItem,
@@ -31,6 +32,21 @@ import type {
   PlatformRuntimeStatus,
   RepositoryPathValidation,
   RepositoryListItem,
+  ErdDiagram,
+  BlastRadiusResult,
+  RefactorPlanSummary,
+  RefactorPlanDetail,
+  RoiReport,
+  RegisterDatabaseConnectionInput,
+  DocumentationExportFormat,
+  AuthenticationConfigurationStatus,
+  SystemSetting,
+  TeamSummary,
+  ServiceApiKeySummary,
+  CreateServiceApiKeyResult,
+  WebhookSubscriptionSummary,
+  CreateWebhookSubscriptionResult,
+  WebhookDeliverySummary,
   GlobalSearchItem,
   GlobalSearchResult,
   SystemMap,
@@ -48,6 +64,22 @@ async function fetchJson<T>(url: string): Promise<T> {
 async function postJson<T>(url: string, body?: unknown): Promise<T> {
   const response = await fetch(url, {
     method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorBody = (await response.json().catch(() => null)) as { message?: string } | null;
+    throw new Error(errorBody?.message ?? `Request failed: ${response.status}`);
+  }
+
+  return response.json() as Promise<T>;
+}
+
+async function putJson<T>(url: string, body?: unknown): Promise<T> {
+  const response = await fetch(url, {
+    method: 'PUT',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -92,6 +124,120 @@ export async function postRequestComment(
 
 export async function listApplications(): Promise<ApplicationListItem[]> {
   return fetchJson<ApplicationListItem[]>('/web-api/spa/applications');
+}
+
+export async function listDatabaseConnections(): Promise<DatabaseConnectionSummary[]> {
+  return fetchJson<DatabaseConnectionSummary[]>('/web-api/spa/connections');
+}
+
+export async function registerDatabaseConnection(
+  input: RegisterDatabaseConnectionInput,
+): Promise<DatabaseConnectionSummary> {
+  return postJson<DatabaseConnectionSummary>('/web-api/spa/connections', input);
+}
+
+export async function triggerDatabaseScan(connectionId: string): Promise<DatabaseConnectionSummary> {
+  return postJson<DatabaseConnectionSummary>(`/web-api/spa/connections/${connectionId}/scan`);
+}
+
+export async function getDatabaseSchema(connectionId: string): Promise<DatabaseSchema> {
+  return fetchJson<DatabaseSchema>(`/web-api/spa/connections/${connectionId}/schema`);
+}
+
+export async function getConnectionErd(connectionId: string): Promise<ErdDiagram> {
+  return fetchJson<ErdDiagram>(`/web-api/spa/connections/${connectionId}/erd`);
+}
+
+export function exportDocumentation(applicationId: string, format: DocumentationExportFormat): void {
+  const params = new URLSearchParams();
+  params.set('applicationId', applicationId);
+  params.set('format', format);
+  window.location.assign(`/web-api/spa/documentation/export?${params.toString()}`);
+}
+
+export async function analyzeRefactorBlastRadius(
+  applicationId: string,
+  target: string,
+): Promise<BlastRadiusResult> {
+  return postJson<BlastRadiusResult>('/web-api/spa/refactor/analyze', { applicationId, target });
+}
+
+export async function generateRefactorPlan(
+  applicationId: string,
+  target: string,
+): Promise<RefactorPlanDetail> {
+  return postJson<RefactorPlanDetail>('/web-api/spa/refactor/plans', { applicationId, target });
+}
+
+export async function listRefactorPlans(): Promise<RefactorPlanSummary[]> {
+  return fetchJson<RefactorPlanSummary[]>('/web-api/spa/refactor/plans');
+}
+
+export async function getRefactorPlan(planId: string): Promise<RefactorPlanDetail> {
+  return fetchJson<RefactorPlanDetail>(`/web-api/spa/refactor/plans/${planId}`);
+}
+
+export async function getAuthenticationConfigurationStatus(): Promise<AuthenticationConfigurationStatus> {
+  return fetchJson<AuthenticationConfigurationStatus>('/web-api/spa/settings/authentication');
+}
+
+export async function listSystemSettings(): Promise<SystemSetting[]> {
+  return fetchJson<SystemSetting[]>('/web-api/spa/settings/system');
+}
+
+export async function updateSystemSetting(settingId: string, value: string): Promise<void> {
+  await putJson(`/web-api/spa/settings/system/${settingId}`, { value });
+}
+
+export async function listAdminTeams(): Promise<TeamSummary[]> {
+  return fetchJson<TeamSummary[]>('/web-api/spa/settings/teams');
+}
+
+export async function createAdminTeam(name: string, description?: string): Promise<TeamSummary> {
+  return postJson<TeamSummary>('/web-api/spa/settings/teams', { name, description });
+}
+
+export async function listServiceApiKeys(): Promise<ServiceApiKeySummary[]> {
+  return fetchJson<ServiceApiKeySummary[]>('/web-api/spa/settings/api-keys');
+}
+
+export async function createServiceApiKey(input: {
+  name: string;
+  description?: string;
+  role: string;
+  teamId?: string;
+  expiresInDays?: number;
+}): Promise<CreateServiceApiKeyResult> {
+  return postJson<CreateServiceApiKeyResult>('/web-api/spa/settings/api-keys', input);
+}
+
+export async function revokeServiceApiKey(keyId: string): Promise<void> {
+  await postJson(`/web-api/spa/settings/api-keys/${keyId}/revoke`);
+}
+
+export async function listWebhookEventTypes(): Promise<string[]> {
+  const result = await fetchJson<{ eventTypes: string[] }>('/web-api/spa/settings/webhooks');
+  return result.eventTypes;
+}
+
+export async function listWebhookSubscriptions(): Promise<WebhookSubscriptionSummary[]> {
+  return fetchJson<WebhookSubscriptionSummary[]>('/web-api/spa/settings/webhooks/subscriptions');
+}
+
+export async function listWebhookDeliveries(): Promise<WebhookDeliverySummary[]> {
+  return fetchJson<WebhookDeliverySummary[]>('/web-api/spa/settings/webhooks/deliveries');
+}
+
+export async function createWebhookSubscription(input: {
+  name: string;
+  url: string;
+  eventTypes: string[];
+}): Promise<CreateWebhookSubscriptionResult> {
+  return postJson<CreateWebhookSubscriptionResult>('/web-api/spa/settings/webhooks/subscriptions', input);
+}
+
+export async function revokeWebhookSubscription(subscriptionId: string): Promise<void> {
+  await postJson(`/web-api/spa/settings/webhooks/subscriptions/${subscriptionId}/revoke`);
 }
 
 export async function listDriftConnections(): Promise<DatabaseConnectionSummary[]> {
@@ -354,15 +500,40 @@ export async function getDashboard(): Promise<DashboardPageData> {
   return fetchJson('/web-api/spa/dashboard');
 }
 
+export async function getRoiReport(): Promise<RoiReport> {
+  return fetchJson<RoiReport>('/web-api/spa/insights/roi');
+}
+
+export async function exportRoiCsv(): Promise<void> {
+  const response = await fetch('/web-api/spa/insights/roi/export', { credentials: 'include' });
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'enhancementhub-roi-report.csv';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 export async function searchGlobal(query: string, limit = 20): Promise<GlobalSearchItem[]> {
   return fetchJson<GlobalSearchItem[]>(
     `/web-api/spa/search?q=${encodeURIComponent(query)}&limit=${limit}`,
   );
 }
 
-export async function searchGlobalGrouped(query: string, limit = 20): Promise<GlobalSearchResult> {
+export async function searchGlobalGrouped(
+  query: string,
+  limit = 20,
+  semantic = false,
+): Promise<GlobalSearchResult> {
   return fetchJson<GlobalSearchResult>(
-    `/web-api/spa/search?q=${encodeURIComponent(query)}&grouped=true&limit=${limit}`,
+    `/web-api/spa/search?q=${encodeURIComponent(query)}&grouped=true&limit=${limit}&semantic=${semantic}`,
   );
 }
 

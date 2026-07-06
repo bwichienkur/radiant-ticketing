@@ -4,5 +4,6 @@ public enum AiWorkflowStep
 {
     EnhancementAnalysis,
     RefactorPlan,
-    IntakeCopilot
+    IntakeCopilot,
+    ApprovalCopilot
 }

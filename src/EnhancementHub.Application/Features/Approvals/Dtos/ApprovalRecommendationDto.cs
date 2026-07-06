@@ -8,4 +8,5 @@ public sealed record ApprovalRecommendationDto(
     string Summary,
     RiskLevel? RiskLevel,
     double? ConfidenceScore,
-    bool NeedsClarification);
+    bool NeedsClarification,
+    string Source = "Heuristic");

@@ -15,7 +15,7 @@ import {
   LoadingState,
   PageHeader,
 } from '../components/ui';
-import type { EnhancementTemplateSummary } from '../types/spa';
+import type { EnhancementTemplateSummary, CustomFieldDefinition, CustomFieldValueInput } from '../types/spa';
 
 interface CreateRequestAppProps {
   initialTemplateId?: string;
@@ -27,6 +27,8 @@ const PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];
 export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: CreateRequestAppProps) {
   const [templates, setTemplates] = useState<EnhancementTemplateSummary[]>([]);
   const [applications, setApplications] = useState<Array<{ id: string; name: string }>>([]);
+  const [customFieldDefinitions, setCustomFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,6 +58,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
         if (!cancelled) {
           setTemplates(data.templates);
           setApplications(data.applications);
+          setCustomFieldDefinitions(data.customFields ?? []);
         }
       } catch {
         if (!cancelled) {
@@ -160,6 +163,52 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
     setError(null);
   }, []);
 
+  function buildCustomFieldPayload(): CustomFieldValueInput[] {
+    return customFieldDefinitions
+      .map((field) => {
+        const rawValue = customFieldValues[field.key] ?? '';
+        switch (field.fieldType) {
+          case 'Number':
+            return {
+              key: field.key,
+              numberValue: rawValue === '' ? undefined : Number(rawValue),
+            };
+          case 'Date':
+            return {
+              key: field.key,
+              dateValue: rawValue || undefined,
+            };
+          case 'User':
+            return {
+              key: field.key,
+              userValueId: rawValue || undefined,
+            };
+          default:
+            return {
+              key: field.key,
+              textValue: rawValue || undefined,
+            };
+        }
+      })
+      .filter((value) => {
+        const field = customFieldDefinitions.find((item) => item.key === value.key);
+        if (!field) {
+          return false;
+        }
+
+        if (field.isRequired) {
+          return true;
+        }
+
+        return (
+          value.textValue !== undefined ||
+          value.numberValue !== undefined ||
+          value.dateValue !== undefined ||
+          value.userValueId !== undefined
+        );
+      });
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setSubmitting(true);
@@ -175,6 +224,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
         department: form.department || undefined,
         supportingNotes: form.supportingNotes || undefined,
         templateId: selectedTemplateId || undefined,
+        customFields: buildCustomFieldPayload(),
       };
 
       const created = intakeSessionId
@@ -366,6 +416,86 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
                   />
                 </FormField>
               </div>
+              {customFieldDefinitions.length > 0 ? (
+                <div className="col-12">
+                  <h3 className="h6 text-muted text-uppercase mb-3">Additional fields</h3>
+                  <div className="row g-3">
+                    {customFieldDefinitions.map((field) => (
+                      <div key={field.id} className="col-md-6">
+                        <FormField
+                          id={`custom-field-${field.key}`}
+                          label={field.label}
+                          required={field.isRequired}
+                        >
+                          {field.fieldType === 'Select' ? (
+                            <select
+                              id={`custom-field-${field.key}`}
+                              className="form-select"
+                              required={field.isRequired}
+                              value={customFieldValues[field.key] ?? ''}
+                              onChange={(event) =>
+                                setCustomFieldValues((prev) => ({
+                                  ...prev,
+                                  [field.key]: event.target.value,
+                                }))
+                              }
+                            >
+                              <option value="">— Select —</option>
+                              {field.options.map((option) => (
+                                <option key={option} value={option}>
+                                  {option}
+                                </option>
+                              ))}
+                            </select>
+                          ) : field.fieldType === 'Number' ? (
+                            <input
+                              id={`custom-field-${field.key}`}
+                              type="number"
+                              className="form-control"
+                              required={field.isRequired}
+                              value={customFieldValues[field.key] ?? ''}
+                              onChange={(event) =>
+                                setCustomFieldValues((prev) => ({
+                                  ...prev,
+                                  [field.key]: event.target.value,
+                                }))
+                              }
+                            />
+                          ) : field.fieldType === 'Date' ? (
+                            <input
+                              id={`custom-field-${field.key}`}
+                              type="date"
+                              className="form-control"
+                              required={field.isRequired}
+                              value={customFieldValues[field.key] ?? ''}
+                              onChange={(event) =>
+                                setCustomFieldValues((prev) => ({
+                                  ...prev,
+                                  [field.key]: event.target.value,
+                                }))
+                              }
+                            />
+                          ) : (
+                            <input
+                              id={`custom-field-${field.key}`}
+                              type="text"
+                              className="form-control"
+                              required={field.isRequired}
+                              value={customFieldValues[field.key] ?? ''}
+                              onChange={(event) =>
+                                setCustomFieldValues((prev) => ({
+                                  ...prev,
+                                  [field.key]: event.target.value,
+                                }))
+                              }
+                            />
+                          )}
+                        </FormField>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
             <div className="mt-4 d-flex gap-2">
               <button type="submit" className="btn btn-primary" disabled={submitting}>
