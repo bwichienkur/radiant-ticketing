@@ -406,6 +406,32 @@ export interface ApprovalRecommendation {
   riskLevel?: string;
   confidenceScore?: number;
   needsClarification: boolean;
+  source?: string;
+}
+
+export interface RoiCategoryMetric {
+  category: string;
+  requestCount: number;
+}
+
+export interface RoiReport {
+  totalAnalysesCompleted: number;
+  averageAnalysisDurationMinutes: number;
+  estimatedManualAnalysisHoursPerRequest: number;
+  estimatedHoursSaved: number;
+  highOrCriticalRiskApprovedCount: number;
+  driftFindingsResolved: number;
+  driftFindingsTotal: number;
+  architectEditsRecorded: number;
+  humanApprovedFindings: number;
+  aiSuggestedFindings: number;
+  templateUsageByCategory: RoiCategoryMetric[];
+  averageTimeToAnalysisHours?: number | null;
+  averageTimeToApprovalHours?: number | null;
+  mockAiRunPercent: number;
+  totalAiRunsCompleted: number;
+  averagePilotNps?: number | null;
+  totalFeedbackSubmissions: number;
 }
 
 export interface IntakeQualityScore {

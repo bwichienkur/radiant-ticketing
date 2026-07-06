@@ -65,6 +65,12 @@
             <a class="sidebar-link @(NavActive("/Spa/Audit") ? "active" : "")" href="/Spa/Audit">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"audit"' /></span> Audit
             </a>
+            @if (User.IsInRole("Admin") || User.IsInRole("Approver"))
+            {
+                <a class="sidebar-link @(NavActive("/Spa/Insights") ? "active" : "")" href="/Spa/Insights">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"dashboard"' /></span> Insights
+                </a>
+            }
             @if (User.IsInRole("Admin"))
             {
                 <a class="sidebar-link @(NavActive("/Spa/Settings") ? "active" : "")" href="/Spa/Settings">

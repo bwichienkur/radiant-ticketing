@@ -1,0 +1,12 @@
+@page "/Spa/Insights"
+@model EnhancementHub.Web.Pages.Spa.InsightsModel
+@{
+    ViewData["Title"] = "Insights";
+    ViewData["Breadcrumb"] = "Insights";
+}
+
+<partial name="_SpaRoot" />
+
+@section Scripts {
+    <script type="module" src="~/spa/react/spa-shell.js" asp-append-version="true"></script>
+}

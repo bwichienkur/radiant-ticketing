@@ -10,7 +10,7 @@ const PRIMARY_SECTIONS = [
 
 const ADVANCED_ADMIN_LINKS = [
   { href: '/Admin/Jobs', label: 'Jobs' },
-  { href: '/Admin/Roi', label: 'ROI' },
+  { href: '/Spa/Insights', label: 'ROI' },
   { href: '/Admin/Compliance', label: 'Compliance' },
   { href: '/Admin/CustomFields', label: 'Custom fields' },
 ] as const;

@@ -29,6 +29,7 @@ import { DocumentationExportApp } from '../apps/DocumentationExportApp';
 import { RefactorAnalyzeApp } from '../apps/RefactorAnalyzeApp';
 import { RefactorPlansApp } from '../apps/RefactorPlansApp';
 import { SettingsApp } from '../apps/SettingsApp';
+import { InsightsApp } from '../apps/InsightsApp';
 import { FeedbackWidget } from './FeedbackWidget';
 import { MockAiTrustBanner } from './MockAiTrustBanner';
 import { readSpaContext } from '../spaRoutes';
@@ -152,6 +153,7 @@ export function SpaShell() {
         <Route path="/Spa/Refactor/Analyze" element={<RefactorAnalyzeApp />} />
         <Route path="/Spa/Refactor/Plans" element={<RefactorPlansApp />} />
         <Route path="/Spa/Settings/*" element={<SettingsApp />} />
+        <Route path="/Spa/Insights" element={<InsightsApp />} />
         <Route path="*" element={<UnknownSpaRoute />} />
       </Routes>
     </BrowserRouter>

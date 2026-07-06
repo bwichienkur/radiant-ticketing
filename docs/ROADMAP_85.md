@@ -74,21 +74,21 @@ New `SettingsApp.tsx` at `/Spa/Settings/*`; migrate Identity, API keys, Teams, G
 
 ---
 
-## WAVE 2 — Proof & Intelligence (64–66) → 80/100
+## WAVE 2 — Proof & Intelligence (64–66) → 80/100 ✅
 
-### Phase 64 — Design partner #2 + published proof (GTM)
+### Phase 64 — Design partner #2 + published proof (GTM) ✅
 
-Execute [DESIGN_PARTNER_PLAYBOOK.md](DESIGN_PARTNER_PLAYBOOK.md); publish case study from [CASE_STUDY_TEMPLATE.md](CASE_STUDY_TEMPLATE.md).
+Execute [DESIGN_PARTNER_PLAYBOOK.md](DESIGN_PARTNER_PLAYBOOK.md); track progress in [DESIGN_PARTNER_2_TRACKER.md](DESIGN_PARTNER_2_TRACKER.md); publish case study from [CASE_STUDY_TEMPLATE.md](CASE_STUDY_TEMPLATE.md).
 
 **Exit criteria:** 2 pilots measured; ≥1 published case study; combined NPS > 40
 
-### Phase 65 — Executive ROI dashboard
+### Phase 65 — Executive ROI dashboard ✅
 
-`InsightsApp.tsx` at `/Spa/Insights` — read-only ROI for Manager+ roles; PDF/CSV export.
+`InsightsApp.tsx` at `/Spa/Insights` — read-only ROI for Admin/Approver roles; CSV export.
 
-### Phase 66 — LLM approval copilot
+### Phase 66 — LLM approval copilot ✅
 
-Replace heuristic `GetApprovalRecommendationQuery` with `IApprovalCopilotService`; feature flag `Features:ApprovalCopilot`.
+`IApprovalCopilotService` behind `Features:ApprovalCopilot`; heuristic fallback; source badge in approval queue.
 
 **Wave 2 gate:** 2 pilots · executive dashboard · LLM copilot behind flag
 
@@ -169,4 +169,4 @@ Re-run audit checklist; update `PRODUCT_SCORECARD.md`; 5-person heuristic UX rev
 
 ---
 
-*Last updated: July 2026 — Wave 1 complete (Phases 61–63).*
+*Last updated: July 2026 — Wave 2 complete (Phases 64–66).*

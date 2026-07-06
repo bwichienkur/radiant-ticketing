@@ -656,6 +656,7 @@
             '/Spa/Refactor/Analyze',
             '/Spa/Refactor/Plans',
             '/Spa/Settings',
+            '/Spa/Insights',
         ];
 
         function isSpaPath(pathname) {

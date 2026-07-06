@@ -36,6 +36,7 @@ import type {
   BlastRadiusResult,
   RefactorPlanSummary,
   RefactorPlanDetail,
+  RoiReport,
   RegisterDatabaseConnectionInput,
   DocumentationExportFormat,
   AuthenticationConfigurationStatus,
@@ -497,6 +498,27 @@ export function getOnboardingExportDocsUrl(sessionId: string): string {
 
 export async function getDashboard(): Promise<DashboardPageData> {
   return fetchJson('/web-api/spa/dashboard');
+}
+
+export async function getRoiReport(): Promise<RoiReport> {
+  return fetchJson<RoiReport>('/web-api/spa/insights/roi');
+}
+
+export async function exportRoiCsv(): Promise<void> {
+  const response = await fetch('/web-api/spa/insights/roi/export', { credentials: 'include' });
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'enhancementhub-roi-report.csv';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
 }
 
 export async function searchGlobal(query: string, limit = 20): Promise<GlobalSearchItem[]> {

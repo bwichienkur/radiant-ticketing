@@ -551,6 +551,26 @@ Post-audit roadmap to reach world-class enterprise readiness. Full task breakdow
 - Legacy admin pages redirect to SPA settings sections
 - `Phase63SettingsSpaTests`
 
+## Phase 64 — Design partner #2 + case study (complete — GTM track)
+
+- [DESIGN_PARTNER_2_TRACKER.md](DESIGN_PARTNER_2_TRACKER.md) — pipeline, week-by-week checklist, combined NPS gate
+- Playbook extended for second partner; pilot #1 case study in draft
+- Scorecard measured column includes pilot #2 targets
+
+## Phase 65 — Executive ROI dashboard (complete)
+
+- `InsightsApp.tsx` at `/Spa/Insights` — read-only ROI for Admin and Approver roles
+- `SpaInsightsController` BFF: `GET roi`, `GET roi/export` (CSV)
+- Legacy `/Admin/Roi` redirects to SPA; sidebar Insights link
+- `Phase65InsightsSpaTests`
+
+## Phase 66 — LLM approval copilot (complete)
+
+- `IApprovalCopilotService` + `ApprovalCopilotService` with `Features:ApprovalCopilot` flag
+- Heuristic fallback when LLM unavailable; `Source` field on recommendation DTO
+- Approval queue shows AI copilot vs rule-based badge
+- `Phase66ApprovalCopilotLlmTests`
+
 ## Roadmap to 85+ (active)
 
 Full plan: [ROADMAP_85.md](ROADMAP_85.md)
@@ -560,9 +580,9 @@ Full plan: [ROADMAP_85.md](ROADMAP_85.md)
 | 61 | Shell unification (DB, Docs, Refactor → React) | 1 | Complete |
 | 62 | Enterprise intake + demo trust | 1 | Complete |
 | 63 | Unified Admin Settings SPA | 1 | Complete |
-| 64 | Design partner #2 + case study | 2 | Planned |
-| 65 | Executive ROI dashboard | 2 | Planned |
-| 66 | LLM approval copilot | 2 | Planned |
+| 64 | Design partner #2 + case study | 2 | Complete |
+| 65 | Executive ROI dashboard | 2 | Complete |
+| 66 | LLM approval copilot | 2 | Complete |
 | 67 | Command palette + semantic search | 3 | Planned |
 | 68 | EF decoupling wave 1 | 3 | Planned |
 | 69 | Postgres load CI + visual regression | 3 | Planned |

@@ -50,7 +50,7 @@ EnhancementHub provides white-glove onboarding, weekly office hours, and priorit
 - [ ] Complete onboarding wizard (applications, repos, optional database connection)  
 - [ ] First repository indexed and system map visible  
 - [ ] Champion submits first enhancement request  
-- [ ] Admin reviews `/Admin/Roi` pilot metrics baseline  
+- [ ] Admin reviews `/Spa/Insights` pilot metrics baseline  
 
 **Exit:** At least one request in `Submitted` or `AiAnalyzing` status.
 
@@ -146,15 +146,24 @@ Aggregates appear on `/Admin/Roi` under **Pilot NPS**.
 
 ---
 
+## Partner #2 (Wave 2)
+
+Second design partner engagements follow the same 6-week cadence. Track pipeline and metrics in [DESIGN_PARTNER_2_TRACKER.md](DESIGN_PARTNER_2_TRACKER.md).
+
+**Combined gate (Wave 2):** Both pilots instrumented; ≥1 case study approved for external use; combined NPS > 40.
+
+---
+
 ## Artifacts checklist
 
 - [ ] `docs/DESIGN_PARTNER_PLAYBOOK.md` (this document)  
+- [ ] `docs/DESIGN_PARTNER_2_TRACKER.md` (partner #2 pipeline)  
 - [ ] Signed pilot scope (repos, users, SSO)  
 - [ ] Week 0 baseline spreadsheet  
-- [ ] `/Admin/Roi` export or screenshots at week 5  
+- [ ] `/Spa/Insights` CSV export or screenshots at week 5  
 - [ ] `docs/CASE_STUDY_TEMPLATE.md` completed (anonymized)  
 - [ ] `docs/PRODUCT_SCORECARD.md` measured column updated  
 
 ---
 
-*Last updated: July 2026 — Phase 56 design partner program.*
+*Last updated: July 2026 — Wave 2 Phase 64 (partner #2 tracker).*

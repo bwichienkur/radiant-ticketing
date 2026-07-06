@@ -195,6 +195,19 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
     }
   }
 
+  function recommendationSourceLabel(source?: string): string | null {
+    switch (source) {
+      case 'Llm':
+        return 'AI copilot';
+      case 'HeuristicFallback':
+        return 'Rule-based fallback';
+      case 'Heuristic':
+        return 'Rule-based';
+      default:
+        return null;
+    }
+  }
+
   if (loading) {
     return <LoadingState label="Loading approval queue…" />;
   }
@@ -285,7 +298,12 @@ export function ApprovalQueueApp({ initialRequestId }: ApprovalQueueAppProps) {
               {recommendation ? (
                 <AlertBanner
                   variant={recommendationVariant(recommendation)}
-                  title={recommendationLabel(recommendation)}
+                  title={[
+                    recommendationLabel(recommendation),
+                    recommendationSourceLabel(recommendation.source),
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
                   className="mb-3"
                 >
                   {recommendation.summary}
