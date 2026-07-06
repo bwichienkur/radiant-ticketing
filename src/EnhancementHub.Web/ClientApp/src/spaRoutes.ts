@@ -18,6 +18,7 @@ export const SPA_PREFIXES = [
   '/Spa/Refactor/Analyze',
   '/Spa/Refactor/Plans',
   '/Spa/Settings',
+  '/Spa/Admin',
   '/Spa/Insights',
   '/Spa/PortfolioHealth',
   '/Spa/Account/Notifications',

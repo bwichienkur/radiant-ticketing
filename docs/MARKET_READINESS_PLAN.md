@@ -1,6 +1,6 @@
 # Market Readiness Plan — EnhancementHub
 
-**Status:** Active — Wave A complete (Phases 73–75)  
+**Status:** Active — Waves A–D engineering complete; GTM gates tracked in [MARKET_READINESS_VERIFICATION.md](MARKET_READINESS_VERIFICATION.md)  
 **Starting point:** Independent audit **77/100** product quality · **74/100** launch readiness · **68/100** marketability  
 **Target:** **Market ready** — **88+ launch readiness**, **85+ marketability**, **90+ enterprise procurement pass rate**
 

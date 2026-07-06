@@ -206,9 +206,9 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
       </AlertBanner>
 
       {analysisUpdateMessage ? (
-        <div className="alert alert-info" role="status">
+        <AlertBanner variant="info" className="mb-3">
           {analysisUpdateMessage}
-        </div>
+        </AlertBanner>
       ) : null}
 
       {!analysis && isAnalyzing ? (

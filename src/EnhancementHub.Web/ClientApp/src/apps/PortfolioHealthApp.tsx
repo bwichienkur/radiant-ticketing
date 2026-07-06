@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getPortfolioHealth } from '../api/spaClient';
+import { getPortfolioHealth, getPortfolioHealthExportUrl } from '../api/spaClient';
 import { ErrorState, EmptyState, LoadingState, PageHeader } from '../components/ui';
 import { SpaLink } from '../components/SpaLink';
 import type { PortfolioHealthReport } from '../types/spa';
@@ -54,6 +54,11 @@ export function PortfolioHealthApp() {
       <PageHeader
         title="Portfolio health"
         description="Risk heatmap across applications — drift, pending approvals, and stale indexing"
+        actions={
+          <a href={getPortfolioHealthExportUrl()} className="btn btn-outline-primary btn-sm">
+            Export CSV
+          </a>
+        }
       />
 
       <div className="card-panel p-3 mb-3">

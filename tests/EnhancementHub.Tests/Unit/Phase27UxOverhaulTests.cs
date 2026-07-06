@@ -83,7 +83,7 @@ public sealed class Phase27UxOverhaulTests
     public void AdminNav_IncludesTenancy()
     {
         var nav = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Shared/_AdminNav.cshtml"));
-        nav.Should().Contain("/Admin/Tenancy");
+        nav.Should().Contain("/Spa/Admin/Tenancy");
     }
 
     [Fact]

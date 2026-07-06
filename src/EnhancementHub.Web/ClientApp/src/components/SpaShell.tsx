@@ -33,6 +33,7 @@ import { RefactorPlansApp } from '../apps/RefactorPlansApp';
 import { SettingsApp } from '../apps/SettingsApp';
 import { InsightsApp } from '../apps/InsightsApp';
 import { PortfolioHealthApp } from '../apps/PortfolioHealthApp';
+import { AdminApp } from '../apps/AdminApp';
 import { FeedbackWidget } from './FeedbackWidget';
 import { MockAiTrustBanner } from './MockAiTrustBanner';
 import { CommandPalette } from './CommandPalette';
@@ -141,6 +142,17 @@ function SpaNavigationBridge() {
     ehUx?.updateSidebarActive?.(location.pathname);
   }, [location.pathname, location.search]);
 
+  useEffect(() => {
+    const liveRegion = document.getElementById('eh-spa-live-region');
+    if (!liveRegion) return;
+
+    const pageTitle = document.querySelector('.eh-section-title, .page-header h1, h1')?.textContent?.trim();
+    const announcement = pageTitle
+      ? `Navigated to ${pageTitle}`
+      : `Navigated to ${location.pathname}`;
+    liveRegion.textContent = announcement;
+  }, [location.pathname, location.search]);
+
   return null;
 }
 
@@ -202,6 +214,7 @@ export function SpaShell() {
         <Route path="/Spa/Refactor/Analyze" element={<RefactorAnalyzeApp />} />
         <Route path="/Spa/Refactor/Plans" element={<RefactorPlansApp />} />
         <Route path="/Spa/Settings/*" element={<SettingsApp />} />
+        <Route path="/Spa/Admin/*" element={<AdminApp />} />
         <Route path="/Spa/Insights" element={<InsightsApp />} />
         <Route path="/Spa/PortfolioHealth" element={<PortfolioHealthApp />} />
         <Route path="*" element={<UnknownSpaRoute />} />

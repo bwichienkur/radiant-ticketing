@@ -13,7 +13,7 @@ Living assessment of product maturity, marketability, and scalability. Updated w
 | 10 | Validated in production at scale with measured outcomes |
 
 **Baseline:** Phase 15 enterprise hardening (July 2026), before Horizons 1–3 work.  
-**Current snapshot:** Wave 4 complete (Phases 70–72; ROADMAP_85 target **85+** met).
+**Current snapshot:** Market ready engineering track complete (Phases 73–84); launch readiness target **88+** — see [MARKET_READINESS_VERIFICATION.md](MARKET_READINESS_VERIFICATION.md).
 
 Related: [ROADMAP.md](ROADMAP.md) · [PHASES.md](PHASES.md) · [ICP_ONE_PAGER.md](ICP_ONE_PAGER.md)
 

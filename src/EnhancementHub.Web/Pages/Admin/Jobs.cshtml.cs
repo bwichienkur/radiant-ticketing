@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.Admin;
 
+/// <summary>Legacy Razor jobs page — redirects to <c>/Spa/Admin/Jobs</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/Admin/Jobs. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize(Roles = "Admin")]
 public class JobsModel : PageModel
 {
@@ -21,10 +23,16 @@ public class JobsModel : PageModel
     [TempData]
     public string? StatusMessage { get; set; }
 
-    public async Task OnGetAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectPermanent("/Spa/Admin/Jobs");
+        }
+
         Status = await _mediator.Send(new GetBackgroundJobsStatusQuery(), cancellationToken);
         Freshness = await _mediator.Send(new GetIndexFreshnessReportQuery(), cancellationToken);
+        return Page();
     }
 
     public async Task<IActionResult> OnPostRetryAsync(string jobId, CancellationToken cancellationToken)
@@ -33,6 +41,6 @@ public class JobsModel : PageModel
         StatusMessage = success
             ? "Failed job requeued successfully."
             : "Could not requeue job. Retry is only available for Hangfire failed jobs.";
-        return RedirectToPage();
+        return RedirectToPage("/Spa/Admin/Jobs");
     }
 }

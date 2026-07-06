@@ -178,7 +178,7 @@ Key settings in `appsettings.json`:
 dotnet test
 ```
 
-**489+ automated tests** covering React onboarding advanced flows, API v1 versioning, load-test harness, accessibility CI, React SignalR collaboration, Cytoscape system map graph, React approval queue and onboarding wizard, React SPA migration, schema-per-tenant isolation, Stripe billing, UX overhaul, commercial platform, product differentiation, polyglot integrations, HA observability, System Intelligence performance, data layer scaling, indexing scale, incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
+**515+ automated tests** covering React onboarding advanced flows, API v1 versioning, load-test harness, accessibility CI, React SignalR collaboration, Cytoscape system map graph, React approval queue and onboarding wizard, React SPA migration, schema-per-tenant isolation, Stripe billing, UX overhaul, commercial platform, product differentiation, polyglot integrations, HA observability, System Intelligence performance, data layer scaling, indexing scale, incremental indexing, service API keys, team membership, SOC 2 readiness, data retention, onboarding wizard, audit export, enterprise AI, SSO hardening, admin operations, security, risk scoring, repository scanning, schema drift, integrations, API workflows, and role permissions.
 
 ---
 

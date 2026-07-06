@@ -642,14 +642,14 @@ Full plan: [MARKET_READINESS_PLAN.md](MARKET_READINESS_PLAN.md)
 | 73 | Command palette & theme unification | A | Complete |
 | 74 | Mobile data surface parity | A | Complete |
 | 75 | Demo path continuity | A | Complete |
-| 76 | Unified admin SPA (Jobs, Custom fields, Compliance) | B | Planned |
-| 77 | Remaining admin migration | B | Planned |
-| 78 | Design system hardening + Vitest | B | Planned |
-| 79 | Pilot #2 execution | C | Planned |
-| 80 | Published proof assets | C | Planned |
-| 81 | Conversion & packaging | C | Planned |
-| 82 | Security attestation | D | Planned |
-| 83 | Engineering scale defaults | D | Planned |
-| 84 | Market ready gate verification | D | Planned |
+| 76 | Unified admin SPA (Jobs, Custom fields, Compliance) | B | Complete |
+| 77 | Remaining admin migration | B | Complete |
+| 78 | Design system hardening + Vitest | B | Complete |
+| 79 | Pilot #2 execution | C | In progress (GTM) |
+| 80 | Published proof assets | C | In progress (GTM) |
+| 81 | Conversion & packaging | C | Complete |
+| 82 | Security attestation | D | In progress (GTM) |
+| 83 | Engineering scale defaults | D | Complete |
+| 84 | Market ready gate verification | D | Complete |
 
 ## Future enhancements

@@ -802,3 +802,115 @@ export async function submitProductFeedback(
 ): Promise<{ id: string; workflowKey: string; npsScore: number }> {
   return postJson('/web-api/spa/feedback', input);
 }
+
+export async function getAdminJobs(): Promise<import('../types/spa').AdminJobsResponse> {
+  return fetchJson('/web-api/spa/admin/jobs');
+}
+
+export async function retryAdminJob(jobId: string): Promise<{ message: string }> {
+  return postJson(`/web-api/spa/admin/jobs/${encodeURIComponent(jobId)}/retry`);
+}
+
+export async function getAdminCompliance(): Promise<import('../types/spa').AdminComplianceResponse> {
+  return fetchJson('/web-api/spa/admin/compliance/soc2');
+}
+
+export async function listAdminCustomFields(): Promise<import('../types/spa').CustomFieldDefinition[]> {
+  return fetchJson('/web-api/spa/admin/custom-fields');
+}
+
+export async function upsertAdminCustomField(
+  input: {
+    id?: string;
+    key: string;
+    label: string;
+    fieldType: number;
+    isRequired: boolean;
+    isActive: boolean;
+    sortOrder: number;
+    options?: string[];
+  },
+): Promise<import('../types/spa').CustomFieldDefinition> {
+  return postJson('/web-api/spa/admin/custom-fields', input);
+}
+
+export async function deleteAdminCustomField(id: string): Promise<void> {
+  await fetch(`/web-api/spa/admin/custom-fields/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+}
+
+export async function getAdminTenancy(): Promise<import('../types/spa').AdminTenancyResponse> {
+  return fetchJson('/web-api/spa/admin/tenancy');
+}
+
+export async function createBillingCheckout(plan: number): Promise<{ url: string }> {
+  return postJson('/web-api/spa/admin/tenancy/checkout', { plan });
+}
+
+export async function createBillingPortal(): Promise<{ url: string }> {
+  return postJson('/web-api/spa/admin/tenancy/portal');
+}
+
+export async function provisionTenantSchema(): Promise<{ message: string }> {
+  return postJson('/web-api/spa/admin/tenancy/provision-schema');
+}
+
+export async function getAdminObservability(): Promise<import('../types/spa').ObservabilityStatus> {
+  return fetchJson('/web-api/spa/admin/observability');
+}
+
+export async function getAdminDataScaling(): Promise<import('../types/spa').DataScalingStatus> {
+  return fetchJson('/web-api/spa/admin/data-scaling');
+}
+
+export async function getAdminRetention(): Promise<import('../types/spa').DataRetentionStatus> {
+  return fetchJson('/web-api/spa/admin/retention');
+}
+
+export async function applyAdminRetention(dryRun: boolean): Promise<import('../types/spa').DataRetentionResult> {
+  return postJson(`/web-api/spa/admin/retention/apply?dryRun=${dryRun}`);
+}
+
+export async function listAdminAiPrompts(): Promise<import('../types/spa').AiPromptConfiguration[]> {
+  return fetchJson('/web-api/spa/admin/ai-prompts');
+}
+
+export async function updateAdminAiPrompt(
+  id: string,
+  input: { systemPromptTemplate: string; userPromptTemplate: string; isActive: boolean },
+): Promise<void> {
+  await putJson(`/web-api/spa/admin/ai-prompts/${id}`, input);
+}
+
+export async function getTenantDeliveryProfile(): Promise<import('../types/spa').TenantDeliveryProfile> {
+  return fetchJson('/web-api/spa/delivery/tenant-profile');
+}
+
+export async function updateTenantDeliveryProfile(
+  input: Record<string, unknown>,
+): Promise<import('../types/spa').TenantDeliveryProfile> {
+  return putJson('/web-api/spa/delivery/tenant-profile', input);
+}
+
+export async function validateTenantDeliveryProfile(): Promise<import('../types/spa').DeliveryProfileValidation> {
+  return postJson('/web-api/spa/delivery/tenant-profile/validate');
+}
+
+export async function upsertTenantDeploymentEnvironment(
+  input: Record<string, unknown>,
+): Promise<unknown> {
+  return postJson('/web-api/spa/delivery/tenant-environments', input);
+}
+
+export async function deleteTenantDeploymentEnvironment(environmentId: string): Promise<void> {
+  await fetch(`/web-api/spa/delivery/tenant-environments/${environmentId}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+}
+
+export function getPortfolioHealthExportUrl(): string {
+  return '/web-api/spa/portfolio/health/export';
+}

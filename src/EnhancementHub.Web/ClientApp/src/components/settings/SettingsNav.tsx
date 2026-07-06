@@ -10,10 +10,10 @@ const PRIMARY_SECTIONS = [
 ] as const;
 
 const ADVANCED_ADMIN_LINKS = [
-  { href: '/Admin/Jobs', label: 'Jobs' },
-  { href: '/Spa/Insights', label: 'ROI' },
-  { href: '/Admin/Compliance', label: 'Compliance' },
-  { href: '/Admin/CustomFields', label: 'Custom fields' },
+  { to: '/Spa/Admin/Jobs', label: 'Jobs' },
+  { to: '/Spa/Insights', label: 'ROI' },
+  { to: '/Spa/Admin/Compliance', label: 'Compliance' },
+  { to: '/Spa/Admin/CustomFields', label: 'Custom fields' },
 ] as const;
 
 export function SettingsNav() {
@@ -34,17 +34,24 @@ export function SettingsNav() {
             </NavLink>
           ))}
         </div>
-        <div className="small text-uppercase text-muted mt-4 mb-2 px-2">Advanced admin</div>
+        <div className="small text-uppercase text-muted mt-4 mb-2 px-2">Platform admin</div>
         <div className="d-flex flex-column gap-1">
           {ADVANCED_ADMIN_LINKS.map((link) => (
-            <a key={link.href} href={link.href} className="settings-nav-link">
+            <NavLink
+              key={link.to}
+              to={link.to}
+              className={({ isActive }) => `settings-nav-link ${isActive ? 'active' : ''}`.trim()}
+            >
               {link.label}
-            </a>
+            </NavLink>
           ))}
+          <NavLink
+            to="/Spa/Admin"
+            className={({ isActive }) => `settings-nav-link ${isActive ? 'active' : ''}`.trim()}
+          >
+            All admin pages
+          </NavLink>
         </div>
-        <p className="small text-muted mt-3 mb-0 px-2">
-          More admin pages remain in Razor while Wave 2 migrations continue.
-        </p>
       </div>
     </nav>
   );

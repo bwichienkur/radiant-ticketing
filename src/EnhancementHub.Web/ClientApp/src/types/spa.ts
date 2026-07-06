@@ -539,7 +539,7 @@ export interface CustomFieldDefinition {
   id: string;
   key: string;
   label: string;
-  fieldType: string;
+  fieldType: string | number;
   isRequired: boolean;
   isActive: boolean;
   sortOrder: number;
@@ -795,4 +795,248 @@ export interface WebhookDeliverySummary {
   lastError?: string;
   createdAt: string;
   deliveredAt?: string;
+}
+
+export interface AdminJobsResponse {
+  status: BackgroundJobsStatus;
+  freshness: IndexFreshnessReport;
+}
+
+export interface BackgroundJobsStatus {
+  provider: string;
+  generatedAtUtc: string;
+  queueCounts: {
+    pendingRepositoryIndexing: number;
+    awaitingAiAnalysis: number;
+    queuedApplicationDiscovery: number;
+    pendingDatabaseSchemaScans: number;
+  };
+  jobs: Array<{
+    jobId: string;
+    description: string;
+    schedule: string;
+    lastExecution?: string;
+    nextExecution?: string;
+  }>;
+  hangfire?: {
+    enqueued: number;
+    processing: number;
+    scheduled: number;
+    succeeded: number;
+    failed: number;
+    deleted: number;
+  };
+  failedJobs: Array<{
+    jobId: string;
+    jobName?: string;
+    failedAt?: string;
+    exceptionMessage?: string;
+  }>;
+}
+
+export interface IndexFreshnessReport {
+  slaHours: number;
+  totalRepositories: number;
+  freshCount: number;
+  staleCount: number;
+  neverIndexedCount: number;
+  inProgressCount: number;
+  failedCount: number;
+  freshnessPercent: number;
+  slaMet: boolean;
+  generatedAtUtc: string;
+  staleRepositories: Array<{
+    id: string;
+    name: string;
+    applicationId: string;
+    applicationName?: string;
+    lastIndexedAt?: string;
+    hoursSinceIndexed?: number;
+    indexingStatus: string;
+  }>;
+}
+
+export interface Soc2ReadinessReport {
+  implementedCount: number;
+  partialCount: number;
+  gapCount: number;
+  controls: Array<{
+    controlId: string;
+    trustServiceCategory: string;
+    title: string;
+    enhancementHubFeature: string;
+    status: string;
+    configurationHint?: string;
+  }>;
+}
+
+export interface AdminComplianceResponse {
+  report: Soc2ReadinessReport;
+  runtimeStatus: PlatformRuntimeStatus;
+}
+
+export interface TenantBilling {
+  tenantId: string;
+  tenantName: string;
+  plan: string;
+  region: string;
+  isTrialActive: boolean;
+  isTrialExpired: boolean;
+  trialEndsAt?: string;
+  subscriptionStatus: string;
+  subscriptionPeriodEnd?: string;
+  hasActiveSubscription: boolean;
+  stripeEnabled: boolean;
+  maxApplications: number;
+  maxAnalysesPerMonth: number;
+  maxStorageMegabytes: number;
+  applicationCount: number;
+  analysisCountThisMonth: number;
+  storageBytes: number;
+  isOverLimit: boolean;
+}
+
+export interface TenantIsolation {
+  tenantId: string;
+  isolationMode: string;
+  databaseSchemaName?: string;
+  isSchemaProvisioned: boolean;
+  schemaProvisionedAt?: string;
+  isolationEnabled: boolean;
+}
+
+export interface TenantSummary {
+  id: string;
+  name: string;
+  slug: string;
+  plan: string;
+  region: string;
+  isActive: boolean;
+  trialEndsAt?: string;
+}
+
+export interface AdminTenancyResponse {
+  billing?: TenantBilling;
+  isolation?: TenantIsolation;
+  allTenants: TenantSummary[];
+}
+
+export interface ObservabilityStatus {
+  generatedAt: string;
+  openTelemetry: {
+    enabled: boolean;
+    serviceName: string;
+    otlpEndpoint?: string;
+    prometheusMetricsEnabled: boolean;
+    backgroundJobInstrumentationEnabled: boolean;
+    activeInstrumentations: string[];
+  };
+  dataProtection: {
+    storageProvider: string;
+    sharedKeyRingConfigured: boolean;
+    keysPath?: string;
+    azureBlobContainer?: string;
+    issues: Array<{ severity: string; message: string }>;
+  };
+  highAvailability: {
+    postgresConfigured: boolean;
+    hangfireConfigured: boolean;
+    readReplicaConfigured: boolean;
+    vectorOffloadConfigured: boolean;
+    sharedDataProtectionConfigured: boolean;
+    observabilityEnabled: boolean;
+    recommendations: string[];
+  };
+}
+
+export interface DataScalingStatus {
+  generatedAtUtc: string;
+  vectorSearch: {
+    provider: string;
+    isProductionReady: boolean;
+    recommendedProvider?: string;
+    dimensions: number;
+    issues: Array<{ severity: string; message: string }>;
+  };
+  database: {
+    readReplicaConfigured: boolean;
+    primaryConnectionName: string;
+    reportingConnectionName: string;
+    maxPoolSize: number;
+    schemaScanMaxConcurrency: number;
+    databaseProvider: string;
+  };
+  archival: {
+    auditLogCount: number;
+    aiPromptRunCount: number;
+    eligibleAiPromptRunArchiveCount: number;
+    archiveBeforeDeleteEnabled: boolean;
+    archivePath?: string;
+    aiPromptRunsRetentionDays: number;
+    recommendations: string[];
+  };
+}
+
+export interface DataRetentionStatus {
+  enabled: boolean;
+  aiPromptRunsRetentionDays: number;
+  attachmentsRetentionDays: number;
+  batchSize: number;
+  eligibleAiPromptRunCount: number;
+  eligibleAttachmentCount: number;
+  aiPromptRunsCutoffUtc?: string;
+  attachmentsCutoffUtc?: string;
+}
+
+export interface DataRetentionResult {
+  dryRun: boolean;
+  aiPromptRunsDeleted: number;
+  retrievedContextItemsDeleted: number;
+  attachmentsDeleted: number;
+  attachmentFilesDeleted: number;
+  appliedAtUtc: string;
+}
+
+export interface AiPromptConfiguration {
+  id: string;
+  name: string;
+  version: string;
+  systemPromptTemplate: string;
+  userPromptTemplate: string;
+  isActive: boolean;
+}
+
+export interface TenantDeliveryProfile {
+  id: string;
+  defaultCicdProvider: number;
+  vaultSecretPrefix?: string;
+  autoImplementOnApprove: boolean;
+  autoDeployToTest: boolean;
+  requirePullRequestReview: boolean;
+  requireUatSignoff: boolean;
+  requireProdChangeWindow: boolean;
+  changeWindowNotes?: string;
+  qaVideoRetentionDays: number;
+  allowOneClickProdDeploy: boolean;
+  allowOneClickRollback: boolean;
+  testDataStrategy: number;
+  allowProdToTestRefresh: boolean;
+  environments: TenantDeploymentEnvironment[];
+}
+
+export interface TenantDeploymentEnvironment {
+  id: string;
+  name: string;
+  environmentType: number;
+  baseUrlTemplate?: string;
+  secretReferencePrefix?: string;
+  isActive: boolean;
+  sortOrder: number;
+  requiresApprovalForDeploy: boolean;
+}
+
+export interface DeliveryProfileValidation {
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
 }

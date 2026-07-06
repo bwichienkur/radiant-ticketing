@@ -1,0 +1,12 @@
+@page "/Spa/Admin/{*catchall}"
+@model EnhancementHub.Web.Pages.Spa.AdminModel
+@{
+    ViewData["Title"] = "Administration";
+    ViewData["Breadcrumb"] = "Admin";
+}
+
+<partial name="_SpaRoot" />
+
+@section Scripts {
+    <script type="module" src="~/spa/react/spa-shell.js" asp-append-version="true"></script>
+}
