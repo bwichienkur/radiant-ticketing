@@ -7,6 +7,7 @@ import type {
   CreatedRequestSummary,
   DashboardPageData,
   DatabaseConnectionStringResult,
+  EnhancementDeliveryRun,
   EnhancementAnalysis,
   EnhancementRequestDetail,
   EnhancementRequestListItem,
@@ -356,4 +357,38 @@ export async function listEnhancementRequests(params: {
   return fetchJson<EnhancementRequestListItem[]>(
     `/web-api/spa/requests${query ? `?${query}` : ''}`,
   );
+}
+
+export async function getDeliveryRun(requestId: string): Promise<EnhancementDeliveryRun | null> {
+  const response = await fetch(`/web-api/spa/delivery/requests/${requestId}/run`, {
+    credentials: 'include',
+  });
+  if (response.status === 404) {
+    return null;
+  }
+
+  if (!response.ok) {
+    throw new Error(`Delivery run request failed: ${response.status}`);
+  }
+
+  return response.json() as Promise<EnhancementDeliveryRun>;
+}
+
+export async function startDeliveryRun(requestId: string): Promise<EnhancementDeliveryRun> {
+  return postJson<EnhancementDeliveryRun>(`/web-api/spa/delivery/requests/${requestId}/start`);
+}
+
+export async function advanceDeliveryPastPr(requestId: string): Promise<EnhancementDeliveryRun> {
+  return postJson<EnhancementDeliveryRun>(`/web-api/spa/delivery/requests/${requestId}/advance-pr`);
+}
+
+export async function signUat(
+  requestId: string,
+  approved: boolean,
+  notes?: string,
+): Promise<EnhancementDeliveryRun> {
+  return postJson<EnhancementDeliveryRun>(`/web-api/spa/delivery/requests/${requestId}/uat`, {
+    approved,
+    notes,
+  });
 }

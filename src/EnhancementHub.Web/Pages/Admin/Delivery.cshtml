@@ -1,0 +1,184 @@
+@page
+@model EnhancementHub.Web.Pages.Admin.DeliveryModel
+@using EnhancementHub.Domain.Enums
+@{
+    ViewData["AdminSection"] = "delivery";
+    ViewData["Title"] = "Delivery automation";
+    var profile = Model.Profile;
+    var validation = Model.Validation;
+}
+
+<div class="page-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+    <div>
+        <h1>Delivery automation</h1>
+        <p class="mb-0 text-muted">Configure tenant-wide environments and policies for automated test deploys, QA, and UAT (Phase A — config only).</p>
+    </div>
+    @if (validation is not null)
+    {
+        <span class="badge @(validation.IsValid ? "text-bg-success" : "text-bg-warning") badge-status">
+            @(validation.IsValid ? "Profile valid" : "Needs attention")
+        </span>
+    }
+</div>
+
+@if (!string.IsNullOrWhiteSpace(Model.StatusMessage))
+{
+    <div class="alert alert-info">@Model.StatusMessage</div>
+}
+
+@if (profile is null)
+{
+    <div class="card-panel p-4"><p class="text-muted mb-0">Unable to load delivery profile.</p></div>
+}
+else
+{
+    @if (validation is not null && (validation.Errors.Count > 0 || validation.Warnings.Count > 0))
+    {
+        <div class="card-panel p-4 mb-4">
+            <h2 class="h6">Validation</h2>
+            @foreach (var error in validation.Errors)
+            {
+                <div class="text-danger small">@error</div>
+            }
+            @foreach (var warning in validation.Warnings)
+            {
+                <div class="text-warning small">@warning</div>
+            }
+        </div>
+    }
+
+    <div class="card-panel p-4 mb-4">
+        <h2 class="h5 mb-3">Tenant policies</h2>
+        <form method="post" asp-page-handler="SaveProfile">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label" asp-for="DefaultCicdProvider">Default CI/CD provider</label>
+                    <select class="form-select" asp-for="DefaultCicdProvider" asp-items="Html.GetEnumSelectList<CicdProvider>()"></select>
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label" asp-for="VaultSecretPrefix">Vault secret prefix</label>
+                    <input class="form-control" asp-for="VaultSecretPrefix" placeholder="e.g. kv://contoso-delivery/" />
+                    <div class="form-text">Reference only — secrets are resolved at deploy time, not stored here.</div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" asp-for="QaVideoRetentionDays">QA video retention (days)</label>
+                    <input class="form-control" asp-for="QaVideoRetentionDays" type="number" min="7" max="3650" />
+                </div>
+                <div class="col-md-8">
+                    <label class="form-label" asp-for="ChangeWindowNotes">Production change window notes</label>
+                    <textarea class="form-control" asp-for="ChangeWindowNotes" rows="2" placeholder="e.g. Sundays 02:00–06:00 UTC"></textarea>
+                </div>
+                <div class="col-12">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" asp-for="AutoImplementOnApprove" />
+                        <label class="form-check-label" asp-for="AutoImplementOnApprove">Auto-start implementation when approved (Phase B)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" asp-for="AutoDeployToTest" />
+                        <label class="form-check-label" asp-for="AutoDeployToTest">Auto-deploy to test after implementation (Phase C)</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" asp-for="RequirePullRequestReview" />
+                        <label class="form-check-label" asp-for="RequirePullRequestReview">Require pull request review before deploy</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" asp-for="RequireUatSignoff" />
+                        <label class="form-check-label" asp-for="RequireUatSignoff">Require requester UAT before production</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" asp-for="RequireProdChangeWindow" />
+                        <label class="form-check-label" asp-for="RequireProdChangeWindow">Respect production change windows</label>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Save policies</button>
+        </form>
+    </div>
+
+    <div class="card-panel p-4 mb-4">
+        <h2 class="h5 mb-3">Deployment environments</h2>
+        @if (profile.Environments.Count == 0)
+        {
+            <p class="text-muted">No environments yet. Add a Test environment to support automated QA deploys.</p>
+        }
+        else
+        {
+            <div class="table-responsive mb-4">
+                <table class="table table-sm align-middle">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Base URL template</th>
+                            <th>Active</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var env in profile.Environments)
+                        {
+                            <tr>
+                                <td>@env.Name</td>
+                                <td>@env.EnvironmentType</td>
+                                <td class="small text-muted">@(env.BaseUrlTemplate ?? "—")</td>
+                                <td>@(env.IsActive ? "Yes" : "No")</td>
+                                <td class="text-end">
+                                    <form method="post" asp-page-handler="DeleteEnvironment" class="d-inline">
+                                        <input type="hidden" name="DeleteEnvironmentId" value="@env.Id" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this environment?');">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <h3 class="h6">Add or update environment</h3>
+        <form method="post" asp-page-handler="SaveEnvironment">
+            <input type="hidden" asp-for="EditEnvironmentId" />
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label" asp-for="EnvironmentName">Name</label>
+                    <input class="form-control" asp-for="EnvironmentName" placeholder="Test" required />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" asp-for="EnvironmentType">Type</label>
+                    <select class="form-select" asp-for="EnvironmentType" asp-items="Html.GetEnumSelectList<DeploymentEnvironmentType>()"></select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label" asp-for="BaseUrlTemplate">Base URL template</label>
+                    <input class="form-control" asp-for="BaseUrlTemplate" placeholder="https://{appSlug}-test.contoso.com" />
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" asp-for="SortOrder">Order</label>
+                    <input class="form-control" asp-for="SortOrder" type="number" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label" asp-for="SecretReferencePrefix">Secret ref prefix (optional)</label>
+                    <input class="form-control" asp-for="SecretReferencePrefix" />
+                </div>
+                <div class="col-md-6 d-flex align-items-end gap-3">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" asp-for="EnvironmentIsActive" />
+                        <label class="form-check-label" asp-for="EnvironmentIsActive">Active</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" asp-for="RequiresApprovalForDeploy" />
+                        <label class="form-check-label" asp-for="RequiresApprovalForDeploy">Requires approval to deploy</label>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-outline-primary mt-3">Save environment</button>
+        </form>
+    </div>
+
+    <div class="card-panel p-4">
+        <h2 class="h6">Per-application delivery</h2>
+        <p class="small text-muted mb-0">
+            Configure deployment mechanism, pipeline reference, and environment-specific connection mappings on each
+            application via the API <code>GET/PUT /web-api/spa/delivery/applications/{id}/profile</code> or during onboarding (Phase B).
+        </p>
+    </div>
+}

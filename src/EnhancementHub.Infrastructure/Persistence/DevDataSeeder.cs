@@ -116,6 +116,7 @@ public static class DevDataSeeder
         }
 
         await SeedDemoSystemIntelligenceDataAsync(db, logger, cancellationToken);
+        await SeedDeliveryDemoProfilesAsync(db, logger, cancellationToken);
 
         var now = DateTime.UtcNow;
         var demoRequest = await db.EnhancementRequests
@@ -503,5 +504,113 @@ public static class DevDataSeeder
             });
             await db.SaveChangesAsync(cancellationToken);
         }
+    }
+
+    private static async Task SeedDeliveryDemoProfilesAsync(
+        IEnhancementHubDbContext db,
+        ILogger logger,
+        CancellationToken cancellationToken)
+    {
+        if (await db.TenantDeliveryProfiles.AnyAsync(p => p.TenantId == DefaultTenantId, cancellationToken))
+        {
+            return;
+        }
+
+        if (!await db.Applications.AnyAsync(a => a.Id == DemoApplicationId, cancellationToken))
+        {
+            return;
+        }
+
+        logger.LogInformation("Seeding demo delivery automation profiles.");
+
+        var now = DateTime.UtcNow;
+        var tenantProfileId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+
+        db.TenantDeliveryProfiles.Add(new TenantDeliveryProfile
+        {
+            Id = tenantProfileId,
+            TenantId = DefaultTenantId,
+            DefaultCicdProvider = CicdProvider.GitHubActions,
+            VaultSecretPrefix = "kv://radiant-demo/delivery/",
+            AutoImplementOnApprove = true,
+            AutoDeployToTest = true,
+            RequirePullRequestReview = false,
+            RequireUatSignoff = true,
+            RequireProdChangeWindow = true,
+            ChangeWindowNotes = "Sundays 02:00–06:00 UTC",
+            QaVideoRetentionDays = 90,
+            CreatedAt = now,
+            UpdatedAt = now,
+        });
+
+        db.TenantDeploymentEnvironments.AddRange(
+            new TenantDeploymentEnvironment
+            {
+                Id = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+                TenantId = DefaultTenantId,
+                Name = "Test",
+                EnvironmentType = DeploymentEnvironmentType.Test,
+                BaseUrlTemplate = "https://radiant-commerce-test.azurewebsites.net",
+                SecretReferencePrefix = "kv://radiant-demo/test/",
+                IsActive = true,
+                SortOrder = 1,
+                CreatedAt = now,
+                UpdatedAt = now,
+            },
+            new TenantDeploymentEnvironment
+            {
+                Id = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+                TenantId = DefaultTenantId,
+                Name = "Production",
+                EnvironmentType = DeploymentEnvironmentType.Production,
+                BaseUrlTemplate = "https://radiant-commerce.azurewebsites.net",
+                SecretReferencePrefix = "kv://radiant-demo/prod/",
+                IsActive = true,
+                SortOrder = 2,
+                RequiresApprovalForDeploy = true,
+                CreatedAt = now,
+                UpdatedAt = now,
+            });
+
+        var repositoryId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+        db.ApplicationDeliveryProfiles.Add(new ApplicationDeliveryProfile
+        {
+            Id = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"),
+            ApplicationId = DemoApplicationId,
+            DeploymentMechanism = DeploymentMechanism.AppService,
+            PrimaryRepositoryId = repositoryId,
+            BranchNamingPattern = "eh/{requestId}-{slug}",
+            CicdPipelineReference = ".github/workflows/deploy-radiant-commerce.yml",
+            SmokeTestPath = "/health",
+            DatabaseMigrationStrategy = DatabaseMigrationStrategy.EfMigrations,
+            ConnectionMappingsJson = """
+                {
+                  "mappings": [
+                    {
+                      "logicalName": "DefaultConnection",
+                      "byEnvironment": {
+                        "Test": "kv://radiant-demo/orders-db-test",
+                        "Production": "kv://radiant-demo/orders-db-prod"
+                      }
+                    }
+                  ]
+                }
+                """,
+            ConfigTransformsJson = """
+                {
+                  "Test": {
+                    "env": { "ASPNETCORE_ENVIRONMENT": "Staging" }
+                  },
+                  "Production": {
+                    "env": { "ASPNETCORE_ENVIRONMENT": "Production" }
+                  }
+                }
+                """,
+            CreatedAt = now,
+            UpdatedAt = now,
+        });
+
+        await db.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("Demo delivery profiles created.");
     }
 }

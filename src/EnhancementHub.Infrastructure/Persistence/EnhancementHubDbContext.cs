@@ -68,6 +68,10 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<TenantUsageSnapshot> TenantUsageSnapshots => Set<TenantUsageSnapshot>();
     public DbSet<IntakeCopilotSession> IntakeCopilotSessions => Set<IntakeCopilotSession>();
+    public DbSet<TenantDeliveryProfile> TenantDeliveryProfiles => Set<TenantDeliveryProfile>();
+    public DbSet<TenantDeploymentEnvironment> TenantDeploymentEnvironments => Set<TenantDeploymentEnvironment>();
+    public DbSet<ApplicationDeliveryProfile> ApplicationDeliveryProfiles => Set<ApplicationDeliveryProfile>();
+    public DbSet<EnhancementDeliveryRun> EnhancementDeliveryRuns => Set<EnhancementDeliveryRun>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

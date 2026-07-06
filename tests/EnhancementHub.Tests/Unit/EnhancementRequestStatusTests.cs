@@ -1,5 +1,6 @@
 using EnhancementHub.Application.Abstractions;
 using EnhancementHub.Application.Features.Approvals.Commands;
+using EnhancementHub.Application.Features.Delivery.Commands;
 using EnhancementHub.Application.Features.EnhancementRequests.Commands;
 using EnhancementHub.Domain.Entities;
 using EnhancementHub.Domain.Enums;
@@ -119,11 +120,14 @@ public sealed class EnhancementRequestStatusTests : IDisposable
             .Setup(x => x.EvaluateAsync(It.IsAny<Guid>(), It.IsAny<UserRole>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ApprovalPolicyEvaluationResult(true, null, null));
 
+        var deliveryHook = new Mock<IDeliveryApprovalHook>();
+
         var handler = new SubmitApprovalActionCommandHandler(
             _dbContext,
             currentUser.Object,
             new AuditService(_dbContext, currentUser.Object),
-            policyEvaluator.Object);
+            policyEvaluator.Object,
+            deliveryHook.Object);
 
         var result = await handler.Handle(
             new SubmitApprovalActionCommand(requestId, actionType, "Test comment"),

@@ -59,7 +59,7 @@ public sealed class GitHubAppCloneService : IGitHubAppCloneService
 
         try
         {
-            var token = await GetInstallationTokenAsync(resolvedInstallationId.Value, cancellationToken);
+            var token = await GetInstallationAccessTokenAsync(resolvedInstallationId.Value, cancellationToken);
             var cloneUrl = $"https://github.com/{owner.Trim()}/{repository.Trim()}.git";
             var clone = await _gitCloneService.CloneAsync(cloneUrl, branch, token, cancellationToken);
             return new GitHubAppCloneResult(clone.Succeeded, clone.LocalPath, clone.ErrorMessage);
@@ -70,6 +70,9 @@ public sealed class GitHubAppCloneService : IGitHubAppCloneService
             return new GitHubAppCloneResult(false, null, ex.Message);
         }
     }
+
+    public Task<string> GetInstallationAccessTokenAsync(long installationId, CancellationToken cancellationToken = default) =>
+        GetInstallationTokenAsync(installationId, cancellationToken);
 
     internal async Task<string> GetInstallationTokenAsync(long installationId, CancellationToken cancellationToken)
     {

@@ -11,5 +11,12 @@ public enum EnhancementRequestStatus
     ReadyForDevelopment,
     InProgress,
     Completed,
-    Cancelled
+    Cancelled,
+    Implementing,
+    InTest,
+    QaInProgress,
+    AwaitingUat,
+    UatApproved,
+    ProdScheduled,
+    DeployingToProduction
 }

@@ -25,4 +25,5 @@ public class Application : BaseEntity
     public ICollection<DocumentationExportCache> DocumentationExportCaches { get; set; } = new List<DocumentationExportCache>();
     public ICollection<OpenApiRegistration> OpenApiRegistrations { get; set; } = new List<OpenApiRegistration>();
     public ICollection<OnPremAgent> OnPremAgents { get; set; } = new List<OnPremAgent>();
+    public ApplicationDeliveryProfile? DeliveryProfile { get; set; }
 }

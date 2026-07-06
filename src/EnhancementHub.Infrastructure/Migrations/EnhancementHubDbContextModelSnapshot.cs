@@ -438,6 +438,72 @@ namespace EnhancementHub.Infrastructure.Migrations
                     b.ToTable("Applications", (string)null);
                 });
 
+            modelBuilder.Entity("EnhancementHub.Domain.Entities.ApplicationDeliveryProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("ApplicationId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BranchNamingPattern")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CicdPipelineReference")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("CicdProviderOverride")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ConfigTransformsJson")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ConnectionMappingsJson")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DatabaseMigrationStrategy")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DeploymentMechanism")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("PrimaryRepositoryId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("RequiresHumanProdDeploy")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SmokeTestPath")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationId")
+                        .IsUnique();
+
+                    b.HasIndex("PrimaryRepositoryId");
+
+                    b.ToTable("ApplicationDeliveryProfiles", (string)null);
+                });
+
             modelBuilder.Entity("EnhancementHub.Domain.Entities.ApplicationProfile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1354,6 +1420,111 @@ namespace EnhancementHub.Infrastructure.Migrations
                     b.HasIndex("UploadedByUserId");
 
                     b.ToTable("EnhancementAttachments", (string)null);
+                });
+
+            modelBuilder.Entity("EnhancementHub.Domain.Entities.EnhancementDeliveryRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BranchName")
+                        .HasMaxLength(300)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CommitSha")
+                        .HasMaxLength(64)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("EnhancementRequestId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsSimulation")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(4000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Phase")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ProdDeployReference")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ProdDeployedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("ProdScheduledAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("PullRequestNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("PullRequestUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool?>("QaPassed")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("QaReportStoragePath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("QaStepsJson")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("QaVideoStoragePath")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("RunNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("TestDeployReference")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TestUrl")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TimelineJson")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("UatApproved")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UatNotes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UatSignedOffAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("UatSignedOffByUserId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EnhancementRequestId", "RunNumber")
+                        .IsUnique();
+
+                    b.ToTable("EnhancementDeliveryRuns", (string)null);
                 });
 
             modelBuilder.Entity("EnhancementHub.Domain.Entities.EnhancementRequest", b =>
@@ -2697,6 +2868,123 @@ namespace EnhancementHub.Infrastructure.Migrations
                     b.ToTable("Tenants", (string)null);
                 });
 
+            modelBuilder.Entity("EnhancementHub.Domain.Entities.TenantDeliveryProfile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("AutoDeployToTest")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("AutoImplementOnApprove")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ChangeWindowNotes")
+                        .HasMaxLength(4000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DefaultCicdProvider")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("QaVideoRetentionDays")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("RequireProdChangeWindow")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("RequirePullRequestReview")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("RequireUatSignoff")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("VaultSecretPrefix")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId")
+                        .IsUnique();
+
+                    b.ToTable("TenantDeliveryProfiles", (string)null);
+                });
+
+            modelBuilder.Entity("EnhancementHub.Domain.Entities.TenantDeploymentEnvironment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BaseUrlTemplate")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("EnvironmentType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("RequiresApprovalForDeploy")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("SecretReferencePrefix")
+                        .HasMaxLength(500)
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid?>("TenantDeliveryProfileId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantDeliveryProfileId");
+
+                    b.HasIndex("TenantId", "Name")
+                        .IsUnique();
+
+                    b.ToTable("TenantDeploymentEnvironments", (string)null);
+                });
+
             modelBuilder.Entity("EnhancementHub.Domain.Entities.TenantUsageSnapshot", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2898,6 +3186,24 @@ namespace EnhancementHub.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("OwnerTeam");
+                });
+
+            modelBuilder.Entity("EnhancementHub.Domain.Entities.ApplicationDeliveryProfile", b =>
+                {
+                    b.HasOne("EnhancementHub.Domain.Entities.Application", "Application")
+                        .WithOne("DeliveryProfile")
+                        .HasForeignKey("EnhancementHub.Domain.Entities.ApplicationDeliveryProfile", "ApplicationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EnhancementHub.Domain.Entities.Repository", "PrimaryRepository")
+                        .WithMany()
+                        .HasForeignKey("PrimaryRepositoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Application");
+
+                    b.Navigation("PrimaryRepository");
                 });
 
             modelBuilder.Entity("EnhancementHub.Domain.Entities.ApplicationProfile", b =>
@@ -3116,6 +3422,17 @@ namespace EnhancementHub.Infrastructure.Migrations
                     b.Navigation("EnhancementRequest");
 
                     b.Navigation("UploadedByUser");
+                });
+
+            modelBuilder.Entity("EnhancementHub.Domain.Entities.EnhancementDeliveryRun", b =>
+                {
+                    b.HasOne("EnhancementHub.Domain.Entities.EnhancementRequest", "EnhancementRequest")
+                        .WithMany("DeliveryRuns")
+                        .HasForeignKey("EnhancementRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("EnhancementRequest");
                 });
 
             modelBuilder.Entity("EnhancementHub.Domain.Entities.EnhancementRequest", b =>
@@ -3455,6 +3772,32 @@ namespace EnhancementHub.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("EnhancementHub.Domain.Entities.TenantDeliveryProfile", b =>
+                {
+                    b.HasOne("EnhancementHub.Domain.Entities.Tenant", "Tenant")
+                        .WithOne("DeliveryProfile")
+                        .HasForeignKey("EnhancementHub.Domain.Entities.TenantDeliveryProfile", "TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("EnhancementHub.Domain.Entities.TenantDeploymentEnvironment", b =>
+                {
+                    b.HasOne("EnhancementHub.Domain.Entities.TenantDeliveryProfile", null)
+                        .WithMany("Environments")
+                        .HasForeignKey("TenantDeliveryProfileId");
+
+                    b.HasOne("EnhancementHub.Domain.Entities.Tenant", "Tenant")
+                        .WithMany("DeploymentEnvironments")
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("EnhancementHub.Domain.Entities.TenantUsageSnapshot", b =>
                 {
                     b.HasOne("EnhancementHub.Domain.Entities.Tenant", "Tenant")
@@ -3486,6 +3829,8 @@ namespace EnhancementHub.Infrastructure.Migrations
                     b.Navigation("AnalysisImpacts");
 
                     b.Navigation("DatabaseConnections");
+
+                    b.Navigation("DeliveryProfile");
 
                     b.Navigation("DocumentationExportCaches");
 
@@ -3562,6 +3907,8 @@ namespace EnhancementHub.Infrastructure.Migrations
 
                     b.Navigation("Comments");
 
+                    b.Navigation("DeliveryRuns");
+
                     b.Navigation("ExternalTickets");
 
                     b.Navigation("RefactorPlans");
@@ -3625,11 +3972,20 @@ namespace EnhancementHub.Infrastructure.Migrations
 
             modelBuilder.Entity("EnhancementHub.Domain.Entities.Tenant", b =>
                 {
+                    b.Navigation("DeliveryProfile");
+
+                    b.Navigation("DeploymentEnvironments");
+
                     b.Navigation("Teams");
 
                     b.Navigation("UsageSnapshots");
 
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("EnhancementHub.Domain.Entities.TenantDeliveryProfile", b =>
+                {
+                    b.Navigation("Environments");
                 });
 
             modelBuilder.Entity("EnhancementHub.Domain.Entities.User", b =>

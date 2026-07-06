@@ -15,4 +15,8 @@ public interface IGitHubAppCloneService
         string branch = "main",
         long? installationId = null,
         CancellationToken cancellationToken = default);
+
+    Task<string> GetInstallationAccessTokenAsync(
+        long installationId,
+        CancellationToken cancellationToken = default);
 }

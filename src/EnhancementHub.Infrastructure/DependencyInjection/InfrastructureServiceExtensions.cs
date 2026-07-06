@@ -132,6 +132,15 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IRepositoryArchiveExtractService>(sp => sp.GetRequiredService<RepositoryArchiveExtractService>());
         services.AddScoped<GitHubAppCloneService>();
         services.AddScoped<IGitHubAppCloneService>(sp => sp.GetRequiredService<GitHubAppCloneService>());
+        services.AddScoped<IGitHubAppRepositoryService, Services.Delivery.GitHubAppRepositoryService>();
+        services.AddScoped<IDeploymentConfigBundleBuilder, Services.Delivery.DeploymentConfigBundleBuilder>();
+        services.AddScoped<IDeploymentAdapter, Services.Delivery.GitHubActionsDeploymentAdapter>();
+        services.AddScoped<IDeploymentAdapter, Services.Delivery.WebhookDeploymentAdapter>();
+        services.AddScoped<IDeploymentAdapterFactory, Services.Delivery.DeploymentAdapterFactory>();
+        services.AddScoped<IQaEvidenceService, Services.Delivery.QaEvidenceService>();
+        services.AddScoped<IChangeWindowEvaluator, Services.Delivery.ChangeWindowEvaluator>();
+        services.AddScoped<IDeliveryOrchestrationService, Services.Delivery.DeliveryOrchestrationService>();
+        services.AddScoped<IDeliveryOrchestrationDispatcher, Services.Delivery.DeliveryOrchestrationDispatcher>();
         services.AddScoped<AttachmentScanService>();
         services.AddScoped<NoOpAttachmentScanService>();
         services.AddScoped<IAttachmentScanService>(sp =>
@@ -346,6 +355,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<DatabaseSchemaScanJobExecutor>();
         services.AddScoped<ScheduledRepositoryRefreshJobExecutor>();
         services.AddScoped<DataRetentionJobExecutor>();
+        services.AddScoped<DeliveryOrchestrationJobExecutor>();
 
         var jobProvider = configuration["BackgroundJobs:Provider"] ?? "Polling";
         var useHangfire = ShouldUseHangfire(configuration, provider);
@@ -378,6 +388,7 @@ public static class InfrastructureServiceExtensions
         services.AddHostedService<DatabaseSchemaScanJob>();
         services.AddHostedService<ApplicationDiscoveryJob>();
         services.AddHostedService<DataRetentionJob>();
+        services.AddHostedService<DeliveryOrchestrationJob>();
     }
 
     private static void RegisterHangfireTelemetry(IConfiguration configuration)
