@@ -1,7 +1,8 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { readSpaContext } from '../spaRoutes';
-import { AdminNav } from '../components/admin/AdminNav';
-import { ErrorState, PageHeader } from '../components/ui';
+import { ErrorState } from '../components/ui';
+import { SettingsCommandCenter } from '../components/settings/SettingsCommandCenter';
+import { SettingsSectionPage } from '../components/settings/SettingsSectionPage';
 import { AdminJobsSection } from './admin/AdminJobsSection';
 import { AdminComplianceSection } from './admin/AdminComplianceSection';
 import { AdminCustomFieldsSection } from './admin/AdminCustomFieldsSection';
@@ -20,29 +21,85 @@ export function AdminApp() {
   }
 
   return (
-    <div className="eh-admin">
-      <PageHeader
-        title="Platform administration"
-        description="Jobs, compliance, tenancy, delivery automation, and operational controls"
-      />
-      <div className="row">
-        <AdminNav />
-        <div className="col-lg-9">
-          <Routes>
-            <Route index element={<Navigate to="Jobs" replace />} />
-            <Route path="Jobs" element={<AdminJobsSection />} />
-            <Route path="Compliance" element={<AdminComplianceSection />} />
-            <Route path="CustomFields" element={<AdminCustomFieldsSection />} />
-            <Route path="Tenancy" element={<AdminTenancySection />} />
-            <Route path="Observability" element={<AdminObservabilitySection />} />
-            <Route path="DataScaling" element={<AdminDataScalingSection />} />
-            <Route path="Retention" element={<AdminRetentionSection />} />
-            <Route path="Delivery" element={<AdminDeliverySection />} />
-            <Route path="AiPrompts" element={<AdminAiPromptsSection />} />
-            <Route path="*" element={<Navigate to="Jobs" replace />} />
-          </Routes>
-        </div>
-      </div>
+    <div className="eh-admin eh-settings">
+      <SettingsCommandCenter>
+        <Routes>
+          <Route index element={<Navigate to="Jobs" replace />} />
+          <Route
+            path="Jobs"
+            element={
+              <SettingsSectionPage sectionId="jobs">
+                <AdminJobsSection />
+              </SettingsSectionPage>
+            }
+          />
+          <Route
+            path="Compliance"
+            element={
+              <SettingsSectionPage sectionId="compliance">
+                <AdminComplianceSection />
+              </SettingsSectionPage>
+            }
+          />
+          <Route
+            path="CustomFields"
+            element={
+              <SettingsSectionPage sectionId="custom-fields">
+                <AdminCustomFieldsSection />
+              </SettingsSectionPage>
+            }
+          />
+          <Route
+            path="Tenancy"
+            element={
+              <SettingsSectionPage sectionId="tenancy">
+                <AdminTenancySection />
+              </SettingsSectionPage>
+            }
+          />
+          <Route
+            path="Observability"
+            element={
+              <SettingsSectionPage sectionId="observability">
+                <AdminObservabilitySection />
+              </SettingsSectionPage>
+            }
+          />
+          <Route
+            path="DataScaling"
+            element={
+              <SettingsSectionPage sectionId="data-scaling">
+                <AdminDataScalingSection />
+              </SettingsSectionPage>
+            }
+          />
+          <Route
+            path="Retention"
+            element={
+              <SettingsSectionPage sectionId="retention">
+                <AdminRetentionSection />
+              </SettingsSectionPage>
+            }
+          />
+          <Route
+            path="Delivery"
+            element={
+              <SettingsSectionPage sectionId="delivery">
+                <AdminDeliverySection />
+              </SettingsSectionPage>
+            }
+          />
+          <Route
+            path="AiPrompts"
+            element={
+              <SettingsSectionPage sectionId="ai-prompts">
+                <AdminAiPromptsSection />
+              </SettingsSectionPage>
+            }
+          />
+          <Route path="*" element={<Navigate to="Jobs" replace />} />
+        </Routes>
+      </SettingsCommandCenter>
     </div>
   );
 }

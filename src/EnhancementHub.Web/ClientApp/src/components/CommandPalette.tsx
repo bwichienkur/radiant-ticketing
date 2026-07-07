@@ -25,7 +25,7 @@ const NAV_PAGES: PaletteItem[] = [
   { type: 'page', title: 'Audit log', subtitle: 'Governance', url: '/Spa/Audit' },
   { type: 'page', title: 'Insights', subtitle: 'Governance', url: '/Spa/Insights' },
   { type: 'page', title: 'Portfolio health', subtitle: 'Governance', url: '/Spa/PortfolioHealth' },
-  { type: 'page', title: 'Settings', subtitle: 'Admin', url: '/Spa/Settings/General' },
+  { type: 'page', title: 'Settings', subtitle: 'Admin', url: '/Spa/Settings' },
   { type: 'page', title: 'Onboarding wizard', subtitle: 'Setup', url: '/Spa/OnboardingWizard' },
 ];
 
