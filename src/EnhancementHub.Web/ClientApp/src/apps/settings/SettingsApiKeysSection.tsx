@@ -10,6 +10,7 @@ import {
   ErrorState,
   FormField,
   LoadingState,
+  SectionCard,
   useToast,
 } from '../../components/ui';
 import type { CreateServiceApiKeyResult, ServiceApiKeySummary, TeamSummary } from '../../types/spa';
@@ -103,8 +104,7 @@ export function SettingsApiKeysSection() {
   }
 
   return (
-    <div>
-      <h2 className="eh-section-title mb-1">Service API keys</h2>
+    <SectionCard title="Service API keys">
       <p className="text-muted small mb-3">Machine-to-machine authentication for integrations and automation</p>
 
       {createdKey ? (
@@ -251,6 +251,6 @@ export function SettingsApiKeysSection() {
           </div>
         </div>
       </div>
-    </div>
+    </SectionCard>
   );
 }

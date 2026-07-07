@@ -21,7 +21,7 @@ export function SettingsApp() {
   return (
     <div>
       <PageHeader
-        title="Administration"
+        title="Settings"
         description="Platform configuration, identity, integrations, and teams"
       />
       <div className="row">

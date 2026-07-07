@@ -11,6 +11,8 @@ public sealed class Phase84MarketReadinessTests
         doc.Should().Contain("Launch readiness");
         doc.Should().Contain("Marketability");
         doc.Should().Contain("Phase 84");
+        doc.Should().Contain("10 flows");
+        doc.Should().Contain("Phase 85");
     }
 
     [Fact]
@@ -35,6 +37,7 @@ public sealed class Phase84MarketReadinessTests
         shell.Should().Contain("/Spa/Admin/*");
         shell.Should().Contain("/Spa/Account/Notifications");
         shell.Should().Contain("/Spa/Applications/:id");
+        shell.Should().Contain("/Spa/Portfolio");
     }
 
     [Fact]
@@ -49,6 +52,45 @@ public sealed class Phase84MarketReadinessTests
     {
         var scorecard = File.ReadAllText(GetPath("docs/PRODUCT_SCORECARD.md"));
         scorecard.Should().Contain("Market ready");
+        scorecard.Should().Contain("Phase 84");
+    }
+
+    [Fact]
+    public void AccessibilitySpec_CoversTenExpandedFlows()
+    {
+        var spec = File.ReadAllText(GetPath("tests/e2e/accessibility.spec.ts"));
+        var flowCount = spec.Split("expectNoSeriousViolations", StringSplitOptions.None).Length - 1;
+        flowCount.Should().BeGreaterThanOrEqualTo(10);
+        spec.Should().Contain("/Spa/Portfolio");
+        spec.Should().Contain("/Spa/PortfolioHealth");
+        spec.Should().Contain("/Spa/Search");
+    }
+
+    [Fact]
+    public void SettingsApp_UsesSinglePageHeaderWithSectionCards()
+    {
+        var app = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/apps/SettingsApp.tsx"));
+        app.Should().Contain("PageHeader");
+        app.Should().Contain("title=\"Settings\"");
+
+        var general = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/apps/settings/SettingsGeneralSection.tsx"));
+        general.Should().Contain("SectionCard");
+        general.Should().NotContain("eh-section-title mb-1");
+    }
+
+    [Fact]
+    public void UxHeuristicReview_IncludesWave5PostRedesignScores()
+    {
+        var review = File.ReadAllText(GetPath("docs/UX_HEURISTIC_REVIEW.md"));
+        review.Should().Contain("Wave 5");
+        review.Should().Contain("4.38");
+    }
+
+    [Fact]
+    public void Readme_ReflectsCurrentAutomatedTestCount()
+    {
+        var readme = File.ReadAllText(GetPath("README.md"));
+        readme.Should().MatchRegex(@"53[0-9]\+ automated tests");
     }
 
     private static string GetPath(string relativePath) =>

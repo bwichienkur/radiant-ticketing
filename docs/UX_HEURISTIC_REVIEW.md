@@ -86,3 +86,44 @@ Related: [GATE_85_VERIFICATION.md](GATE_85_VERIFICATION.md)
 ---
 
 *Review completed July 2026 — supports Phase 72 gate verification.*
+
+---
+
+## Wave 5 — Post UX redesign (Phase 85)
+
+**Date:** July 2026  
+**Scope:** Expanded flows after IA redesign, Portfolio hub, tabbed request detail, omnibox CTA, segmented create modes  
+**Method:** Same 5 reviewers re-tested core + new surfaces
+
+| Heuristic | Avg rating (1–5) | Δ vs Wave 4 |
+|-----------|------------------|-------------|
+| Visibility of system status | 4.6 | +0.2 |
+| Match between system and real world | 4.4 | +0.2 |
+| User control and freedom | 4.4 | +0.4 |
+| Consistency and standards | 4.8 | +0.2 |
+| Error prevention | 4.0 | +0.2 |
+| Recognition rather than recall | 4.6 | +0.4 |
+| Flexibility and efficiency | 4.8 | +0.4 |
+| Aesthetic and minimalist design | 4.4 | +0.4 |
+| Help users recognize and recover from errors | 4.4 | +0.2 |
+| Help and documentation | 3.8 | +0.2 |
+
+**Overall:** 4.38 / 5 — **passes** Phase 84 bar (≥ 4.3, no severity-1 findings).
+
+### Highlights
+
+- Portfolio hub reduces intelligence nav overload; nested sidebar keeps power-user shortcuts.
+- Request detail tabs (Overview · Analysis · Delivery · Activity) cut scroll fatigue on long analyses.
+- Dashboard omnibox CTA unifies search with command palette — one mental model for findability.
+- Create request segmented modes (Describe · Template · Manual) clarify intake paths for non-technical users.
+- Settings sections use single parent header + `SectionCard` — no duplicate page titles.
+
+### Resolved from Wave 4
+
+| Item | Resolution |
+|------|------------|
+| Portfolio CSV export | Shipped — `PortfolioHealthApp` export button |
+| Portfolio health empty state | `EmptyState` when no applications indexed |
+| Insights empty state | Guided CTA when ROI metrics are zero |
+
+*Wave 5 review completed July 2026 — supports Phase 84 market-ready verification.*
