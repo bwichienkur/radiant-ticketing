@@ -1,42 +1,39 @@
-using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Abstractions.Persistence;
 using EnhancementHub.Application.Features.Admin.Dtos;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace EnhancementHub.Application.Features.Admin.Queries;
 
 public sealed class GetTeamDetailQueryHandler : IRequestHandler<GetTeamDetailQuery, TeamDetailDto?>
 {
-    private readonly IEnhancementHubDbContext _dbContext;
+    private readonly ITeamRepository _teams;
 
-    public GetTeamDetailQueryHandler(IEnhancementHubDbContext dbContext) => _dbContext = dbContext;
+    public GetTeamDetailQueryHandler(ITeamRepository teams) => _teams = teams;
 
     public async Task<TeamDetailDto?> Handle(GetTeamDetailQuery request, CancellationToken cancellationToken)
     {
-        var team = await _dbContext.Teams
-            .AsNoTracking()
-            .Where(t => t.Id == request.TeamId)
-            .Select(t => new TeamDetailDto(
-                t.Id,
-                t.Name,
-                t.Description,
-                t.Members
-                    .OrderBy(m => m.User.DisplayName)
-                    .Select(m => new TeamMemberDto(
-                        m.Id,
-                        m.UserId,
-                        m.User.Email,
-                        m.User.DisplayName,
-                        m.User.Role,
-                        m.Role,
-                        m.User.IsActive))
-                    .ToList(),
-                t.OwnedApplications
-                    .OrderBy(a => a.Name)
-                    .Select(a => new TeamApplicationSummaryDto(a.Id, a.Name))
-                    .ToList()))
-            .FirstOrDefaultAsync(cancellationToken);
+        var team = await _teams.GetDetailAsync(request.TeamId, cancellationToken);
+        if (team is null)
+        {
+            return null;
+        }
 
-        return team;
+        return new TeamDetailDto(
+            team.Id,
+            team.Name,
+            team.Description,
+            team.Members
+                .Select(m => new TeamMemberDto(
+                    m.Id,
+                    m.UserId,
+                    m.Email,
+                    m.DisplayName,
+                    m.UserRole,
+                    m.TeamRole,
+                    m.IsActive))
+                .ToList(),
+            team.Applications
+                .Select(a => new TeamApplicationSummaryDto(a.Id, a.Name))
+                .ToList());
     }
 }

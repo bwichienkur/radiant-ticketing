@@ -23,8 +23,9 @@ export function AlertBanner({
   children,
   className = '',
 }: AlertBannerProps) {
+  const role = variant === 'danger' || variant === 'warning' ? 'alert' : 'status';
   return (
-    <div className={`alert ${variantClass[variant]} eh-alert-banner ${className}`.trim()} role="status">
+    <div className={`alert ${variantClass[variant]} eh-alert-banner ${className}`.trim()} role={role}>
       {title ? (
         <>
           <strong>{title}</strong> {children}

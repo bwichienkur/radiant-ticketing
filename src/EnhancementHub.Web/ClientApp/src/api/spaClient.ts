@@ -1,12 +1,16 @@
 import type {
   AiBudgetStatus,
   AnalysisComparison,
+  ApplicationDetailResponse,
   ApplicationListItem,
+  NotificationPreference,
+  UpdateNotificationPreferenceInput,
   ApprovalRecommendation,
   IntakeQualityScore,
   AuditLogEntry,
   AuditLogFilters,
   DatabaseConnectionSummary,
+  DatabaseSchema,
   DriftReport,
   DriftRequestDraft,
   ApprovalHistoryItem,
@@ -31,9 +35,27 @@ import type {
   PlatformRuntimeStatus,
   RepositoryPathValidation,
   RepositoryListItem,
+  ErdDiagram,
+  BlastRadiusResult,
+  RefactorPlanSummary,
+  RefactorPlanDetail,
+  RoiReport,
+  SystemMap,
+  RegisterDatabaseConnectionInput,
+  DocumentationExportFormat,
+  AuthenticationConfigurationStatus,
+  SystemSetting,
+  TeamSummary,
+  ServiceApiKeySummary,
+  CreateServiceApiKeyResult,
+  WebhookSubscriptionSummary,
+  CreateWebhookSubscriptionResult,
+  WebhookDeliverySummary,
   GlobalSearchItem,
   GlobalSearchResult,
-  SystemMap,
+  PortfolioHealthReport,
+  TenantBranding,
+  UserAppearance,
 } from '../types/spa';
 
 async function fetchJson<T>(url: string): Promise<T> {
@@ -48,6 +70,22 @@ async function fetchJson<T>(url: string): Promise<T> {
 async function postJson<T>(url: string, body?: unknown): Promise<T> {
   const response = await fetch(url, {
     method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+
+  if (!response.ok) {
+    const errorBody = (await response.json().catch(() => null)) as { message?: string } | null;
+    throw new Error(errorBody?.message ?? `Request failed: ${response.status}`);
+  }
+
+  return response.json() as Promise<T>;
+}
+
+async function putJson<T>(url: string, body?: unknown): Promise<T> {
+  const response = await fetch(url, {
+    method: 'PUT',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -92,6 +130,134 @@ export async function postRequestComment(
 
 export async function listApplications(): Promise<ApplicationListItem[]> {
   return fetchJson<ApplicationListItem[]>('/web-api/spa/applications');
+}
+
+export async function getApplicationDetail(applicationId: string): Promise<ApplicationDetailResponse> {
+  return fetchJson<ApplicationDetailResponse>(`/web-api/spa/applications/${applicationId}`);
+}
+
+export async function getNotificationPreferences(): Promise<NotificationPreference[]> {
+  return fetchJson<NotificationPreference[]>('/web-api/spa/notifications/preferences');
+}
+
+export async function updateNotificationPreferences(
+  preferences: UpdateNotificationPreferenceInput[],
+): Promise<NotificationPreference[]> {
+  return putJson<NotificationPreference[]>('/web-api/spa/notifications/preferences', preferences);
+}
+
+export async function listDatabaseConnections(): Promise<DatabaseConnectionSummary[]> {
+  return fetchJson<DatabaseConnectionSummary[]>('/web-api/spa/connections');
+}
+
+export async function registerDatabaseConnection(
+  input: RegisterDatabaseConnectionInput,
+): Promise<DatabaseConnectionSummary> {
+  return postJson<DatabaseConnectionSummary>('/web-api/spa/connections', input);
+}
+
+export async function triggerDatabaseScan(connectionId: string): Promise<DatabaseConnectionSummary> {
+  return postJson<DatabaseConnectionSummary>(`/web-api/spa/connections/${connectionId}/scan`);
+}
+
+export async function getDatabaseSchema(connectionId: string): Promise<DatabaseSchema> {
+  return fetchJson<DatabaseSchema>(`/web-api/spa/connections/${connectionId}/schema`);
+}
+
+export async function getConnectionErd(connectionId: string): Promise<ErdDiagram> {
+  return fetchJson<ErdDiagram>(`/web-api/spa/connections/${connectionId}/erd`);
+}
+
+export function exportDocumentation(applicationId: string, format: DocumentationExportFormat): void {
+  const params = new URLSearchParams();
+  params.set('applicationId', applicationId);
+  params.set('format', format);
+  window.location.assign(`/web-api/spa/documentation/export?${params.toString()}`);
+}
+
+export async function analyzeRefactorBlastRadius(
+  applicationId: string,
+  target: string,
+): Promise<BlastRadiusResult> {
+  return postJson<BlastRadiusResult>('/web-api/spa/refactor/analyze', { applicationId, target });
+}
+
+export async function generateRefactorPlan(
+  applicationId: string,
+  target: string,
+): Promise<RefactorPlanDetail> {
+  return postJson<RefactorPlanDetail>('/web-api/spa/refactor/plans', { applicationId, target });
+}
+
+export async function listRefactorPlans(): Promise<RefactorPlanSummary[]> {
+  return fetchJson<RefactorPlanSummary[]>('/web-api/spa/refactor/plans');
+}
+
+export async function getRefactorPlan(planId: string): Promise<RefactorPlanDetail> {
+  return fetchJson<RefactorPlanDetail>(`/web-api/spa/refactor/plans/${planId}`);
+}
+
+export async function getAuthenticationConfigurationStatus(): Promise<AuthenticationConfigurationStatus> {
+  return fetchJson<AuthenticationConfigurationStatus>('/web-api/spa/settings/authentication');
+}
+
+export async function listSystemSettings(): Promise<SystemSetting[]> {
+  return fetchJson<SystemSetting[]>('/web-api/spa/settings/system');
+}
+
+export async function updateSystemSetting(settingId: string, value: string): Promise<void> {
+  await putJson(`/web-api/spa/settings/system/${settingId}`, { value });
+}
+
+export async function listAdminTeams(): Promise<TeamSummary[]> {
+  return fetchJson<TeamSummary[]>('/web-api/spa/settings/teams');
+}
+
+export async function createAdminTeam(name: string, description?: string): Promise<TeamSummary> {
+  return postJson<TeamSummary>('/web-api/spa/settings/teams', { name, description });
+}
+
+export async function listServiceApiKeys(): Promise<ServiceApiKeySummary[]> {
+  return fetchJson<ServiceApiKeySummary[]>('/web-api/spa/settings/api-keys');
+}
+
+export async function createServiceApiKey(input: {
+  name: string;
+  description?: string;
+  role: string;
+  teamId?: string;
+  expiresInDays?: number;
+}): Promise<CreateServiceApiKeyResult> {
+  return postJson<CreateServiceApiKeyResult>('/web-api/spa/settings/api-keys', input);
+}
+
+export async function revokeServiceApiKey(keyId: string): Promise<void> {
+  await postJson(`/web-api/spa/settings/api-keys/${keyId}/revoke`);
+}
+
+export async function listWebhookEventTypes(): Promise<string[]> {
+  const result = await fetchJson<{ eventTypes: string[] }>('/web-api/spa/settings/webhooks');
+  return result.eventTypes;
+}
+
+export async function listWebhookSubscriptions(): Promise<WebhookSubscriptionSummary[]> {
+  return fetchJson<WebhookSubscriptionSummary[]>('/web-api/spa/settings/webhooks/subscriptions');
+}
+
+export async function listWebhookDeliveries(): Promise<WebhookDeliverySummary[]> {
+  return fetchJson<WebhookDeliverySummary[]>('/web-api/spa/settings/webhooks/deliveries');
+}
+
+export async function createWebhookSubscription(input: {
+  name: string;
+  url: string;
+  eventTypes: string[];
+}): Promise<CreateWebhookSubscriptionResult> {
+  return postJson<CreateWebhookSubscriptionResult>('/web-api/spa/settings/webhooks/subscriptions', input);
+}
+
+export async function revokeWebhookSubscription(subscriptionId: string): Promise<void> {
+  await postJson(`/web-api/spa/settings/webhooks/subscriptions/${subscriptionId}/revoke`);
 }
 
 export async function listDriftConnections(): Promise<DatabaseConnectionSummary[]> {
@@ -354,15 +520,40 @@ export async function getDashboard(): Promise<DashboardPageData> {
   return fetchJson('/web-api/spa/dashboard');
 }
 
+export async function getRoiReport(): Promise<RoiReport> {
+  return fetchJson<RoiReport>('/web-api/spa/insights/roi');
+}
+
+export async function exportRoiCsv(): Promise<void> {
+  const response = await fetch('/web-api/spa/insights/roi/export', { credentials: 'include' });
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  const blob = await response.blob();
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'enhancementhub-roi-report.csv';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 export async function searchGlobal(query: string, limit = 20): Promise<GlobalSearchItem[]> {
   return fetchJson<GlobalSearchItem[]>(
     `/web-api/spa/search?q=${encodeURIComponent(query)}&limit=${limit}`,
   );
 }
 
-export async function searchGlobalGrouped(query: string, limit = 20): Promise<GlobalSearchResult> {
+export async function searchGlobalGrouped(
+  query: string,
+  limit = 20,
+  semantic = false,
+): Promise<GlobalSearchResult> {
   return fetchJson<GlobalSearchResult>(
-    `/web-api/spa/search?q=${encodeURIComponent(query)}&grouped=true&limit=${limit}`,
+    `/web-api/spa/search?q=${encodeURIComponent(query)}&grouped=true&limit=${limit}&semantic=${semantic}`,
   );
 }
 
@@ -580,6 +771,26 @@ export async function getPlatformRuntimeStatus(): Promise<PlatformRuntimeStatus>
   return fetchJson<PlatformRuntimeStatus>('/web-api/spa/platform/runtime-status');
 }
 
+export async function getPortfolioHealth(): Promise<PortfolioHealthReport> {
+  return fetchJson<PortfolioHealthReport>('/web-api/spa/portfolio/health');
+}
+
+export async function getUserAppearance(): Promise<UserAppearance> {
+  return fetchJson<UserAppearance>('/web-api/spa/branding/appearance');
+}
+
+export async function updateThemePreference(themePreference: string): Promise<UserAppearance> {
+  return putJson<UserAppearance>('/web-api/spa/branding/theme', { themePreference });
+}
+
+export async function updateTenantBranding(input: {
+  logoUrl?: string;
+  accentColor: string;
+  productName?: string;
+}): Promise<TenantBranding> {
+  return putJson<TenantBranding>('/web-api/spa/branding/tenant', input);
+}
+
 export interface SubmitProductFeedbackInput {
   workflowKey: string;
   npsScore: number;
@@ -590,4 +801,116 @@ export async function submitProductFeedback(
   input: SubmitProductFeedbackInput,
 ): Promise<{ id: string; workflowKey: string; npsScore: number }> {
   return postJson('/web-api/spa/feedback', input);
+}
+
+export async function getAdminJobs(): Promise<import('../types/spa').AdminJobsResponse> {
+  return fetchJson('/web-api/spa/admin/jobs');
+}
+
+export async function retryAdminJob(jobId: string): Promise<{ message: string }> {
+  return postJson(`/web-api/spa/admin/jobs/${encodeURIComponent(jobId)}/retry`);
+}
+
+export async function getAdminCompliance(): Promise<import('../types/spa').AdminComplianceResponse> {
+  return fetchJson('/web-api/spa/admin/compliance/soc2');
+}
+
+export async function listAdminCustomFields(): Promise<import('../types/spa').CustomFieldDefinition[]> {
+  return fetchJson('/web-api/spa/admin/custom-fields');
+}
+
+export async function upsertAdminCustomField(
+  input: {
+    id?: string;
+    key: string;
+    label: string;
+    fieldType: number;
+    isRequired: boolean;
+    isActive: boolean;
+    sortOrder: number;
+    options?: string[];
+  },
+): Promise<import('../types/spa').CustomFieldDefinition> {
+  return postJson('/web-api/spa/admin/custom-fields', input);
+}
+
+export async function deleteAdminCustomField(id: string): Promise<void> {
+  await fetch(`/web-api/spa/admin/custom-fields/${id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+}
+
+export async function getAdminTenancy(): Promise<import('../types/spa').AdminTenancyResponse> {
+  return fetchJson('/web-api/spa/admin/tenancy');
+}
+
+export async function createBillingCheckout(plan: number): Promise<{ url: string }> {
+  return postJson('/web-api/spa/admin/tenancy/checkout', { plan });
+}
+
+export async function createBillingPortal(): Promise<{ url: string }> {
+  return postJson('/web-api/spa/admin/tenancy/portal');
+}
+
+export async function provisionTenantSchema(): Promise<{ message: string }> {
+  return postJson('/web-api/spa/admin/tenancy/provision-schema');
+}
+
+export async function getAdminObservability(): Promise<import('../types/spa').ObservabilityStatus> {
+  return fetchJson('/web-api/spa/admin/observability');
+}
+
+export async function getAdminDataScaling(): Promise<import('../types/spa').DataScalingStatus> {
+  return fetchJson('/web-api/spa/admin/data-scaling');
+}
+
+export async function getAdminRetention(): Promise<import('../types/spa').DataRetentionStatus> {
+  return fetchJson('/web-api/spa/admin/retention');
+}
+
+export async function applyAdminRetention(dryRun: boolean): Promise<import('../types/spa').DataRetentionResult> {
+  return postJson(`/web-api/spa/admin/retention/apply?dryRun=${dryRun}`);
+}
+
+export async function listAdminAiPrompts(): Promise<import('../types/spa').AiPromptConfiguration[]> {
+  return fetchJson('/web-api/spa/admin/ai-prompts');
+}
+
+export async function updateAdminAiPrompt(
+  id: string,
+  input: { systemPromptTemplate: string; userPromptTemplate: string; isActive: boolean },
+): Promise<void> {
+  await putJson(`/web-api/spa/admin/ai-prompts/${id}`, input);
+}
+
+export async function getTenantDeliveryProfile(): Promise<import('../types/spa').TenantDeliveryProfile> {
+  return fetchJson('/web-api/spa/delivery/tenant-profile');
+}
+
+export async function updateTenantDeliveryProfile(
+  input: Record<string, unknown>,
+): Promise<import('../types/spa').TenantDeliveryProfile> {
+  return putJson('/web-api/spa/delivery/tenant-profile', input);
+}
+
+export async function validateTenantDeliveryProfile(): Promise<import('../types/spa').DeliveryProfileValidation> {
+  return postJson('/web-api/spa/delivery/tenant-profile/validate');
+}
+
+export async function upsertTenantDeploymentEnvironment(
+  input: Record<string, unknown>,
+): Promise<unknown> {
+  return postJson('/web-api/spa/delivery/tenant-environments', input);
+}
+
+export async function deleteTenantDeploymentEnvironment(environmentId: string): Promise<void> {
+  await fetch(`/web-api/spa/delivery/tenant-environments/${environmentId}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+}
+
+export function getPortfolioHealthExportUrl(): string {
+  return '/web-api/spa/portfolio/health/export';
 }

@@ -7,9 +7,20 @@ namespace EnhancementHub.Infrastructure.Persistence;
 
 public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
 {
+    /// <summary>Captured tenant for global query filters (null = no tenant scoping).</summary>
+    public Guid? FilterTenantId { get; }
+
     public EnhancementHubDbContext(DbContextOptions<EnhancementHubDbContext> options)
         : base(options)
     {
+    }
+
+    public EnhancementHubDbContext(
+        DbContextOptions<EnhancementHubDbContext> options,
+        ICurrentTenantService currentTenant)
+        : base(options)
+    {
+        FilterTenantId = currentTenant.TenantId;
     }
 
     protected EnhancementHubDbContext(DbContextOptions options)
@@ -66,6 +77,7 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     public DbSet<OnboardingSession> OnboardingSessions => Set<OnboardingSession>();
     public DbSet<ServiceApiKey> ServiceApiKeys => Set<ServiceApiKey>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
+    public DbSet<TenantBranding> TenantBrandings => Set<TenantBranding>();
     public DbSet<TenantUsageSnapshot> TenantUsageSnapshots => Set<TenantUsageSnapshot>();
     public DbSet<IntakeCopilotSession> IntakeCopilotSessions => Set<IntakeCopilotSession>();
     public DbSet<TenantDeliveryProfile> TenantDeliveryProfiles => Set<TenantDeliveryProfile>();
@@ -89,6 +101,28 @@ public class EnhancementHubDbContext : DbContext, IEnhancementHubDbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(EnhancementHubDbContext).Assembly);
+        ApplyTenantQueryFilters(modelBuilder);
         base.OnModelCreating(modelBuilder);
+    }
+
+    private void ApplyTenantQueryFilters(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Team>().HasQueryFilter(e =>
+            FilterTenantId == null || e.TenantId == null || e.TenantId == FilterTenantId);
+
+        modelBuilder.Entity<User>().HasQueryFilter(e =>
+            FilterTenantId == null || e.TenantId == null || e.TenantId == FilterTenantId);
+
+        modelBuilder.Entity<WebhookSubscription>().HasQueryFilter(e =>
+            FilterTenantId == null || e.TenantId == null || e.TenantId == FilterTenantId);
+
+        modelBuilder.Entity<Notification>().HasQueryFilter(e =>
+            FilterTenantId == null || e.TenantId == null || e.TenantId == FilterTenantId);
+
+        modelBuilder.Entity<CustomFieldDefinition>().HasQueryFilter(e =>
+            FilterTenantId == null || e.TenantId == null || e.TenantId == FilterTenantId);
+
+        modelBuilder.Entity<ProductFeedback>().HasQueryFilter(e =>
+            FilterTenantId == null || e.TenantId == null || e.TenantId == FilterTenantId);
     }
 }

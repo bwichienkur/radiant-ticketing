@@ -1,9 +1,9 @@
 using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Abstractions.Persistence;
 using EnhancementHub.Application.Features.Feedback.Dtos;
 using EnhancementHub.Domain.Entities;
 using FluentValidation;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace EnhancementHub.Application.Features.Feedback.Commands;
 
@@ -25,14 +25,17 @@ public sealed class SubmitProductFeedbackCommandValidator : AbstractValidator<Su
 public sealed class SubmitProductFeedbackCommandHandler
     : IRequestHandler<SubmitProductFeedbackCommand, ProductFeedbackDto>
 {
-    private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IEnhancementRequestRepository _requests;
+    private readonly IUserRepository _users;
     private readonly ICurrentUserService _currentUser;
 
     public SubmitProductFeedbackCommandHandler(
-        IEnhancementHubDbContext dbContext,
+        IEnhancementRequestRepository requests,
+        IUserRepository users,
         ICurrentUserService currentUser)
     {
-        _dbContext = dbContext;
+        _requests = requests;
+        _users = users;
         _currentUser = currentUser;
     }
 
@@ -45,12 +48,7 @@ public sealed class SubmitProductFeedbackCommandHandler
             throw new UnauthorizedAccessException("User must be authenticated to submit feedback.");
         }
 
-        var tenantId = await _dbContext.Users
-            .AsNoTracking()
-            .Where(u => u.Id == userId)
-            .Select(u => u.TenantId)
-            .FirstOrDefaultAsync(cancellationToken);
-
+        var tenantId = await _users.GetTenantIdAsync(userId, cancellationToken);
         var now = DateTime.UtcNow;
         var feedback = new ProductFeedback
         {
@@ -66,8 +64,8 @@ public sealed class SubmitProductFeedbackCommandHandler
             UpdatedBy = userId
         };
 
-        _dbContext.ProductFeedbacks.Add(feedback);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        _requests.AddFeedback(feedback);
+        await _requests.SaveChangesAsync(cancellationToken);
 
         return new ProductFeedbackDto(
             feedback.Id,

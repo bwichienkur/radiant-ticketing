@@ -150,23 +150,52 @@
         });
     }
 
+    function resolveThemePreference(preference) {
+        if (preference === 'Light') {
+            return 'light';
+        }
+
+        if (preference === 'Dark') {
+            return 'dark';
+        }
+
+        if (preference === 'System') {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
+        if (preference === 'light' || preference === 'dark') {
+            return preference;
+        }
+
+        return 'dark';
+    }
+
     function initTheme() {
         const saved = localStorage.getItem(STORAGE_THEME);
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const theme = saved || (prefersDark ? 'dark' : 'light');
+        const theme = resolveThemePreference(saved);
         document.documentElement.setAttribute('data-bs-theme', theme);
         document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
             btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
             btn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
         });
+        document.querySelectorAll('[data-theme-preference]').forEach(btn => {
+            const pref = btn.getAttribute('data-theme-preference');
+            const active = saved ? saved === pref : pref === 'Dark';
+            btn.classList.toggle('active', active);
+            btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+    }
+
+    function setThemePreference(preference) {
+        localStorage.setItem(STORAGE_THEME, preference);
+        initTheme();
     }
 
     function toggleTheme() {
-        const html = document.documentElement;
-        const next = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
-        html.setAttribute('data-bs-theme', next);
-        localStorage.setItem(STORAGE_THEME, next);
-        initTheme();
+        const saved = localStorage.getItem(STORAGE_THEME);
+        const current = resolveThemePreference(saved);
+        const next = current === 'dark' ? 'Light' : 'Dark';
+        setThemePreference(next);
     }
 
     function initSidebar() {
@@ -201,6 +230,29 @@
                 if (mobileMq.matches) {
                     offcanvas?.hide();
                 }
+            });
+        });
+    }
+
+    function initSidebarGroups() {
+        document.querySelectorAll('[data-sidebar-group]').forEach((section) => {
+            const groupId = section.getAttribute('data-sidebar-group');
+            const toggle = section.querySelector('.sidebar-section-toggle');
+            if (!toggle || !groupId) {
+                return;
+            }
+
+            const storageKey = `eh-sidebar-group-${groupId}`;
+            const collapsed = localStorage.getItem(storageKey) === 'collapsed';
+            if (collapsed) {
+                section.classList.add('collapsed');
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+
+            toggle.addEventListener('click', () => {
+                const isCollapsed = section.classList.toggle('collapsed');
+                toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+                localStorage.setItem(storageKey, isCollapsed ? 'collapsed' : 'expanded');
             });
         });
     }
@@ -635,9 +687,8 @@
         /*
          * SPA vs full-page navigation (Phase 48):
          * - Client-side (no reload): /, /Index, /Spa/*
-         * - Full Razor page load: /DatabaseConnections, /Documentation, /Refactor,
-         *   /Applications/Details, /Admin/*
-         * Intelligence list pages (Applications, Drift, Repositories, Audit) are in the SPA shell.
+         * - Full Razor page load: /Admin/*
+         * Intelligence list pages (Applications, Drift, Repositories, Audit, Databases, Docs, Refactor) are in the SPA shell.
          */
         const spaExact = new Set(['/', '/Index']);
         const spaPrefixes = [
@@ -647,11 +698,21 @@
             '/Spa/ApprovalQueue',
             '/Spa/OnboardingWizard',
             '/Spa/SystemMap',
+            '/Spa/Portfolio',
             '/Spa/Applications',
             '/Spa/SchemaDrift',
             '/Spa/Repositories',
             '/Spa/Audit',
             '/Spa/Search',
+            '/Spa/DatabaseConnections',
+            '/Spa/Documentation/Export',
+            '/Spa/Refactor/Analyze',
+            '/Spa/Refactor/Plans',
+            '/Spa/Settings',
+            '/Spa/Admin',
+            '/Spa/Insights',
+            '/Spa/PortfolioHealth',
+            '/Spa/Account/Notifications',
         ];
 
         function isSpaPath(pathname) {
@@ -677,11 +738,23 @@
             if (linkPath === '/Spa/OnboardingWizard') {
                 return currentPath.startsWith('/Spa/OnboardingWizard');
             }
+            if (linkPath === '/Spa/Portfolio') {
+                return currentPath === '/Spa/Portfolio';
+            }
             if (linkPath === '/Spa/SystemMap') {
                 return currentPath.startsWith('/Spa/SystemMap');
             }
             if (linkPath === '/Spa/Applications') {
                 return currentPath.startsWith('/Spa/Applications');
+            }
+            if (linkPath === '/Spa/DatabaseConnections') {
+                return currentPath.startsWith('/Spa/DatabaseConnections');
+            }
+            if (linkPath === '/Spa/Search') {
+                return currentPath.startsWith('/Spa/Search');
+            }
+            if (linkPath === '/Spa/Settings/General') {
+                return currentPath.startsWith('/Spa/Settings') || currentPath.startsWith('/Spa/Admin');
             }
             if (linkPath === '/Spa/SchemaDrift') {
                 return currentPath.startsWith('/Spa/SchemaDrift');
@@ -779,21 +852,35 @@
         });
     }
 
+    const isSpaShell = !!document.getElementById('spa-root');
+
     document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
         btn.addEventListener('click', toggleTheme);
     });
 
+    document.querySelectorAll('[data-theme-preference]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const preference = btn.getAttribute('data-theme-preference');
+            if (preference) {
+                setThemePreference(preference);
+            }
+        });
+    });
+
     initTheme();
     initSidebar();
+    initSidebarGroups();
     initNotifications();
-    initCommandPalette();
+    if (!isSpaShell) {
+        initCommandPalette();
+    }
     initCopilot();
     initAccordions();
     initApprovalQueue();
     initProductTour();
     const spaNav = initSpaNavigation();
 
-    window.EhUx = { toggleTheme, addNotification, showToast, initProductTour, updateSidebarActive: spaNav?.updateSidebarActive };
+    window.EhUx = { toggleTheme, setThemePreference, addNotification, showToast, initProductTour, updateSidebarActive: spaNav?.updateSidebarActive };
 
     initCommandPaletteKbd();
 })();

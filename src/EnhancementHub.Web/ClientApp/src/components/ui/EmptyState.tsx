@@ -17,7 +17,9 @@ const iconClass: Record<EmptyStateIcon, string> = {
 };
 
 export function EmptyState({ title, description, action, icon = 'inbox', embedded = false }: EmptyStateProps) {
-  const rootClass = embedded ? 'empty-state embedded-empty-state' : 'card-panel empty-state';
+  const rootClass = embedded
+    ? 'empty-state eh-empty-state embedded-empty-state'
+    : 'card-panel empty-state eh-empty-state';
 
   return (
     <div className={rootClass} role="status">

@@ -1,10 +1,10 @@
 using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Abstractions.Persistence;
 using EnhancementHub.Application.Common.Exceptions;
 using EnhancementHub.Application.Common.Mappings;
 using EnhancementHub.Application.Features.EnhancementRequests.Dtos;
 using EnhancementHub.Domain.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace EnhancementHub.Application.Features.EnhancementRequests.Queries;
 
@@ -13,14 +13,14 @@ public sealed record GetEnhancementRequestByIdQuery(Guid Id) : IRequest<Enhancem
 public sealed class GetEnhancementRequestByIdQueryHandler
     : IRequestHandler<GetEnhancementRequestByIdQuery, EnhancementRequestDetailDto>
 {
-    private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IEnhancementRequestRepository _requests;
     private readonly IEnhancementRequestAccessService _accessService;
 
     public GetEnhancementRequestByIdQueryHandler(
-        IEnhancementHubDbContext dbContext,
+        IEnhancementRequestRepository requests,
         IEnhancementRequestAccessService accessService)
     {
-        _dbContext = dbContext;
+        _requests = requests;
         _accessService = accessService;
     }
 
@@ -30,14 +30,7 @@ public sealed class GetEnhancementRequestByIdQueryHandler
     {
         await _accessService.GetAccessibleRequestAsync(request.Id, cancellationToken);
 
-        var entity = await _dbContext.EnhancementRequests
-            .AsNoTracking()
-            .Include(r => r.TargetApplication)
-            .Include(r => r.SubmittedByUser)
-            .Include(r => r.Attachments)
-            .Include(r => r.Comments).ThenInclude(c => c.User)
-            .Include(r => r.Analyses)
-            .FirstOrDefaultAsync(r => r.Id == request.Id, cancellationToken)
+        var entity = await _requests.GetByIdWithDetailsAsync(request.Id, cancellationToken)
             ?? throw new NotFoundException(nameof(EnhancementRequest), request.Id);
 
         return entity.ToDetailDto();

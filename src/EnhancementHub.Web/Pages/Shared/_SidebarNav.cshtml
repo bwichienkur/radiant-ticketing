@@ -5,9 +5,18 @@
     bool NavDashboard() => NavExact("/Index") || NavExact("/");
     bool NavRequests() =>
         NavActive("/Spa/RequestList")
+        || NavActive("/Spa/RequestDetail")
         && !NavActive("/Spa/CreateRequest")
         && !NavActive("/Spa/ApprovalQueue");
-    var isAdmin = path.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase);
+    bool NavPortfolio() =>
+        NavActive("/Spa/Portfolio")
+        || NavActive("/Spa/Applications")
+        || NavActive("/Spa/SystemMap")
+        || NavActive("/Spa/DatabaseConnections")
+        || NavActive("/Spa/SchemaDrift")
+        || NavActive("/Spa/Documentation")
+        || NavActive("/Spa/Refactor")
+        || NavActive("/Spa/Repositories");
 }
 
 <aside class="app-sidebar" aria-label="Sidebar">
@@ -18,59 +27,115 @@
         </a>
     </div>
     <nav class="sidebar-nav">
-        <div class="sidebar-section">
-            <div class="sidebar-section-label">Work</div>
-            <a class="sidebar-link @(NavDashboard() ? "active" : "")" asp-page="/Index">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"dashboard"' /></span> Dashboard
-            </a>
-            <a class="sidebar-link @(NavRequests() ? "active" : "")" href="/Spa/RequestList">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"requests"' /></span> Requests
-            </a>
-            <a class="sidebar-link @(NavActive("/Spa/ApprovalQueue") ? "active" : "")" href="/Spa/ApprovalQueue" data-tour="nav-approvals">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"approvals"' /></span> Approvals
-            </a>
-            <a class="sidebar-link @(NavActive("/Spa/CreateRequest") ? "active" : "")" href="/Spa/CreateRequest">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"create"' /></span> New request
-            </a>
-            <a class="sidebar-link @(NavActive("/Spa/OnboardingWizard") ? "active" : "")" href="/Spa/OnboardingWizard" data-tour="nav-setup">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"setup"' /></span> Setup
-            </a>
-        </div>
-        <div class="sidebar-section">
-            <div class="sidebar-section-label">Intelligence</div>
-            <a class="sidebar-link @(NavActive("/Spa/Applications") ? "active" : "")" href="/Spa/Applications">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"applications"' /></span> Applications
-            </a>
-            <a class="sidebar-link @(NavActive("/Spa/SystemMap") ? "active" : "")" href="/Spa/SystemMap">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"map"' /></span> System map
-            </a>
-            <a class="sidebar-link @(NavActive("/DatabaseConnections") ? "active" : "")" asp-page="/DatabaseConnections/Index">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"database"' /></span> Databases
-            </a>
-            <a class="sidebar-link @(NavActive("/Spa/SchemaDrift") ? "active" : "")" href="/Spa/SchemaDrift">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"drift"' /></span> Drift
-            </a>
-            <a class="sidebar-link @(NavActive("/Documentation") ? "active" : "")" asp-page="/Documentation/Export">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"docs"' /></span> Docs
-            </a>
-            <a class="sidebar-link @(NavActive("/Refactor") ? "active" : "")" asp-page="/Refactor/Analyze">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"refactor"' /></span> Refactor
-            </a>
-            <a class="sidebar-link @(NavActive("/Spa/Repositories") ? "active" : "")" href="/Spa/Repositories">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"repositories"' /></span> Repositories
-            </a>
-        </div>
-        <div class="sidebar-section">
-            <div class="sidebar-section-label">Governance</div>
-            <a class="sidebar-link @(NavActive("/Spa/Audit") ? "active" : "")" href="/Spa/Audit">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"audit"' /></span> Audit
-            </a>
-            @if (User.IsInRole("Admin"))
-            {
-                <a class="sidebar-link @(isAdmin ? "active" : "")" asp-page="/Admin/Settings">
-                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"admin"' /></span> Admin
+        <div class="sidebar-section" data-sidebar-group="home">
+            <button type="button" class="sidebar-section-toggle" aria-expanded="true" aria-controls="sidebar-group-home">
+                <span class="sidebar-section-label">Home</span>
+                <svg class="sidebar-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="sidebar-section-items" id="sidebar-group-home">
+                <a class="sidebar-link @(NavDashboard() ? "active" : "")" asp-page="/Index" title="Dashboard">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"dashboard"' /></span>
+                    <span>Dashboard</span>
                 </a>
-            }
+            </div>
         </div>
+
+        <div class="sidebar-section" data-sidebar-group="work">
+            <button type="button" class="sidebar-section-toggle" aria-expanded="true" aria-controls="sidebar-group-work">
+                <span class="sidebar-section-label">Work</span>
+                <svg class="sidebar-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="sidebar-section-items" id="sidebar-group-work">
+                <a class="sidebar-link @(NavRequests() ? "active" : "")" href="/Spa/RequestList" title="Requests">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"requests"' /></span>
+                    <span>Requests</span>
+                </a>
+                <a class="sidebar-link @(NavActive("/Spa/ApprovalQueue") ? "active" : "")" href="/Spa/ApprovalQueue" data-tour="nav-approvals" title="Approvals">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"approvals"' /></span>
+                    <span>Approvals</span>
+                </a>
+                <a class="sidebar-link @(NavActive("/Spa/CreateRequest") ? "active" : "")" href="/Spa/CreateRequest" title="New request">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"create"' /></span>
+                    <span>New request</span>
+                </a>
+                <a class="sidebar-link @(NavActive("/Spa/OnboardingWizard") ? "active" : "")" href="/Spa/OnboardingWizard" data-tour="nav-setup" title="Onboarding">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"setup"' /></span>
+                    <span>Onboarding</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="sidebar-section" data-sidebar-group="portfolio">
+            <button type="button" class="sidebar-section-toggle" aria-expanded="true" aria-controls="sidebar-group-portfolio">
+                <span class="sidebar-section-label">Portfolio</span>
+                <svg class="sidebar-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="sidebar-section-items" id="sidebar-group-portfolio">
+                <a class="sidebar-link @(NavExact("/Spa/Portfolio") ? "active" : "")" href="/Spa/Portfolio" title="Overview">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"map"' /></span>
+                    <span>Overview</span>
+                </a>
+                <a class="sidebar-link sidebar-link-nested @(NavActive("/Spa/Applications") ? "active" : "")" href="/Spa/Applications" title="Applications">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"applications"' /></span>
+                    <span>Applications</span>
+                </a>
+                <a class="sidebar-link sidebar-link-nested @(NavActive("/Spa/SystemMap") ? "active" : "")" href="/Spa/SystemMap" title="System map">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"map"' /></span>
+                    <span>System map</span>
+                </a>
+                <a class="sidebar-link sidebar-link-nested @(NavActive("/Spa/Repositories") ? "active" : "")" href="/Spa/Repositories" title="Repositories">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"repositories"' /></span>
+                    <span>Repositories</span>
+                </a>
+                <a class="sidebar-link sidebar-link-nested @(NavActive("/Spa/DatabaseConnections") ? "active" : "")" href="/Spa/DatabaseConnections" title="Databases">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"database"' /></span>
+                    <span>Databases</span>
+                </a>
+                <a class="sidebar-link sidebar-link-nested @(NavActive("/Spa/SchemaDrift") ? "active" : "")" href="/Spa/SchemaDrift" title="Drift">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"drift"' /></span>
+                    <span>Drift</span>
+                </a>
+                <a class="sidebar-link sidebar-link-nested @(NavActive("/Spa/Audit") ? "active" : "")" href="/Spa/Audit" title="Audit">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"audit"' /></span>
+                    <span>Audit</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="sidebar-section" data-sidebar-group="governance">
+            <button type="button" class="sidebar-section-toggle" aria-expanded="true" aria-controls="sidebar-group-governance">
+                <span class="sidebar-section-label">Governance</span>
+                <svg class="sidebar-section-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
+            <div class="sidebar-section-items" id="sidebar-group-governance">
+                <a class="sidebar-link @(NavActive("/Spa/Search") ? "active" : "")" href="/Spa/Search" title="Search">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"search"' /></span>
+                    <span>Search</span>
+                </a>
+                @if (User.IsInRole("Admin") || User.IsInRole("Approver"))
+                {
+                    <a class="sidebar-link @(NavActive("/Spa/Insights") ? "active" : "")" href="/Spa/Insights" title="Insights">
+                        <span class="sidebar-icon"><partial name="_SidebarIcon" model='"dashboard"' /></span>
+                        <span>Insights</span>
+                    </a>
+                    <a class="sidebar-link @(NavActive("/Spa/PortfolioHealth") ? "active" : "")" href="/Spa/PortfolioHealth" title="Portfolio health">
+                        <span class="sidebar-icon"><partial name="_SidebarIcon" model='"drift"' /></span>
+                        <span>Portfolio health</span>
+                    </a>
+                }
+            </div>
+        </div>
+
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="sidebar-section sidebar-section-settings" data-sidebar-group="settings">
+                <div class="sidebar-section-items">
+                    <a class="sidebar-link @(NavActive("/Spa/Settings") || NavActive("/Spa/Admin") ? "active" : "")" href="/Spa/Settings" title="Settings">
+                        <span class="sidebar-icon"><partial name="_SidebarIcon" model='"admin"' /></span>
+                        <span>Settings</span>
+                    </a>
+                </div>
+            </div>
+        }
     </nav>
 </aside>

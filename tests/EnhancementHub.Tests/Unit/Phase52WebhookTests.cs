@@ -53,7 +53,7 @@ public sealed class Phase52WebhookTests
     public void AdminNav_IncludesWebhooksLink()
     {
         var nav = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Shared/_AdminNav.cshtml"));
-        nav.Should().Contain("/Admin/Webhooks");
+        nav.Should().Contain("/Spa/Settings/Webhooks");
     }
 
     private static string GetPath(string relativePath) =>

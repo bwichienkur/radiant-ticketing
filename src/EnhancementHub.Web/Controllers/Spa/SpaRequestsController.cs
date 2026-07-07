@@ -4,6 +4,8 @@ using EnhancementHub.Application.Features.Analysis.Queries;
 using EnhancementHub.Application.Features.Approvals.Commands;
 using EnhancementHub.Application.Features.Approvals.Queries;
 using EnhancementHub.Application.Features.Applications.Queries;
+using EnhancementHub.Application.Features.CustomFields.Dtos;
+using EnhancementHub.Application.Features.CustomFields.Queries;
 using EnhancementHub.Application.Features.EnhancementRequests.Commands;
 using EnhancementHub.Application.Features.EnhancementRequests.Queries;
 using EnhancementHub.Application.Features.Templates.Queries;
@@ -145,7 +147,8 @@ public sealed class SpaRequestsController : ControllerBase
     {
         var applications = await _mediator.Send(new ListApplicationsQuery(), cancellationToken);
         var templates = await _mediator.Send(new ListEnhancementTemplatesQuery(), cancellationToken);
-        return Ok(new SpaCreateRequestFormResponse(applications, templates));
+        var customFields = await _mediator.Send(new ListCustomFieldDefinitionsQuery(ActiveOnly: true), cancellationToken);
+        return Ok(new SpaCreateRequestFormResponse(applications, templates, customFields));
     }
 
     [HttpGet("templates/{id:guid}")]
@@ -167,7 +170,13 @@ public sealed class SpaRequestsController : ControllerBase
                 request.Department,
                 null,
                 request.SupportingNotes,
-                request.TemplateId),
+                request.TemplateId,
+                request.CustomFields?.Select(f => new CustomFieldValueInput(
+                    f.Key,
+                    f.TextValue,
+                    f.NumberValue,
+                    f.DateValue,
+                    f.UserValueId)).ToList()),
             cancellationToken));
 
     private static string Csv(string value)

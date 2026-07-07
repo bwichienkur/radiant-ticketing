@@ -1,8 +1,8 @@
 using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Abstractions.Persistence;
 using EnhancementHub.Application.Common.Mappings;
 using EnhancementHub.Application.Features.Repositories.Dtos;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace EnhancementHub.Application.Features.Repositories.Queries;
 
@@ -12,14 +12,14 @@ public sealed record ListRepositoriesQuery(Guid? ApplicationId = null)
 public sealed class ListRepositoriesQueryHandler
     : IRequestHandler<ListRepositoriesQuery, IReadOnlyList<RepositoryDto>>
 {
-    private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IGitRepositoryRepository _repositories;
     private readonly IApplicationAccessService _accessService;
 
     public ListRepositoriesQueryHandler(
-        IEnhancementHubDbContext dbContext,
+        IGitRepositoryRepository repositories,
         IApplicationAccessService accessService)
     {
-        _dbContext = dbContext;
+        _repositories = repositories;
         _accessService = accessService;
     }
 
@@ -34,25 +34,7 @@ public sealed class ListRepositoriesQueryHandler
                 cancellationToken);
         }
 
-        var accessibleApplicationIds = _accessService
-            .ApplyVisibilityFilter(_dbContext.Applications.AsNoTracking())
-            .Select(a => a.Id);
-
-        var query = _dbContext.Repositories
-            .AsNoTracking()
-            .Include(r => r.Application)
-            .Where(r => accessibleApplicationIds.Contains(r.ApplicationId))
-            .AsQueryable();
-
-        if (request.ApplicationId.HasValue)
-        {
-            query = query.Where(r => r.ApplicationId == request.ApplicationId.Value);
-        }
-
-        var entities = await query
-            .OrderBy(r => r.Name)
-            .ToListAsync(cancellationToken);
-
+        var entities = await _repositories.ListAccessibleAsync(request.ApplicationId, cancellationToken);
         return entities.Select(e => e.ToDto()).ToList();
     }
 }

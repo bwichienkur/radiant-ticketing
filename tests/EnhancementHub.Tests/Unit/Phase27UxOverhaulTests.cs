@@ -31,7 +31,7 @@ public sealed class Phase27UxOverhaulTests
 
         page.Should().Contain("_SpaRoot");
         page.Should().Contain("spa-shell.js");
-        app.Should().Contain("copilot-bar");
+        app.Should().Contain("eh-omnibox-cta");
         app.Should().Contain("Recent activity");
         app.Should().Contain("sparkline");
     }
@@ -83,7 +83,7 @@ public sealed class Phase27UxOverhaulTests
     public void AdminNav_IncludesTenancy()
     {
         var nav = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Shared/_AdminNav.cshtml"));
-        nav.Should().Contain("/Admin/Tenancy");
+        nav.Should().Contain("/Spa/Admin/Tenancy");
     }
 
     [Fact]

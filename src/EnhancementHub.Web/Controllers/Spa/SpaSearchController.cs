@@ -18,10 +18,11 @@ public sealed class SpaSearchController : ControllerBase
     public async Task<IActionResult> Search(
         [FromQuery] string q,
         [FromQuery] bool grouped = false,
+        [FromQuery] bool semantic = false,
         [FromQuery] int limit = 20,
         CancellationToken cancellationToken = default)
     {
-        var result = await _mediator.Send(new GlobalEntitySearchQuery(q, limit), cancellationToken);
+        var result = await _mediator.Send(new GlobalEntitySearchQuery(q, limit, semantic), cancellationToken);
         return grouped ? Ok(result) : Ok(result.Items);
     }
 }

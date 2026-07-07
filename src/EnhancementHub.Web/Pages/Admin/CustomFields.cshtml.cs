@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.Admin;
 
+/// <summary>Legacy Razor custom fields page — redirects to <c>/Spa/Admin/CustomFields</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/Admin/CustomFields. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize(Roles = "Admin")]
 public class CustomFieldsModel : PageModel
 {
@@ -49,8 +51,16 @@ public class CustomFieldsModel : PageModel
     [TempData]
     public string? ErrorMessage { get; set; }
 
-    public async Task OnGetAsync(CancellationToken cancellationToken) =>
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
+    {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectPermanent("/Spa/Admin/CustomFields");
+        }
+
         Fields = await _mediator.Send(new ListCustomFieldDefinitionsQuery(ActiveOnly: false), cancellationToken);
+        return Page();
+    }
 
     public async Task<IActionResult> OnPostSaveAsync(CancellationToken cancellationToken)
     {
@@ -80,13 +90,13 @@ public class CustomFieldsModel : PageModel
             ErrorMessage = ex.Message;
         }
 
-        return RedirectToPage();
+        return RedirectToPage("/Spa/Admin/CustomFields");
     }
 
     public async Task<IActionResult> OnPostDeleteAsync(Guid deleteId, CancellationToken cancellationToken)
     {
         await _mediator.Send(new DeleteCustomFieldDefinitionCommand(deleteId), cancellationToken);
         StatusMessage = "Custom field deleted.";
-        return RedirectToPage();
+        return RedirectToPage("/Spa/Admin/CustomFields");
     }
 }

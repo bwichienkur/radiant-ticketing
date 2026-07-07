@@ -328,7 +328,7 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
   }
 
   return (
-    <>
+    <div className="eh-request-list">
       <PageHeader
         title="Enhancement Requests"
         description="Triage, search, and open request details"
@@ -339,27 +339,23 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
         }
       />
 
-      <form className="card-panel p-3 mb-3 eh-filter-panel" onSubmit={applyFilters} aria-label="Filter requests">
-        <div className="row g-2 align-items-end">
-          <div className="col-md-4">
-            <label className="form-label small" htmlFor="search-q">
-              Search
-            </label>
-            <input
-              type="search"
-              className="form-control"
-              id="search-q"
-              value={draftFilters.q}
-              onChange={(event) => setDraftFilters((prev) => ({ ...prev, q: event.target.value }))}
-              placeholder="Title, submitter, application…"
-            />
-          </div>
-          <div className="col-md-2">
-            <label className="form-label small" htmlFor="filter-status">
-              Status
-            </label>
+      <form className="card-panel eh-filter-toolbar eh-filter-panel" onSubmit={applyFilters} aria-label="Filter requests">
+        <div className="eh-filter-toolbar-search">
+          <label className="visually-hidden" htmlFor="search-q">Search</label>
+          <input
+            type="search"
+            className="form-control eh-input"
+            id="search-q"
+            value={draftFilters.q}
+            onChange={(event) => setDraftFilters((prev) => ({ ...prev, q: event.target.value }))}
+            placeholder="Search requests…"
+          />
+        </div>
+        <div className="eh-filter-toolbar-fields">
+          <div className="eh-filter-field">
+            <label htmlFor="filter-status">Status</label>
             <select
-              className="form-select"
+              className="form-select eh-input"
               id="filter-status"
               value={draftFilters.status}
               onChange={(event) => setDraftFilters((prev) => ({ ...prev, status: event.target.value }))}
@@ -372,12 +368,10 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
               ))}
             </select>
           </div>
-          <div className="col-md-2">
-            <label className="form-label small" htmlFor="filter-priority">
-              Priority
-            </label>
+          <div className="eh-filter-field">
+            <label htmlFor="filter-priority">Priority</label>
             <select
-              className="form-select"
+              className="form-select eh-input"
               id="filter-priority"
               value={draftFilters.priority}
               onChange={(event) => setDraftFilters((prev) => ({ ...prev, priority: event.target.value }))}
@@ -390,12 +384,10 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
               ))}
             </select>
           </div>
-          <div className="col-md-2">
-            <label className="form-label small" htmlFor="filter-sort">
-              Sort
-            </label>
+          <div className="eh-filter-field">
+            <label htmlFor="filter-sort">Sort</label>
             <select
-              className="form-select"
+              className="form-select eh-input"
               id="filter-sort"
               value={draftFilters.sort}
               onChange={(event) => setDraftFilters((prev) => ({ ...prev, sort: event.target.value }))}
@@ -407,13 +399,26 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
               ))}
             </select>
           </div>
-          <div className="col-md-2">
-            <button type="submit" className="btn btn-primary w-100">
-              Apply
-            </button>
-          </div>
         </div>
-        <div className="filter-chips mt-3">
+        <div className="eh-filter-toolbar-actions">
+          <button
+            type="button"
+            className="btn eh-btn-ghost"
+            onClick={() => {
+              const cleared: ListFilters = { q: '', status: '', priority: '', view: '', sort: 'Newest' };
+              setDraftFilters(cleared);
+              setFilters(cleared);
+              window.history.replaceState({}, '', '/Spa/RequestList');
+            }}
+          >
+            Reset
+          </button>
+          <button type="submit" className="btn btn-primary">
+            Apply
+          </button>
+        </div>
+      </form>
+      <div className="filter-chips">
           <SpaLink
             className={`filter-chip ${isChipActive({}) ? 'active' : ''}`}
             href={chipHref({ q: '', status: '', priority: '', view: '' })}
@@ -439,7 +444,6 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
             High risk
           </SpaLink>
         </div>
-      </form>
 
       {loading ? (
         <LoadingState label="Loading requests…" />
@@ -532,9 +536,9 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
                     </th>
                     <th scope="col">Title</th>
                     <th scope="col">Application</th>
-                    <th scope="col">Risk</th>
+                    <th scope="col" className="eh-table-badge-col">Risk</th>
                     <th scope="col">Priority</th>
-                    <th scope="col">Status</th>
+                    <th scope="col" className="eh-table-badge-col">Status</th>
                     <th scope="col">Submitted By</th>
                     <th scope="col">Age</th>
                     <th scope="col"></th>
@@ -543,7 +547,7 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
                 <tbody>
                   {requests.map((item) => (
                     <tr key={item.id}>
-                      <td>
+                      <td className="eh-table-checkbox-col">
                         <input
                           type="checkbox"
                           className="form-check-input"
@@ -556,11 +560,11 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
                         <strong>{item.title}</strong>
                       </td>
                       <td>{item.targetApplicationName ?? '—'}</td>
-                      <td>
+                      <td className="eh-table-badge-col">
                         <StatusBadge risk={item.latestRiskLevel} />
                       </td>
                       <td>{item.priority}</td>
-                      <td>
+                      <td className="eh-table-badge-col">
                         <StatusBadge status={item.status} />
                       </td>
                       <td>{item.submittedByUserName ?? '—'}</td>
@@ -640,6 +644,6 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
         onConfirm={() => void handleBulkDecline()}
         onCancel={() => setShowBulkDeclineConfirm(false)}
       />
-    </>
+    </div>
   );
 }

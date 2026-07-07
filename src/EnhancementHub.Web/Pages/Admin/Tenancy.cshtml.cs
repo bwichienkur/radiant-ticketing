@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.Admin;
 
+/// <summary>Legacy Razor tenancy page — redirects to <c>/Spa/Admin/Tenancy</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/Admin/Tenancy. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize(Roles = "Admin")]
 public class TenancyModel : PageModel
 {
@@ -25,8 +27,13 @@ public class TenancyModel : PageModel
     public string? StatusMessage { get; private set; }
     public string? ErrorMessage { get; private set; }
 
-    public async Task<IActionResult> OnGetAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectPermanent("/Spa/Admin/Tenancy");
+        }
+
         await LoadAsync(cancellationToken);
 
         if (Request.Query["checkout"] == "success")

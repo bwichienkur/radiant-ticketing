@@ -25,4 +25,5 @@ public class Tenant : BaseEntity
     public ICollection<TenantUsageSnapshot> UsageSnapshots { get; set; } = new List<TenantUsageSnapshot>();
     public TenantDeliveryProfile? DeliveryProfile { get; set; }
     public ICollection<TenantDeploymentEnvironment> DeploymentEnvironments { get; set; } = new List<TenantDeploymentEnvironment>();
+    public TenantBranding? Branding { get; set; }
 }

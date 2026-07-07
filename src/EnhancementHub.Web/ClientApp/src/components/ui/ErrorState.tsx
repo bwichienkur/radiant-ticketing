@@ -13,7 +13,7 @@ export function ErrorState({
 }: ErrorStateProps) {
   return (
     <div
-      className={`alert alert-danger eh-error-state d-flex flex-wrap justify-content-between align-items-center gap-2 ${className}`.trim()}
+      className={`card-panel border border-danger eh-error-state d-flex flex-wrap justify-content-between align-items-center gap-2 p-3 ${className}`.trim()}
       role="alert"
     >
       <span>{message}</span>

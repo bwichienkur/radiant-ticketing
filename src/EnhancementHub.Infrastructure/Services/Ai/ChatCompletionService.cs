@@ -172,6 +172,9 @@ public sealed class ChatCompletionService : IChatCompletionService
             AiWorkflowStep.IntakeCopilot => IsAzureProvider()
                 ? _options.AzureOpenAI.Deployments.EnhancementAnalysis
                 : ResolveOpenAiModel(_options.OpenAI.Models.EnhancementAnalysis),
+            AiWorkflowStep.ApprovalCopilot => IsAzureProvider()
+                ? _options.AzureOpenAI.Deployments.EnhancementAnalysis
+                : ResolveOpenAiModel(_options.OpenAI.Models.EnhancementAnalysis),
             _ => IsAzureProvider()
                 ? _options.AzureOpenAI.Deployments.EnhancementAnalysis
                 : ResolveOpenAiModel(_options.OpenAI.Models.EnhancementAnalysis)

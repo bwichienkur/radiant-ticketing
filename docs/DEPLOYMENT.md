@@ -189,4 +189,34 @@ dotnet run --project src/EnhancementHub.Agent
 
 ---
 
+## Secrets manager integration
+
+Store production secrets outside plain environment files. Map secret names to configuration keys:
+
+| Secret | Config key | Notes |
+|--------|------------|-------|
+| Database password | `ConnectionStrings__Default` | Prefer managed identity where supported |
+| JWT signing key | `Jwt__Secret` | ≥32 characters; rotate on compromise |
+| Data protection key ring | `DataProtection__KeysPath` or Azure Blob | Required for multi-instance Web/API |
+| OpenAI / Azure OpenAI key | `OpenAI__ApiKey` | Customer-owned; optional for mock analysis |
+| SCIM bearer token | `Scim__BearerToken` | Rotate with `scripts/rotate-scim-bearer-token.sh` |
+| Stripe webhook secret | `Stripe__WebhookSecret` | When billing enabled |
+| Agent API keys | per-agent registration | One-time display at creation |
+
+### Azure Key Vault
+
+1. Create vault and access policy (or RBAC) for API, Web, and Worker managed identities.
+2. Store secrets with names matching double-underscore config (e.g. `Jwt--Secret` or use Key Vault references in App Service / AKS).
+3. In Helm, use `externalSecrets` or CSI driver to mount secrets as environment variables.
+
+### AWS Secrets Manager
+
+1. Create secrets per environment (`enhancementhub/prod/jwt-secret`, etc.).
+2. Grant ECS task role or EKS service account `secretsmanager:GetSecretValue`.
+3. Inject at deploy time via task definition `secrets` block or External Secrets Operator.
+
+Never commit secrets to source control. Rotate `Jwt:Secret` and `Scim:BearerToken` on a documented schedule (quarterly minimum for SCIM).
+
+---
+
 See also: [ROADMAP.md](ROADMAP.md), [PHASES.md](PHASES.md)

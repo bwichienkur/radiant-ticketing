@@ -1,6 +1,7 @@
 using EnhancementHub.Infrastructure.Services;
 using EnhancementHub.Tests.Common;
 using FluentAssertions;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
@@ -23,7 +24,7 @@ public sealed class Soc2ReadinessServiceTests
 
         var runtimeStatus = new PlatformRuntimeStatusService(
             configuration,
-            new ConfigurationFeatureService(configuration));
+            new ConfigurationFeatureService(configuration, new MemoryCache(new MemoryCacheOptions())));
         var service = new Soc2ReadinessService(configuration, new TestHostEnvironment("Production"), runtimeStatus);
         var report = service.GetReport();
 

@@ -1,7 +1,7 @@
 import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { exportAuditLogs, listAuditLogs } from '../api/spaClient';
-import { EmptyState, ErrorState, LoadingState, PageHeader } from '../components/ui';
+import { EmptyState, ErrorState, LoadingState, PageHeader, ResponsiveDataList } from '../components/ui';
 import { readSpaContext } from '../spaRoutes';
 import type { AuditLogEntry, AuditLogFilters } from '../types/spa';
 
@@ -173,32 +173,45 @@ export function AuditApp() {
           icon="search"
         />
       ) : (
-        <div className="card-panel table-desktop-only">
-          <div className="table-responsive">
-            <table className="table table-hover table-enterprise mb-0">
-              <thead>
-                <tr>
-                  <th scope="col">Time (UTC)</th>
-                  <th scope="col">Action</th>
-                  <th scope="col">Entity</th>
-                  <th scope="col">User</th>
-                  <th scope="col">Details</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((log) => (
-                  <tr key={log.id}>
-                    <td className="small">{new Date(log.createdAt).toLocaleString()}</td>
-                    <td>{log.action}</td>
-                    <td>{log.entityType}</td>
-                    <td>{log.userName ?? '—'}</td>
-                    <td className="small">{log.comments ?? '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <ResponsiveDataList
+          items={logs}
+          getRowKey={(log) => log.id}
+          columns={[
+            {
+              id: 'time',
+              header: 'Time (UTC)',
+              cell: (log) => <span className="small">{new Date(log.createdAt).toLocaleString()}</span>,
+            },
+            { id: 'action', header: 'Action', cell: (log) => log.action },
+            { id: 'entity', header: 'Entity', cell: (log) => log.entityType },
+            { id: 'user', header: 'User', cell: (log) => log.userName ?? '—' },
+            {
+              id: 'details',
+              header: 'Details',
+              cell: (log) => <span className="small">{log.comments ?? '—'}</span>,
+            },
+          ]}
+          renderMobileCard={(log) => (
+            <>
+              <div className="mobile-data-card-title">{log.action}</div>
+              <div className="mobile-data-card-row">
+                <span className="mobile-data-card-label">Time</span>
+                <span className="small">{new Date(log.createdAt).toLocaleString()}</span>
+              </div>
+              <div className="mobile-data-card-row">
+                <span className="mobile-data-card-label">Entity</span>
+                <span>{log.entityType}</span>
+              </div>
+              <div className="mobile-data-card-row">
+                <span className="mobile-data-card-label">User</span>
+                <span>{log.userName ?? '—'}</span>
+              </div>
+              {log.comments ? (
+                <div className="small text-muted mt-2">{log.comments}</div>
+              ) : null}
+            </>
+          )}
+        />
       )}
     </div>
   );

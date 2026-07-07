@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.Admin;
 
+/// <summary>Legacy Razor settings — redirects to <c>/Spa/Settings/General</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/Settings/General. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize(Roles = "Admin")]
 public class SettingsModel : PageModel
 {
@@ -22,8 +24,16 @@ public class SettingsModel : PageModel
     [BindProperty]
     public string Value { get; set; } = string.Empty;
 
-    public async Task OnGetAsync(CancellationToken cancellationToken) =>
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
+    {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectPermanent("/Spa/Settings/General");
+        }
+
         Settings = await _mediator.Send(new GetSystemSettingsQuery(), cancellationToken);
+        return Page();
+    }
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {

@@ -1,9 +1,9 @@
 using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Abstractions.Persistence;
 using EnhancementHub.Application.Features.Admin.Dtos;
 using EnhancementHub.Domain.Entities;
 using FluentValidation;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace EnhancementHub.Application.Features.Admin.Commands;
 
@@ -20,20 +20,19 @@ public sealed class CreateTeamCommandValidator : AbstractValidator<CreateTeamCom
 
 public sealed class CreateTeamCommandHandler : IRequestHandler<CreateTeamCommand, TeamSummaryDto>
 {
-    private readonly IEnhancementHubDbContext _dbContext;
+    private readonly ITeamRepository _teams;
     private readonly IAuditService _auditService;
 
-    public CreateTeamCommandHandler(IEnhancementHubDbContext dbContext, IAuditService auditService)
+    public CreateTeamCommandHandler(ITeamRepository teams, IAuditService auditService)
     {
-        _dbContext = dbContext;
+        _teams = teams;
         _auditService = auditService;
     }
 
     public async Task<TeamSummaryDto> Handle(CreateTeamCommand request, CancellationToken cancellationToken)
     {
         var name = request.Name.Trim();
-        var exists = await _dbContext.Teams.AnyAsync(t => t.Name == name, cancellationToken);
-        if (exists)
+        if (await _teams.NameExistsAsync(name, cancellationToken))
         {
             throw new ValidationException($"A team named '{name}' already exists.");
         }
@@ -48,8 +47,8 @@ public sealed class CreateTeamCommandHandler : IRequestHandler<CreateTeamCommand
             UpdatedAt = now
         };
 
-        _dbContext.Teams.Add(team);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        _teams.Add(team);
+        await _teams.SaveChangesAsync(cancellationToken);
 
         await _auditService.LogAsync(
             "TeamCreated",

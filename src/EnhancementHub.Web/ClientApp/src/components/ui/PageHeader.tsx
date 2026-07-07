@@ -17,7 +17,7 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <header
-      className="page-header d-flex justify-content-between align-items-start flex-wrap gap-3"
+      className="page-header eh-page-header d-flex justify-content-between align-items-start flex-wrap gap-3"
       data-tour={tourId}
     >
       <div className="page-header-body">

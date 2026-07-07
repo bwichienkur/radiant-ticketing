@@ -189,8 +189,8 @@ public sealed class ProductHardeningTests
 
         page.Should().Contain("_SpaRoot");
         page.Should().Contain("spa-shell.js");
-        app.Should().Contain("Pipeline search");
-        app.Should().Contain("not a generative AI chat");
+        app.Should().Contain("eh-omnibox-cta");
+        app.Should().Contain("not a generative chat");
         app.Should().NotContain("Ask EnhancementHub");
     }
 

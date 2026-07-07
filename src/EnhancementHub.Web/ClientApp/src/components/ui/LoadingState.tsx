@@ -6,7 +6,7 @@ interface LoadingStateProps {
 
 export function LoadingState({ label = 'Loading…' }: LoadingStateProps) {
   return (
-    <div aria-busy="true" aria-live="polite">
+    <div className="eh-loading-state" aria-busy="true" aria-live="polite">
       <p className="eh-loading-label" role="status">
         {label}
       </p>
