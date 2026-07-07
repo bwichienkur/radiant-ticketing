@@ -199,7 +199,7 @@ export function CommandPalette() {
   }
 
   return (
-    <div className="command-palette-backdrop" role="presentation" onClick={close}>
+    <div className="command-palette-backdrop eh-command-palette" role="presentation" onClick={close}>
       <div
         className="command-palette-modal card-panel"
         role="dialog"

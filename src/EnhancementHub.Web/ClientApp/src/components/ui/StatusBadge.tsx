@@ -14,7 +14,7 @@ export function StatusBadge({ status, risk }: StatusBadgeProps) {
     }
 
     return (
-      <span className={`badge ${riskBadgeClass(normalized)} badge-status`}>{normalized}</span>
+      <span className={`eh-status-chip badge ${riskBadgeClass(normalized)} badge-status`}>{normalized}</span>
     );
   }
 
@@ -23,6 +23,6 @@ export function StatusBadge({ status, risk }: StatusBadgeProps) {
   }
 
   return (
-    <span className="badge text-bg-secondary badge-status">{formatRequestStatus(status)}</span>
+    <span className="eh-status-chip badge badge-status text-bg-secondary">{formatRequestStatus(status)}</span>
   );
 }

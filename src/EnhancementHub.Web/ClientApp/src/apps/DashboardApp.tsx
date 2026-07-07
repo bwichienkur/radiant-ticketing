@@ -62,7 +62,7 @@ export function DashboardApp() {
   const hasRequests = report.totalRequests > 0;
 
   return (
-    <div aria-live="polite">
+    <div className="eh-dashboard" aria-live="polite">
       <PageHeader
         title="Dashboard"
         description="Track your change requests and see what needs attention"
