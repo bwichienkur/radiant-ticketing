@@ -286,9 +286,9 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
           details are redacted before saving.
         </p>
         {policyLabel ? (
-          <div className="alert alert-info py-2 small mb-2" role="status">
+          <AlertBanner variant="info" className="py-2 small mb-2">
             Policy attached: <strong>{policyLabel}</strong>
-          </div>
+          </AlertBanner>
         ) : null}
         <div className="d-flex flex-wrap gap-2 align-items-center mb-2">
           <input
@@ -364,9 +364,9 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
       ) : null}
 
       {isComplete ? (
-        <div className="alert alert-success py-2 small mb-3" role="status">
+        <AlertBanner variant="success" className="py-2 small mb-3">
           Your draft is ready — review the details below and submit when you are happy with them.
-        </div>
+        </AlertBanner>
       ) : null}
 
       {qualityScore ? (
@@ -389,9 +389,9 @@ export function IntakeCopilotPanel({ onApplyDraft, onSessionChange }: IntakeCopi
       ) : null}
 
       {error ? (
-        <div className="alert alert-danger py-2 small" role="alert">
+        <AlertBanner variant="danger" className="py-2 small">
           {error}
-        </div>
+        </AlertBanner>
       ) : null}
 
       <form onSubmit={(e) => void (messages.length === 0 ? handleQuickDraft(e) : handleSendMessage(e))}>

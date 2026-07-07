@@ -55,4 +55,20 @@ test.describe('Accessibility (axe)', () => {
     await expect(page.getByLabel('Application')).toBeVisible({ timeout: 15_000 });
     await expectNoSeriousViolations(page);
   });
+
+  test('settings has no serious axe violations', async ({ page }) => {
+    await page.goto('/Spa/Settings/General');
+    await expect(page.getByRole('heading', { name: 'Administration' })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expectNoSeriousViolations(page);
+  });
+
+  test('onboarding wizard has no serious axe violations', async ({ page }) => {
+    await page.goto('/Spa/OnboardingWizard');
+    await expect(page.getByRole('heading', { name: 'Set up a system for change requests' })).toBeVisible({
+      timeout: 15_000,
+    });
+    await expectNoSeriousViolations(page);
+  });
 });

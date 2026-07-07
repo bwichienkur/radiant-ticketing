@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace EnhancementHub.Web.Pages.DatabaseConnections;
 
+/// <summary>Legacy Razor register page — redirects to <c>/Spa/DatabaseConnections/Register</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/DatabaseConnections/Register. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize]
 public class RegisterModel : PageModel
 {
@@ -20,10 +22,16 @@ public class RegisterModel : PageModel
 
     public List<SelectListItem> ApplicationOptions { get; private set; } = [];
 
-    public async Task OnGetAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToPagePermanent("/Spa/DatabaseConnectionRegister");
+        }
+
         var apps = await _mediator.Send(new ListApplicationsQuery(), cancellationToken);
         ApplicationOptions = apps.Select(a => new SelectListItem(a.Name, a.Id.ToString())).ToList();
+        return Page();
     }
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)

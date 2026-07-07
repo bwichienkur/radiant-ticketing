@@ -1,0 +1,12 @@
+@page "/Spa/Applications/{id:guid}"
+@model EnhancementHub.Web.Pages.Spa.ApplicationDetailModel
+@{
+    ViewData["Title"] = "Application";
+    ViewData["Breadcrumb"] = "Application";
+}
+
+<partial name="_SpaRoot" />
+
+@section Scripts {
+    <script type="module" src="~/spa/react/spa-shell.js" asp-append-version="true"></script>
+}

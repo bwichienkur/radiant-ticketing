@@ -23,4 +23,12 @@ public static class EnhancementHubTelemetry
     public static readonly Counter<long> JobFailedTotal = Meter.CreateCounter<long>(
         "enhancementhub.job.failed.total",
         description: "Background jobs failed");
+
+    public static readonly Counter<long> FeatureFlagCacheHits = Meter.CreateCounter<long>(
+        "enhancementhub.feature_flag.cache.hits",
+        description: "Feature flag cache hits");
+
+    public static readonly Counter<long> FeatureFlagCacheMisses = Meter.CreateCounter<long>(
+        "enhancementhub.feature_flag.cache.misses",
+        description: "Feature flag cache misses");
 }

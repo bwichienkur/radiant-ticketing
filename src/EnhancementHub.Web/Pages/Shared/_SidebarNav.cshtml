@@ -5,9 +5,18 @@
     bool NavDashboard() => NavExact("/Index") || NavExact("/");
     bool NavRequests() =>
         NavActive("/Spa/RequestList")
+        || NavActive("/Spa/RequestDetail")
         && !NavActive("/Spa/CreateRequest")
         && !NavActive("/Spa/ApprovalQueue");
-    var isAdmin = path.StartsWith("/Admin", StringComparison.OrdinalIgnoreCase);
+    bool NavPortfolio() =>
+        NavActive("/Spa/Portfolio")
+        || NavActive("/Spa/Applications")
+        || NavActive("/Spa/SystemMap")
+        || NavActive("/Spa/DatabaseConnections")
+        || NavActive("/Spa/SchemaDrift")
+        || NavActive("/Spa/Documentation")
+        || NavActive("/Spa/Refactor")
+        || NavActive("/Spa/Repositories");
 }
 
 <aside class="app-sidebar" aria-label="Sidebar">
@@ -19,10 +28,14 @@
     </div>
     <nav class="sidebar-nav">
         <div class="sidebar-section">
-            <div class="sidebar-section-label">Work</div>
+            <div class="sidebar-section-label">Home</div>
             <a class="sidebar-link @(NavDashboard() ? "active" : "")" asp-page="/Index">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"dashboard"' /></span> Dashboard
             </a>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Work</div>
             <a class="sidebar-link @(NavRequests() ? "active" : "")" href="/Spa/RequestList">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"requests"' /></span> Requests
             </a>
@@ -33,44 +46,58 @@
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"create"' /></span> New request
             </a>
             <a class="sidebar-link @(NavActive("/Spa/OnboardingWizard") ? "active" : "")" href="/Spa/OnboardingWizard" data-tour="nav-setup">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"setup"' /></span> Setup
+                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"setup"' /></span> Onboarding
             </a>
         </div>
+
         <div class="sidebar-section">
-            <div class="sidebar-section-label">Intelligence</div>
-            <a class="sidebar-link @(NavActive("/Spa/Applications") ? "active" : "")" href="/Spa/Applications">
+            <div class="sidebar-section-label">Portfolio</div>
+            <a class="sidebar-link @(NavExact("/Spa/Portfolio") ? "active" : "")" href="/Spa/Portfolio">
+                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"map"' /></span> Overview
+            </a>
+            <a class="sidebar-link sidebar-link-nested @(NavActive("/Spa/Applications") ? "active" : "")" href="/Spa/Applications">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"applications"' /></span> Applications
             </a>
-            <a class="sidebar-link @(NavActive("/Spa/SystemMap") ? "active" : "")" href="/Spa/SystemMap">
+            <a class="sidebar-link sidebar-link-nested @(NavActive("/Spa/SystemMap") ? "active" : "")" href="/Spa/SystemMap">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"map"' /></span> System map
             </a>
-            <a class="sidebar-link @(NavActive("/DatabaseConnections") ? "active" : "")" asp-page="/DatabaseConnections/Index">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"database"' /></span> Databases
-            </a>
-            <a class="sidebar-link @(NavActive("/Spa/SchemaDrift") ? "active" : "")" href="/Spa/SchemaDrift">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"drift"' /></span> Drift
-            </a>
-            <a class="sidebar-link @(NavActive("/Documentation") ? "active" : "")" asp-page="/Documentation/Export">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"docs"' /></span> Docs
-            </a>
-            <a class="sidebar-link @(NavActive("/Refactor") ? "active" : "")" asp-page="/Refactor/Analyze">
-                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"refactor"' /></span> Refactor
-            </a>
-            <a class="sidebar-link @(NavActive("/Spa/Repositories") ? "active" : "")" href="/Spa/Repositories">
+            <a class="sidebar-link sidebar-link-nested @(NavActive("/Spa/Repositories") ? "active" : "")" href="/Spa/Repositories">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"repositories"' /></span> Repositories
             </a>
-        </div>
-        <div class="sidebar-section">
-            <div class="sidebar-section-label">Governance</div>
-            <a class="sidebar-link @(NavActive("/Spa/Audit") ? "active" : "")" href="/Spa/Audit">
+            <a class="sidebar-link sidebar-link-nested @(NavActive("/Spa/DatabaseConnections") ? "active" : "")" href="/Spa/DatabaseConnections">
+                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"database"' /></span> Databases
+            </a>
+            <a class="sidebar-link sidebar-link-nested @(NavActive("/Spa/SchemaDrift") ? "active" : "")" href="/Spa/SchemaDrift">
+                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"drift"' /></span> Drift
+            </a>
+            <a class="sidebar-link sidebar-link-nested @(NavActive("/Spa/Audit") ? "active" : "")" href="/Spa/Audit">
                 <span class="sidebar-icon"><partial name="_SidebarIcon" model='"audit"' /></span> Audit
             </a>
-            @if (User.IsInRole("Admin"))
+        </div>
+
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">Governance</div>
+            <a class="sidebar-link @(NavActive("/Spa/Search") ? "active" : "")" href="/Spa/Search">
+                <span class="sidebar-icon"><partial name="_SidebarIcon" model='"search"' /></span> Search
+            </a>
+            @if (User.IsInRole("Admin") || User.IsInRole("Approver"))
             {
-                <a class="sidebar-link @(isAdmin ? "active" : "")" asp-page="/Admin/Settings">
-                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"admin"' /></span> Admin
+                <a class="sidebar-link @(NavActive("/Spa/Insights") ? "active" : "")" href="/Spa/Insights">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"dashboard"' /></span> Insights
+                </a>
+                <a class="sidebar-link @(NavActive("/Spa/PortfolioHealth") ? "active" : "")" href="/Spa/PortfolioHealth">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"drift"' /></span> Portfolio health
                 </a>
             }
         </div>
+
+        @if (User.IsInRole("Admin"))
+        {
+            <div class="sidebar-section sidebar-section-settings">
+                <a class="sidebar-link @(NavActive("/Spa/Settings") || NavActive("/Spa/Admin") ? "active" : "")" href="/Spa/Settings/General">
+                    <span class="sidebar-icon"><partial name="_SidebarIcon" model='"admin"' /></span> Settings
+                </a>
+            </div>
+        }
     </nav>
 </aside>

@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.Admin;
 
+/// <summary>Legacy Razor delivery page — redirects to <c>/Spa/Admin/Delivery</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/Admin/Delivery. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize(Roles = "Admin")]
 public class DeliveryModel : PageModel
 {
@@ -89,7 +91,16 @@ public class DeliveryModel : PageModel
     [BindProperty]
     public Guid DeleteEnvironmentId { get; set; }
 
-    public async Task OnGetAsync(CancellationToken cancellationToken) => await LoadAsync(cancellationToken);
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
+    {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectPermanent("/Spa/Admin/Delivery");
+        }
+
+        await LoadAsync(cancellationToken);
+        return Page();
+    }
 
     public async Task<IActionResult> OnPostSaveProfileAsync(CancellationToken cancellationToken)
     {

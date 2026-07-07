@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EnhancementHub.Application.Features.Search.Queries;
 
-public sealed record GlobalEntitySearchQuery(string Query, int Limit = 20)
+public sealed record GlobalEntitySearchQuery(string Query, int Limit = 20, bool Semantic = false)
     : IRequest<GlobalSearchResultDto>;
 
 public sealed class GlobalEntitySearchQueryHandler
@@ -18,17 +18,20 @@ public sealed class GlobalEntitySearchQueryHandler
     private readonly IEnhancementHubDbContext _dbContext;
     private readonly IApplicationAccessService _applicationAccess;
     private readonly IVectorSearchService _vectorSearch;
+    private readonly IFeatureService _featureService;
 
     public GlobalEntitySearchQueryHandler(
         IMediator mediator,
         IEnhancementHubDbContext dbContext,
         IApplicationAccessService applicationAccess,
-        IVectorSearchService vectorSearch)
+        IVectorSearchService vectorSearch,
+        IFeatureService featureService)
     {
         _mediator = mediator;
         _dbContext = dbContext;
         _applicationAccess = applicationAccess;
         _vectorSearch = vectorSearch;
+        _featureService = featureService;
     }
 
     public async Task<GlobalSearchResultDto> Handle(
@@ -43,16 +46,31 @@ public sealed class GlobalEntitySearchQueryHandler
 
         var term = query.ToLowerInvariant();
         var limit = Math.Clamp(request.Limit, 1, 50);
+        var semantic = request.Semantic && _featureService.IsEnabled(FeatureFlags.SemanticSearch);
         var items = new List<GlobalSearchItemDto>();
 
-        items.AddRange(SearchPages(term));
-        items.AddRange(await SearchRequestsAsync(term, cancellationToken));
-        items.AddRange(await SearchApplicationsAsync(term, cancellationToken));
-        items.AddRange(await SearchRepositoriesAsync(term, cancellationToken));
-        items.AddRange(await SearchDriftFindingsAsync(term, cancellationToken));
-        items.AddRange(await SearchSymbolsAsync(term, cancellationToken));
-        items.AddRange(await SearchKnowledgeAsync(query, cancellationToken));
-        items.AddRange(await SearchVectorArtifactsAsync(term, cancellationToken));
+        if (semantic)
+        {
+            items.AddRange(await SearchVectorArtifactsAsync(term, cancellationToken));
+            items.AddRange(await SearchKnowledgeAsync(query, cancellationToken));
+            items.AddRange(await SearchSymbolsAsync(term, cancellationToken));
+            items.AddRange(await SearchRequestsAsync(term, cancellationToken));
+            items.AddRange(await SearchApplicationsAsync(term, cancellationToken));
+            items.AddRange(await SearchRepositoriesAsync(term, cancellationToken));
+            items.AddRange(await SearchDriftFindingsAsync(term, cancellationToken));
+            items.AddRange(SearchPages(term));
+        }
+        else
+        {
+            items.AddRange(SearchPages(term));
+            items.AddRange(await SearchRequestsAsync(term, cancellationToken));
+            items.AddRange(await SearchApplicationsAsync(term, cancellationToken));
+            items.AddRange(await SearchRepositoriesAsync(term, cancellationToken));
+            items.AddRange(await SearchDriftFindingsAsync(term, cancellationToken));
+            items.AddRange(await SearchSymbolsAsync(term, cancellationToken));
+            items.AddRange(await SearchKnowledgeAsync(query, cancellationToken));
+            items.AddRange(await SearchVectorArtifactsAsync(term, cancellationToken));
+        }
 
         var deduped = items
             .GroupBy(i => $"{i.Type}:{i.Url}:{i.Title}", StringComparer.OrdinalIgnoreCase)
@@ -69,7 +87,20 @@ public sealed class GlobalEntitySearchQueryHandler
                 g => (IReadOnlyList<GlobalSearchItemDto>)g.ToList(),
                 StringComparer.OrdinalIgnoreCase);
 
-        return new GlobalSearchResultDto(query, deduped, groups);
+        var semanticHint = semantic ? BuildSemanticHint(deduped) : null;
+
+        return new GlobalSearchResultDto(query, deduped, groups, semanticHint);
+    }
+
+    private static string? BuildSemanticHint(IReadOnlyList<GlobalSearchItemDto> items)
+    {
+        if (items.Count == 0)
+        {
+            return null;
+        }
+
+        var top = items.Take(3).Select(i => i.Title);
+        return $"Semantic matches across portfolio: {string.Join(" · ", top)}";
     }
 
     private static IEnumerable<GlobalSearchItemDto> SearchPages(string term) =>
@@ -258,6 +289,6 @@ public sealed class GlobalEntitySearchQueryHandler
                 file.ClassName ?? file.FilePath,
                 $"{file.Repository.Name} · {file.Repository.Application.Name}",
                 $"/Spa/SystemMap?ApplicationId={file.Repository.ApplicationId}",
-                scoreById[file.Id]));
+                Math.Min(1.0f, scoreById[file.Id] + 0.15f)));
     }
 }

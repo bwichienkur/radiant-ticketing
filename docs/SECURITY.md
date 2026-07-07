@@ -226,7 +226,8 @@ See `docs/DEPLOYMENT.md`. Minimum production requirements:
 The Web app applies a default CSP via `SecurityHeadersMiddleware`:
 
 - `default-src 'self'`
-- `script-src 'self' 'unsafe-inline' 'unsafe-eval'` (required for Bootstrap and Vite bundles)
+- `script-src 'self' 'unsafe-inline' 'unsafe-eval'` (Development only — Vite HMR may require `unsafe-eval`)
+- Production Web host omits `unsafe-eval` when `ASPNETCORE_ENVIRONMENT` is not Development (`UseSecurityHeaders(allowUnsafeEval: false)`)
 - `style-src 'self' 'unsafe-inline'`
 - `frame-ancestors 'none'`
 
@@ -246,6 +247,8 @@ Additional headers: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, 
 ### SCIM provisioning
 
 Enterprise tenants may provision users from Entra ID via SCIM 2.0 (`POST /scim/v2/Users`). See [ENTRA_ID_SSO.md](ENTRA_ID_SSO.md#scim-provisioning-optional-tier).
+
+**Bearer token rotation:** Generate a new `Scim:BearerToken` with `scripts/rotate-scim-bearer-token.sh`, update your secrets manager (Azure Key Vault, AWS Secrets Manager, or Kubernetes secret), rolling-restart API instances, then update the Entra enterprise app provisioning credential. Validate with a sandbox group provision/deprovision before revoking the prior secret version.
 
 ### Per-tenant audit export
 
