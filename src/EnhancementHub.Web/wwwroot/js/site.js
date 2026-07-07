@@ -159,11 +159,15 @@
             return 'dark';
         }
 
+        if (preference === 'System') {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+
         if (preference === 'light' || preference === 'dark') {
             return preference;
         }
 
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        return 'dark';
     }
 
     function initTheme() {
@@ -172,16 +176,11 @@
         document.documentElement.setAttribute('data-bs-theme', theme);
         document.querySelectorAll('[data-theme-toggle]').forEach(btn => {
             btn.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
-            const title = saved === 'System' || !saved
-                ? 'Theme: system'
-                : theme === 'dark'
-                    ? 'Switch to light mode'
-                    : 'Switch to dark mode';
-            btn.title = title;
+            btn.title = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
         });
         document.querySelectorAll('[data-theme-preference]').forEach(btn => {
             const pref = btn.getAttribute('data-theme-preference');
-            const active = (saved === 'System' || !saved) ? pref === 'System' : saved === pref;
+            const active = saved ? saved === pref : pref === 'Dark';
             btn.classList.toggle('active', active);
             btn.setAttribute('aria-pressed', active ? 'true' : 'false');
         });
@@ -231,6 +230,29 @@
                 if (mobileMq.matches) {
                     offcanvas?.hide();
                 }
+            });
+        });
+    }
+
+    function initSidebarGroups() {
+        document.querySelectorAll('[data-sidebar-group]').forEach((section) => {
+            const groupId = section.getAttribute('data-sidebar-group');
+            const toggle = section.querySelector('.sidebar-section-toggle');
+            if (!toggle || !groupId) {
+                return;
+            }
+
+            const storageKey = `eh-sidebar-group-${groupId}`;
+            const collapsed = localStorage.getItem(storageKey) === 'collapsed';
+            if (collapsed) {
+                section.classList.add('collapsed');
+                toggle.setAttribute('aria-expanded', 'false');
+            }
+
+            toggle.addEventListener('click', () => {
+                const isCollapsed = section.classList.toggle('collapsed');
+                toggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+                localStorage.setItem(storageKey, isCollapsed ? 'collapsed' : 'expanded');
             });
         });
     }
@@ -847,6 +869,7 @@
 
     initTheme();
     initSidebar();
+    initSidebarGroups();
     initNotifications();
     if (!isSpaShell) {
         initCommandPalette();

@@ -8,8 +8,8 @@ public sealed class Phase88SurfacePolishTests
     public void TopBar_UsesModernChromeMarkup()
     {
         var topbar = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Shared/_AppTopBar.cshtml"));
-        topbar.Should().Contain("eh-topbar");
-        topbar.Should().Contain("eh-topbar-search");
+        topbar.Should().Contain("eh-header");
+        topbar.Should().Contain("eh-header-search");
         topbar.Should().Contain("eh-topbar-avatar");
         topbar.Should().Contain("eh-dropdown-panel");
         topbar.Should().NotContain("btn-outline-secondary btn-sm dropdown-toggle");
@@ -29,10 +29,11 @@ public sealed class Phase88SurfacePolishTests
     public void PremiumCss_IncludesTopbarLoginAndCommandPalettePolish()
     {
         var css = File.ReadAllText(GetPath("src/EnhancementHub.Web/wwwroot/css/eh-premium-v3.css"));
-        css.Should().Contain(".eh-topbar-search");
+        var v4 = File.ReadAllText(GetPath("src/EnhancementHub.Web/wwwroot/css/eh-enterprise-v4.css"));
         css.Should().Contain(".eh-command-palette-modal");
-        css.Should().Contain(".eh-topbar-dropdown .dropdown-menu");
         css.Should().Contain(".login-submit-btn");
+        v4.Should().Contain(".eh-header-search");
+        v4.Should().Contain(".eh-topbar-dropdown .dropdown-menu");
     }
 
     [Fact]

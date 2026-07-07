@@ -11,7 +11,8 @@ public sealed class Phase73CommandPaletteTests
         topBar.Should().NotContain("id=\"commandPalette\"");
         topBar.Should().NotContain("commandPaletteInput");
         topBar.Should().Contain("eh-topbar-theme-slot");
-        topBar.Should().NotContain("data-theme-toggle");
+        topBar.Should().Contain("data-theme-toggle");
+        topBar.Should().Contain("data-command-trigger");
     }
 
     [Fact]

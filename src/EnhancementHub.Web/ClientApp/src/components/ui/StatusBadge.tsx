@@ -1,5 +1,19 @@
-import { formatRequestStatus } from '../../utils/requestLabels';
+import { formatRequestStatus, normalizeRequestStatus } from '../../utils/requestLabels';
 import { normalizeRiskLevel, riskBadgeClass } from '../../utils/riskLabels';
+
+function statusBadgeClass(status: string | number): string {
+  const normalized = normalizeRequestStatus(status).toLowerCase();
+  if (normalized.includes('approv')) {
+    return 'eh-badge-status-approved';
+  }
+  if (normalized.includes('reject') || normalized.includes('cancel')) {
+    return 'eh-badge-status-rejected';
+  }
+  if (normalized.includes('pending') || normalized.includes('analyz') || normalized.includes('submitted')) {
+    return 'eh-badge-status-pending';
+  }
+  return 'eh-badge-risk-medium';
+}
 
 interface StatusBadgeProps {
   status?: string | number;
@@ -23,6 +37,8 @@ export function StatusBadge({ status, risk }: StatusBadgeProps) {
   }
 
   return (
-    <span className="eh-status-chip badge badge-status text-bg-secondary">{formatRequestStatus(status)}</span>
+    <span className={`eh-status-chip badge badge-status ${statusBadgeClass(status)}`}>
+      {formatRequestStatus(status)}
+    </span>
   );
 }

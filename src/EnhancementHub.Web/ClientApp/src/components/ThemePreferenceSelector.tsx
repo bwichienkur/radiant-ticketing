@@ -8,7 +8,7 @@ import { SegmentedControl } from './ui/SegmentedControl';
 const OPTIONS: ThemePreference[] = ['System', 'Light', 'Dark'];
 
 export function ThemePreferenceSelector() {
-  const [preference, setPreference] = useState<ThemePreference>('System');
+  const [preference, setPreference] = useState<ThemePreference>('Dark');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {

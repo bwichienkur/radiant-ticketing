@@ -20,7 +20,12 @@ function enhanceControl(
   }
 
   const element = child as ReactElement<{ className?: string; 'aria-invalid'?: boolean; 'aria-describedby'?: string }>;
-  const className = [element.props.className, error ? 'is-invalid' : ''].filter(Boolean).join(' ');
+  const isFormControl =
+    typeof element.type === 'string' &&
+    (element.type === 'input' || element.type === 'select' || element.type === 'textarea');
+  const className = [element.props.className, error ? 'is-invalid' : '', isFormControl ? 'eh-input' : '']
+    .filter(Boolean)
+    .join(' ');
 
   return cloneElement(element, {
     className: className || undefined,

@@ -1,6 +1,4 @@
 @{
-    var title = ViewData["Title"]?.ToString() ?? "EnhancementHub";
-    var breadcrumb = ViewData["Breadcrumb"] as string;
     var userName = User.Identity?.Name ?? "User";
     var nameParts = userName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
     var initials = nameParts.Length >= 2
@@ -10,34 +8,52 @@
             : userName.ToUpperInvariant();
 }
 
-<header class="app-topbar eh-topbar">
-    <div class="eh-topbar-start">
-        <button type="button" class="eh-topbar-icon-btn sidebar-toggle-btn" data-sidebar-toggle aria-label="Toggle sidebar">
-            <svg class="topbar-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+<header class="app-topbar eh-header">
+    <div class="eh-header-left">
+        <button type="button" class="eh-header-btn sidebar-toggle-btn" data-sidebar-toggle aria-label="Toggle sidebar">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M4 6h16M4 12h16M4 18h16" />
             </svg>
         </button>
-        <nav class="eh-topbar-breadcrumb topbar-breadcrumb" aria-label="Breadcrumb">
-            <a asp-page="/Index">Home</a>
-            <span class="eh-topbar-breadcrumb-sep" aria-hidden="true">/</span>
-            <span id="eh-topbar-crumb-section" class="topbar-breadcrumb-section">@(breadcrumb ?? "Home")</span>
-            <span class="eh-topbar-breadcrumb-sep" aria-hidden="true">/</span>
-            <span id="eh-topbar-crumb-current" class="eh-topbar-breadcrumb-current" aria-current="page">@(breadcrumb ?? title)</span>
-        </nav>
+        <a asp-page="/Index" class="eh-header-logo d-none d-md-inline-flex">
+            <span class="eh-header-logo-mark">EH</span>
+            <span class="d-none d-lg-inline">EnhancementHub</span>
+        </a>
+        <span class="eh-header-workspace d-none d-xl-inline-flex" title="Workspace">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Default workspace
+        </span>
     </div>
-    <div class="eh-topbar-end topbar-actions">
-        <button type="button" class="eh-topbar-search eh-omnibox-trigger" data-command-trigger aria-label="Open command palette (Ctrl+K or Cmd+K)">
-            <svg class="eh-topbar-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+
+    <div class="eh-header-center">
+        <button type="button" class="eh-header-search eh-omnibox-trigger" data-command-trigger aria-label="Search (Ctrl+K or Cmd+K)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <circle cx="11" cy="11" r="7" />
                 <path d="m20 20-3.5-3.5" />
             </svg>
-            <span class="eh-topbar-search-label">Search…</span>
+            <span class="eh-header-search-label">Search requests, apps, pages…</span>
             <kbd class="eh-kbd command-kbd" data-command-kbd>⌘K</kbd>
         </button>
-        <div id="eh-topbar-theme-slot" class="eh-topbar-theme topbar-theme-slot"></div>
+    </div>
+
+    <div class="eh-header-right topbar-actions">
+        <button type="button" class="eh-header-btn eh-header-btn--ai d-none d-md-inline-flex" data-command-trigger aria-label="AI assistant" title="AI assistant — opens command palette">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" />
+                <path d="M5 19l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z" />
+            </svg>
+            <span class="d-none d-lg-inline">AI</span>
+        </button>
+        <a href="/Spa/OnboardingWizard" class="eh-header-btn d-none d-lg-inline-flex" aria-label="Help and setup" title="Help">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M9.5 9.5a2.5 2.5 0 0 1 4 2c0 2-2.5 2-2.5 4" />
+                <circle cx="12" cy="17" r="0.5" fill="currentColor" />
+            </svg>
+        </a>
         <div class="dropdown eh-topbar-dropdown">
-            <button class="eh-topbar-icon-btn position-relative" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="Notifications">
-                <svg class="topbar-icon-svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <button class="eh-header-btn position-relative" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" aria-label="Notifications">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
                     <path d="M13.73 21a2 2 0 0 1-3.46 0" />
                 </svg>
@@ -54,10 +70,16 @@
                 </div>
             </div>
         </div>
+        <button type="button" class="eh-header-btn d-none d-sm-inline-flex" data-theme-toggle aria-label="Toggle theme" title="Toggle theme">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path d="M12 3a6 6 0 1 0 0 18 6 6 0 0 0 0-18z" />
+            </svg>
+        </button>
+        <div id="eh-topbar-theme-slot" class="eh-topbar-theme topbar-theme-slot d-none"></div>
         <div class="dropdown eh-topbar-dropdown">
-            <button class="eh-topbar-user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false" aria-label="Account menu">
+            <button class="eh-header-btn eh-topbar-user-btn dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="true" aria-expanded="false" aria-label="Account menu">
                 <span class="eh-topbar-avatar" aria-hidden="true">@initials</span>
-                <span class="eh-topbar-user-name d-none d-lg-inline">@userName</span>
+                <span class="eh-topbar-user-name d-none d-xl-inline">@userName</span>
             </button>
             <ul class="dropdown-menu dropdown-menu-end eh-dropdown-panel">
                 <li><h6 class="dropdown-header">@userName</h6></li>

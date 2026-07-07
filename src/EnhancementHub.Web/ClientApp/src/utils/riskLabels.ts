@@ -24,13 +24,13 @@ export function normalizeRiskLevel(risk: string | number | undefined | null): st
 export function riskBadgeClass(risk: string): string {
   switch (risk) {
     case 'Critical':
-      return 'text-bg-danger';
+      return 'eh-badge-risk-critical';
     case 'High':
-      return 'text-bg-warning';
+      return 'eh-badge-risk-high';
     case 'Medium':
-      return 'text-bg-info';
+      return 'eh-badge-risk-medium';
     default:
-      return 'text-bg-success';
+      return 'eh-badge-risk-low';
   }
 }
 

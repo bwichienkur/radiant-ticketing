@@ -53,5 +53,5 @@ export function readStoredThemePreference(): ThemePreference {
     return stored;
   }
 
-  return 'System';
+  return 'Dark';
 }
