@@ -172,7 +172,7 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
   const activityCount = comments.length + approvalHistory.length;
 
   return (
-    <div aria-live="polite">
+    <div className="eh-request-detail" aria-live="polite">
       {runtimeStatus && !runtimeStatus.aiConfigured && analysis ? (
         <AlertBanner variant="warning" title="Mock AI analysis" className="mb-3">
           AI provider is not configured ({runtimeStatus.aiProvider}). Analysis shown may be

@@ -328,7 +328,7 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
   }
 
   return (
-    <>
+    <div className="eh-request-list">
       <PageHeader
         title="Enhancement Requests"
         description="Triage, search, and open request details"
@@ -640,6 +640,6 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
         onConfirm={() => void handleBulkDecline()}
         onCancel={() => setShowBulkDeclineConfirm(false)}
       />
-    </>
+    </div>
   );
 }

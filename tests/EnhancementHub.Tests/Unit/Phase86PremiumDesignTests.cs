@@ -78,6 +78,17 @@ public sealed class Phase86PremiumDesignTests
         loading.Should().Contain("eh-loading-state");
     }
 
+    [Fact]
+    public void HeroScreens_UsePremiumWrappers()
+    {
+        var list = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/apps/RequestListApp.tsx"));
+        var detail = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/apps/RequestDetailApp.tsx"));
+        var settings = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/apps/SettingsApp.tsx"));
+        list.Should().Contain("eh-request-list");
+        detail.Should().Contain("eh-request-detail");
+        settings.Should().Contain("eh-settings");
+    }
+
     private static string GetPath(string relativePath) =>
         Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", relativePath));
 }

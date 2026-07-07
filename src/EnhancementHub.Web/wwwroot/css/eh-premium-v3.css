@@ -498,6 +498,89 @@ body {
     border-top-color: var(--eh-border-subtle);
 }
 
+/* Hero screens — request list */
+.eh-request-list .eh-filter-panel {
+    border-radius: var(--eh-radius-lg);
+    background: var(--eh-surface);
+}
+
+.eh-request-list .filter-chip {
+    font-size: var(--eh-font-size-xs);
+    font-weight: 500;
+    padding: 0.3rem 0.7rem;
+    transition: background var(--eh-transition-fast), border-color var(--eh-transition-fast);
+}
+
+.eh-request-list .filter-chip.active {
+    background: var(--eh-accent-muted);
+    border-color: var(--eh-accent);
+    color: var(--eh-accent);
+    font-weight: 600;
+}
+
+.eh-request-list .eh-list-toolbar-count {
+    font-size: var(--eh-font-size-sm);
+    color: var(--eh-text-secondary);
+}
+
+.eh-request-list .table-enterprise thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    text-transform: none;
+    letter-spacing: 0.01em;
+    font-weight: 500;
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+}
+
+.eh-request-list .table-enterprise tbody td {
+    font-size: var(--eh-font-size-sm);
+    vertical-align: middle;
+    border-bottom-color: var(--eh-border-subtle);
+}
+
+.eh-request-list .table-enterprise tbody tr:hover {
+    background: var(--eh-surface-muted);
+}
+
+.eh-request-list .eh-bulk-toolbar {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--eh-border-subtle);
+    background: var(--eh-surface-2);
+    border-radius: var(--eh-radius-lg) var(--eh-radius-lg) 0 0;
+}
+
+/* Hero screens — request detail */
+.eh-request-detail .eh-tab-bar {
+    margin-bottom: 1.5rem;
+    border-bottom-color: var(--eh-border-subtle);
+}
+
+.eh-request-detail .card-panel {
+    border-radius: var(--eh-radius-lg);
+}
+
+.eh-request-detail #analysis-in-progress {
+    border: 1px dashed var(--eh-border);
+    background: var(--eh-surface-2);
+}
+
+.eh-request-detail .collaboration-live-item:last-child {
+    border-bottom: none !important;
+}
+
+/* Hero screens — settings */
+.eh-settings .eh-settings-nav {
+    position: sticky;
+    top: 1rem;
+}
+
+.eh-settings .card-panel,
+.eh-settings .eh-section-card {
+    border-radius: var(--eh-radius-lg);
+}
+
 /* Focus */
 :focus-visible {
     outline: 2px solid var(--eh-accent);

@@ -19,7 +19,7 @@ export function SettingsApp() {
   }
 
   return (
-    <div>
+    <div className="eh-settings">
       <PageHeader
         title="Settings"
         description="Platform configuration, identity, integrations, and teams"
