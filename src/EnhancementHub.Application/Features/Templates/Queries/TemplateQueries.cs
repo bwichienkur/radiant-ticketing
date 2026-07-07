@@ -1,7 +1,6 @@
-using EnhancementHub.Application.Abstractions;
+using EnhancementHub.Application.Abstractions.Persistence;
 using EnhancementHub.Application.Features.Templates.Dtos;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace EnhancementHub.Application.Features.Templates.Queries;
 
@@ -11,34 +10,24 @@ public sealed record ListEnhancementTemplatesQuery(string? DomainCategory = null
 public sealed class ListEnhancementTemplatesQueryHandler
     : IRequestHandler<ListEnhancementTemplatesQuery, IReadOnlyList<EnhancementTemplateSummaryDto>>
 {
-    private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IEnhancementRequestRepository _requests;
 
-    public ListEnhancementTemplatesQueryHandler(IEnhancementHubDbContext dbContext) =>
-        _dbContext = dbContext;
+    public ListEnhancementTemplatesQueryHandler(IEnhancementRequestRepository requests) =>
+        _requests = requests;
 
     public async Task<IReadOnlyList<EnhancementTemplateSummaryDto>> Handle(
         ListEnhancementTemplatesQuery request,
         CancellationToken cancellationToken)
     {
-        var query = _dbContext.EnhancementTemplates
-            .AsNoTracking()
-            .Where(t => t.IsActive);
-
-        if (!string.IsNullOrWhiteSpace(request.DomainCategory))
-        {
-            query = query.Where(t => t.DomainCategory == request.DomainCategory);
-        }
-
-        return await query
-            .OrderBy(t => t.DomainCategory)
-            .ThenBy(t => t.Name)
+        var templates = await _requests.ListActiveTemplatesAsync(request.DomainCategory, cancellationToken);
+        return templates
             .Select(t => new EnhancementTemplateSummaryDto(
                 t.Id,
                 t.Name,
                 t.DomainCategory,
                 t.Title,
                 t.Priority))
-            .ToListAsync(cancellationToken);
+            .ToList();
     }
 }
 
@@ -47,19 +36,17 @@ public sealed record GetEnhancementTemplateQuery(Guid Id) : IRequest<Enhancement
 public sealed class GetEnhancementTemplateQueryHandler
     : IRequestHandler<GetEnhancementTemplateQuery, EnhancementTemplateDto>
 {
-    private readonly IEnhancementHubDbContext _dbContext;
+    private readonly IEnhancementRequestRepository _requests;
 
-    public GetEnhancementTemplateQueryHandler(IEnhancementHubDbContext dbContext) =>
-        _dbContext = dbContext;
+    public GetEnhancementTemplateQueryHandler(IEnhancementRequestRepository requests) =>
+        _requests = requests;
 
     public async Task<EnhancementTemplateDto> Handle(
         GetEnhancementTemplateQuery request,
         CancellationToken cancellationToken)
     {
-        var template = await _dbContext.EnhancementTemplates
-            .AsNoTracking()
-            .FirstOrDefaultAsync(t => t.Id == request.Id && t.IsActive, cancellationToken)
-            ?? throw new Common.Exceptions.NotFoundException("EnhancementTemplate", request.Id);
+        var template = await _requests.GetTemplateByIdAsync(request.Id, cancellationToken)
+            ?? throw new KeyNotFoundException($"Template {request.Id} was not found.");
 
         return new EnhancementTemplateDto(
             template.Id,

@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.Admin;
 
+/// <summary>Legacy Razor AI prompts page — redirects to <c>/Spa/Admin/AiPrompts</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/Admin/AiPrompts. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize(Roles = "Admin")]
 public class AiPromptsModel : PageModel
 {
@@ -28,13 +30,21 @@ public class AiPromptsModel : PageModel
     [BindProperty]
     public bool IsActive { get; set; }
 
-    public async Task OnGetAsync(CancellationToken cancellationToken) =>
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
+    {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectPermanent("/Spa/Admin/AiPrompts");
+        }
+
         Prompts = await _mediator.Send(new ListAiPromptConfigurationsQuery(), cancellationToken);
+        return Page();
+    }
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
     {
         await _mediator.Send(new UpdateAiPromptConfigurationCommand(
             PromptId, SystemPromptTemplate, UserPromptTemplate, IsActive), cancellationToken);
-        return RedirectToPage();
+        return RedirectToPage("/Spa/Admin/AiPrompts");
     }
 }

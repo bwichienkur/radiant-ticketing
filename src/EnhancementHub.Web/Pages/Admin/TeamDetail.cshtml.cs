@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.Admin;
 
+/// <summary>Legacy Razor team detail — redirects to <c>/Spa/Settings/Teams</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/Settings/Teams. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize(Roles = "Admin")]
 public class TeamDetailModel : PageModel
 {
@@ -43,8 +45,13 @@ public class TeamDetailModel : PageModel
     [TempData]
     public string? ErrorMessage { get; set; }
 
-    public async Task<IActionResult> OnGetAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectPermanent("/Spa/Settings/Teams");
+        }
+
         TeamId = Id;
         Team = await _mediator.Send(new GetTeamDetailQuery(Id), cancellationToken);
         return Team is null ? NotFound() : Page();

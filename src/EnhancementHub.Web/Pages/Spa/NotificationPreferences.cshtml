@@ -1,0 +1,12 @@
+@page "/Spa/Account/Notifications"
+@model EnhancementHub.Web.Pages.Spa.NotificationPreferencesModel
+@{
+    ViewData["Title"] = "Notification preferences";
+    ViewData["Breadcrumb"] = "Notifications";
+}
+
+<partial name="_SpaRoot" />
+
+@section Scripts {
+    <script type="module" src="~/spa/react/spa-shell.js" asp-append-version="true"></script>
+}

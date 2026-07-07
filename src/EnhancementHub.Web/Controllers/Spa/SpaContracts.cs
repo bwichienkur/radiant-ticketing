@@ -1,8 +1,13 @@
 using EnhancementHub.Application.Features.Applications.Dtos;
+using EnhancementHub.Application.Features.CustomFields.Dtos;
 using EnhancementHub.Application.Features.Templates.Dtos;
 using EnhancementHub.Domain.Enums;
 
 namespace EnhancementHub.Web.Controllers.Spa;
+
+public sealed record SpaApplicationDetailResponse(
+    ApplicationDto Application,
+    IReadOnlyList<ApplicationProfileDto> Profiles);
 
 public sealed record SpaApprovalActionRequest(ApprovalActionType ActionType, string? Comments);
 
@@ -22,11 +27,20 @@ public sealed record SpaCreateRequestInput(
     DateTime? RequestedDueDate,
     string? Department,
     string? SupportingNotes,
-    Guid? TemplateId);
+    Guid? TemplateId,
+    IReadOnlyList<SpaCustomFieldValueInput>? CustomFields = null);
+
+public sealed record SpaCustomFieldValueInput(
+    string Key,
+    string? TextValue,
+    double? NumberValue,
+    DateTime? DateValue,
+    Guid? UserValueId);
 
 public sealed record SpaCreateRequestFormResponse(
     IReadOnlyList<ApplicationDto> Applications,
-    IReadOnlyList<EnhancementTemplateSummaryDto> Templates);
+    IReadOnlyList<EnhancementTemplateSummaryDto> Templates,
+    IReadOnlyList<CustomFieldDefinitionDto> CustomFields);
 
 public sealed record SpaValidatePathRequest(string Path);
 

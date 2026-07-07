@@ -7,11 +7,16 @@ public sealed class SecurityHeadersMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly bool _includeContentSecurityPolicy;
+    private readonly bool _allowUnsafeEval;
 
-    public SecurityHeadersMiddleware(RequestDelegate next, bool includeContentSecurityPolicy)
+    public SecurityHeadersMiddleware(
+        RequestDelegate next,
+        bool includeContentSecurityPolicy,
+        bool allowUnsafeEval = true)
     {
         _next = next;
         _includeContentSecurityPolicy = includeContentSecurityPolicy;
+        _allowUnsafeEval = allowUnsafeEval;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -25,9 +30,13 @@ public sealed class SecurityHeadersMiddleware
 
         if (_includeContentSecurityPolicy && !headers.ContainsKey("Content-Security-Policy"))
         {
+            var scriptSrc = _allowUnsafeEval
+                ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+                : "script-src 'self' 'unsafe-inline'; ";
+
             headers["Content-Security-Policy"] =
                 "default-src 'self'; " +
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval'; " +
+                scriptSrc +
                 "style-src 'self' 'unsafe-inline'; " +
                 "img-src 'self' data: blob:; " +
                 "font-src 'self' data:; " +
@@ -43,6 +52,9 @@ public sealed class SecurityHeadersMiddleware
 
 public static class SecurityHeadersMiddlewareExtensions
 {
-    public static IApplicationBuilder UseSecurityHeaders(this IApplicationBuilder app, bool includeContentSecurityPolicy = true) =>
-        app.UseMiddleware<SecurityHeadersMiddleware>(includeContentSecurityPolicy);
+    public static IApplicationBuilder UseSecurityHeaders(
+        this IApplicationBuilder app,
+        bool includeContentSecurityPolicy = true,
+        bool allowUnsafeEval = true) =>
+        app.UseMiddleware<SecurityHeadersMiddleware>(includeContentSecurityPolicy, allowUnsafeEval);
 }

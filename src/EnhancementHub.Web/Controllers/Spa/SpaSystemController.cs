@@ -1,3 +1,4 @@
+using EnhancementHub.Application.Features.Applications.Dtos;
 using EnhancementHub.Application.Features.Applications.Queries;
 using EnhancementHub.Application.Features.SystemIntelligence.Commands;
 using EnhancementHub.Application.Features.SystemIntelligence.Queries;
@@ -19,6 +20,20 @@ public sealed class SpaSystemController : ControllerBase
     [HttpGet("applications")]
     public async Task<IActionResult> ListApplications(CancellationToken cancellationToken) =>
         Ok(await _mediator.Send(new ListApplicationsQuery(), cancellationToken));
+
+    [HttpGet("applications/{id:guid}")]
+    public async Task<IActionResult> GetApplication(Guid id, CancellationToken cancellationToken)
+    {
+        var applications = await _mediator.Send(new ListApplicationsQuery(), cancellationToken);
+        var application = applications.FirstOrDefault(a => a.Id == id);
+        if (application is null)
+        {
+            return NotFound();
+        }
+
+        var profiles = await _mediator.Send(new GetApplicationProfileQuery(id), cancellationToken);
+        return Ok(new SpaApplicationDetailResponse(application, profiles));
+    }
 
     [HttpGet("system-map/{applicationId:guid}")]
     public async Task<IActionResult> GetSystemMap(Guid applicationId, CancellationToken cancellationToken) =>

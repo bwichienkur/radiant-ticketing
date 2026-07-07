@@ -50,6 +50,7 @@ try
         options.Conventions.AuthorizeFolder("/");
         options.Conventions.AllowAnonymousToPage("/Account/Login");
         options.Conventions.AllowAnonymousToPage("/Account/Signup");
+        options.Conventions.AllowAnonymousToPage("/Pricing");
     });
     builder.Services.AddScoped<DevAuthService>();
 
@@ -81,7 +82,7 @@ try
 
     app.UseSerilogRequestLogging();
     app.UseCorrelationId();
-    app.UseSecurityHeaders();
+    app.UseSecurityHeaders(allowUnsafeEval: app.Environment.IsDevelopment());
     app.UseHttpsRedirection();
     app.UseStaticFiles();
     app.UseRouting();

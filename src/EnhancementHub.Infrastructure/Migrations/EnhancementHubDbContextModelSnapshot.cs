@@ -3313,6 +3313,48 @@ namespace EnhancementHub.Infrastructure.Migrations
                     b.ToTable("Tenants", (string)null);
                 });
 
+            modelBuilder.Entity("EnhancementHub.Domain.Entities.TenantBranding", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("AccentColor")
+                        .IsRequired()
+                        .HasMaxLength(16)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("LogoUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ProductName")
+                        .HasMaxLength(120)
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("TenantId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TenantId")
+                        .IsUnique();
+
+                    b.ToTable("TenantBrandings", (string)null);
+                });
+
             modelBuilder.Entity("EnhancementHub.Domain.Entities.TenantDeliveryProfile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3642,6 +3684,9 @@ namespace EnhancementHub.Infrastructure.Migrations
 
                     b.Property<Guid?>("TenantId")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("ThemePreference")
+                        .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("TEXT");
@@ -4579,6 +4624,17 @@ namespace EnhancementHub.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("EnhancementHub.Domain.Entities.TenantBranding", b =>
+                {
+                    b.HasOne("EnhancementHub.Domain.Entities.Tenant", "Tenant")
+                        .WithOne("Branding")
+                        .HasForeignKey("EnhancementHub.Domain.Entities.TenantBranding", "TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("EnhancementHub.Domain.Entities.TenantDeliveryProfile", b =>
                 {
                     b.HasOne("EnhancementHub.Domain.Entities.Tenant", "Tenant")
@@ -4850,6 +4906,8 @@ namespace EnhancementHub.Infrastructure.Migrations
 
             modelBuilder.Entity("EnhancementHub.Domain.Entities.Tenant", b =>
                 {
+                    b.Navigation("Branding");
+
                     b.Navigation("DeliveryProfile");
 
                     b.Navigation("DeploymentEnvironments");

@@ -14,6 +14,7 @@ public class User : BaseEntity
     public Guid? TenantId { get; set; }
     public string? ExternalId { get; set; }
     public bool ProvisionedViaScim { get; set; }
+    public ThemePreference ThemePreference { get; set; } = ThemePreference.System;
 
     public Tenant? Tenant { get; set; }
 

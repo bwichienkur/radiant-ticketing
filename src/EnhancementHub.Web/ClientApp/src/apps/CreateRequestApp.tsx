@@ -14,8 +14,9 @@ import {
   FormField,
   LoadingState,
   PageHeader,
+  SegmentedControl,
 } from '../components/ui';
-import type { EnhancementTemplateSummary } from '../types/spa';
+import type { EnhancementTemplateSummary, CustomFieldDefinition, CustomFieldValueInput } from '../types/spa';
 
 interface CreateRequestAppProps {
   initialTemplateId?: string;
@@ -24,16 +25,20 @@ interface CreateRequestAppProps {
 
 const PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];
 
+type CreateRequestMode = 'describe' | 'template' | 'manual';
+
 export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: CreateRequestAppProps) {
   const [templates, setTemplates] = useState<EnhancementTemplateSummary[]>([]);
   const [applications, setApplications] = useState<Array<{ id: string; name: string }>>([]);
+  const [customFieldDefinitions, setCustomFieldDefinitions] = useState<CustomFieldDefinition[]>([]);
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState(initialTemplateId ?? '');
   const [intakeSessionId, setIntakeSessionId] = useState<string | null>(null);
-  const [showManualForm, setShowManualForm] = useState(
-    Boolean(initialTemplateId || initialDriftFindingId),
+  const [mode, setMode] = useState<CreateRequestMode>(
+    initialTemplateId ? 'template' : initialDriftFindingId ? 'manual' : 'describe',
   );
   const [form, setForm] = useState({
     title: '',
@@ -56,6 +61,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
         if (!cancelled) {
           setTemplates(data.templates);
           setApplications(data.applications);
+          setCustomFieldDefinitions(data.customFields ?? []);
         }
       } catch {
         if (!cancelled) {
@@ -76,7 +82,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
 
   const applyTemplate = useCallback(async (templateId: string) => {
     setSelectedTemplateId(templateId);
-    setShowManualForm(true);
+    setMode('manual');
     try {
       const template = await getEnhancementTemplate(templateId);
       setForm({
@@ -117,7 +123,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
           return;
         }
 
-        setShowManualForm(true);
+        setMode('manual');
         setForm({
           title: draft.title,
           businessDescription: draft.businessDescription,
@@ -143,7 +149,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
   }, [initialDriftFindingId]);
 
   const applyCopilotDraft = useCallback((draft: IntakeCopilotFormDraft) => {
-    setShowManualForm(true);
+    setMode('manual');
     setForm({
       title: draft.title,
       businessDescription: draft.businessDescription,
@@ -160,6 +166,52 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
     setError(null);
   }, []);
 
+  function buildCustomFieldPayload(): CustomFieldValueInput[] {
+    return customFieldDefinitions
+      .map((field) => {
+        const rawValue = customFieldValues[field.key] ?? '';
+        switch (field.fieldType) {
+          case 'Number':
+            return {
+              key: field.key,
+              numberValue: rawValue === '' ? undefined : Number(rawValue),
+            };
+          case 'Date':
+            return {
+              key: field.key,
+              dateValue: rawValue || undefined,
+            };
+          case 'User':
+            return {
+              key: field.key,
+              userValueId: rawValue || undefined,
+            };
+          default:
+            return {
+              key: field.key,
+              textValue: rawValue || undefined,
+            };
+        }
+      })
+      .filter((value) => {
+        const field = customFieldDefinitions.find((item) => item.key === value.key);
+        if (!field) {
+          return false;
+        }
+
+        if (field.isRequired) {
+          return true;
+        }
+
+        return (
+          value.textValue !== undefined ||
+          value.numberValue !== undefined ||
+          value.dateValue !== undefined ||
+          value.userValueId !== undefined
+        );
+      });
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
     setSubmitting(true);
@@ -175,6 +227,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
         department: form.department || undefined,
         supportingNotes: form.supportingNotes || undefined,
         templateId: selectedTemplateId || undefined,
+        customFields: buildCustomFieldPayload(),
       };
 
       const created = intakeSessionId
@@ -198,11 +251,26 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
         description="Describe your need in everyday language. We will help shape it into a change request for review."
       />
 
-      <IntakeCopilotPanel onApplyDraft={applyCopilotDraft} onSessionChange={setIntakeSessionId} />
+      <div className="mb-4">
+        <SegmentedControl
+          ariaLabel="Create request mode"
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: 'describe', label: 'Describe' },
+            { value: 'template', label: 'Template' },
+            { value: 'manual', label: 'Manual' },
+          ]}
+        />
+      </div>
 
-      {templates.length > 0 ? (
+      {mode === 'describe' ? (
+        <IntakeCopilotPanel onApplyDraft={applyCopilotDraft} onSessionChange={setIntakeSessionId} />
+      ) : null}
+
+      {mode === 'template' && templates.length > 0 ? (
         <section className="mb-4">
-          <h2 className="h6 text-muted text-uppercase mb-2">Or start from a template</h2>
+          <h2 className="h6 text-muted text-uppercase mb-2">Start from a template</h2>
           <div className="template-card-grid" role="list" aria-label="Request templates">
             {templates.map((template) => (
               <button
@@ -221,6 +289,12 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
         </section>
       ) : null}
 
+      {mode === 'template' && templates.length === 0 ? (
+        <div className="card-panel p-4 mb-4">
+          <p className="text-muted mb-0">No templates are configured yet. Switch to Describe or Manual to continue.</p>
+        </div>
+      ) : null}
+
       <AlertBanner variant="neutral" title="What happens next:" className="mb-4">
         After you submit, we review the impact and route the request to your approver. You can track status on
         your dashboard.
@@ -228,17 +302,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
 
       {error ? <ErrorState message={error} /> : null}
 
-      {!showManualForm ? (
-        <div className="card-panel p-4 mb-4">
-          <p className="mb-3 text-muted">
-            Prefer to fill in the form yourself? You can enter details manually after using the assistant above,
-            or open the full form now.
-          </p>
-          <button type="button" className="btn btn-outline-secondary" onClick={() => setShowManualForm(true)}>
-            Fill in the form manually
-          </button>
-        </div>
-      ) : (
+      {mode === 'manual' ? (
         <div className="card-panel p-4">
           <h2 className="eh-section-title mb-4">Request details</h2>
           <form onSubmit={(e) => void handleSubmit(e)} noValidate>
@@ -366,6 +430,86 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
                   />
                 </FormField>
               </div>
+              {customFieldDefinitions.length > 0 ? (
+                <div className="col-12">
+                  <h3 className="h6 text-muted text-uppercase mb-3">Additional fields</h3>
+                  <div className="row g-3">
+                    {customFieldDefinitions.map((field) => (
+                      <div key={field.id} className="col-md-6">
+                        <FormField
+                          id={`custom-field-${field.key}`}
+                          label={field.label}
+                          required={field.isRequired}
+                        >
+                          {field.fieldType === 'Select' ? (
+                            <select
+                              id={`custom-field-${field.key}`}
+                              className="form-select"
+                              required={field.isRequired}
+                              value={customFieldValues[field.key] ?? ''}
+                              onChange={(event) =>
+                                setCustomFieldValues((prev) => ({
+                                  ...prev,
+                                  [field.key]: event.target.value,
+                                }))
+                              }
+                            >
+                              <option value="">— Select —</option>
+                              {field.options.map((option) => (
+                                <option key={option} value={option}>
+                                  {option}
+                                </option>
+                              ))}
+                            </select>
+                          ) : field.fieldType === 'Number' ? (
+                            <input
+                              id={`custom-field-${field.key}`}
+                              type="number"
+                              className="form-control"
+                              required={field.isRequired}
+                              value={customFieldValues[field.key] ?? ''}
+                              onChange={(event) =>
+                                setCustomFieldValues((prev) => ({
+                                  ...prev,
+                                  [field.key]: event.target.value,
+                                }))
+                              }
+                            />
+                          ) : field.fieldType === 'Date' ? (
+                            <input
+                              id={`custom-field-${field.key}`}
+                              type="date"
+                              className="form-control"
+                              required={field.isRequired}
+                              value={customFieldValues[field.key] ?? ''}
+                              onChange={(event) =>
+                                setCustomFieldValues((prev) => ({
+                                  ...prev,
+                                  [field.key]: event.target.value,
+                                }))
+                              }
+                            />
+                          ) : (
+                            <input
+                              id={`custom-field-${field.key}`}
+                              type="text"
+                              className="form-control"
+                              required={field.isRequired}
+                              value={customFieldValues[field.key] ?? ''}
+                              onChange={(event) =>
+                                setCustomFieldValues((prev) => ({
+                                  ...prev,
+                                  [field.key]: event.target.value,
+                                }))
+                              }
+                            />
+                          )}
+                        </FormField>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
             </div>
             <div className="mt-4 d-flex gap-2">
               <button type="submit" className="btn btn-primary" disabled={submitting}>
@@ -377,7 +521,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
             </div>
           </form>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

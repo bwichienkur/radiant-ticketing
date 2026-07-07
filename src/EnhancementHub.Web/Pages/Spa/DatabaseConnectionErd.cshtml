@@ -1,0 +1,12 @@
+@page "/Spa/DatabaseConnections/{id:guid}/erd"
+@model EnhancementHub.Web.Pages.Spa.DatabaseConnectionErdModel
+@{
+    ViewData["Title"] = "ERD";
+    ViewData["Breadcrumb"] = "ERD";
+}
+
+<partial name="_SpaRoot" />
+
+@section Scripts {
+    <script type="module" src="~/spa/react/spa-shell.js" asp-append-version="true"></script>
+}

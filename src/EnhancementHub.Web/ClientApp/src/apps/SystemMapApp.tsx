@@ -245,13 +245,13 @@ export function SystemMapApp({ initialApplicationId }: SystemMapAppProps) {
           </div>
 
           {selectedNode ? (
-            <div className="alert alert-light border mb-3">
+            <AlertBanner variant="neutral" className="mb-3">
               <strong>{selectedNode.label}</strong>
               <span className="badge ms-2" style={{ backgroundColor: nodeColor(selectedNode.type) }}>
                 {selectedNode.type}
               </span>
               {selectedNode.detail ? <div className="small text-muted mt-1">{selectedNode.detail}</div> : null}
-            </div>
+            </AlertBanner>
           ) : null}
 
           {nodesByType.length === 0 ? (

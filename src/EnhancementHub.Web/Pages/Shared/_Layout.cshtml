@@ -1,6 +1,18 @@
 <!DOCTYPE html>
 <html lang="en" data-bs-theme="light">
 <head>
+    <script>
+        (function () {
+            try {
+                var stored = localStorage.getItem('eh-theme');
+                var theme = stored === 'Light' ? 'light'
+                    : stored === 'Dark' ? 'dark'
+                    : stored === 'light' || stored === 'dark' ? stored
+                    : window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-bs-theme', theme);
+            } catch (e) { /* ignore */ }
+        })();
+    </script>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - EnhancementHub</title>

@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.Documentation;
 
+/// <summary>Legacy Razor documentation export — redirects to <c>/Spa/Documentation/Export</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/Documentation/Export. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize]
 public class ExportModel : PageModel
 {
@@ -25,10 +27,16 @@ public class ExportModel : PageModel
     public IReadOnlyList<ApplicationDto> Applications { get; private set; } = [];
     public string? Preview { get; private set; }
 
-    public async Task OnGetAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToPagePermanent("/Spa/DocumentationExport");
+        }
+
         Applications = await _mediator.Send(new ListApplicationsQuery(), cancellationToken);
         ApplicationId = Applications.FirstOrDefault()?.Id ?? Guid.Empty;
+        return Page();
     }
 
     public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)

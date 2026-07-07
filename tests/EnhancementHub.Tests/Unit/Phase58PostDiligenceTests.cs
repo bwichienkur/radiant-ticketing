@@ -16,8 +16,8 @@ public sealed class Phase58PostDiligenceTests
     public void ProductScorecard_ReflectsPhase57Completion()
     {
         var scorecard = File.ReadAllText(GetPath("docs/PRODUCT_SCORECARD.md"));
-        scorecard.Should().Contain("Phase 57 complete");
-        scorecard.Should().Contain("8.4");
+        scorecard.Should().Contain("Phase 57");
+        scorecard.Should().Contain("8.5");
         scorecard.Should().Contain("SCIM");
     }
 

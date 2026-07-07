@@ -15,6 +15,9 @@ const WORKFLOW_LABELS: Record<string, string> = {
   repositories: 'Repositories',
   audit: 'Audit log',
   search: 'Global search',
+  'portfolio-health': 'Portfolio health',
+  settings: 'Settings',
+  admin: 'Admin console',
 };
 
 function resolveWorkflowKey(pathname: string): string {
@@ -64,6 +67,18 @@ function resolveWorkflowKey(pathname: string): string {
 
   if (pathname.startsWith('/Spa/Search')) {
     return 'search';
+  }
+
+  if (pathname.startsWith('/Spa/PortfolioHealth')) {
+    return 'portfolio-health';
+  }
+
+  if (pathname.startsWith('/Spa/Settings')) {
+    return 'settings';
+  }
+
+  if (pathname.startsWith('/Spa/Admin')) {
+    return 'admin';
   }
 
   return 'other';

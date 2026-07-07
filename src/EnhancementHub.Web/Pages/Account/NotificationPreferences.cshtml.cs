@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace EnhancementHub.Web.Pages.Account;
 
+/// <summary>Legacy Razor notification preferences — redirects to <c>/Spa/Account/Notifications</c> unless <c>?layout=classic</c>.</summary>
+[Obsolete("Use /Spa/Account/Notifications. Append ?layout=classic only for legacy Razor debugging.")]
 [Authorize]
 public class NotificationPreferencesModel : PageModel
 {
@@ -25,8 +27,13 @@ public class NotificationPreferencesModel : PageModel
     [BindProperty]
     public List<PreferenceInput> PreferenceInputs { get; set; } = [];
 
-    public async Task<IActionResult> OnGetAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnGetAsync(string? layout, CancellationToken cancellationToken)
     {
+        if (!string.Equals(layout, "classic", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectPermanent("/Spa/Account/Notifications");
+        }
+
         if (_currentUser.UserId is not Guid userId)
         {
             return Unauthorized();
