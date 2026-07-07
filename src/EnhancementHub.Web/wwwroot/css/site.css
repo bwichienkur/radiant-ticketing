@@ -1704,3 +1704,239 @@ a.checklist-item-link:focus-visible {
         gap: 0.35rem 0.75rem;
     }
 }
+
+/* UX redesign v2 — tabs, segmented controls, hub grid, omnibox CTA */
+.eh-tab-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    border-bottom: 1px solid var(--eh-border);
+    margin-bottom: 1.25rem;
+}
+
+.eh-tab-bar-item {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--eh-muted);
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.65rem 0.9rem;
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    border-radius: 0.35rem 0.35rem 0 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.eh-tab-bar-item:hover {
+    color: var(--eh-text);
+    background: var(--eh-surface-muted, rgba(148, 163, 184, 0.08));
+}
+
+.eh-tab-bar-item.active {
+    color: var(--eh-primary, #2563eb);
+    border-bottom-color: var(--eh-primary, #2563eb);
+}
+
+.eh-tab-bar-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0.15rem 0.4rem;
+    border-radius: 999px;
+    background: var(--eh-surface-muted, rgba(148, 163, 184, 0.15));
+    color: var(--eh-muted);
+}
+
+.eh-tab-bar-item.active .eh-tab-bar-badge {
+    background: rgba(37, 99, 235, 0.12);
+    color: var(--eh-primary, #2563eb);
+}
+
+.eh-segmented-control {
+    display: inline-flex;
+    padding: 0.2rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--eh-border);
+    background: var(--eh-surface-muted, rgba(148, 163, 184, 0.08));
+    gap: 0.15rem;
+}
+
+.eh-segmented-option {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--eh-muted);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.35rem;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.eh-segmented-option:hover {
+    color: var(--eh-text);
+}
+
+.eh-segmented-option.active {
+    background: var(--eh-surface);
+    color: var(--eh-text);
+    box-shadow: var(--eh-shadow-sm, 0 1px 2px rgba(15, 23, 42, 0.08));
+}
+
+.eh-hub-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: 1rem;
+}
+
+.eh-hub-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.1rem 1.15rem;
+    border: 1px solid var(--eh-border);
+    border-radius: 0.65rem;
+    background: var(--eh-surface);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.eh-hub-card:hover {
+    border-color: var(--eh-primary, #2563eb);
+    box-shadow: var(--eh-shadow-sm);
+    transform: translateY(-1px);
+    color: inherit;
+}
+
+.eh-hub-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.eh-hub-card-description {
+    font-size: 0.875rem;
+    color: var(--eh-muted);
+    margin: 0;
+    flex: 1;
+}
+
+.eh-hub-card-cta {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--eh-primary, #2563eb);
+}
+
+.sidebar-link-nested {
+    padding-left: 2.35rem;
+    font-size: 0.875rem;
+}
+
+.eh-omnibox-cta {
+    margin-bottom: 1.5rem;
+}
+
+.eh-omnibox-cta-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--eh-border);
+    border-radius: 0.65rem;
+    background: var(--eh-surface);
+    color: var(--eh-muted);
+    font-size: 0.9375rem;
+    text-align: left;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.eh-omnibox-cta-button:hover {
+    border-color: var(--eh-primary, #2563eb);
+    box-shadow: var(--eh-shadow-sm);
+    color: var(--eh-text);
+}
+
+.eh-omnibox-cta-button .command-kbd {
+    margin-left: auto;
+}
+
+.eh-omnibox-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.mock-ai-trust-banner {
+    position: relative;
+}
+
+.mock-ai-trust-banner.compact .alert {
+    padding: 0.5rem 2.5rem 0.5rem 0.85rem;
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+}
+
+.mock-ai-trust-dismiss {
+    position: absolute;
+    top: 0.55rem;
+    right: 0.65rem;
+    border: none;
+    background: transparent;
+    color: var(--eh-muted);
+    font-size: 1.1rem;
+    line-height: 1;
+    padding: 0.15rem 0.35rem;
+    border-radius: 0.25rem;
+}
+
+.mock-ai-trust-dismiss:hover {
+    color: var(--eh-text);
+    background: rgba(148, 163, 184, 0.15);
+}
+
+.login-theme-segmented {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1050;
+}
+
+.topbar-theme-slot .eh-segmented-control {
+    flex-wrap: nowrap;
+}
+
+.stat-card {
+    box-shadow: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card-link:hover .stat-card,
+.stat-card:hover {
+    box-shadow: var(--eh-shadow-sm);
+}
+
+.table > :not(caption) > * > * {
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .eh-hub-card,
+    .eh-tab-bar-item,
+    .eh-segmented-option,
+    .eh-omnibox-cta-button,
+    .stat-card {
+        transition: none;
+    }
+
+    .eh-hub-card:hover {
+        transform: none;
+    }
+}
+

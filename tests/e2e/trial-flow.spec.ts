@@ -29,7 +29,7 @@ test.describe('Self-serve trial flow', () => {
     await expect(page.getByRole('heading', { name: 'Tell us what you need changed' })).toBeVisible({
       timeout: 15_000,
     });
-    await page.getByRole('button', { name: 'Fill in the form manually' }).click();
+    await page.getByRole('button', { name: 'Manual' }).click();
 
     const requestTitle = `Trial smoke request ${slug}`;
     await page.getByLabel('Title').fill(requestTitle);

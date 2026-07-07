@@ -9,7 +9,8 @@ public sealed class NonTechnicalUxTests
     {
         var content = ReadClientFile("apps/CreateRequestApp.tsx");
         content.Should().Contain("Tell us what you need changed");
-        content.Should().Contain("Fill in the form manually");
+        content.Should().Contain("SegmentedControl");
+        content.Should().Contain("manual");
     }
 
     [Fact]

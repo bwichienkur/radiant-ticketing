@@ -14,6 +14,7 @@ import {
   FormField,
   LoadingState,
   PageHeader,
+  SegmentedControl,
 } from '../components/ui';
 import type { EnhancementTemplateSummary, CustomFieldDefinition, CustomFieldValueInput } from '../types/spa';
 
@@ -23,6 +24,8 @@ interface CreateRequestAppProps {
 }
 
 const PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];
+
+type CreateRequestMode = 'describe' | 'template' | 'manual';
 
 export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: CreateRequestAppProps) {
   const [templates, setTemplates] = useState<EnhancementTemplateSummary[]>([]);
@@ -34,8 +37,8 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
   const [error, setError] = useState<string | null>(null);
   const [selectedTemplateId, setSelectedTemplateId] = useState(initialTemplateId ?? '');
   const [intakeSessionId, setIntakeSessionId] = useState<string | null>(null);
-  const [showManualForm, setShowManualForm] = useState(
-    Boolean(initialTemplateId || initialDriftFindingId),
+  const [mode, setMode] = useState<CreateRequestMode>(
+    initialTemplateId ? 'template' : initialDriftFindingId ? 'manual' : 'describe',
   );
   const [form, setForm] = useState({
     title: '',
@@ -79,7 +82,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
 
   const applyTemplate = useCallback(async (templateId: string) => {
     setSelectedTemplateId(templateId);
-    setShowManualForm(true);
+    setMode('manual');
     try {
       const template = await getEnhancementTemplate(templateId);
       setForm({
@@ -120,7 +123,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
           return;
         }
 
-        setShowManualForm(true);
+        setMode('manual');
         setForm({
           title: draft.title,
           businessDescription: draft.businessDescription,
@@ -146,7 +149,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
   }, [initialDriftFindingId]);
 
   const applyCopilotDraft = useCallback((draft: IntakeCopilotFormDraft) => {
-    setShowManualForm(true);
+    setMode('manual');
     setForm({
       title: draft.title,
       businessDescription: draft.businessDescription,
@@ -248,11 +251,26 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
         description="Describe your need in everyday language. We will help shape it into a change request for review."
       />
 
-      <IntakeCopilotPanel onApplyDraft={applyCopilotDraft} onSessionChange={setIntakeSessionId} />
+      <div className="mb-4">
+        <SegmentedControl
+          ariaLabel="Create request mode"
+          value={mode}
+          onChange={setMode}
+          options={[
+            { value: 'describe', label: 'Describe' },
+            { value: 'template', label: 'Template' },
+            { value: 'manual', label: 'Manual' },
+          ]}
+        />
+      </div>
 
-      {templates.length > 0 ? (
+      {mode === 'describe' ? (
+        <IntakeCopilotPanel onApplyDraft={applyCopilotDraft} onSessionChange={setIntakeSessionId} />
+      ) : null}
+
+      {mode === 'template' && templates.length > 0 ? (
         <section className="mb-4">
-          <h2 className="h6 text-muted text-uppercase mb-2">Or start from a template</h2>
+          <h2 className="h6 text-muted text-uppercase mb-2">Start from a template</h2>
           <div className="template-card-grid" role="list" aria-label="Request templates">
             {templates.map((template) => (
               <button
@@ -271,6 +289,12 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
         </section>
       ) : null}
 
+      {mode === 'template' && templates.length === 0 ? (
+        <div className="card-panel p-4 mb-4">
+          <p className="text-muted mb-0">No templates are configured yet. Switch to Describe or Manual to continue.</p>
+        </div>
+      ) : null}
+
       <AlertBanner variant="neutral" title="What happens next:" className="mb-4">
         After you submit, we review the impact and route the request to your approver. You can track status on
         your dashboard.
@@ -278,17 +302,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
 
       {error ? <ErrorState message={error} /> : null}
 
-      {!showManualForm ? (
-        <div className="card-panel p-4 mb-4">
-          <p className="mb-3 text-muted">
-            Prefer to fill in the form yourself? You can enter details manually after using the assistant above,
-            or open the full form now.
-          </p>
-          <button type="button" className="btn btn-outline-secondary" onClick={() => setShowManualForm(true)}>
-            Fill in the form manually
-          </button>
-        </div>
-      ) : (
+      {mode === 'manual' ? (
         <div className="card-panel p-4">
           <h2 className="eh-section-title mb-4">Request details</h2>
           <form onSubmit={(e) => void handleSubmit(e)} noValidate>
@@ -507,7 +521,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
             </div>
           </form>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

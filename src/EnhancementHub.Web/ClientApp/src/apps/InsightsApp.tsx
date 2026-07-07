@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { exportRoiCsv, getRoiReport } from '../api/spaClient';
 import { readSpaContext } from '../spaRoutes';
-import { ErrorState, LoadingState, PageHeader } from '../components/ui';
+import { EmptyState, ErrorState, LoadingState, PageHeader } from '../components/ui';
+import { SpaLink } from '../components/SpaLink';
 import type { RoiReport } from '../types/spa';
 
 function formatHours(value?: number | null): string {
@@ -69,6 +70,38 @@ export function InsightsApp() {
 
   if (!report) {
     return <ErrorState message="Unable to load ROI report." onRetry={() => void loadReport()} />;
+  }
+
+  const hasMetrics =
+    report.totalAnalysesCompleted > 0
+    || report.driftFindingsTotal > 0
+    || report.totalFeedbackSubmissions > 0
+    || report.architectEditsRecorded > 0;
+
+  if (!hasMetrics) {
+    return (
+      <div>
+        <PageHeader
+          title="ROI Dashboard"
+          description="Analysis time saved, risk governance, and drift resolution metrics"
+        />
+        <EmptyState
+          title="No ROI data yet"
+          description="Insights populate after requests are analyzed, drift is tracked, and teams submit in-product feedback."
+          icon="document"
+          action={
+            <div className="d-flex flex-wrap gap-2 justify-content-center">
+              <SpaLink href="/Spa/CreateRequest" className="btn btn-primary btn-sm">
+                Submit a request
+              </SpaLink>
+              <SpaLink href="/Spa/SchemaDrift" className="btn btn-outline-primary btn-sm">
+                Review schema drift
+              </SpaLink>
+            </div>
+          }
+        />
+      </div>
+    );
   }
 
   return (

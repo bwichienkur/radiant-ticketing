@@ -52,7 +52,7 @@ public sealed class Phase63SettingsSpaTests
     public void SidebarNav_PointsAdminLinkToSettingsSpa()
     {
         var nav = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Shared/_SidebarNav.cshtml"));
-        nav.Should().Contain("href=\"/Spa/Settings\"");
+        nav.Should().Contain("href=\"/Spa/Settings/General\"");
         nav.Should().NotContain("asp-page=\"/Admin/Settings\"");
     }
 

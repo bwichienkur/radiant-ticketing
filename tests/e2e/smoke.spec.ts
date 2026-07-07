@@ -10,19 +10,18 @@ test.describe('EnhancementHub smoke', () => {
     await loginAsAdmin(page);
   });
 
-  test('dashboard shows pipeline search and stats', async ({ page }) => {
+  test('dashboard shows omnibox search CTA and stats', async ({ page }) => {
     await expectSpaShell(page);
-    await expect(page.locator('.copilot-bar .fw-semibold')).toHaveText('Pipeline search', {
-      timeout: 15_000,
-    });
-    await expect(page.getByText('not a generative AI chat')).toBeVisible();
+    await expect(page.locator('.eh-omnibox-cta-button')).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText('not a generative chat')).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
   });
 
-  test('pipeline search returns approval queue shortcut', async ({ page }) => {
-    await page.getByPlaceholder(/high risk pending approval/i).fill('pending approval');
-    await page.getByRole('button', { name: 'Search' }).click();
-    await expect(page.locator('#copilot-results a').first()).toBeVisible({ timeout: 10_000 });
+  test('command palette returns approval queue shortcut', async ({ page }) => {
+    await page.keyboard.press('Control+k');
+    await expect(page.locator('#commandPaletteInput')).toBeVisible({ timeout: 5_000 });
+    await page.locator('#commandPaletteInput').fill('pending approval');
+    await expect(page.locator('.command-result').first()).toBeVisible({ timeout: 10_000 });
   });
 
   test('approval queue SPA loads pending items', async ({ page }) => {
@@ -60,7 +59,7 @@ test.describe('EnhancementHub smoke', () => {
     await expect(page.getByRole('heading', { name: 'Tell us what you need changed' })).toBeVisible({
       timeout: 15_000,
     });
-    await page.getByRole('button', { name: 'Fill in the form manually' }).click();
+    await page.getByRole('button', { name: 'Manual' }).click();
     await expect(page.getByLabel('Title')).toBeVisible();
   });
 

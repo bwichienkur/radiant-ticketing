@@ -27,7 +27,7 @@ public sealed class Phase76AdminSpaTests
     [Fact]
     public void AdminNav_ReplacesLegacyRazorLinks()
     {
-        var nav = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/components/admin/AdminNav.tsx"));
+        var nav = File.ReadAllText(GetPath("src/EnhancementHub.Web/ClientApp/src/components/settings/SettingsNav.tsx"));
         nav.Should().Contain("/Spa/Admin/Jobs");
         nav.Should().NotContain("href=\"/Admin/Jobs\"");
         nav.Should().NotContain("asp-page=\"/Admin/Jobs\"");

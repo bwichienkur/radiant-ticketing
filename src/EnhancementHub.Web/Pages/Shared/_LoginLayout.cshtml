@@ -12,7 +12,11 @@
 </head>
 <body class="login-body">
     <a class="skip-link" href="#main-content">Skip to main content</a>
-    <button type="button" class="btn btn-outline-secondary btn-sm login-theme-toggle" data-theme-toggle aria-label="Toggle theme" aria-pressed="false">◐</button>
+    <div class="login-theme-segmented eh-segmented-control" role="group" aria-label="Theme preference">
+        <button type="button" class="eh-segmented-option active" data-theme-preference="System">System</button>
+        <button type="button" class="eh-segmented-option" data-theme-preference="Light">Light</button>
+        <button type="button" class="eh-segmented-option" data-theme-preference="Dark">Dark</button>
+    </div>
     <main id="main-content" tabindex="-1">
         @RenderBody()
     </main>

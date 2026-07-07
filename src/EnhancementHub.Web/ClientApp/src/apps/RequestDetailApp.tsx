@@ -18,6 +18,7 @@ import {
   PageHeader,
   SectionCard,
   StatusBadge,
+  TabBar,
 } from '../components/ui';
 import { MissionControl } from '../components/MissionControl';
 import { useRequestCollaboration } from '../hooks/useRequestCollaboration';
@@ -35,6 +36,8 @@ interface RequestDetailAppProps {
   requestId: string;
 }
 
+type RequestDetailTab = 'overview' | 'analysis' | 'delivery' | 'activity';
+
 export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
   const [detail, setDetail] = useState<EnhancementRequestDetail | null>(null);
   const [analysis, setAnalysis] = useState<EnhancementAnalysis | null>(null);
@@ -42,6 +45,7 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
   const [approvalHistory, setApprovalHistory] = useState<ApprovalHistoryItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<RequestDetailTab>('overview');
   const [commentText, setCommentText] = useState('');
   const [commentInternal, setCommentInternal] = useState(false);
   const [postingComment, setPostingComment] = useState(false);
@@ -165,6 +169,8 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
   const isAnalyzing =
     detail.status === 'Analyzing' || detail.status === 'AiAnalyzing' || detail.status === 'Submitted';
 
+  const activityCount = comments.length + approvalHistory.length;
+
   return (
     <div aria-live="polite">
       {runtimeStatus && !runtimeStatus.aiConfigured && analysis ? (
@@ -173,6 +179,7 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
           deterministic mock output — configure OpenAI or Azure OpenAI for production.
         </AlertBanner>
       ) : null}
+
       <PageHeader
         title={detail.title}
         titleAs="h1"
@@ -201,9 +208,17 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
         }
       />
 
-      <AlertBanner variant="neutral" title="What happens next:" className="mb-4">
-        {getStatusNextStep(detail.status)}
-      </AlertBanner>
+      <TabBar
+        ariaLabel="Request sections"
+        activeId={activeTab}
+        onChange={(id) => setActiveTab(id as RequestDetailTab)}
+        tabs={[
+          { id: 'overview', label: 'Overview' },
+          { id: 'analysis', label: 'Analysis', badge: analysis ? 'Ready' : isAnalyzing ? '…' : undefined },
+          { id: 'delivery', label: 'Delivery' },
+          { id: 'activity', label: 'Activity', badge: activityCount > 0 ? activityCount : undefined },
+        ]}
+      />
 
       {analysisUpdateMessage ? (
         <AlertBanner variant="info" className="mb-3">
@@ -211,22 +226,11 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
         </AlertBanner>
       ) : null}
 
-      {!analysis && isAnalyzing ? (
-        <div className="card-panel p-4 mb-3" id="analysis-in-progress" role="status">
-          <div className="d-flex align-items-center gap-2">
-            <span className="spinner-border spinner-border-sm text-primary" aria-hidden="true" />
-            <span>We are reviewing your request. This page refreshes automatically.</span>
-          </div>
-        </div>
-      ) : null}
-
-      <div className="row g-4">
-        <div className="col-lg-8">
-          <DeliveryRunPanel
-            requestId={requestId}
-            requestStatus={detail.status}
-            desiredOutcome={detail.desiredOutcome}
-          />
+      {activeTab === 'overview' ? (
+        <>
+          <AlertBanner variant="neutral" title="What happens next:" className="mb-4">
+            {getStatusNextStep(detail.status)}
+          </AlertBanner>
 
           <SectionCard title="Your original request">
             <p className="mb-2">
@@ -246,21 +250,34 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
               </>
             ) : null}
           </SectionCard>
+        </>
+      ) : null}
+
+      {activeTab === 'analysis' ? (
+        <>
+          {!analysis && isAnalyzing ? (
+            <div className="card-panel p-4 mb-3" id="analysis-in-progress" role="status">
+              <div className="d-flex align-items-center gap-2">
+                <span className="spinner-border spinner-border-sm text-primary" aria-hidden="true" />
+                <span>We are reviewing your request. This page refreshes automatically.</span>
+              </div>
+            </div>
+          ) : null}
 
           {analysis ? (
             <>
               <AnalysisSummaryBanner analysis={analysis} />
               <MissionControl analysis={analysis} />
-          {detail.targetApplicationId ? (
-            <div className="mb-3">
-              <SpaLink
-                href={`/Spa/SystemMap?applicationId=${detail.targetApplicationId}`}
-                className="btn btn-sm btn-outline-primary"
-              >
-                View affected systems
-              </SpaLink>
-            </div>
-          ) : null}
+              {detail.targetApplicationId ? (
+                <div className="mb-3">
+                  <SpaLink
+                    href={`/Spa/SystemMap?applicationId=${detail.targetApplicationId}`}
+                    className="btn btn-sm btn-outline-primary"
+                  >
+                    View affected systems
+                  </SpaLink>
+                </div>
+              ) : null}
               <AnalysisDetailSections analysis={analysis} />
               {analysisEvolution &&
               analysisEvolution.fieldChanges.some((change) => change.changed) ? (
@@ -297,82 +314,100 @@ export function RequestDetailApp({ requestId }: RequestDetailAppProps) {
                 </SectionCard>
               ) : null}
             </>
+          ) : !isAnalyzing ? (
+            <SectionCard title="Analysis">
+              <p className="text-muted mb-0">No analysis is available for this request yet.</p>
+            </SectionCard>
           ) : null}
-        </div>
+        </>
+      ) : null}
 
-        <div className="col-lg-4">
-          <SectionCard title="Live collaboration" id="collaboration-panel" ariaLabel="Collaboration">
-            <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
-              <span className="small text-muted" id="collaboration-presence" aria-live="polite">
-                {presence}
-              </span>
-            </div>
+      {activeTab === 'delivery' ? (
+        <DeliveryRunPanel
+          requestId={requestId}
+          requestStatus={detail.status}
+          desiredOutcome={detail.desiredOutcome}
+        />
+      ) : null}
 
-            <form onSubmit={(event) => void onSubmitComment(event)} className="mb-3">
-              <FormField id="spa-comment-content" label="Add comment" required>
-                <textarea
-                  id="spa-comment-content"
-                  className="form-control"
-                  rows={2}
-                  value={commentText}
-                  onChange={(event) => setCommentText(event.target.value)}
-                  required
-                />
-              </FormField>
-              <div className="form-check mb-2">
-                <input
-                  id="spa-comment-internal"
-                  type="checkbox"
-                  className="form-check-input"
-                  checked={commentInternal}
-                  onChange={(event) => setCommentInternal(event.target.checked)}
-                />
-                <label className="form-check-label" htmlFor="spa-comment-internal">
-                  Internal note
-                </label>
+      {activeTab === 'activity' ? (
+        <div className="row g-4">
+          <div className="col-lg-7">
+            <SectionCard title="Live collaboration" id="collaboration-panel" ariaLabel="Collaboration">
+              <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <span className="small text-muted" id="collaboration-presence" aria-live="polite">
+                  {presence}
+                </span>
               </div>
-              <button type="submit" className="btn btn-outline-primary btn-sm" disabled={postingComment}>
-                {postingComment ? 'Posting…' : 'Post comment'}
-              </button>
-            </form>
 
-            <div id="collaboration-live-comments" aria-live="polite" aria-relevant="additions">
-              {comments.length === 0 ? (
-                <p className="small text-muted mb-0">No comments yet.</p>
+              <form onSubmit={(event) => void onSubmitComment(event)} className="mb-3">
+                <FormField id="spa-comment-content" label="Add comment" required>
+                  <textarea
+                    id="spa-comment-content"
+                    className="form-control"
+                    rows={2}
+                    value={commentText}
+                    onChange={(event) => setCommentText(event.target.value)}
+                    required
+                  />
+                </FormField>
+                <div className="form-check mb-2">
+                  <input
+                    id="spa-comment-internal"
+                    type="checkbox"
+                    className="form-check-input"
+                    checked={commentInternal}
+                    onChange={(event) => setCommentInternal(event.target.checked)}
+                  />
+                  <label className="form-check-label" htmlFor="spa-comment-internal">
+                    Internal note
+                  </label>
+                </div>
+                <button type="submit" className="btn btn-outline-primary btn-sm" disabled={postingComment}>
+                  {postingComment ? 'Posting…' : 'Post comment'}
+                </button>
+              </form>
+
+              <div id="collaboration-live-comments" aria-live="polite" aria-relevant="additions">
+                {comments.length === 0 ? (
+                  <p className="small text-muted mb-0">No comments yet.</p>
+                ) : (
+                  comments.map((comment: CommentSummary) => (
+                    <div key={comment.id} className="border-bottom py-2 collaboration-live-item">
+                      <strong>{comment.userDisplayName}</strong>
+                      {comment.isInternal ? (
+                        <span className="badge text-bg-warning ms-1">Internal</span>
+                      ) : null}
+                      <p className="small mb-0">{comment.content}</p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </SectionCard>
+          </div>
+
+          <div className="col-lg-5">
+            <SectionCard title="Approval history">
+              {approvalHistory.length === 0 ? (
+                <p className="text-muted small mb-0">No approval actions yet.</p>
               ) : (
-                comments.map((comment: CommentSummary) => (
-                  <div key={comment.id} className="border-bottom py-2 collaboration-live-item">
-                    <strong>{comment.userDisplayName}</strong>
-                    {comment.isInternal ? (
-                      <span className="badge text-bg-warning ms-1">Internal</span>
-                    ) : null}
-                    <p className="small mb-0">{comment.content}</p>
-                  </div>
-                ))
+                <ul className="list-group list-group-flush">
+                  {approvalHistory.map((action) => (
+                    <li key={action.id} className="list-group-item px-0">
+                      <strong>{formatApprovalAction(action.actionType)}</strong> by {action.userDisplayName}
+                      <br />
+                      <span className="text-muted small">
+                        {new Date(action.createdAt).toLocaleString()}
+                      </span>
+                      {action.comments ? <p className="small mb-0 mt-1">{action.comments}</p> : null}
+                    </li>
+                  ))}
+                </ul>
               )}
-            </div>
-          </SectionCard>
-
-          <SectionCard title="Approval history">
-            {approvalHistory.length === 0 ? (
-              <p className="text-muted small mb-0">No approval actions yet.</p>
-            ) : (
-              <ul className="list-group list-group-flush">
-                {approvalHistory.map((action) => (
-                  <li key={action.id} className="list-group-item px-0">
-                    <strong>{formatApprovalAction(action.actionType)}</strong> by {action.userDisplayName}
-                    <br />
-                    <span className="text-muted small">
-                      {new Date(action.createdAt).toLocaleString()}
-                    </span>
-                    {action.comments ? <p className="small mb-0 mt-1">{action.comments}</p> : null}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </SectionCard>
+            </SectionCard>
+          </div>
         </div>
-      </div>
+      ) : null}
     </div>
   );
 }

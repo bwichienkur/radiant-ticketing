@@ -12,20 +12,18 @@
         </button>
         <nav class="topbar-breadcrumb" aria-label="Breadcrumb">
             <a asp-page="/Index">Home</a>
-            @if (!string.IsNullOrEmpty(breadcrumb))
-            {
-                <span aria-hidden="true">›</span>
-                <span aria-current="page">@breadcrumb</span>
-            }
-            else if (!string.Equals(title, "Dashboard", StringComparison.OrdinalIgnoreCase))
-            {
-                <span aria-hidden="true">›</span>
-                <span aria-current="page">@title</span>
-            }
+            <span aria-hidden="true">›</span>
+            <span id="eh-topbar-crumb-section" class="topbar-breadcrumb-section">@(breadcrumb ?? "Home")</span>
+            <span aria-hidden="true">›</span>
+            <span id="eh-topbar-crumb-current" aria-current="page">@(breadcrumb ?? title)</span>
         </nav>
     </div>
     <div class="topbar-actions">
-        <button type="button" class="btn btn-outline-secondary btn-sm" data-command-trigger aria-label="Open command palette (Ctrl+K or Cmd+K)">
+        <button type="button" class="btn btn-outline-secondary btn-sm eh-omnibox-trigger" data-command-trigger aria-label="Open command palette (Ctrl+K or Cmd+K)">
+            <svg class="topbar-icon-svg me-1" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.5-3.5" />
+            </svg>
             <span class="d-none d-md-inline">Search</span>
             <kbd class="command-kbd" data-command-kbd>⌘K</kbd>
         </button>
@@ -49,9 +47,25 @@
                 </div>
             </div>
         </div>
-        <span class="topbar-user d-none d-md-inline">@User.Identity?.Name</span>
-        <form method="post" asp-page="/Account/Login" asp-page-handler="Logout" class="d-inline">
-            <button type="submit" class="btn btn-outline-secondary btn-sm">Sign out</button>
-        </form>
+        <span class="topbar-user d-none d-md-inline" id="eh-topbar-username">@User.Identity?.Name</span>
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-label="Account menu">
+                Account
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><h6 class="dropdown-header">@User.Identity?.Name</h6></li>
+                <li><a class="dropdown-item" href="/Spa/Account/Notifications">Notification preferences</a></li>
+                @if (User.IsInRole("Admin"))
+                {
+                    <li><a class="dropdown-item" href="/Spa/Settings/General">Settings</a></li>
+                }
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                    <form method="post" asp-page="/Account/Login" asp-page-handler="Logout" class="px-3 py-1">
+                        <button type="submit" class="btn btn-link btn-sm text-danger p-0">Sign out</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
     </div>
 </header>

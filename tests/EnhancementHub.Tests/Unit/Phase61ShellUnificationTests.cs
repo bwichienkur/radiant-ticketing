@@ -63,8 +63,7 @@ public sealed class Phase61ShellUnificationTests
     {
         var nav = File.ReadAllText(GetPath("src/EnhancementHub.Web/Pages/Shared/_SidebarNav.cshtml"));
         nav.Should().Contain("/Spa/DatabaseConnections");
-        nav.Should().Contain("/Spa/Documentation/Export");
-        nav.Should().Contain("/Spa/Refactor/Analyze");
+        nav.Should().Contain("/Spa/Portfolio");
         nav.Should().NotContain("asp-page=\"/DatabaseConnections/Index\"");
         nav.Should().NotContain("asp-page=\"/Documentation/Export\"");
         nav.Should().NotContain("asp-page=\"/Refactor/Analyze\"");

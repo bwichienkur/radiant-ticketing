@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { getUserAppearance, updateThemePreference } from '../api/spaClient';
 import type { ThemePreference } from '../theme';
 import { applyThemePreference } from '../theme';
+import { SegmentedControl } from './ui/SegmentedControl';
 
 const OPTIONS: ThemePreference[] = ['System', 'Light', 'Dark'];
 
@@ -36,20 +37,14 @@ export function ThemePreferenceSelector() {
 
   const content = (
     <div className="theme-preference-selector d-flex align-items-center gap-2" aria-label="Theme preference">
-      <span className="small text-muted d-none d-lg-inline">Theme</span>
-      <select
-        className="form-select form-select-sm"
+      <span className="small text-muted d-none d-xl-inline">Theme</span>
+      <SegmentedControl
+        ariaLabel="Choose theme preference"
         value={preference}
-        disabled={saving}
-        onChange={(event) => void onChange(event.target.value as ThemePreference)}
-        aria-label="Choose theme preference"
-      >
-        {OPTIONS.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
+        onChange={(value) => void onChange(value)}
+        options={OPTIONS.map((option) => ({ value: option, label: option }))}
+      />
+      {saving ? <span className="visually-hidden">Saving theme…</span> : null}
     </div>
   );
 

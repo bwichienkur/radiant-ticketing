@@ -179,14 +179,24 @@
                     : 'Switch to dark mode';
             btn.title = title;
         });
+        document.querySelectorAll('[data-theme-preference]').forEach(btn => {
+            const pref = btn.getAttribute('data-theme-preference');
+            const active = (saved === 'System' || !saved) ? pref === 'System' : saved === pref;
+            btn.classList.toggle('active', active);
+            btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+    }
+
+    function setThemePreference(preference) {
+        localStorage.setItem(STORAGE_THEME, preference);
+        initTheme();
     }
 
     function toggleTheme() {
         const saved = localStorage.getItem(STORAGE_THEME);
         const current = resolveThemePreference(saved);
         const next = current === 'dark' ? 'Light' : 'Dark';
-        localStorage.setItem(STORAGE_THEME, next);
-        initTheme();
+        setThemePreference(next);
     }
 
     function initSidebar() {
@@ -666,6 +676,7 @@
             '/Spa/ApprovalQueue',
             '/Spa/OnboardingWizard',
             '/Spa/SystemMap',
+            '/Spa/Portfolio',
             '/Spa/Applications',
             '/Spa/SchemaDrift',
             '/Spa/Repositories',
@@ -705,11 +716,23 @@
             if (linkPath === '/Spa/OnboardingWizard') {
                 return currentPath.startsWith('/Spa/OnboardingWizard');
             }
+            if (linkPath === '/Spa/Portfolio') {
+                return currentPath === '/Spa/Portfolio';
+            }
             if (linkPath === '/Spa/SystemMap') {
                 return currentPath.startsWith('/Spa/SystemMap');
             }
             if (linkPath === '/Spa/Applications') {
                 return currentPath.startsWith('/Spa/Applications');
+            }
+            if (linkPath === '/Spa/DatabaseConnections') {
+                return currentPath.startsWith('/Spa/DatabaseConnections');
+            }
+            if (linkPath === '/Spa/Search') {
+                return currentPath.startsWith('/Spa/Search');
+            }
+            if (linkPath === '/Spa/Settings/General') {
+                return currentPath.startsWith('/Spa/Settings') || currentPath.startsWith('/Spa/Admin');
             }
             if (linkPath === '/Spa/SchemaDrift') {
                 return currentPath.startsWith('/Spa/SchemaDrift');
@@ -813,6 +836,15 @@
         btn.addEventListener('click', toggleTheme);
     });
 
+    document.querySelectorAll('[data-theme-preference]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const preference = btn.getAttribute('data-theme-preference');
+            if (preference) {
+                setThemePreference(preference);
+            }
+        });
+    });
+
     initTheme();
     initSidebar();
     initNotifications();
@@ -825,7 +857,7 @@
     initProductTour();
     const spaNav = initSpaNavigation();
 
-    window.EhUx = { toggleTheme, addNotification, showToast, initProductTour, updateSidebarActive: spaNav?.updateSidebarActive };
+    window.EhUx = { toggleTheme, setThemePreference, addNotification, showToast, initProductTour, updateSidebarActive: spaNav?.updateSidebarActive };
 
     initCommandPaletteKbd();
 })();

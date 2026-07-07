@@ -11,4 +11,7 @@ export { SectionCard } from './SectionCard';
 export { ResponsiveDataList } from './ResponsiveDataList';
 export type { DataColumn, ResponsiveDataListProps } from './ResponsiveDataList';
 export { StatusBadge } from './StatusBadge';
+export { SegmentedControl } from './SegmentedControl';
+export { TabBar } from './TabBar';
+export type { TabItem } from './TabBar';
 export { useToast } from './useToast';

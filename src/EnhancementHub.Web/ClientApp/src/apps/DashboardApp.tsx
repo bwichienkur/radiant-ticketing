@@ -1,5 +1,5 @@
-import { FormEvent, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { getDashboard, searchPipeline } from '../api/spaClient';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { getDashboard } from '../api/spaClient';
 import { SpaLink } from '../components/SpaLink';
 import {
   EmptyState,
@@ -9,21 +9,10 @@ import {
 } from '../components/ui';
 import type { DashboardPageData, DashboardActivityItem } from '../types/spa';
 
-interface SearchResult {
-  type?: string;
-  title: string;
-  subtitle?: string;
-  url: string;
-}
-
 export function DashboardApp() {
   const [data, setData] = useState<DashboardPageData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchAnswer, setSearchAnswer] = useState('');
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [searching, setSearching] = useState(false);
 
   async function loadDashboard() {
     setLoading(true);
@@ -55,37 +44,6 @@ export function DashboardApp() {
     const peak = data?.insights.requestsLast7Days.reduce((max, day) => Math.max(max, day.count), 0) ?? 0;
     return peak > 0 ? peak : 1;
   }, [data]);
-
-  async function handleSearch(event: FormEvent) {
-    event.preventDefault();
-    const query = searchQuery.trim();
-    if (!query) {
-      return;
-    }
-
-    setSearching(true);
-    setSearchAnswer('');
-    setSearchResults([]);
-    try {
-      const response = await fetch(`/web-api/ux/copilot?q=${encodeURIComponent(query)}`, {
-        credentials: 'include',
-      });
-      const payload = (await response.json()) as {
-        answer?: string;
-        items?: SearchResult[];
-      };
-      setSearchAnswer(payload.answer ?? '');
-      setSearchResults(Array.isArray(payload.items) ? payload.items : []);
-    } catch {
-      try {
-        setSearchResults(await searchPipeline(query));
-      } catch {
-        setSearchAnswer('Unable to run search.');
-      }
-    } finally {
-      setSearching(false);
-    }
-  }
 
   if (loading) {
     return <LoadingState label="Loading dashboard…" />;
@@ -121,37 +79,18 @@ export function DashboardApp() {
         }
       />
 
-      <div className="copilot-bar" data-tour="copilot">
-        <form className="d-flex gap-2 flex-wrap align-items-center" onSubmit={(e) => void handleSearch(e)}>
-          <label htmlFor="copilot-input" className="visually-hidden">
-            Pipeline search
-          </label>
-          <span className="fw-semibold text-nowrap">Pipeline search</span>
-          <input
-            type="search"
-            id="copilot-input"
-            className="form-control flex-grow-1"
-            placeholder="e.g. high risk pending approval, system map…"
-            autoComplete="off"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-          />
-          <button type="submit" className="btn btn-primary" disabled={searching}>
-            {searching ? 'Searching…' : 'Search'}
-          </button>
-        </form>
-        <p className="small text-muted mb-0 mt-1">
-          Keyword shortcuts across requests, pages, and applications — not a generative AI chat.
+      <div className="eh-omnibox-cta" data-tour="copilot">
+        <button type="button" className="eh-omnibox-cta-button" data-command-trigger>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" />
+          </svg>
+          <span>Search requests, applications, and pages…</span>
+          <kbd className="command-kbd" data-command-kbd>⌘K</kbd>
+        </button>
+        <p className="small text-muted mb-0 mt-2">
+          Opens the command palette — keyword search across your portfolio, not a generative chat.
         </p>
-        <div id="copilot-results" className="mt-2" aria-live="polite">
-          {searchAnswer ? <p className="small fw-semibold mb-2">{searchAnswer}</p> : null}
-          {searchResults.map((item) => (
-            <SpaLink key={`${item.url}-${item.title}`} href={item.url} className="copilot-result d-block">
-              <strong>{item.title}</strong>
-              {item.subtitle ? <span className="small text-muted d-block">{item.subtitle}</span> : null}
-            </SpaLink>
-          ))}
-        </div>
       </div>
 
       {(insights.unresolvedDriftFindings > 0 || insights.staleRepositoryCount > 0) ? (

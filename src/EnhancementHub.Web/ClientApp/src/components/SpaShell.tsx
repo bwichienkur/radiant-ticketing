@@ -34,7 +34,9 @@ import { SettingsApp } from '../apps/SettingsApp';
 import { InsightsApp } from '../apps/InsightsApp';
 import { PortfolioHealthApp } from '../apps/PortfolioHealthApp';
 import { AdminApp } from '../apps/AdminApp';
+import { PortfolioHubApp } from '../apps/PortfolioHubApp';
 import { FeedbackWidget } from './FeedbackWidget';
+import { resolveSpaPageMeta } from '../spaPageMeta';
 import { MockAiTrustBanner } from './MockAiTrustBanner';
 import { CommandPalette } from './CommandPalette';
 import { ThemePreferenceSelector } from './ThemePreferenceSelector';
@@ -144,13 +146,26 @@ function SpaNavigationBridge() {
 
   useEffect(() => {
     const liveRegion = document.getElementById('eh-spa-live-region');
-    if (!liveRegion) return;
-
-    const pageTitle = document.querySelector('.eh-section-title, .page-header h1, h1')?.textContent?.trim();
-    const announcement = pageTitle
+    const meta = resolveSpaPageMeta(location.pathname);
+    const pageTitle = document.querySelector('.page-header-title, .eh-section-title, h1')?.textContent?.trim();
+    const announcement = pageTitle && pageTitle.length > 0
       ? `Navigated to ${pageTitle}`
-      : `Navigated to ${location.pathname}`;
-    liveRegion.textContent = announcement;
+      : `Navigated to ${meta.breadcrumb}`;
+
+    if (liveRegion) {
+      liveRegion.textContent = announcement;
+    }
+
+    document.title = `${pageTitle || meta.title} - EnhancementHub`;
+
+    const sectionEl = document.getElementById('eh-topbar-crumb-section');
+    const currentEl = document.getElementById('eh-topbar-crumb-current');
+    if (sectionEl) {
+      sectionEl.textContent = meta.section ?? 'Home';
+    }
+    if (currentEl) {
+      currentEl.textContent = pageTitle || meta.breadcrumb;
+    }
   }, [location.pathname, location.search]);
 
   return null;
@@ -217,6 +232,7 @@ export function SpaShell() {
         <Route path="/Spa/Admin/*" element={<AdminApp />} />
         <Route path="/Spa/Insights" element={<InsightsApp />} />
         <Route path="/Spa/PortfolioHealth" element={<PortfolioHealthApp />} />
+        <Route path="/Spa/Portfolio" element={<PortfolioHubApp />} />
         <Route path="*" element={<UnknownSpaRoute />} />
       </Routes>
     </BrowserRouter>

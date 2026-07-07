@@ -31,7 +31,7 @@ public sealed class Phase27UxOverhaulTests
 
         page.Should().Contain("_SpaRoot");
         page.Should().Contain("spa-shell.js");
-        app.Should().Contain("copilot-bar");
+        app.Should().Contain("eh-omnibox-cta");
         app.Should().Contain("Recent activity");
         app.Should().Contain("sparkline");
     }

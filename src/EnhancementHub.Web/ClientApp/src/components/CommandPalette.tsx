@@ -12,12 +12,21 @@ interface PaletteItem {
 const RECENT_SEARCHES_KEY = 'eh-recent-searches';
 const NAV_PAGES: PaletteItem[] = [
   { type: 'page', title: 'Dashboard', subtitle: 'Navigate', url: '/' },
+  { type: 'page', title: 'New request', subtitle: 'Create', url: '/Spa/CreateRequest' },
   { type: 'page', title: 'Requests', subtitle: 'Navigate', url: '/Spa/RequestList' },
   { type: 'page', title: 'Approvals', subtitle: 'Navigate', url: '/Spa/ApprovalQueue' },
-  { type: 'page', title: 'System map', subtitle: 'Navigate', url: '/Spa/SystemMap' },
-  { type: 'page', title: 'Insights', subtitle: 'Navigate', url: '/Spa/Insights' },
-  { type: 'page', title: 'Portfolio health', subtitle: 'Navigate', url: '/Spa/PortfolioHealth' },
-  { type: 'page', title: 'Settings', subtitle: 'Navigate', url: '/Spa/Settings' },
+  { type: 'page', title: 'Portfolio overview', subtitle: 'Navigate', url: '/Spa/Portfolio' },
+  { type: 'page', title: 'Applications', subtitle: 'Portfolio', url: '/Spa/Applications' },
+  { type: 'page', title: 'System map', subtitle: 'Portfolio', url: '/Spa/SystemMap' },
+  { type: 'page', title: 'Repositories', subtitle: 'Portfolio', url: '/Spa/Repositories' },
+  { type: 'page', title: 'Databases', subtitle: 'Portfolio', url: '/Spa/DatabaseConnections' },
+  { type: 'page', title: 'Schema drift', subtitle: 'Portfolio', url: '/Spa/SchemaDrift' },
+  { type: 'page', title: 'Global search', subtitle: 'Governance', url: '/Spa/Search' },
+  { type: 'page', title: 'Audit log', subtitle: 'Governance', url: '/Spa/Audit' },
+  { type: 'page', title: 'Insights', subtitle: 'Governance', url: '/Spa/Insights' },
+  { type: 'page', title: 'Portfolio health', subtitle: 'Governance', url: '/Spa/PortfolioHealth' },
+  { type: 'page', title: 'Settings', subtitle: 'Admin', url: '/Spa/Settings/General' },
+  { type: 'page', title: 'Onboarding wizard', subtitle: 'Setup', url: '/Spa/OnboardingWizard' },
 ];
 
 function loadRecentSearches(): string[] {
