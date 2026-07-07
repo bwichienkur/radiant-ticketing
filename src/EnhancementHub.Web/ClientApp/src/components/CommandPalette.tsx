@@ -201,18 +201,22 @@ export function CommandPalette() {
   return (
     <div className="command-palette-backdrop eh-command-palette" role="presentation" onClick={close}>
       <div
-        className="command-palette-modal card-panel"
+        className="command-palette-modal eh-command-palette-modal"
         role="dialog"
         aria-modal="true"
         aria-label="Command palette"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="command-palette-input-wrap border-bottom px-3 py-2">
+        <div className="command-palette-input-wrap eh-command-palette-input-wrap">
+          <svg className="eh-command-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="7" />
+            <path d="m20 20-3.5-3.5" />
+          </svg>
           <input
             ref={inputRef}
             id="commandPaletteInput"
             type="search"
-            className="form-control border-0 shadow-none"
+            className="form-control eh-command-palette-input"
             placeholder="Search requests, apps, symbols, pages…"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -220,40 +224,49 @@ export function CommandPalette() {
             aria-controls="commandPaletteResults"
             autoComplete="off"
           />
-          {loading ? <span className="small text-muted">Searching…</span> : null}
-          {semanticHint ? <p className="small text-muted mb-0 mt-1">{semanticHint}</p> : null}
+          <kbd className="eh-kbd eh-command-esc">ESC</kbd>
         </div>
-        <div id="commandPaletteResults" className="command-palette-results" role="listbox">
+        {loading ? <p className="eh-command-status">Searching…</p> : null}
+        {semanticHint ? <p className="eh-command-hint">{semanticHint}</p> : null}
+        <div id="commandPaletteResults" className="command-palette-results eh-command-palette-results" role="listbox">
           {items.length === 0 ? (
-            <p className="text-muted small px-3 py-2 mb-0">No results</p>
+            <p className="eh-command-empty">No results</p>
           ) : (
             items.map((item, index) => (
               <button
                 key={`${item.type}-${item.url}-${item.title}`}
                 type="button"
-                className={`command-result w-100 text-start ${index === activeIndex ? 'active' : ''}`}
+                className={`command-result eh-command-result ${index === activeIndex ? 'active' : ''}`}
                 role="option"
                 aria-selected={index === activeIndex}
                 onMouseEnter={() => setActiveIndex(index)}
                 onClick={() => navigateTo(item.url)}
               >
+                <span className="eh-command-result-icon" aria-hidden="true">{item.type.slice(0, 1).toUpperCase()}</span>
+                <span className="eh-command-result-body">
+                  <span className="command-result-title">{item.title}</span>
+                  {item.subtitle ? <span className="command-result-sub">{item.subtitle}</span> : null}
+                </span>
                 <span className="command-result-type">{item.type}</span>
-                <span className="command-result-title">{item.title}</span>
-                <span className="command-result-sub">{item.subtitle ?? ''}</span>
               </button>
             ))
           )}
           {query.trim().length >= 2 ? (
-            <div className="border-top px-3 py-2">
+            <div className="eh-command-footer">
               <button
                 type="button"
-                className="btn btn-link btn-sm p-0"
+                className="eh-command-footer-link"
                 onClick={() => navigateTo(`/Spa/Search?q=${encodeURIComponent(query.trim())}`)}
               >
                 View all grouped results
               </button>
             </div>
           ) : null}
+        </div>
+        <div className="eh-command-palette-shortcuts" aria-hidden="true">
+          <span><kbd className="eh-kbd">↑↓</kbd> navigate</span>
+          <span><kbd className="eh-kbd">↵</kbd> open</span>
+          <span><kbd className="eh-kbd">esc</kbd> close</span>
         </div>
       </div>
     </div>

@@ -346,8 +346,8 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
 
       {mode === 'manual' ? (
         <SectionCard title="Request details">
-          <form onSubmit={(e) => void handleSubmit(e)} noValidate>
-            <div className="row g-3">
+            <form onSubmit={(e) => void handleSubmit(e)} noValidate>
+            <div className="row g-4">
               <div className="col-md-8">
                 <FormField id="request-title" label="Title" required error={fieldErrors.title}>
                   <input
