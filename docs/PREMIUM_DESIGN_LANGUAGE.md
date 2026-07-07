@@ -108,11 +108,12 @@
 | Phase | Scope | Status |
 |-------|-------|--------|
 | 1 | Audit + design language (this doc) | Done |
-| 2 | Tokens + `eh-premium-v3.css` foundation | In progress |
-| 3 | Shell: sidebar, topbar, command palette | In progress |
-| 4 | Components: buttons, cards, tables, chips, skeleton | In progress |
-| 5 | Hero screens polish (dashboard, request, settings) | In progress |
-| 6 | Per-screen refinement pass | Ongoing |
+| 2 | Tokens + `eh-premium-v3.css` foundation | Done |
+| 3 | Shell: sidebar, topbar, command palette | Done |
+| 4 | Components: buttons, cards, tables, chips, skeleton | Done |
+| 5 | Hero screens polish (dashboard, request, settings) | Done |
+| 6 | Forms, admin tables, login, insight strip | Done |
+| 7 | Per-screen refinement + visual regression baselines | Ongoing |
 
 ---
 

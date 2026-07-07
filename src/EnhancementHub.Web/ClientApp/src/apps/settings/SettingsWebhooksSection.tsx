@@ -33,6 +33,7 @@ export function SettingsWebhooksSection() {
   const [name, setName] = useState('');
   const [url, setUrl] = useState('');
   const [selectedEvents, setSelectedEvents] = useState<string[]>(['request.approved']);
+  const [createErrors, setCreateErrors] = useState<Record<string, string>>({});
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -70,9 +71,24 @@ export function SettingsWebhooksSection() {
 
   async function handleCreate(event: React.FormEvent) {
     event.preventDefault();
-    if (!name.trim() || !url.trim() || selectedEvents.length === 0) {
+    const errors: Record<string, string> = {};
+    if (!name.trim()) {
+      errors.name = 'Name is required.';
+    }
+    if (!url.trim()) {
+      errors.url = 'Endpoint URL is required.';
+    }
+    if (selectedEvents.length === 0) {
+      errors.events = 'Select at least one event type.';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setCreateErrors(errors);
+      toast.danger('Check the form', 'Complete all required fields before creating a webhook.');
       return;
     }
+
+    setCreateErrors({});
 
     setSubmitting(true);
     try {
@@ -132,29 +148,43 @@ export function SettingsWebhooksSection() {
         <div className="col-lg-4">
           <form className="card-panel p-4" onSubmit={(event) => void handleCreate(event)}>
             <h2 className="h6 mb-3">Create subscription</h2>
-            <FormField label="Name" id="webhook-name" required>
+            <FormField label="Name" id="webhook-name" required error={createErrors.name}>
               <input
                 id="webhook-name"
                 className="form-control"
                 value={name}
-                onChange={(event) => setName(event.target.value)}
+                onChange={(event) => {
+                  setCreateErrors((prev) => {
+                    const next = { ...prev };
+                    delete next.name;
+                    return next;
+                  });
+                  setName(event.target.value);
+                }}
                 required
                 maxLength={200}
                 placeholder="Zapier approval hook"
               />
             </FormField>
-            <FormField label="Endpoint URL" id="webhook-url" required>
+            <FormField label="Endpoint URL" id="webhook-url" required error={createErrors.url}>
               <input
                 id="webhook-url"
                 className="form-control"
                 value={url}
-                onChange={(event) => setUrl(event.target.value)}
+                onChange={(event) => {
+                  setCreateErrors((prev) => {
+                    const next = { ...prev };
+                    delete next.url;
+                    return next;
+                  });
+                  setUrl(event.target.value);
+                }}
                 required
                 maxLength={2000}
                 placeholder="https://hooks.example.com/enhancementhub"
               />
             </FormField>
-            <fieldset className="mb-3">
+            <fieldset className={`mb-3 ${createErrors.events ? 'eh-form-field--invalid' : ''}`}>
               <legend className="form-label fs-6">Event types</legend>
               {eventTypes.map((eventType) => (
                 <div key={eventType} className="form-check">
@@ -163,13 +193,25 @@ export function SettingsWebhooksSection() {
                     type="checkbox"
                     id={`event-${eventType}`}
                     checked={selectedEvents.includes(eventType)}
-                    onChange={() => toggleEvent(eventType)}
+                    onChange={() => {
+                      setCreateErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.events;
+                        return next;
+                      });
+                      toggleEvent(eventType);
+                    }}
                   />
                   <label className="form-check-label" htmlFor={`event-${eventType}`}>
                     {eventType}
                   </label>
                 </div>
               ))}
+              {createErrors.events ? (
+                <div className="invalid-feedback d-block" role="alert">
+                  {createErrors.events}
+                </div>
+              ) : null}
             </fieldset>
             <button type="submit" className="btn btn-primary" disabled={submitting}>
               {submitting ? 'Creating…' : 'Create webhook'}

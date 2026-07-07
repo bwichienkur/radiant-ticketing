@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { Children, cloneElement, isValidElement, type ReactElement, type ReactNode } from 'react';
 
 interface FormFieldProps {
   id: string;
@@ -8,6 +8,25 @@ interface FormFieldProps {
   required?: boolean;
   children: ReactNode;
   className?: string;
+}
+
+function enhanceControl(
+  child: ReactNode,
+  error: string | undefined,
+  describedBy: string | undefined,
+): ReactNode {
+  if (!isValidElement(child)) {
+    return child;
+  }
+
+  const element = child as ReactElement<{ className?: string; 'aria-invalid'?: boolean; 'aria-describedby'?: string }>;
+  const className = [element.props.className, error ? 'is-invalid' : ''].filter(Boolean).join(' ');
+
+  return cloneElement(element, {
+    className: className || undefined,
+    'aria-invalid': error ? true : element.props['aria-invalid'],
+    'aria-describedby': describedBy ?? element.props['aria-describedby'],
+  });
 }
 
 export function FormField({
@@ -22,26 +41,27 @@ export function FormField({
   const hintId = hint ? `${id}-hint` : undefined;
   const errorId = error ? `${id}-error` : undefined;
   const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined;
+  const enhancedChild = Children.map(children, (child) => enhanceControl(child, error, describedBy));
 
   return (
-    <div className={`eh-form-field ${className}`.trim()}>
+    <div className={`eh-form-field ${error ? 'eh-form-field--invalid' : ''} ${className}`.trim()}>
       <label className="form-label" htmlFor={id}>
         {label}
         {required ? (
-          <span className="text-danger ms-1" aria-hidden="true">
+          <span className="eh-required-mark" aria-hidden="true">
             *
           </span>
         ) : null}
         {required ? <span className="visually-hidden"> (required)</span> : null}
       </label>
-      <div aria-describedby={describedBy}>{children}</div>
+      <div>{enhancedChild}</div>
       {hint ? (
         <div id={hintId} className="form-text">
           {hint}
         </div>
       ) : null}
       {error ? (
-        <div id={errorId} className="invalid-feedback d-block">
+        <div id={errorId} className="invalid-feedback d-block" role="alert">
           {error}
         </div>
       ) : null}

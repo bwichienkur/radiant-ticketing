@@ -14,6 +14,7 @@ import {
   FormField,
   LoadingState,
   PageHeader,
+  SectionCard,
   SegmentedControl,
 } from '../components/ui';
 import type { EnhancementTemplateSummary, CustomFieldDefinition, CustomFieldValueInput } from '../types/spa';
@@ -35,6 +36,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [selectedTemplateId, setSelectedTemplateId] = useState(initialTemplateId ?? '');
   const [intakeSessionId, setIntakeSessionId] = useState<string | null>(null);
   const [mode, setMode] = useState<CreateRequestMode>(
@@ -212,8 +214,48 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
       });
   }
 
+  function validateForm(): boolean {
+    const errors: Record<string, string> = {};
+    if (!form.title.trim()) {
+      errors.title = 'Enter a short title for this request.';
+    }
+    if (!form.businessDescription.trim()) {
+      errors.businessDescription = 'Describe the problem you are trying to solve.';
+    }
+    if (!form.desiredOutcome.trim()) {
+      errors.desiredOutcome = 'Describe what success looks like.';
+    }
+
+    for (const field of customFieldDefinitions) {
+      if (!field.isRequired) {
+        continue;
+      }
+      const value = customFieldValues[field.key] ?? '';
+      if (!value.trim()) {
+        errors[`custom-${field.key}`] = `${field.label} is required.`;
+      }
+    }
+
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  }
+
+  function clearFieldError(key: string) {
+    setFieldErrors((prev) => {
+      if (!prev[key]) {
+        return prev;
+      }
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  }
+
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    if (!validateForm()) {
+      return;
+    }
     setSubmitting(true);
     setError(null);
     try {
@@ -245,7 +287,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
   }
 
   return (
-    <div aria-live="polite">
+    <div className="eh-create-request" aria-live="polite">
       <PageHeader
         title="Tell us what you need changed"
         description="Describe your need in everyday language. We will help shape it into a change request for review."
@@ -303,19 +345,20 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
       {error ? <ErrorState message={error} /> : null}
 
       {mode === 'manual' ? (
-        <div className="card-panel p-4">
-          <h2 className="eh-section-title mb-4">Request details</h2>
+        <SectionCard title="Request details">
           <form onSubmit={(e) => void handleSubmit(e)} noValidate>
             <div className="row g-3">
               <div className="col-md-8">
-                <FormField id="request-title" label="Title" required>
+                <FormField id="request-title" label="Title" required error={fieldErrors.title}>
                   <input
                     id="request-title"
                     className="form-control"
-                    required
                     placeholder="e.g. Track why orders are cancelled"
                     value={form.title}
-                    onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+                    onChange={(event) => {
+                      clearFieldError('title');
+                      setForm((prev) => ({ ...prev, title: event.target.value }));
+                    }}
                   />
                 </FormField>
               </div>
@@ -382,33 +425,43 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
                 </FormField>
               </div>
               <div className="col-12">
-                <FormField id="request-business-description" label="What problem are you trying to solve?" required>
+                <FormField
+                  id="request-business-description"
+                  label="What problem are you trying to solve?"
+                  required
+                  error={fieldErrors.businessDescription}
+                >
                   <textarea
                     id="request-business-description"
                     className="form-control"
                     rows={4}
-                    required
                     maxLength={4000}
                     placeholder="Describe the business problem and why it matters today."
                     value={form.businessDescription}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, businessDescription: event.target.value }))
-                    }
+                    onChange={(event) => {
+                      clearFieldError('businessDescription');
+                      setForm((prev) => ({ ...prev, businessDescription: event.target.value }));
+                    }}
                   />
                 </FormField>
               </div>
               <div className="col-12">
-                <FormField id="request-desired-outcome" label="What does success look like?" required>
+                <FormField
+                  id="request-desired-outcome"
+                  label="What does success look like?"
+                  required
+                  error={fieldErrors.desiredOutcome}
+                >
                   <textarea
                     id="request-desired-outcome"
                     className="form-control"
                     rows={3}
-                    required
                     placeholder="e.g. Managers can run a monthly report on cancellation reasons."
                     value={form.desiredOutcome}
-                    onChange={(event) =>
-                      setForm((prev) => ({ ...prev, desiredOutcome: event.target.value }))
-                    }
+                    onChange={(event) => {
+                      clearFieldError('desiredOutcome');
+                      setForm((prev) => ({ ...prev, desiredOutcome: event.target.value }));
+                    }}
                   />
                 </FormField>
               </div>
@@ -440,19 +493,20 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
                           id={`custom-field-${field.key}`}
                           label={field.label}
                           required={field.isRequired}
+                          error={fieldErrors[`custom-${field.key}`]}
                         >
                           {field.fieldType === 'Select' ? (
                             <select
                               id={`custom-field-${field.key}`}
                               className="form-select"
-                              required={field.isRequired}
                               value={customFieldValues[field.key] ?? ''}
-                              onChange={(event) =>
+                              onChange={(event) => {
+                                clearFieldError(`custom-${field.key}`);
                                 setCustomFieldValues((prev) => ({
                                   ...prev,
                                   [field.key]: event.target.value,
-                                }))
-                              }
+                                }));
+                              }}
                             >
                               <option value="">— Select —</option>
                               {field.options.map((option) => (
@@ -466,42 +520,42 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
                               id={`custom-field-${field.key}`}
                               type="number"
                               className="form-control"
-                              required={field.isRequired}
                               value={customFieldValues[field.key] ?? ''}
-                              onChange={(event) =>
+                              onChange={(event) => {
+                                clearFieldError(`custom-${field.key}`);
                                 setCustomFieldValues((prev) => ({
                                   ...prev,
                                   [field.key]: event.target.value,
-                                }))
-                              }
+                                }));
+                              }}
                             />
                           ) : field.fieldType === 'Date' ? (
                             <input
                               id={`custom-field-${field.key}`}
                               type="date"
                               className="form-control"
-                              required={field.isRequired}
                               value={customFieldValues[field.key] ?? ''}
-                              onChange={(event) =>
+                              onChange={(event) => {
+                                clearFieldError(`custom-${field.key}`);
                                 setCustomFieldValues((prev) => ({
                                   ...prev,
                                   [field.key]: event.target.value,
-                                }))
-                              }
+                                }));
+                              }}
                             />
                           ) : (
                             <input
                               id={`custom-field-${field.key}`}
                               type="text"
                               className="form-control"
-                              required={field.isRequired}
                               value={customFieldValues[field.key] ?? ''}
-                              onChange={(event) =>
+                              onChange={(event) => {
+                                clearFieldError(`custom-${field.key}`);
                                 setCustomFieldValues((prev) => ({
                                   ...prev,
                                   [field.key]: event.target.value,
-                                }))
-                              }
+                                }));
+                              }}
                             />
                           )}
                         </FormField>
@@ -520,7 +574,7 @@ export function CreateRequestApp({ initialTemplateId, initialDriftFindingId }: C
               </SpaLink>
             </div>
           </form>
-        </div>
+        </SectionCard>
       ) : null}
     </div>
   );

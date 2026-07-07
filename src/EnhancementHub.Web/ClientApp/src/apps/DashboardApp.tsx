@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { getDashboard } from '../api/spaClient';
+import { DashboardInsightStrip } from '../components/DashboardInsightStrip';
 import { SpaLink } from '../components/SpaLink';
 import {
   EmptyState,
@@ -78,6 +79,8 @@ export function DashboardApp() {
           </>
         }
       />
+
+      <DashboardInsightStrip data={data} />
 
       <div className="eh-omnibox-cta" data-tour="copilot">
         <button type="button" className="eh-omnibox-cta-button" data-command-trigger>

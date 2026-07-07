@@ -20,7 +20,7 @@ export function AdminApp() {
   }
 
   return (
-    <div>
+    <div className="eh-admin">
       <PageHeader
         title="Platform administration"
         description="Jobs, compliance, tenancy, delivery automation, and operational controls"

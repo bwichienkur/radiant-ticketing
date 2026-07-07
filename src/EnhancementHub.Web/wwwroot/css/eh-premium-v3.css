@@ -581,6 +581,200 @@ body {
     border-radius: var(--eh-radius-lg);
 }
 
+/* Unified enterprise tables */
+.eh-table,
+.table-enterprise {
+    --eh-table-border: var(--eh-border-subtle);
+}
+
+.eh-table thead th,
+.table-enterprise thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--eh-surface-3);
+    color: var(--eh-muted);
+    font-size: var(--eh-font-size-xs);
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0.01em;
+    border-bottom: 1px solid var(--eh-border);
+}
+
+.eh-table tbody td,
+.table-enterprise tbody td {
+    font-size: var(--eh-font-size-sm);
+    border-bottom-color: var(--eh-border-subtle);
+    vertical-align: middle;
+}
+
+.eh-table tbody tr:hover,
+.table-enterprise tbody tr:hover {
+    background: var(--eh-surface-muted);
+}
+
+/* Form fields */
+.eh-form-field .form-label {
+    font-size: var(--eh-font-size-sm);
+    font-weight: 500;
+    color: var(--eh-text-secondary);
+    margin-bottom: 0.35rem;
+}
+
+.eh-form-field .form-text {
+    font-size: var(--eh-font-size-xs);
+    color: var(--eh-muted);
+    margin-top: 0.35rem;
+}
+
+.eh-required-mark {
+    color: var(--eh-danger);
+    margin-left: 0.2rem;
+}
+
+.eh-form-field--invalid .form-label {
+    color: var(--eh-danger);
+}
+
+.eh-form-field .is-invalid,
+.eh-form-field--invalid .form-control,
+.eh-form-field--invalid .form-select {
+    border-color: rgba(220, 38, 38, 0.55);
+}
+
+.eh-create-request .eh-section-card {
+    margin-bottom: 1.5rem;
+}
+
+.eh-create-request .template-card {
+    border-radius: var(--eh-radius-lg);
+    border: 1px solid var(--eh-border-subtle);
+    transition: border-color var(--eh-transition-base), box-shadow var(--eh-transition-base);
+}
+
+.eh-create-request .template-card.selected,
+.eh-create-request .template-card:hover {
+    border-color: var(--eh-accent);
+    box-shadow: var(--eh-shadow-sm);
+}
+
+/* Admin screens */
+.eh-admin .eh-settings-nav,
+.eh-admin .admin-nav {
+    position: sticky;
+    top: 1rem;
+}
+
+.eh-admin .card-panel,
+.eh-admin .eh-section-card {
+    border-radius: var(--eh-radius-lg);
+}
+
+.eh-admin .table-responsive {
+    border-radius: var(--eh-radius-lg);
+    border: 1px solid var(--eh-border-subtle);
+    overflow: auto;
+}
+
+.eh-admin .table-enterprise thead th:first-child {
+    border-top-left-radius: var(--eh-radius-lg);
+}
+
+/* Dashboard insight strip */
+.eh-insight-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1rem 1.25rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--eh-radius-lg);
+    border: 1px solid var(--eh-border-subtle);
+    background: var(--eh-surface);
+}
+
+.eh-insight-strip--neutral {
+    border-left: 3px solid var(--eh-accent);
+    background: var(--eh-accent-muted);
+}
+
+.eh-insight-strip--warning {
+    border-left: 3px solid var(--eh-warning);
+    background: rgba(217, 119, 6, 0.06);
+}
+
+.eh-insight-strip--urgent {
+    border-left: 3px solid var(--eh-danger);
+    background: rgba(220, 38, 38, 0.05);
+}
+
+.eh-insight-strip--success {
+    border-left: 3px solid var(--eh-success);
+    background: rgba(5, 150, 105, 0.06);
+}
+
+.eh-insight-strip-main {
+    flex: 1 1 16rem;
+    min-width: 0;
+}
+
+.eh-insight-strip-label {
+    display: block;
+    font-size: var(--eh-font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--eh-muted);
+    margin-bottom: 0.25rem;
+}
+
+.eh-insight-strip-message {
+    font-size: var(--eh-font-size-base);
+    font-weight: 500;
+    color: var(--eh-text);
+    letter-spacing: -0.01em;
+}
+
+.eh-insight-strip-action {
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.eh-insight-strip-more {
+    flex: 1 1 100%;
+    font-size: var(--eh-font-size-sm);
+    color: var(--eh-text-secondary);
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--eh-border-subtle);
+}
+
+.eh-insight-strip-more-link {
+    color: var(--eh-text-secondary);
+    text-decoration: none;
+}
+
+.eh-insight-strip-more-link:hover {
+    color: var(--eh-accent);
+}
+
+/* Login — align hero to v3 tokens */
+.login-hero {
+    background: linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--eh-accent) 88%, #0f172a) 0%,
+        color-mix(in srgb, var(--eh-accent-hover) 70%, #0f172a) 45%,
+        #0f1419 100%
+    );
+}
+
+[data-bs-theme="dark"] .login-hero {
+    background: linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--eh-accent) 35%, #09090b) 0%,
+        #111114 50%,
+        #09090b 100%
+    );
+}
+
 /* Focus */
 :focus-visible {
     outline: 2px solid var(--eh-accent);

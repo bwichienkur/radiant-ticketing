@@ -21,6 +21,8 @@ const requiredStories = [
   'ui-responsivedatalist--default',
   'ui-themepreferenceselector--default',
   'ui-kit-components--alert-variants',
+  'ui-kit-components--form-field-example',
+  'ui-kit-components--empty-state-inbox',
 ];
 
 function runStaticServer() {
