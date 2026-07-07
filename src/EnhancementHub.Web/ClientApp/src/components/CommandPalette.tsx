@@ -217,7 +217,7 @@ export function CommandPalette() {
             id="commandPaletteInput"
             type="search"
             className="form-control eh-command-palette-input"
-            placeholder="Search requests, apps, symbols, pages…"
+            placeholder="Search workspace…"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             onKeyDown={onInputKeyDown}

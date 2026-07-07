@@ -37,7 +37,6 @@ export function ThemePreferenceSelector() {
 
   const content = (
     <div className="theme-preference-selector d-flex align-items-center gap-2" aria-label="Theme preference">
-      <span className="small text-muted d-none d-xl-inline">Theme</span>
       <SegmentedControl
         ariaLabel="Choose theme preference"
         value={preference}

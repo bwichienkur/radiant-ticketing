@@ -348,7 +348,7 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
             id="search-q"
             value={draftFilters.q}
             onChange={(event) => setDraftFilters((prev) => ({ ...prev, q: event.target.value }))}
-            placeholder="Search title, submitter, application…"
+            placeholder="Search requests…"
           />
         </div>
         <div className="eh-filter-toolbar-fields">
@@ -536,9 +536,9 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
                     </th>
                     <th scope="col">Title</th>
                     <th scope="col">Application</th>
-                    <th scope="col">Risk</th>
+                    <th scope="col" className="eh-table-badge-col">Risk</th>
                     <th scope="col">Priority</th>
-                    <th scope="col">Status</th>
+                    <th scope="col" className="eh-table-badge-col">Status</th>
                     <th scope="col">Submitted By</th>
                     <th scope="col">Age</th>
                     <th scope="col"></th>
@@ -547,7 +547,7 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
                 <tbody>
                   {requests.map((item) => (
                     <tr key={item.id}>
-                      <td>
+                      <td className="eh-table-checkbox-col">
                         <input
                           type="checkbox"
                           className="form-check-input"
@@ -560,11 +560,11 @@ export function RequestListApp({ isApprover = false }: RequestListAppProps) {
                         <strong>{item.title}</strong>
                       </td>
                       <td>{item.targetApplicationName ?? '—'}</td>
-                      <td>
+                      <td className="eh-table-badge-col">
                         <StatusBadge risk={item.latestRiskLevel} />
                       </td>
                       <td>{item.priority}</td>
-                      <td>
+                      <td className="eh-table-badge-col">
                         <StatusBadge status={item.status} />
                       </td>
                       <td>{item.submittedByUserName ?? '—'}</td>

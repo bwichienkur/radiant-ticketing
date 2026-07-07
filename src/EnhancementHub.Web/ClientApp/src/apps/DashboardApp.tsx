@@ -88,7 +88,7 @@ export function DashboardApp() {
             <circle cx="11" cy="11" r="7" />
             <path d="m20 20-3.5-3.5" />
           </svg>
-          <span>Search requests, applications, and pages…</span>
+          <span>Search workspace…</span>
           <kbd className="command-kbd" data-command-kbd>⌘K</kbd>
         </button>
         <p className="small text-muted mb-0 mt-2">
